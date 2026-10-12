@@ -1,92 +1,134 @@
 {
  "_meta": {
   "descripcion": "Clima promedio por mes de cada destino (indice 0 = enero): max/min °C, lluvia mm del mes, dias con 5 mm o mas, horas de sol por dia.",
-  "fuente": "Open-Meteo Historical Weather API (ERA5), datos diarios 2015-01-01 a 2024-12-31, en la coordenada de data/destinos-geo.json.",
+  "fuente": "Open-Meteo Historical Weather API (ERA5), datos diarios 2015-01-01 a 2024-12-31, en la coordenada de data/destinos-geo.json; temperaturas corregidas con estaciones de Meteostat (ver fuentes).",
+  "fuentes": {
+   "ajuda": "temperatura: estacion Porto Seguro / José Ribeiro (11 km); lluvia y sol: Open-Meteo",
+   "for": "temperatura: estacion Fortaleza / Mundubim (1 km); lluvia y sol: Open-Meteo",
+   "buz": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "arraial": "temperatura: estacion Arraial Do Cabo / Arraial do Cabo (1 km); lluvia y sol: Open-Meteo",
+   "cabo": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "ilha": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "paraty": "temperatura: estacion Parati (1 km); lluvia y sol: Open-Meteo",
+   "ilhabela": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "ubatuba": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "rio": "temperatura: estacion Rio De Janeiro (4 km); lluvia y sol: Open-Meteo",
+   "angra": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "sao": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "porto": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "mcz": "temperatura: estacion Maceio / Satuba (11 km); lluvia y sol: Open-Meteo",
+   "maragogi": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "nat": "temperatura: estacion Natal / Santa Luzia (3 km); lluvia y sol: Open-Meteo",
+   "pip": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "trancoso": "temperatura: estacion Porto Seguro (5 km); lluvia y sol: Open-Meteo",
+   "ssa": "temperatura: estacion Salvador / Ondina (4 km); lluvia y sol: Open-Meteo",
+   "jericoacoara": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "morro": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "portoseguro": "temperatura: estacion Porto Seguro (2 km); lluvia y sol: Open-Meteo",
+   "itacare": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "forte": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "fernando": "temperatura: estacion Fernando De Noronha (1 km); lluvia y sol: Open-Meteo",
+   "fln": "temperatura: estacion Florianopolis / São José (7 km); lluvia y sol: Open-Meteo",
+   "bombinhas": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "rosa": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "bcm": "temperatura: estacion Navegantes (aero) (16 km); lluvia y sol: Open-Meteo",
+   "itapema": "temperatura: estacion Itajai / Ilhota (22 km); lluvia y sol: Open-Meteo",
+   "garopaba": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "ferrugem": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "picarras": "temperatura: estacion Navegantes (aero) (12 km); lluvia y sol: Open-Meteo",
+   "gram": "temperatura: estacion Canela (5 km); lluvia y sol: Open-Meteo",
+   "canela": "temperatura: estacion Canela (2 km); lluvia y sol: Open-Meteo",
+   "torres": "temperatura: estacion Torres (1 km); lluvia y sol: Open-Meteo",
+   "canoa": "Open-Meteo (sin estacion cerca con datos suficientes)",
+   "rec": "temperatura: estacion Recife (4 km); lluvia y sol: Open-Meteo",
+   "joaopessoa": "temperatura: estacion Joao Pessoa (3 km); lluvia y sol: Open-Meteo",
+   "poa": "todo de la estacion Porto Alegre (2 km): temperatura y dias de lluvia 2015-2024, lluvia del mes y sol de las normales 1991-2020"
+  },
   "generado": "2026-10-12",
   "regenerar": "node scripts/build-clima.js && node scripts/build-destinos-datos.js"
  },
  "destinos": {
   "ajuda": [
    {
-    "max": 29.7,
-    "min": 22.5,
+    "max": 30.2,
+    "min": 21.7,
     "lluvia": 96,
     "dias": 4,
     "sol": 11.1
    },
    {
-    "max": 30.1,
-    "min": 22.8,
+    "max": 30.7,
+    "min": 22,
     "lluvia": 87,
     "dias": 4,
     "sol": 11.1
    },
    {
-    "max": 30.1,
-    "min": 22.7,
+    "max": 30.5,
+    "min": 21.7,
     "lluvia": 89,
     "dias": 5,
     "sol": 10.9
    },
    {
-    "max": 28.6,
-    "min": 22.1,
+    "max": 29,
+    "min": 21.4,
     "lluvia": 137,
     "dias": 7,
     "sol": 9.9
    },
    {
-    "max": 27.1,
-    "min": 20.7,
+    "max": 27.5,
+    "min": 19.9,
     "lluvia": 99,
     "dias": 6,
     "sol": 9.8
    },
    {
-    "max": 25.9,
-    "min": 19.6,
+    "max": 26.2,
+    "min": 18.3,
     "lluvia": 86,
     "dias": 6,
     "sol": 9.9
    },
    {
-    "max": 25.3,
-    "min": 18.8,
+    "max": 25.6,
+    "min": 17.4,
     "lluvia": 69,
     "dias": 3,
     "sol": 9.9
    },
    {
-    "max": 25.5,
-    "min": 18.9,
+    "max": 25.9,
+    "min": 17.7,
     "lluvia": 71,
     "dias": 4,
     "sol": 10
    },
    {
-    "max": 26.9,
-    "min": 19.9,
+    "max": 27,
+    "min": 18.7,
     "lluvia": 60,
     "dias": 3,
     "sol": 10.2
    },
    {
-    "max": 28.2,
-    "min": 21.3,
+    "max": 28.5,
+    "min": 20.3,
     "lluvia": 92,
     "dias": 5,
     "sol": 10.4
    },
    {
-    "max": 28.4,
-    "min": 21.7,
+    "max": 28.5,
+    "min": 20.9,
     "lluvia": 202,
     "dias": 9,
     "sol": 9.7
    },
    {
-    "max": 29.4,
-    "min": 22.2,
+    "max": 29.6,
+    "min": 21.7,
     "lluvia": 180,
     "dias": 7,
     "sol": 10.7
@@ -94,85 +136,85 @@
   ],
   "for": [
    {
-    "max": 29.5,
-    "min": 25,
+    "max": 31,
+    "min": 24.8,
     "lluvia": 128,
     "dias": 7,
     "sol": 10.6
    },
    {
-    "max": 29.2,
+    "max": 30.7,
     "min": 24.7,
     "lluvia": 217,
     "dias": 13,
     "sol": 10
    },
    {
-    "max": 29,
-    "min": 24.4,
+    "max": 30.3,
+    "min": 24.1,
     "lluvia": 304,
     "dias": 18,
     "sol": 9.5
    },
    {
-    "max": 29.2,
-    "min": 24.3,
+    "max": 30.7,
+    "min": 24,
     "lluvia": 255,
     "dias": 16,
     "sol": 9.4
    },
    {
-    "max": 29.6,
-    "min": 24.6,
+    "max": 30.6,
+    "min": 24,
     "lluvia": 148,
     "dias": 8,
     "sol": 10.3
    },
    {
-    "max": 29.5,
-    "min": 24.1,
+    "max": 30.4,
+    "min": 23.7,
     "lluvia": 81,
     "dias": 4,
     "sol": 10.6
    },
    {
-    "max": 29.8,
-    "min": 23.8,
+    "max": 30.7,
+    "min": 23.4,
     "lluvia": 49,
     "dias": 3,
     "sol": 10.8
    },
    {
-    "max": 30.4,
-    "min": 24.4,
+    "max": 31.1,
+    "min": 23.8,
     "lluvia": 13,
     "dias": 0,
     "sol": 11.4
    },
    {
-    "max": 30.4,
-    "min": 24.9,
+    "max": 31.3,
+    "min": 24.4,
     "lluvia": 8,
     "dias": 0,
     "sol": 11.3
    },
    {
-    "max": 30.6,
-    "min": 25.4,
+    "max": 31.5,
+    "min": 25.1,
     "lluvia": 12,
     "dias": 0,
     "sol": 11.5
    },
    {
-    "max": 30.7,
-    "min": 25.8,
+    "max": 31.8,
+    "min": 25.5,
     "lluvia": 17,
     "dias": 0,
     "sol": 11.6
    },
    {
-    "max": 30.4,
-    "min": 25.7,
+    "max": 31.7,
+    "min": 25.6,
     "lluvia": 50,
     "dias": 2,
     "sol": 11.2
@@ -266,85 +308,85 @@
   ],
   "arraial": [
    {
-    "max": 25.3,
-    "min": 23.8,
+    "max": 27.7,
+    "min": 23.2,
     "lluvia": 79,
     "dias": 4,
     "sol": 11.1
    },
    {
-    "max": 25.6,
-    "min": 24.1,
+    "max": 28.3,
+    "min": 23.7,
     "lluvia": 72,
     "dias": 4,
     "sol": 10.4
    },
    {
-    "max": 25.8,
-    "min": 24.3,
+    "max": 28.4,
+    "min": 23.6,
     "lluvia": 87,
     "dias": 4,
     "sol": 10.8
    },
    {
-    "max": 25.1,
-    "min": 23.4,
+    "max": 27.2,
+    "min": 22.7,
     "lluvia": 53,
     "dias": 3,
     "sol": 10.5
    },
    {
-    "max": 23.7,
-    "min": 21.9,
+    "max": 25.8,
+    "min": 21.5,
     "lluvia": 76,
     "dias": 4,
     "sol": 9.6
    },
    {
-    "max": 22.8,
-    "min": 21,
+    "max": 24.8,
+    "min": 20.7,
     "lluvia": 33,
     "dias": 2,
     "sol": 9.4
    },
    {
-    "max": 22.2,
-    "min": 20.4,
+    "max": 24.1,
+    "min": 19.8,
     "lluvia": 22,
     "dias": 1,
     "sol": 9.5
    },
    {
-    "max": 22,
-    "min": 20.2,
+    "max": 23.9,
+    "min": 19.8,
     "lluvia": 45,
     "dias": 3,
     "sol": 9.4
    },
    {
-    "max": 22.5,
-    "min": 20.9,
+    "max": 24.6,
+    "min": 20.6,
     "lluvia": 39,
     "dias": 2,
     "sol": 9.9
    },
    {
-    "max": 23,
-    "min": 21.5,
+    "max": 25.5,
+    "min": 21.3,
     "lluvia": 64,
     "dias": 4,
     "sol": 10
    },
    {
-    "max": 23.6,
-    "min": 22.1,
+    "max": 25.5,
+    "min": 21.5,
     "lluvia": 109,
     "dias": 6,
     "sol": 10.4
    },
    {
-    "max": 24.7,
-    "min": 23.2,
+    "max": 27.3,
+    "min": 22.6,
     "lluvia": 79,
     "dias": 5,
     "sol": 11
@@ -524,85 +566,85 @@
   ],
   "paraty": [
    {
-    "max": 29.6,
-    "min": 23.4,
+    "max": 30.4,
+    "min": 23.2,
     "lluvia": 374,
     "dias": 16,
     "sol": 9.9
    },
    {
-    "max": 29.3,
-    "min": 23.1,
+    "max": 29.7,
+    "min": 22.7,
     "lluvia": 366,
     "dias": 17,
     "sol": 9.6
    },
    {
-    "max": 28.8,
-    "min": 22.7,
+    "max": 29.4,
+    "min": 22.5,
     "lluvia": 361,
     "dias": 15,
     "sol": 9.7
    },
    {
-    "max": 27,
-    "min": 20.9,
+    "max": 27.6,
+    "min": 20.6,
     "lluvia": 189,
     "dias": 8,
     "sol": 9.8
    },
    {
-    "max": 25.3,
-    "min": 18.9,
+    "max": 25.9,
+    "min": 19,
     "lluvia": 130,
     "dias": 7,
     "sol": 8.9
    },
    {
-    "max": 24.5,
-    "min": 17.9,
+    "max": 24.9,
+    "min": 18.3,
     "lluvia": 103,
     "dias": 6,
     "sol": 8.6
    },
    {
     "max": 24.3,
-    "min": 17.1,
+    "min": 16.7,
     "lluvia": 63,
     "dias": 3,
     "sol": 8.9
    },
    {
-    "max": 24.5,
-    "min": 17.3,
+    "max": 25.1,
+    "min": 17.1,
     "lluvia": 113,
     "dias": 6,
     "sol": 8.7
    },
    {
-    "max": 26,
+    "max": 26.4,
     "min": 19,
     "lluvia": 142,
     "dias": 8,
     "sol": 8.9
    },
    {
-    "max": 26.4,
+    "max": 26.6,
     "min": 20.2,
     "lluvia": 218,
     "dias": 14,
     "sol": 8.1
    },
    {
-    "max": 26.7,
-    "min": 20.4,
+    "max": 26.9,
+    "min": 20.2,
     "lluvia": 257,
     "dias": 13,
     "sol": 9
    },
    {
-    "max": 28.3,
-    "min": 22,
+    "max": 28.5,
+    "min": 21.6,
     "lluvia": 328,
     "dias": 16,
     "sol": 9.8
@@ -782,85 +824,85 @@
   ],
   "rio": [
    {
-    "max": 30.3,
-    "min": 23.9,
+    "max": 31.1,
+    "min": 24,
     "lluvia": 161,
     "dias": 9,
     "sol": 10.5
    },
    {
-    "max": 29.9,
+    "max": 30.7,
     "min": 23.8,
     "lluvia": 149,
     "dias": 9,
     "sol": 10.1
    },
    {
-    "max": 29.1,
-    "min": 23.3,
+    "max": 31.2,
+    "min": 23.4,
     "lluvia": 152,
     "dias": 8,
     "sol": 10.4
    },
    {
-    "max": 27.3,
-    "min": 21.5,
+    "max": 29.2,
+    "min": 21.4,
     "lluvia": 81,
     "dias": 5,
     "sol": 10.1
    },
    {
-    "max": 25.6,
-    "min": 19.6,
+    "max": 28,
+    "min": 19.4,
     "lluvia": 64,
     "dias": 3,
     "sol": 9.2
    },
    {
-    "max": 25,
-    "min": 18.5,
+    "max": 27.4,
+    "min": 18.1,
     "lluvia": 42,
     "dias": 2,
     "sol": 9
    },
    {
-    "max": 24.8,
-    "min": 17.9,
+    "max": 26.6,
+    "min": 17.4,
     "lluvia": 40,
     "dias": 2,
     "sol": 9
    },
    {
-    "max": 25.1,
-    "min": 17.8,
+    "max": 26.3,
+    "min": 17.6,
     "lluvia": 63,
     "dias": 4,
     "sol": 9
    },
    {
-    "max": 26.4,
-    "min": 19.4,
+    "max": 27.5,
+    "min": 19.8,
     "lluvia": 71,
     "dias": 4,
     "sol": 9.6
    },
    {
-    "max": 26.8,
-    "min": 20.6,
+    "max": 27.5,
+    "min": 21.1,
     "lluvia": 88,
     "dias": 5,
     "sol": 9.1
    },
    {
-    "max": 26.9,
-    "min": 21,
+    "max": 27.8,
+    "min": 21.6,
     "lluvia": 146,
     "dias": 9,
     "sol": 9.6
    },
    {
-    "max": 28.8,
-    "min": 22.5,
+    "max": 29.4,
+    "min": 23,
     "lluvia": 137,
     "dias": 8,
     "sol": 10.4
@@ -1126,85 +1168,85 @@
   ],
   "mcz": [
    {
-    "max": 29.2,
-    "min": 24.1,
+    "max": 30.6,
+    "min": 23.3,
     "lluvia": 67,
     "dias": 3,
     "sol": 11.5
    },
    {
-    "max": 29.5,
-    "min": 24.3,
+    "max": 31.1,
+    "min": 23.9,
     "lluvia": 68,
     "dias": 3,
     "sol": 11.4
    },
    {
-    "max": 29.3,
-    "min": 24.3,
+    "max": 30.8,
+    "min": 23.8,
     "lluvia": 151,
     "dias": 8,
     "sol": 10.8
    },
    {
-    "max": 28.7,
-    "min": 24.1,
+    "max": 30.2,
+    "min": 23.5,
     "lluvia": 122,
     "dias": 8,
     "sol": 10.7
    },
    {
-    "max": 27.6,
-    "min": 23.7,
+    "max": 29.1,
+    "min": 22.8,
     "lluvia": 224,
     "dias": 12,
     "sol": 9.9
    },
    {
-    "max": 26.5,
-    "min": 22.9,
+    "max": 27.7,
+    "min": 21.8,
     "lluvia": 219,
     "dias": 13,
     "sol": 9.6
    },
    {
-    "max": 25.8,
-    "min": 22.2,
+    "max": 27,
+    "min": 21,
     "lluvia": 177,
     "dias": 12,
     "sol": 9.8
    },
    {
-    "max": 26,
-    "min": 22,
+    "max": 27.4,
+    "min": 20.9,
     "lluvia": 123,
     "dias": 6,
     "sol": 10.4
    },
    {
-    "max": 26.6,
-    "min": 22.4,
+    "max": 28,
+    "min": 21.4,
     "lluvia": 74,
     "dias": 3,
     "sol": 11.1
    },
    {
-    "max": 28,
-    "min": 23.1,
+    "max": 29.6,
+    "min": 22.2,
     "lluvia": 47,
     "dias": 2,
     "sol": 11.8
    },
    {
-    "max": 29.1,
-    "min": 23.6,
+    "max": 30.6,
+    "min": 22.8,
     "lluvia": 52,
     "dias": 1,
     "sol": 11.7
    },
    {
-    "max": 29.3,
-    "min": 23.9,
+    "max": 30.7,
+    "min": 23.1,
     "lluvia": 57,
     "dias": 2,
     "sol": 11.7
@@ -1298,85 +1340,85 @@
   ],
   "nat": [
    {
-    "max": 29.8,
-    "min": 24.7,
+    "max": 30.2,
+    "min": 25.3,
     "lluvia": 90,
     "dias": 5,
     "sol": 11.3
    },
    {
-    "max": 29.8,
-    "min": 24.7,
+    "max": 30.3,
+    "min": 25.4,
     "lluvia": 122,
     "dias": 7,
     "sol": 10.9
    },
    {
-    "max": 29.5,
-    "min": 24.4,
+    "max": 30,
+    "min": 24.8,
     "lluvia": 195,
     "dias": 12,
     "sol": 10.4
    },
    {
-    "max": 29.2,
-    "min": 24.2,
+    "max": 29.9,
+    "min": 24.6,
     "lluvia": 175,
     "dias": 11,
     "sol": 10.2
    },
    {
-    "max": 28.7,
-    "min": 23.9,
+    "max": 29.5,
+    "min": 24.4,
     "lluvia": 148,
     "dias": 6,
     "sol": 10.3
    },
    {
-    "max": 27.9,
-    "min": 23,
+    "max": 28.5,
+    "min": 23.2,
     "lluvia": 145,
     "dias": 7,
     "sol": 10.3
    },
    {
-    "max": 27.3,
-    "min": 22.4,
+    "max": 27.9,
+    "min": 22.6,
     "lluvia": 171,
     "dias": 7,
     "sol": 10.1
    },
    {
-    "max": 27.8,
-    "min": 22.4,
+    "max": 28.3,
+    "min": 22.6,
     "lluvia": 41,
     "dias": 1,
     "sol": 11
    },
    {
     "max": 28.5,
-    "min": 23.1,
+    "min": 23.4,
     "lluvia": 37,
     "dias": 1,
     "sol": 11.4
    },
    {
-    "max": 29.4,
-    "min": 24,
+    "max": 29.3,
+    "min": 24.5,
     "lluvia": 27,
     "dias": 0,
     "sol": 11.9
    },
    {
     "max": 29.9,
-    "min": 24.6,
+    "min": 25.5,
     "lluvia": 27,
     "dias": 0,
     "sol": 11.9
    },
    {
-    "max": 30,
-    "min": 24.7,
+    "max": 30.1,
+    "min": 25.6,
     "lluvia": 52,
     "dias": 2,
     "sol": 11.5
@@ -1470,85 +1512,85 @@
   ],
   "trancoso": [
    {
-    "max": 29,
-    "min": 23.5,
+    "max": 29.6,
+    "min": 23.1,
     "lluvia": 91,
     "dias": 4,
     "sol": 11.2
    },
    {
-    "max": 29.4,
-    "min": 23.9,
+    "max": 30,
+    "min": 23.3,
     "lluvia": 81,
     "dias": 4,
     "sol": 11.2
    },
    {
-    "max": 29.4,
-    "min": 23.6,
+    "max": 30,
+    "min": 23.1,
     "lluvia": 89,
     "dias": 5,
     "sol": 11.1
    },
    {
-    "max": 28.3,
-    "min": 23,
+    "max": 28.9,
+    "min": 22.6,
     "lluvia": 158,
     "dias": 8,
     "sol": 10.1
    },
    {
-    "max": 27,
-    "min": 21.8,
+    "max": 27.5,
+    "min": 21.3,
     "lluvia": 123,
     "dias": 7,
     "sol": 10
    },
    {
-    "max": 25.8,
-    "min": 20.7,
+    "max": 26.5,
+    "min": 20.1,
     "lluvia": 104,
     "dias": 6,
     "sol": 10
    },
    {
-    "max": 25.2,
-    "min": 20.1,
+    "max": 25.8,
+    "min": 19.3,
     "lluvia": 81,
     "dias": 5,
     "sol": 10.1
    },
    {
-    "max": 25.3,
-    "min": 20.2,
+    "max": 25.7,
+    "min": 19.4,
     "lluvia": 86,
     "dias": 4,
     "sol": 10.2
    },
    {
-    "max": 26.5,
-    "min": 21.3,
+    "max": 26.8,
+    "min": 20.3,
     "lluvia": 66,
     "dias": 3,
     "sol": 10.4
    },
    {
-    "max": 27.6,
-    "min": 22.5,
+    "max": 27.9,
+    "min": 21.9,
     "lluvia": 88,
     "dias": 5,
     "sol": 10.6
    },
    {
-    "max": 27.9,
-    "min": 22.7,
+    "max": 28.2,
+    "min": 22.4,
     "lluvia": 206,
     "dias": 9,
     "sol": 9.9
    },
    {
-    "max": 28.8,
-    "min": 23.2,
+    "max": 29.1,
+    "min": 23,
     "lluvia": 171,
     "dias": 6,
     "sol": 10.9
@@ -1556,85 +1598,85 @@
   ],
   "ssa": [
    {
-    "max": 29,
-    "min": 24.9,
+    "max": 31.1,
+    "min": 24.5,
     "lluvia": 74,
     "dias": 3,
     "sol": 11.6
    },
    {
-    "max": 29.2,
-    "min": 25.2,
+    "max": 31,
+    "min": 24.8,
     "lluvia": 58,
     "dias": 3,
     "sol": 11.5
    },
    {
-    "max": 29.1,
-    "min": 25.2,
+    "max": 30.7,
+    "min": 24.7,
     "lluvia": 107,
     "dias": 6,
     "sol": 11.1
    },
    {
-    "max": 28.1,
-    "min": 24.8,
+    "max": 29.5,
+    "min": 24.3,
     "lluvia": 174,
     "dias": 9,
     "sol": 10.4
    },
    {
-    "max": 27,
-    "min": 24.1,
+    "max": 28.2,
+    "min": 23.6,
     "lluvia": 200,
     "dias": 10,
     "sol": 10.2
    },
    {
-    "max": 26.2,
-    "min": 23.3,
+    "max": 27.3,
+    "min": 22.7,
     "lluvia": 139,
     "dias": 8,
     "sol": 10
    },
    {
-    "max": 25.6,
-    "min": 22.6,
+    "max": 26.8,
+    "min": 22,
     "lluvia": 101,
     "dias": 6,
     "sol": 10.5
    },
    {
-    "max": 25.6,
-    "min": 22.4,
+    "max": 27.2,
+    "min": 22,
     "lluvia": 87,
     "dias": 5,
     "sol": 10.7
    },
    {
-    "max": 26.5,
-    "min": 22.8,
+    "max": 27.9,
+    "min": 22.3,
     "lluvia": 58,
     "dias": 2,
     "sol": 10.9
    },
    {
-    "max": 28,
-    "min": 23.9,
+    "max": 29.6,
+    "min": 23.5,
     "lluvia": 48,
     "dias": 2,
     "sol": 11.4
    },
    {
-    "max": 28.5,
-    "min": 24.2,
+    "max": 29.7,
+    "min": 23.8,
     "lluvia": 111,
     "dias": 4,
     "sol": 11.2
    },
    {
-    "max": 29.1,
-    "min": 24.7,
+    "max": 30.7,
+    "min": 24.2,
     "lluvia": 66,
     "dias": 3,
     "sol": 11.9
@@ -1814,85 +1856,85 @@
   ],
   "portoseguro": [
    {
-    "max": 28.8,
-    "min": 23.7,
+    "max": 29.6,
+    "min": 23.1,
     "lluvia": 88,
     "dias": 4,
     "sol": 11.4
    },
    {
-    "max": 29.2,
-    "min": 24,
+    "max": 30,
+    "min": 23.3,
     "lluvia": 75,
     "dias": 4,
     "sol": 11.2
    },
    {
-    "max": 29.3,
-    "min": 23.8,
+    "max": 30,
+    "min": 23.1,
     "lluvia": 81,
     "dias": 4,
     "sol": 11.1
    },
    {
-    "max": 28.2,
-    "min": 23.1,
+    "max": 28.9,
+    "min": 22.6,
     "lluvia": 163,
     "dias": 8,
     "sol": 10.2
    },
    {
-    "max": 26.8,
-    "min": 21.9,
+    "max": 27.5,
+    "min": 21.3,
     "lluvia": 138,
     "dias": 7,
     "sol": 10.2
    },
    {
-    "max": 25.7,
-    "min": 20.9,
+    "max": 26.5,
+    "min": 20.1,
     "lluvia": 122,
     "dias": 7,
     "sol": 10.2
    },
    {
-    "max": 25.1,
-    "min": 20.2,
+    "max": 25.8,
+    "min": 19.3,
     "lluvia": 85,
     "dias": 4,
     "sol": 10.2
    },
    {
-    "max": 25.2,
-    "min": 20.4,
+    "max": 25.7,
+    "min": 19.4,
     "lluvia": 91,
     "dias": 5,
     "sol": 10.4
    },
    {
-    "max": 26.4,
-    "min": 21.5,
+    "max": 26.8,
+    "min": 20.3,
     "lluvia": 74,
     "dias": 3,
     "sol": 10.5
    },
    {
-    "max": 27.4,
-    "min": 22.6,
+    "max": 27.9,
+    "min": 21.9,
     "lluvia": 95,
     "dias": 5,
     "sol": 10.7
    },
    {
-    "max": 27.7,
-    "min": 22.8,
+    "max": 28.2,
+    "min": 22.4,
     "lluvia": 203,
     "dias": 9,
     "sol": 10.1
    },
    {
-    "max": 28.6,
-    "min": 23.4,
+    "max": 29.1,
+    "min": 23,
     "lluvia": 156,
     "dias": 6,
     "sol": 11.1
@@ -2072,85 +2114,85 @@
   ],
   "fernando": [
    {
-    "max": 26.8,
-    "min": 25.4,
+    "max": 30.7,
+    "min": 25.6,
     "lluvia": 93,
     "dias": 5,
     "sol": 11.2
    },
    {
-    "max": 27.1,
-    "min": 25.4,
+    "max": 30.7,
+    "min": 25.7,
     "lluvia": 164,
     "dias": 10,
     "sol": 10.8
    },
    {
-    "max": 27.3,
-    "min": 25.5,
+    "max": 30.4,
+    "min": 25.1,
     "lluvia": 273,
     "dias": 16,
     "sol": 10.4
    },
    {
-    "max": 27.5,
-    "min": 25.7,
+    "max": 30.4,
+    "min": 25.3,
     "lluvia": 291,
     "dias": 17,
     "sol": 10.2
    },
    {
-    "max": 27.5,
-    "min": 25.8,
+    "max": 30.1,
+    "min": 25.6,
     "lluvia": 189,
     "dias": 10,
     "sol": 10.9
    },
    {
-    "max": 26.9,
-    "min": 25.3,
+    "max": 29.4,
+    "min": 25.1,
     "lluvia": 121,
     "dias": 7,
     "sol": 11.3
    },
    {
-    "max": 26.3,
-    "min": 24.8,
+    "max": 29,
+    "min": 24.7,
     "lluvia": 109,
     "dias": 4,
     "sol": 11.1
    },
    {
-    "max": 25.9,
-    "min": 24.6,
+    "max": 29.1,
+    "min": 24.4,
     "lluvia": 44,
     "dias": 1,
     "sol": 11.6
    },
    {
-    "max": 25.8,
-    "min": 24.6,
+    "max": 30.1,
+    "min": 24.8,
     "lluvia": 24,
     "dias": 0,
     "sol": 11.9
    },
    {
-    "max": 26.2,
-    "min": 25,
+    "max": 30.4,
+    "min": 25.1,
     "lluvia": 19,
     "dias": 0,
     "sol": 12
    },
    {
-    "max": 26.5,
-    "min": 25.4,
+    "max": 30.6,
+    "min": 25.6,
     "lluvia": 18,
     "dias": 0,
     "sol": 11.9
    },
    {
-    "max": 26.7,
-    "min": 25.5,
+    "max": 30.7,
+    "min": 25.7,
     "lluvia": 47,
     "dias": 2,
     "sol": 11.7
@@ -2158,85 +2200,85 @@
   ],
   "fln": [
    {
-    "max": 28.6,
-    "min": 22.7,
+    "max": 28.7,
+    "min": 21.9,
     "lluvia": 169,
     "dias": 10,
     "sol": 10
    },
    {
-    "max": 28.2,
-    "min": 22.2,
+    "max": 29,
+    "min": 21.7,
     "lluvia": 184,
     "dias": 9,
     "sol": 10.4
    },
    {
-    "max": 27.4,
-    "min": 21.7,
+    "max": 28.2,
+    "min": 21.5,
     "lluvia": 144,
     "dias": 9,
     "sol": 9.5
    },
    {
-    "max": 25.5,
-    "min": 19.6,
+    "max": 25.4,
+    "min": 19,
     "lluvia": 94,
     "dias": 5,
     "sol": 8.7
    },
    {
-    "max": 22.7,
-    "min": 16.7,
+    "max": 23,
+    "min": 16,
     "lluvia": 129,
     "dias": 6,
     "sol": 7.7
    },
    {
-    "max": 21.1,
-    "min": 14.5,
+    "max": 21.5,
+    "min": 14.4,
     "lluvia": 102,
     "dias": 5,
     "sol": 7.4
    },
    {
-    "max": 20.3,
-    "min": 13.7,
+    "max": 20.8,
+    "min": 13.3,
     "lluvia": 79,
     "dias": 4,
     "sol": 7.8
    },
    {
-    "max": 21,
-    "min": 14.5,
+    "max": 21.4,
+    "min": 14.3,
     "lluvia": 80,
     "dias": 5,
     "sol": 8.3
    },
    {
-    "max": 22.4,
-    "min": 16.4,
+    "max": 23.2,
+    "min": 15.9,
     "lluvia": 106,
     "dias": 6,
     "sol": 8
    },
    {
     "max": 23.3,
-    "min": 17.9,
+    "min": 17.2,
     "lluvia": 169,
     "dias": 9,
     "sol": 7.2
    },
    {
-    "max": 24.7,
-    "min": 19.1,
+    "max": 25.1,
+    "min": 18.4,
     "lluvia": 141,
     "dias": 7,
     "sol": 9
    },
    {
-    "max": 26.9,
-    "min": 21,
+    "max": 27.6,
+    "min": 20.7,
     "lluvia": 161,
     "dias": 8,
     "sol": 9.9
@@ -2416,85 +2458,85 @@
   ],
   "bcm": [
    {
-    "max": 27.6,
-    "min": 22.8,
+    "max": 28.5,
+    "min": 22.7,
     "lluvia": 203,
     "dias": 12,
     "sol": 10.2
    },
    {
-    "max": 27.3,
-    "min": 22.4,
+    "max": 28.4,
+    "min": 22.2,
     "lluvia": 193,
     "dias": 9,
     "sol": 10.3
    },
    {
-    "max": 26.6,
-    "min": 21.9,
+    "max": 27.9,
+    "min": 22,
     "lluvia": 175,
     "dias": 10,
     "sol": 9.5
    },
    {
-    "max": 24.8,
-    "min": 19.9,
+    "max": 25.4,
+    "min": 19.5,
     "lluvia": 103,
     "dias": 6,
     "sol": 9
    },
    {
-    "max": 22.2,
-    "min": 17,
+    "max": 23.2,
+    "min": 16.9,
     "lluvia": 132,
     "dias": 7,
     "sol": 7.7
    },
    {
-    "max": 20.6,
-    "min": 14.9,
+    "max": 21.9,
+    "min": 15.5,
     "lluvia": 106,
     "dias": 6,
     "sol": 7.4
    },
    {
-    "max": 19.8,
-    "min": 14.2,
+    "max": 20.5,
+    "min": 14,
     "lluvia": 72,
     "dias": 4,
     "sol": 7.5
    },
    {
-    "max": 20.2,
-    "min": 14.7,
+    "max": 20.9,
+    "min": 14.6,
     "lluvia": 86,
     "dias": 5,
     "sol": 8
    },
    {
-    "max": 21.6,
-    "min": 16.8,
+    "max": 22.1,
+    "min": 17,
     "lluvia": 122,
     "dias": 6,
     "sol": 7.9
    },
    {
-    "max": 22.5,
-    "min": 18.3,
+    "max": 23.3,
+    "min": 18.6,
     "lluvia": 181,
     "dias": 10,
     "sol": 7.2
    },
    {
-    "max": 23.9,
-    "min": 19.5,
+    "max": 25.1,
+    "min": 19.9,
     "lluvia": 149,
     "dias": 8,
     "sol": 9.1
    },
    {
-    "max": 25.9,
-    "min": 21.3,
+    "max": 27,
+    "min": 21.4,
     "lluvia": 198,
     "dias": 10,
     "sol": 10
@@ -2502,85 +2544,85 @@
   ],
   "itapema": [
    {
-    "max": 28.5,
-    "min": 22.4,
+    "max": 29.2,
+    "min": 21.3,
     "lluvia": 212,
     "dias": 13,
     "sol": 10
    },
    {
-    "max": 28.1,
-    "min": 21.9,
+    "max": 28.8,
+    "min": 20.8,
     "lluvia": 205,
     "dias": 11,
     "sol": 10.3
    },
    {
-    "max": 27.3,
-    "min": 21.4,
+    "max": 28,
+    "min": 20.6,
     "lluvia": 180,
     "dias": 10,
     "sol": 9.4
    },
    {
-    "max": 25.4,
-    "min": 19.3,
+    "max": 25.5,
+    "min": 18,
     "lluvia": 110,
     "dias": 6,
     "sol": 8.9
    },
    {
-    "max": 22.8,
-    "min": 16.4,
+    "max": 23.2,
+    "min": 15.6,
     "lluvia": 144,
     "dias": 7,
     "sol": 7.6
    },
    {
-    "max": 21.3,
-    "min": 14.4,
+    "max": 21.9,
+    "min": 13.6,
     "lluvia": 104,
     "dias": 6,
     "sol": 7.3
    },
    {
-    "max": 20.7,
-    "min": 13.7,
+    "max": 21,
+    "min": 12.5,
     "lluvia": 77,
     "dias": 4,
     "sol": 7.4
    },
    {
-    "max": 21.1,
-    "min": 14.3,
+    "max": 21.3,
+    "min": 13.1,
     "lluvia": 91,
     "dias": 5,
     "sol": 7.9
    },
    {
-    "max": 22.6,
-    "min": 16.5,
+    "max": 22.7,
+    "min": 15.7,
     "lluvia": 130,
     "dias": 6,
     "sol": 7.7
    },
    {
-    "max": 23.4,
-    "min": 18,
+    "max": 23.8,
+    "min": 17.3,
     "lluvia": 194,
     "dias": 11,
     "sol": 7.1
    },
    {
-    "max": 24.7,
-    "min": 19,
+    "max": 25.3,
+    "min": 18.3,
     "lluvia": 157,
     "dias": 9,
     "sol": 8.9
    },
    {
-    "max": 26.8,
-    "min": 20.9,
+    "max": 27.4,
+    "min": 20,
     "lluvia": 203,
     "dias": 10,
     "sol": 9.9
@@ -2760,85 +2802,85 @@
   ],
   "picarras": [
    {
-    "max": 28.1,
-    "min": 22.6,
+    "max": 28.5,
+    "min": 22.7,
     "lluvia": 198,
     "dias": 11,
     "sol": 10.1
    },
    {
-    "max": 27.8,
+    "max": 28.4,
     "min": 22.2,
     "lluvia": 196,
     "dias": 10,
     "sol": 10.1
    },
    {
-    "max": 26.9,
-    "min": 21.7,
+    "max": 27.9,
+    "min": 22,
     "lluvia": 153,
     "dias": 10,
     "sol": 9.3
    },
    {
-    "max": 25.1,
-    "min": 19.7,
+    "max": 25.4,
+    "min": 19.5,
     "lluvia": 110,
     "dias": 6,
     "sol": 9
    },
    {
-    "max": 22.4,
+    "max": 23.2,
     "min": 16.9,
     "lluvia": 137,
     "dias": 7,
     "sol": 7.6
    },
    {
-    "max": 20.8,
-    "min": 14.7,
+    "max": 21.9,
+    "min": 15.5,
     "lluvia": 108,
     "dias": 6,
     "sol": 7.4
    },
    {
-    "max": 20.1,
+    "max": 20.5,
     "min": 14,
     "lluvia": 65,
     "dias": 4,
     "sol": 7.4
    },
    {
-    "max": 20.5,
+    "max": 20.9,
     "min": 14.6,
     "lluvia": 80,
     "dias": 5,
     "sol": 7.7
    },
    {
-    "max": 22,
-    "min": 16.7,
+    "max": 22.1,
+    "min": 17,
     "lluvia": 113,
     "dias": 6,
     "sol": 7.7
    },
    {
-    "max": 23,
-    "min": 18.3,
+    "max": 23.3,
+    "min": 18.6,
     "lluvia": 174,
     "dias": 10,
     "sol": 7
    },
    {
-    "max": 24.4,
-    "min": 19.4,
+    "max": 25.1,
+    "min": 19.9,
     "lluvia": 150,
     "dias": 8,
     "sol": 8.8
    },
    {
-    "max": 26.4,
-    "min": 21.2,
+    "max": 27,
+    "min": 21.4,
     "lluvia": 192,
     "dias": 9,
     "sol": 9.9
@@ -2846,85 +2888,85 @@
   ],
   "gram": [
    {
-    "max": 25.5,
-    "min": 16.3,
+    "max": 25.3,
+    "min": 16.8,
     "lluvia": 205,
     "dias": 11,
     "sol": 10.4
    },
    {
-    "max": 24.9,
-    "min": 15.5,
+    "max": 24.7,
+    "min": 16,
     "lluvia": 136,
     "dias": 8,
     "sol": 10.9
    },
    {
-    "max": 23.4,
-    "min": 14.7,
+    "max": 23.5,
+    "min": 15.5,
     "lluvia": 152,
     "dias": 10,
     "sol": 9.2
    },
    {
-    "max": 21.2,
-    "min": 12.5,
+    "max": 20.8,
+    "min": 13,
     "lluvia": 119,
     "dias": 6,
     "sol": 8.4
    },
    {
     "max": 17.5,
-    "min": 9.3,
+    "min": 10.2,
     "lluvia": 189,
     "dias": 9,
     "sol": 6.7
    },
    {
-    "max": 16.4,
-    "min": 7.8,
+    "max": 16.7,
+    "min": 9.4,
     "lluvia": 159,
     "dias": 7,
     "sol": 7.1
    },
    {
-    "max": 16.6,
-    "min": 7.4,
+    "max": 16.9,
+    "min": 8.5,
     "lluvia": 142,
     "dias": 7,
     "sol": 7.4
    },
    {
-    "max": 18.6,
-    "min": 8.1,
+    "max": 18.4,
+    "min": 9,
     "lluvia": 113,
     "dias": 6,
     "sol": 8.4
    },
    {
-    "max": 20,
-    "min": 10,
+    "max": 19.5,
+    "min": 10.6,
     "lluvia": 187,
     "dias": 10,
     "sol": 7.9
    },
    {
-    "max": 20.9,
-    "min": 11.3,
+    "max": 20.2,
+    "min": 11.6,
     "lluvia": 185,
     "dias": 10,
     "sol": 8.4
    },
    {
-    "max": 22.6,
-    "min": 12.4,
+    "max": 22.1,
+    "min": 13,
     "lluvia": 159,
     "dias": 9,
     "sol": 9.9
    },
    {
-    "max": 24.5,
-    "min": 14.5,
+    "max": 24.1,
+    "min": 14.9,
     "lluvia": 166,
     "dias": 10,
     "sol": 10.9
@@ -2933,84 +2975,84 @@
   "canela": [
    {
     "max": 25.3,
-    "min": 16.3,
+    "min": 16.8,
     "lluvia": 188,
     "dias": 11,
     "sol": 10.5
    },
    {
     "max": 24.7,
-    "min": 15.6,
+    "min": 16,
     "lluvia": 133,
     "dias": 8,
     "sol": 10.9
    },
    {
-    "max": 23.2,
-    "min": 14.8,
+    "max": 23.5,
+    "min": 15.5,
     "lluvia": 150,
     "dias": 10,
     "sol": 9.2
    },
    {
-    "max": 21,
-    "min": 12.7,
+    "max": 20.8,
+    "min": 13,
     "lluvia": 119,
     "dias": 6,
     "sol": 8.4
    },
    {
-    "max": 17.4,
-    "min": 9.5,
+    "max": 17.5,
+    "min": 10.2,
     "lluvia": 181,
     "dias": 8,
     "sol": 6.7
    },
    {
-    "max": 16.3,
-    "min": 7.9,
+    "max": 16.7,
+    "min": 9.4,
     "lluvia": 146,
     "dias": 7,
     "sol": 7.1
    },
    {
-    "max": 16.4,
-    "min": 7.6,
+    "max": 16.9,
+    "min": 8.5,
     "lluvia": 136,
     "dias": 6,
     "sol": 7.5
    },
    {
     "max": 18.4,
-    "min": 8.4,
+    "min": 9,
     "lluvia": 104,
     "dias": 6,
     "sol": 8.5
    },
    {
-    "max": 19.8,
-    "min": 10.1,
+    "max": 19.5,
+    "min": 10.6,
     "lluvia": 179,
     "dias": 9,
     "sol": 8
    },
    {
-    "max": 20.7,
-    "min": 11.3,
+    "max": 20.2,
+    "min": 11.6,
     "lluvia": 184,
     "dias": 10,
     "sol": 8.4
    },
    {
-    "max": 22.2,
-    "min": 12.4,
+    "max": 22.1,
+    "min": 13,
     "lluvia": 154,
     "dias": 8,
     "sol": 10
    },
    {
-    "max": 24.3,
-    "min": 14.6,
+    "max": 24.1,
+    "min": 14.9,
     "lluvia": 160,
     "dias": 10,
     "sol": 11
@@ -3018,84 +3060,84 @@
   ],
   "torres": [
    {
-    "max": 27.3,
-    "min": 21,
+    "max": 27.7,
+    "min": 20.7,
     "lluvia": 128,
     "dias": 8,
     "sol": 10.2
    },
    {
-    "max": 27.2,
-    "min": 20.3,
+    "max": 28.1,
+    "min": 20,
     "lluvia": 100,
     "dias": 6,
     "sol": 10.8
    },
    {
-    "max": 26.2,
-    "min": 19.7,
+    "max": 27,
+    "min": 20.1,
     "lluvia": 116,
     "dias": 7,
     "sol": 9.4
    },
    {
-    "max": 24.4,
+    "max": 24.8,
     "min": 17.4,
     "lluvia": 100,
     "dias": 6,
     "sol": 8.7
    },
    {
-    "max": 21.1,
-    "min": 13.7,
+    "max": 21.7,
+    "min": 13.9,
     "lluvia": 169,
     "dias": 7,
     "sol": 7.6
    },
    {
-    "max": 19.5,
-    "min": 11.4,
+    "max": 20,
+    "min": 11.8,
     "lluvia": 136,
     "dias": 6,
     "sol": 7.6
    },
    {
-    "max": 18.9,
-    "min": 10.8,
+    "max": 19,
+    "min": 11.2,
     "lluvia": 113,
     "dias": 5,
     "sol": 7.9
    },
    {
-    "max": 19.9,
-    "min": 11.8,
+    "max": 19.4,
+    "min": 11.7,
     "lluvia": 80,
     "dias": 5,
     "sol": 8.7
    },
    {
-    "max": 20.9,
-    "min": 14.1,
+    "max": 21.3,
+    "min": 14.8,
     "lluvia": 146,
     "dias": 8,
     "sol": 7.9
    },
    {
-    "max": 22.2,
-    "min": 15.8,
+    "max": 22.4,
+    "min": 15.9,
     "lluvia": 153,
     "dias": 8,
     "sol": 8.3
    },
    {
-    "max": 23.7,
+    "max": 24.3,
     "min": 17.1,
     "lluvia": 129,
     "dias": 8,
     "sol": 9.7
    },
    {
-    "max": 25.7,
+    "max": 25.6,
     "min": 19.2,
     "lluvia": 117,
     "dias": 7,
@@ -3190,85 +3232,85 @@
   ],
   "rec": [
    {
-    "max": 29.2,
-    "min": 24.6,
+    "max": 31,
+    "min": 25.6,
     "lluvia": 80,
     "dias": 4,
     "sol": 11.3
    },
    {
-    "max": 29.4,
-    "min": 24.8,
+    "max": 31,
+    "min": 25.5,
     "lluvia": 91,
     "dias": 5,
     "sol": 11.2
    },
    {
-    "max": 29.2,
-    "min": 24.6,
+    "max": 30.9,
+    "min": 25,
     "lluvia": 123,
     "dias": 8,
     "sol": 10.7
    },
    {
-    "max": 28.9,
-    "min": 24.4,
+    "max": 30.9,
+    "min": 24.8,
     "lluvia": 125,
     "dias": 8,
     "sol": 10.6
    },
    {
-    "max": 28.1,
-    "min": 23.9,
+    "max": 30,
+    "min": 24,
     "lluvia": 193,
     "dias": 11,
     "sol": 10
    },
    {
-    "max": 27.2,
-    "min": 23,
+    "max": 28.1,
+    "min": 22.6,
     "lluvia": 192,
     "dias": 10,
     "sol": 9.9
    },
    {
-    "max": 26.5,
-    "min": 22.5,
+    "max": 27.4,
+    "min": 21.6,
     "lluvia": 153,
     "dias": 10,
     "sol": 10
    },
    {
-    "max": 26.6,
-    "min": 22.4,
+    "max": 27.6,
+    "min": 21.5,
     "lluvia": 103,
     "dias": 6,
     "sol": 10.7
    },
    {
-    "max": 27.2,
-    "min": 22.9,
+    "max": 28.4,
+    "min": 22.3,
     "lluvia": 72,
     "dias": 4,
     "sol": 11.3
    },
    {
-    "max": 28.3,
-    "min": 23.7,
+    "max": 29.6,
+    "min": 23.6,
     "lluvia": 53,
     "dias": 1,
     "sol": 11.8
    },
    {
-    "max": 29.2,
-    "min": 24.4,
+    "max": 30.3,
+    "min": 24.9,
     "lluvia": 51,
     "dias": 2,
     "sol": 11.8
    },
    {
-    "max": 29.2,
-    "min": 24.6,
+    "max": 30.6,
+    "min": 25.3,
     "lluvia": 69,
     "dias": 2,
     "sol": 11.6
@@ -3276,88 +3318,174 @@
   ],
   "joaopessoa": [
    {
-    "max": 30.4,
-    "min": 24.2,
+    "max": 30.8,
+    "min": 23.4,
     "lluvia": 70,
     "dias": 3,
     "sol": 11.3
    },
    {
-    "max": 30.5,
-    "min": 24.4,
+    "max": 31,
+    "min": 23.7,
     "lluvia": 100,
     "dias": 5,
     "sol": 11
    },
    {
-    "max": 30.1,
-    "min": 24.2,
+    "max": 30.8,
+    "min": 23.4,
     "lluvia": 124,
     "dias": 8,
     "sol": 10.5
    },
    {
-    "max": 29.7,
-    "min": 24,
+    "max": 30.6,
+    "min": 23.3,
     "lluvia": 118,
     "dias": 7,
     "sol": 10.6
    },
    {
-    "max": 28.8,
-    "min": 23.5,
+    "max": 29.6,
+    "min": 23,
     "lluvia": 149,
     "dias": 7,
     "sol": 10.3
    },
    {
-    "max": 27.8,
-    "min": 22.6,
+    "max": 28.7,
+    "min": 21.9,
     "lluvia": 158,
     "dias": 7,
     "sol": 9.9
    },
    {
-    "max": 27.1,
-    "min": 22,
+    "max": 28.1,
+    "min": 21.3,
     "lluvia": 131,
     "dias": 7,
     "sol": 10
    },
    {
-    "max": 27.5,
-    "min": 21.8,
+    "max": 28.5,
+    "min": 21.1,
     "lluvia": 52,
     "dias": 1,
     "sol": 10.9
    },
    {
-    "max": 28.3,
-    "min": 22.4,
+    "max": 29.1,
+    "min": 21.6,
     "lluvia": 49,
     "dias": 1,
     "sol": 11.3
    },
    {
-    "max": 29.6,
-    "min": 23.3,
+    "max": 30.1,
+    "min": 22.6,
     "lluvia": 31,
     "dias": 0,
     "sol": 11.8
    },
    {
-    "max": 30.4,
-    "min": 24,
+    "max": 30.8,
+    "min": 23.3,
     "lluvia": 31,
     "dias": 0,
     "sol": 11.9
    },
    {
-    "max": 30.5,
-    "min": 24.2,
+    "max": 30.9,
+    "min": 23.4,
     "lluvia": 51,
     "dias": 1,
     "sol": 11.5
+   }
+  ],
+  "poa": [
+   {
+    "max": 31.6,
+    "min": 20.2,
+    "lluvia": 116,
+    "dias": 7,
+    "sol": 8
+   },
+   {
+    "max": 31,
+    "min": 19.7,
+    "lluvia": 114,
+    "dias": 3,
+    "sol": 7.8
+   },
+   {
+    "max": 29.5,
+    "min": 19.1,
+    "lluvia": 94,
+    "dias": 7,
+    "sol": 6.6
+   },
+   {
+    "max": 26,
+    "min": 15.7,
+    "lluvia": 117,
+    "dias": 5,
+    "sol": 5.7
+   },
+   {
+    "max": 21.2,
+    "min": 11.6,
+    "lluvia": 123,
+    "dias": 9,
+    "sol": 4.4
+   },
+   {
+    "max": 20,
+    "min": 10.5,
+    "lluvia": 132,
+    "dias": 7,
+    "sol": 3.9
+   },
+   {
+    "max": 20,
+    "min": 9.7,
+    "lluvia": 164,
+    "dias": 6,
+    "sol": 4.5
+   },
+   {
+    "max": 21.7,
+    "min": 10.9,
+    "lluvia": 123,
+    "dias": 6,
+    "sol": 4.9
+   },
+   {
+    "max": 22.7,
+    "min": 12.8,
+    "lluvia": 147,
+    "dias": 11,
+    "sol": 4.9
+   },
+   {
+    "max": 24.7,
+    "min": 14.9,
+    "lluvia": 140,
+    "dias": 7,
+    "sol": 5.9
+   },
+   {
+    "max": 27.3,
+    "min": 16.5,
+    "lluvia": 101,
+    "dias": 5,
+    "sol": 7.6
+   },
+   {
+    "max": 29.3,
+    "min": 18.6,
+    "lluvia": 114,
+    "dias": 7,
+    "sol": 8
    }
   ]
  }

@@ -44,6 +44,14 @@
   /* Precio y boton juntos: lo que cuesta y como calcularlo, en el mismo lugar. */
   .u-hero__accion{display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;margin-top:20px}
   .u-hero__accion .u-hero__cta{margin-top:0}
+  /* Guardar el destino en favoritos (los mismos corazones de Destinos y del panel Guardados). Corazon amarillo en modo
+     oscuro y azul en modo claro; vacio si no esta guardado, lleno si esta. */
+  .u-fav{display:inline-flex;align-items:center;gap:8px;min-height:54px;padding:0 20px;border:0;border-radius:14px;background:rgba(10,16,26,.6);color:#fff;font:800 16px var(--fb);cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+  .u-fav svg{flex:0 0 auto;color:#F7C325}
+  .u-fav[aria-pressed="true"] svg path{fill:currentColor}
+  [data-theme="light"] .u-fav{background:rgba(255,255,255,.94);color:#0F1B2D}
+  [data-theme="light"] .u-fav svg{color:#0B2A55}
+  .u-fav:focus-visible{outline:3px solid #fff;outline-offset:3px}
   .u-hero__precio{display:block;color:#fff;font-size:14.5px;font-weight:700;line-height:1.3}
   .u-hero__precio b{display:block;font-family:var(--fh);font-size:32px;font-weight:800;color:var(--accent);line-height:1.1}
   .u-hero__precio:empty{display:none}
@@ -202,6 +210,33 @@
   var tabs = function () { return TAB.filter(cuantos); };
   var tieneLugar = function (x) { return typeof x.lat === 'number' && typeof x.lng === 'number'; };
 
+  /* ---- favoritos: con cuenta.js (carga despues de esta pagina) van a la cuenta y a Guardados; antes, el navegador */
+  var esFav = function () {
+    try {
+      if (window.CSCuenta && CSCuenta.favoritos) return CSCuenta.favoritos.leer().some(function (x) { return x.k === K; });
+      return JSON.parse(localStorage.getItem('cs_favoritos') || '[]').indexOf(K) >= 0;
+    } catch (e) { return false; }
+  };
+  function botonFav() {
+    var on = esFav();
+    return '<button type="button" class="u-fav" data-fav-guia aria-pressed="' + on + '" aria-label="' + (on ? 'Quitar ' + esc(NOM) + ' de favoritos' : 'Guardar ' + esc(NOM) + ' en favoritos') + '">' +
+      '<svg class="cs-keep" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5S3.5 15.3 3.5 9A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8.5 2c0 6.3-8.5 11.5-8.5 11.5z"/></svg>' +
+      '<span>' + (on ? 'Guardado' : 'Guardar') + '</span></button>';
+  }
+  function alternarFav() {
+    if (window.CSCuenta && CSCuenta.favoritos) CSCuenta.favoritos.alternar(K, NOM);
+    else {
+      try {
+        var l = JSON.parse(localStorage.getItem('cs_favoritos') || '[]'), n = JSON.parse(localStorage.getItem('cs_favoritos_n') || '{}') || {};
+        if (l.indexOf(K) >= 0) l = l.filter(function (x) { return x !== K; }); else { l.push(K); n[K] = NOM; }
+        localStorage.setItem('cs_favoritos', JSON.stringify(l)); localStorage.setItem('cs_favoritos_n', JSON.stringify(n)); localStorage.setItem('cs_favoritos_t', String(Date.now()));
+      } catch (e) { /* sin almacenamiento */ }
+    }
+    track(esFav() ? 'guia_fav_agregar' : 'guia_fav_quitar');
+    [].forEach.call(document.querySelectorAll('[data-fav-guia]'), function (b) { b.outerHTML = botonFav(); });
+    var nb = document.querySelector('[data-fav-guia]'); if (nb) nb.focus();
+  }
+
   function cabecera() {
     var check = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
     return '<div class="u-hero" style="background-image:url(../fotos/' + K + '.jpg)"><div class="u-hero__t">' +
@@ -210,7 +245,7 @@
       '<p class="u-hero__p">Qué hacer, cómo llegar desde Uruguay y cuánto presupuestar para organizar tu viaje.</p>' +
       '<p class="u-hero__val">' + check + 'Con el costo total desde Montevideo, no solo el pasaje.</p>' +
       '<div class="u-hero__accion"><span class="u-hero__precio" id="u-precio">' + precioPortada() + '</span>' +
-      '<a class="u-hero__cta" href="' + aPresupuesto('guia_portada') + '" data-evento="guia_calcular_viaje" data-lugar="portada" data-destino="' + K + '">Calculá tu viaje →</a></div>' +
+      '<a class="u-hero__cta" href="' + aPresupuesto('guia_portada') + '" data-evento="guia_calcular_viaje" data-lugar="portada" data-destino="' + K + '">Calculá tu viaje →</a>' + botonFav() + '</div>' +
       '</div></div>';
   }
   function precioPortada() {
@@ -507,6 +542,7 @@
   document.addEventListener('click', function (e) {
     var t = e.target.closest('button'); if (!t) return;
     if (t.id === 'atras') { location.href = 'home-guias.html' + (debug ? '?debug=1' : ''); return; }
+    if (t.hasAttribute('data-fav-guia')) { alternarFav(); return; }
     if (t.dataset.tab) { S.tab = t.dataset.tab; track('guia_pestana', { pestana: S.tab }); pintar(); $('main').scrollTop = 0; return; }
     if (t.dataset.login) { if (window.CSCuenta) CSCuenta.abrir(); return; }
     if (t.dataset.mas) { var it = t.closest('.u-item'), ab = it.classList.toggle('is-abierta'); t.textContent = ab ? 'Ver menos' : 'Ver más'; t.setAttribute('aria-expanded', String(ab)); return; }
