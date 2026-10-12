@@ -657,7 +657,7 @@
     });
     if (!hay) { ordenar(); return; }
     document.getElementById('q-n').textContent = n === 0 ? 'Con esa plata todavía no llegás' : (n === filas.length ? 'Con tu plata llegás a todos los destinos' : 'Con tu plata llegás a ' + n + (n === 1 ? ' destino' : ' destinos'));
-    document.getElementById('q-sub').textContent = n === 0 ? 'Subí el monto para ver opciones.' : (n === filas.length ? 'Primero los que mejor aprovechan tu plata.' : 'Primero los que mejor aprovechan tu plata. Si subís el monto, se suman más.');
+    document.getElementById('q-sub').textContent = n === 0 ? 'Subí el monto para ver opciones.' : (n === filas.length ? 'Recomendados para tu presupuesto.' : 'Recomendados para tu presupuesto. Subí el monto para ver más.');
   }
   rango.addEventListener('input', function () { pintar(true); });
   /* El orden cambia al soltar la barra, no mientras se arrastra: si no, la lista salta bajo el dedo. */
