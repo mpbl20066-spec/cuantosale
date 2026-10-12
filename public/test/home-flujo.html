@@ -1526,6 +1526,9 @@
   var precioHotel = function (h) { if (!h || h.sin) return 0; return S.alojReservado && S.alojReservado.precio > 0 ? S.alojReservado.precio : precioHotelEstimado(h); };
   var vuelo = function () { return VUELOS.filter(function (v) { return v.id === S.vuelo; })[0] || SIN_VUELO; };
   var trPrecio = function (t) { return t.precio * (t.pp ? pax : Math.ceil(pax / 4)) * (S.tIV ? 2 : 1); };
+  /* Por defecto, el transfer mas barato para este grupo (privado por vehiculo o compartido por persona). Antes era
+     siempre el privado: para 1 persona en Florianopolis eran $ 7.395 contra $ 462 del compartido. */
+  (function () { var l = TRASLADOS.filter(function (t) { return t.precio > 0; }).sort(function (a, b) { return trPrecio(a) - trPrecio(b); }); if (l.length) S.traslado = l[0].id; })();
   var trasl = function () { return TRASLADOS.filter(function (t) { return t.id === S.traslado; })[0]; };
   /* Mientras Booking no respondio, ningun hotel: los de la lista inicial son de ejemplo (de Florianopolis) y solo sirven sin servidor. */
   var hotel = function () { return S.sinAloj || (/^https?:$/.test(location.protocol) && (!S.hotelesListos || S.cargandoH)) ? SIN_HOTEL : (HOTELES.filter(function (h) { return h.id === S.hotel; })[0] || SIN_HOTEL); };
