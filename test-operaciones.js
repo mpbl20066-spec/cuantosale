@@ -108,18 +108,20 @@ function ctxPrueba() {
 }
 const base = { operador: 'Otra', destino: 'Maceió', monto: '50', moneda: 'BRL', unidad: 'por persona' };
 
-t('igual a uno que ya esta: por defecto no se importa', function () {
+t('igual a uno que ya esta: por defecto queda para comparar con el tuyo', function () {
   const r = ops.analizarImport([Object.assign({}, base, { titulo: 'Praia do Gunga' })], {}, ctxPrueba())[0];
   assert.strictEqual(r.accion, 'igual');
-  assert.strictEqual(r.decision, 'omitir');
+  assert.strictEqual(r.decision, 'comparar');
+  assert.ok(r.opciones.indexOf('nuevo') < 0, 'mismo titulo exacto: no se puede importar como otro');
   assert.strictEqual(r.ref.id, 't1');
 });
 
-t('dos filas con el mismo paseo en el archivo: entra la primera', function () {
+t('dos filas con el mismo paseo en el archivo: entra la primera y la otra queda para comparar', function () {
   const r = ops.analizarImport([Object.assign({}, base, { titulo: 'Morro do Camaleão' }), Object.assign({}, base, { operador: 'Tercera', titulo: 'Morro do Camaleão' })], {}, ctxPrueba());
   assert.strictEqual(r[0].decision, 'nuevo');
   assert.strictEqual(r[1].accion, 'repetido');
-  assert.strictEqual(r[1].decision, 'omitir');
+  assert.strictEqual(r[1].decision, 'comparar');
+  assert.strictEqual(r[1].ref_n, 1);
 });
 
 t('reimportar el mismo servicio del mismo operador actualiza en vez de duplicar', function () {
@@ -130,6 +132,15 @@ t('reimportar el mismo servicio del mismo operador actualiza en vez de duplicar'
   assert.strictEqual(igual.accion, 'sin_cambios');
 });
 
+t('una oferta para comparar de otra importacion no cuenta como parecido, y reimportarla la actualiza', function () {
+  const ctx = ctxPrueba();
+  ctx.proveedores.push({ id: 'p2', nombre: 'Otra' });
+  ctx.tours.push({ id: 'o1', destino: 'mcz', titulo: 'Praia do Gunga · Otra', proveedor_id: 'p2', precio_brl: 50, unidad: 'persona', alternativa_de: 't1' });
+  const r = ops.analizarImport([Object.assign({}, base, { titulo: 'Praia do Gunga', monto: '60' })], {}, ctx)[0];
+  assert.strictEqual(r.accion, 'actualiza');
+  assert.strictEqual(r.ref.id, 'o1');
+});
+
 t('un destino que no esta en la web es un error, no un servicio invisible', function () {
   const r = ops.analizarImport([Object.assign({}, base, { titulo: 'Algo', destino: 'Atlantida' })], {}, ctxPrueba())[0];
   assert.strictEqual(r.accion, 'error');
@@ -138,7 +149,7 @@ t('un destino que no esta en la web es un error, no un servicio invisible', func
 t('la decision elegida en la vista previa se respeta solo si es una opcion valida', function () {
   const fila = [Object.assign({}, base, { titulo: 'Praia do Gunga' })];
   assert.strictEqual(ops.analizarImport(fila, { 1: 'asignar' }, ctxPrueba())[0].decision, 'asignar');
-  assert.strictEqual(ops.analizarImport(fila, { 1: 'cualquiera' }, ctxPrueba())[0].decision, 'omitir');
+  assert.strictEqual(ops.analizarImport(fila, { 1: 'cualquiera' }, ctxPrueba())[0].decision, 'comparar');
 });
 
 /* ---------- precios masivos (recalcular es async: van al final) ---------- */

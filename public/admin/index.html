@@ -159,11 +159,18 @@ a.lnk:hover{text-decoration:underline}
   .bar input[type=search]{max-width:none;flex:1 1 100%}
 }
 .uso-card{margin-top:12px}.uso-h{margin:0;padding:14px 14px 6px;font-size:15px}.uso-card>.sub,.uso-card>.vacio{padding:0 14px 12px}
+/* Comparar ofertas: una columna por proveedor, que se desliza de costado en el celular. */
+.cmp{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(230px,1fr);gap:10px;overflow-x:auto;padding:0 14px 14px}
+.cmp__col{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.cmp__col--mio{background:color-mix(in srgb,var(--ok) 6%,transparent);border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}
+.cmp__cab{display:grid;gap:4px}.cmp__cab .pill{justify-self:start}
+.cmp__f small{display:block;color:var(--muted);font-size:12px;font-weight:600}
+.cmp__acc{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:4px}
 .uso-barra{display:block;height:10px;border-radius:5px;background:var(--accent);min-width:2px}
 </style>
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=21"></script>
+<script src="/admin/admin.js?v=23"></script>
 </body>
 </html>

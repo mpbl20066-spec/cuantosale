@@ -93,7 +93,7 @@
     var pc = S.precarga;
     if (pc && pc.vuelos) {
       html += '<section class="kpis" aria-label="Precios de las guías">' +
-        kpiPre('vuelos', 'Vuelos de las guías', pc.vuelos.conPrecio + ' / ' + pc.vuelos.rutas, 'meses con precio real (hasta ' + pc.topes.vuelosPorDia + ' por día)', pc.vuelos.conPrecio < pc.vuelos.rutas ? 'kpi--warn' : 'kpi--ok') +
+        kpiPre('vuelos', 'Vuelos de las guías', pc.vuelos.conPrecio + ' / ' + pc.vuelos.rutas, 'meses con precio real · ' + (pc.vuelos.buscadas || 0) + ' de ' + (pc.vuelos.fechas || 0) + ' fechas buscadas', pc.vuelos.conPrecio < pc.vuelos.rutas ? 'kpi--warn' : 'kpi--ok') +
         kpiPre('hoteles', 'Hoteles calibrados', pc.hoteles.calibrados + ' / ' + pc.hoteles.destinos, pc.hoteles.sinDatos ? pc.hoteles.sinDatos + ' sin hoteles en Booking' : 'con Booking, se renueva cada 30 días', pc.hoteles.calibrados < pc.hoteles.destinos ? 'kpi--warn' : 'kpi--ok') +
         kpi('Ignav hoy', pc.ignav.gastoHoy + (pc.ignav.topeDiario ? ' / ' + pc.ignav.topeDiario : ''), 'búsquedas del día (tope)', pc.ignav.topeDiario && pc.ignav.gastoHoy >= pc.ignav.topeDiario ? 'kpi--warn' : '') +
         kpiBooking(pc.booking) + '</section>';
@@ -126,8 +126,8 @@
     if (cual === 'vuelos') {
       var fechas = [], aeros = [];
       pc.vuelos.detalle.forEach(function (r) { if (fechas.indexOf(r.dep) < 0) fechas.push(r.dep); if (aeros.indexOf(r.destination) < 0) aeros.push(r.destination); });
-      var celda = function (a, f) { var r = pc.vuelos.detalle.filter(function (x) { return x.destination === a && x.dep === f; })[0]; return r && r.pp ? '<td class="ok">US$ ' + Math.round(r.pp) + '</td>' : '<td class="falta">—</td>'; };
-      return '<section class="precarga"><p><b>Cómo funciona:</b> el "Desde" de cada guía busca el mes más barato para ir. Para eso, todos los días a las 6:00 (hora de Uruguay) el servidor busca en Ignav el vuelo real Montevideo → aeropuerto del destino, saliendo el 15 de cada uno de los próximos 11 meses y volviendo 7 días después. Hace hasta ' + pc.topes.vuelosPorDia + ' por día y cada precio sirve 14 días. Mientras un mes no tiene precio real (—), la guía usa el estimado del modelo. Los precios son ida y vuelta, por persona.</p>' +
+      var celda = function (a, f) { var r = pc.vuelos.detalle.filter(function (x) { return x.destination === a && x.dep === f; })[0]; return r && r.pp ? '<td class="ok" title="Sale el ' + esc(r.mejor || '') + ' · ' + r.buscadas + ' de ' + r.fechas + ' fechas buscadas">US$ ' + Math.round(r.pp) + '</td>' : '<td class="falta">—</td>'; };
+      return '<section class="precarga"><p><b>Cómo funciona:</b> el "Desde" de cada guía busca el mes más barato para ir. Para eso, todos los días entre las 6:00 y las 10:00 (hora de Uruguay) el servidor busca en Ignav el vuelo real Montevideo → aeropuerto del destino, saliendo cada martes y miércoles de los próximos 11 meses y volviendo 7 días después; cada celda es la salida más barata del mes (pasá el mouse para ver la fecha). Son 4 corridas, de hasta ' + pc.topes.vuelosPorCorrida + ' fechas por vez, y cada precio sirve 14 días (30 si sale a más de 3 meses). Mientras un mes no tiene precio real (—), la guía usa el estimado del modelo. Los precios son ida y vuelta, por persona.</p>' +
         '<div class="precarga__tabla"><table><thead><tr><th>Aeropuerto</th>' + fechas.map(function (f) { return '<th>' + MES_CORTO[+f.slice(5, 7) - 1] + ' ' + f.slice(2, 4) + '</th>'; }).join('') + '</tr></thead><tbody>' +
         aeros.map(function (a) { var ds = (pc.vuelos.aeropuertos || {})[a] || []; return '<tr><th title="' + esc(ds.join(', ')) + '">' + esc(a) + '<small>' + esc(ds.slice(0, 3).join(', ') + (ds.length > 3 ? '…' : '')) + '</small></th>' + fechas.map(function (f) { return celda(a, f); }).join('') + '</tr>'; }).join('') +
         '</tbody></table></div></section>';
@@ -763,9 +763,10 @@
     var d = o.datos, pend = pendPorTour(), dias = d.config.dias_desactualizado;
     var clase = function (s) {
       if (s.eliminado_at) return { papelera: true };
+      if (s.alternativa_de) return { comparar: true };
       return { todos: true, publicados: s.activo && s.revision === 'ok', nuevos: !s.publicado_at, pendientes: !!pend[s.id], revision: s.revision === 'pendiente', inactivos: !s.activo && !!s.publicado_at, viejos: s.activo && viejo(s, dias) };
     };
-    var nombres = { todos: 'Todos', publicados: 'Activos', nuevos: 'Nuevos', pendientes: 'Con cambios sin publicar', revision: 'Para revisar', viejos: 'Precio viejo (+' + dias + ' días)', inactivos: 'Apagados', papelera: 'Papelera' };
+    var nombres = { todos: 'Todos', publicados: 'Activos', nuevos: 'Nuevos', comparar: 'Para comparar', pendientes: 'Con cambios sin publicar', revision: 'Para revisar', viejos: 'Precio viejo (+' + dias + ' días)', inactivos: 'Apagados', papelera: 'Papelera' };
     var cuenta = {}; Object.keys(nombres).forEach(function (k) { cuenta[k] = 0; });
     d.servicios.forEach(function (s) { var c = clase(s); Object.keys(c).forEach(function (k) { if (c[k]) cuenta[k]++; }); });
     var f = S.srvFiltro || 'todos', q = sinTildes(S.qSrv || '');
@@ -790,6 +791,7 @@
       '<select data-sprov style="max-width:240px"><option value="">Todos los proveedores</option><option value="-"' + (S.srvProv === '-' ? ' selected' : '') + '>Sin proveedor</option>' +
         S.datos.proveedores.filter(function (p) { return provUsados[p.id]; }).map(function (p) { return '<option value="' + esc(p.id) + '"' + (S.srvProv === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>' +
       '<input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '"></div>';
+    if (f === 'comparar') return h + vistaComparar(lista);
     if (!lista.length) return h + '<div class="card"><p class="vacio">' + (f === 'papelera' ? 'La papelera está vacía.' : 'No hay servicios con ese filtro.') + '</p></div>';
     if (f === 'papelera') h += '<p class="sub" style="margin:-4px 0 12px">Lo que está en la papelera no se ve en la web. "Recuperar" lo deja como estaba; "Borrar" lo elimina para siempre (su historial de precios queda).</p>';
     S.srvSel = S.srvSel || {};
@@ -840,7 +842,13 @@
     var o = S.ops;
     if (!o || o.cargando) return '<p class="vacio">Cargando…</p>';
     if (o.error) return '<div class="card"><p class="vacio">No se pudo cargar: ' + esc(o.error) + ' <button class="btn" data-act="ops-recargar">Reintentar</button></p></div>';
-    var d = o.datos, porId = {}; d.servicios.forEach(function (s) { porId[s.id] = s; });
+    var d0 = o.datos, porId = {}; d0.servicios.forEach(function (s) { porId[s.id] = s; });
+    /* Filtro por destino: para revisar los nuevos de un lugar y decidir cuales publicar. Seleccionar todos, publicar y
+       descartar se aplican solo a lo que se ve. */
+    var destPend = {}; d0.pendientes.forEach(function (c) { var s = porId[c.tour_id]; var k = s ? s.destino : String(c.tour_clave).split('#')[0]; destPend[k] = (destPend[k] || 0) + 1; });
+    if (S.pubDest && !destPend[S.pubDest]) S.pubDest = '';
+    var d = Object.assign({}, d0, { pendientes: d0.pendientes.filter(function (c) { if (!S.pubDest) return true; var s = porId[c.tour_id]; return (s ? s.destino : String(c.tour_clave).split('#')[0]) === S.pubDest; }) });
+    S.pubVisibles = d.pendientes.map(function (c) { return c.id; });
     S.sel = S.sel || {};
     Object.keys(S.sel).forEach(function (k) { if (!d.pendientes.some(function (c) { return c.id === k; })) delete S.sel[k]; });
     var nSel = Object.keys(S.sel).length;
@@ -848,7 +856,9 @@
       (d.pendientes.length ? '<button class="btn btn--sm" data-act="sel-todos">' + (nSel === d.pendientes.length ? 'Ninguno' : 'Seleccionar todos') + '</button>' +
         '<button class="btn btn--sm btn--danger" data-act="desc-sel"' + (nSel ? '' : ' disabled') + '>Descartar (' + nSel + ')</button>' +
         '<button class="btn btn--main" data-act="pub-sel"' + (nSel ? '' : ' disabled') + '>Publicar (' + nSel + ')</button>' : '') + '</div>' +
-      '<p class="sub" style="margin:-4px 0 12px">Nada de esto se ve en la web hasta que lo publicás. Los cambios de más de 20 % aparecen en rojo.</p>';
+      '<p class="sub" style="margin:-4px 0 12px">Nada de esto se ve en la web hasta que lo publicás. Los cambios de más de 20 % aparecen en rojo.</p>' +
+      (Object.keys(destPend).length > 1 ? '<div class="bar"><select data-pdes style="max-width:280px"><option value="">Todos los destinos (' + d0.pendientes.length + ')</option>' +
+        Object.keys(destPend).sort(function (a, b) { return destNombre(a).localeCompare(destNombre(b), 'es'); }).map(function (k) { return '<option value="' + esc(k) + '"' + (S.pubDest === k ? ' selected' : '') + '>' + esc(destNombre(k)) + ' (' + destPend[k] + ')</option>'; }).join('') + '</select></div>' : '');
     if (!d.pendientes.length) return h + '<div class="card"><p class="vacio">Cuando edites un precio o importes un archivo, los cambios quedan acá para que los revises antes de publicarlos.</p></div>';
     h += '<div class="card"><table><thead><tr><th></th><th>Servicio</th><th>Qué cambia</th><th class="num">Publicado hoy</th><th class="num">Quedaría</th><th>Origen</th><th></th></tr></thead><tbody>';
     d.pendientes.forEach(function (c) {
@@ -995,6 +1005,75 @@
     return api('ops/descartar', { ids: ids }).then(function (r) { S.sel = {}; toast(r.descartados + ' descartado(s)'); return cargarOps(); }).catch(function (e) { toast(e.message); });
   }
 
+  /* ---------- Comparar ofertas (lib/operaciones.js elegirOferta) ----------
+     Cada servicio tuyo con las ofertas parecidas de otros proveedores, lado a lado. La mas barata (por persona, ya
+     publicada) va marcada. Desde cada oferta: me quedo con el mio, uso este operador, o publico los dos. */
+  function contactoProv(pr) {
+    if (!pr) return '';
+    var tel = digitos(pr.whatsapp || pr.telefono);
+    return (tel ? '<a class="lnk" target="_blank" rel="noopener" href="https://wa.me/' + esc(tel) + '">WhatsApp</a> ' : '') +
+      (pr.web ? '<a class="lnk" target="_blank" rel="noopener" href="' + esc(/^https?:/.test(pr.web) ? pr.web : 'https://' + pr.web) + '">Web</a>' : '');
+  }
+  function columnaCmp(x, esMio, barato) {
+    var cfg = S.ops.datos.config, pr = provDe(x.proveedor_id), sinU = /persona o por/.test(x.revision_motivo || '');
+    var c = calcPub(x, pr, cfg), inc = String(x.incluye || '').split('\n').filter(Boolean);
+    var fila = function (t, v) { return '<div class="cmp__f"><small>' + t + '</small>' + (v || '<span class="sub" style="display:inline">—</span>') + '</div>'; };
+    var precio = (x.precio_brl != null ? brl(x.precio_brl) : (x.precio != null ? usd(x.precio) : '—')) + ' <span class="sub" style="display:inline">' + esc(sinU ? 'unidad sin indicar' : (UNIDADES[x.unidad] || '')) + (x.unidad !== 'persona' && x.capacidad ? ' · hasta ' + x.capacidad : '') + '</span>';
+    var h = '<div class="cmp__col' + (esMio ? ' cmp__col--mio' : '') + '">' +
+      '<div class="cmp__cab">' + (esMio ? '<span class="pill p-confirmado">' + (x.publicado_at ? 'Tuyo' : 'Tuyo · nuevo') + '</span>' : '<span class="pill p-pendiente">Oferta</span>') + (barato ? ' <span class="pill p-nuevo">más barato</span>' : '') +
+      '<b>' + esc(pr ? pr.nombre : 'sin proveedor') + '</b><span class="sub">' + esc(esMio ? x.titulo : String(x.titulo).replace(/ · [^·]*$/, '')) + '</span></div>' +
+      fila('Cobra', precio) +
+      fila(esMio && x.precio_publicado != null ? 'Publicado hoy' : 'Quedaría publicado', esMio && x.precio_publicado != null ? '<b>' + pub(x.precio_publicado) + '</b> por persona' : (c.valor != null ? '<b>' + pub(c.valor) + '</b> por persona' : '<span class="deuda">' + esc(c.error || '') + '</span>')) +
+      fila('Duración', esc(x.duracion || '')) +
+      fila('Incluye', inc.length ? esc(inc.slice(0, 4).join(' · ')) + (inc.length > 4 ? '…' : '') : '') +
+      fila('Verificado', x.verificado ? esc(fecha(x.verificado) + ' ' + x.verificado.slice(0, 4)) : '') +
+      fila('Contacto', (x.link_web ? '<a class="lnk" target="_blank" rel="noopener" href="' + esc(x.link_web) + '">Ver la oferta</a> ' : '') + contactoProv(pr));
+    if (!esMio) {
+      h += (sinU ? '<label class="f" style="margin-top:6px">El precio es<select data-cmp-unidad="' + esc(x.id) + '"><option value="">Elegí…</option>' + opts(UNIDADES, (S.cmpUnidad || {})[x.id] || '') + '</select></label>' : '') +
+        '<div class="cmp__acc"><button class="btn btn--sm btn--main" data-cmp="este" data-cmp-id="' + esc(x.id) + '">Usar este operador</button>' +
+        '<button class="btn btn--sm" data-cmp="ambos" data-cmp-id="' + esc(x.id) + '">Publicar los dos</button>' +
+        '<button class="btn btn--sm btn--danger" data-cmp="mio" data-cmp-id="' + esc(x.id) + '">Me quedo con el mío</button></div>';
+    } else {
+      h += '<div class="cmp__acc"><button class="btn btn--sm" data-srv="' + esc(x.id) + '">Abrir el tuyo</button></div>';
+    }
+    return h + '</div>';
+  }
+  function vistaComparar(ofertas) {
+    if (!ofertas.length) return '<div class="card"><p class="vacio">No hay ofertas para comparar. Cuando importes un archivo, lo parecido a tus servicios queda acá.</p></div>';
+    var todos = S.ops.datos.servicios, porId = {}; todos.forEach(function (x) { porId[x.id] = x; });
+    var grupos = {}, orden = [];
+    ofertas.forEach(function (x) { if (!grupos[x.alternativa_de]) { grupos[x.alternativa_de] = []; orden.push(x.alternativa_de); } grupos[x.alternativa_de].push(x); });
+    orden.sort(function (a, b) { var A = porId[a] || {}, B = porId[b] || {}; return (destNombre(A.destino) + A.titulo).localeCompare(destNombre(B.destino) + B.titulo, 'es'); });
+    var cfg = S.ops.datos.config;
+    return '<p class="sub" style="margin:-4px 0 12px">' + ofertas.length + ' oferta(s) de otros proveedores para ' + orden.length + ' servicio(s) tuyos. Elegí en cada una: usar ese operador (su precio queda en "Por publicar"), publicar los dos, o quedarte con el tuyo.</p>' +
+      orden.map(function (id) {
+        var mio = porId[id]; if (!mio) return '';
+        /* Si el tuyo es nuevo (o tiene un cambio sin publicar), sus datos estan en el pendiente: se compara con eso. */
+        var pm = pendPorTour()[id]; if (pm) mio = Object.assign({}, mio, pm.despues);
+        var cols = [mio].concat(grupos[id]);
+        var precios = cols.map(function (x) { var v = x === mio && x.precio_publicado != null ? Number(x.precio_publicado) : calcPub(x, provDe(x.proveedor_id), cfg).valor; return v == null ? Infinity : v; });
+        var min = Math.min.apply(null, precios);
+        return '<div class="card uso-card"><h3 class="uso-h">' + esc(mio.titulo) + ' <span class="sub" style="display:inline">· ' + esc(destNombre(mio.destino)) + ' · ' + grupos[id].length + ' oferta(s)</span></h3>' +
+          '<div class="cmp">' + cols.map(function (x, i) { return columnaCmp(x, i === 0, cols.length > 1 && precios[i] === min && min !== Infinity); }).join('') + '</div></div>';
+      }).join('');
+  }
+  function elegirCmp(accion, id) {
+    var x = S.ops.datos.servicios.filter(function (s) { return s.id === id; })[0]; if (!x) return;
+    var pr = provDe(x.proveedor_id), nom = pr ? pr.nombre : 'este operador', cuerpo = { id: id, accion: accion, unidad: (S.cmpUnidad || {})[id] || '' };
+    if (accion !== 'mio' && /persona o por/.test(x.revision_motivo || '') && !cuerpo.unidad) return toast('Elegí primero si el precio es por persona o por vehículo');
+    if (accion === 'mio' && !confirm('¿Te quedás con el tuyo? La oferta de ' + nom + ' va a la papelera (el proveedor queda en tu directorio).')) return;
+    if (accion === 'este' && !confirm('¿Usar a ' + nom + ' para tu servicio? Su precio queda en "Por publicar" para que lo revises, y la oferta va a la papelera.')) return;
+    if (accion === 'ambos') {
+      var t = prompt('Va a ser un servicio nuevo. ¿Con qué título se muestra?', String(x.titulo).replace(/ · [^·]*$/, ''));
+      if (t == null) return; cuerpo.titulo = t;
+    }
+    document.querySelectorAll('[data-cmp-id="' + id + '"]').forEach(function (bt) { bt.disabled = true; });
+    api('ops/comparar', cuerpo).then(function () {
+      toast(accion === 'mio' ? 'Listo: te quedás con el tuyo' : (accion === 'este' ? 'Listo: el cambio está en "Por publicar"' : 'Listo: quedó como Nuevo, con su precio en "Por publicar"'));
+      return cargar();
+    }).catch(function (e) { toast(e.message); document.querySelectorAll('[data-cmp-id="' + id + '"]').forEach(function (bt) { bt.disabled = false; }); });
+  }
+
   /* ---------- Resumen de Operaciones ----------
      Todo sale de lo que ya carga el panel (ops/datos y los proveedores) mas ops/resumen (ultimas importaciones y
      ultimos publicados). Cada numero lleva a la lista filtrada donde se resuelve. */
@@ -1016,7 +1095,8 @@
     if (o.error) return '<div class="card"><p class="vacio">No se pudo cargar: ' + esc(o.error) + ' <button class="btn" data-act="ops-recargar">Reintentar</button></p></div>';
     if (!S.resumen) cargarResumen();
     var d = o.datos, cfg = d.config, dias = cfg.dias_desactualizado, pend = pendPorTour();
-    var vivos = d.servicios.filter(function (x) { return !x.eliminado_at; });
+    var vivos = d.servicios.filter(function (x) { return !x.eliminado_at && !x.alternativa_de; });
+    var ofertas = d.servicios.filter(function (x) { return !x.eliminado_at && x.alternativa_de; });
     var enWeb = vivos.filter(function (x) { return x.activo && x.revision === 'ok' && x.tipo !== 'traslado'; });
     var nuevos = vivos.filter(function (x) { return !x.publicado_at; });
     var revisar = vivos.filter(function (x) { return x.revision === 'pendiente'; });
@@ -1035,6 +1115,7 @@
       kpiIr('Proveedores activos', provActivos.length, Object.keys(conServ).length + ' con servicios en el catálogo', 'v:proveedores') +
       kpiIr('En la web', enWeb.length, 'servicios publicados', 's:publicados', 'kpi--ok') +
       kpiIr('Nuevos sin publicar', nuevos.length, 'importados o creados', 's:nuevos', nuevos.length ? 'kpi--warn' : '') +
+      (ofertas.length ? kpiIr('Para comparar', ofertas.length, 'ofertas de otros proveedores', 's:comparar', 'kpi--warn') : '') +
       kpiIr('Para revisar', revisar.length, 'les falta un dato', 's:revision', revisar.length ? 'kpi--warn' : '') +
       kpiIr('Precio viejo', viejos.length, 'verificado hace más de ' + dias + ' días', 's:viejos', viejos.length ? 'kpi--warn' : '') +
       kpiIr('Por publicar', d.pendientes.length, grandes.length ? grandes.length + ' cambian más de 20 %' : 'cambios esperando revisión', 'v:publicar', d.pendientes.length ? 'kpi--warn' : '') +
@@ -1177,7 +1258,7 @@
      La vista previa y la confirmacion las calcula el server con la misma funcion (lib/operaciones.js analizarImport),
      asi que lo que se confirma es lo que se vio. Nada se publica: todo queda en "Por publicar". */
   var ACCIONES_IMP = { nuevo: 'Nuevo', parecido: 'Parecido a uno tuyo', igual: 'Igual a uno tuyo', repetido: 'Repetido en el archivo', actualiza: 'Cambia', sin_cambios: 'Sin cambios', error: 'Con error' };
-  var DECISIONES_IMP = { nuevo: 'Importar como nuevo', omitir: 'No importar', asignar: 'Asignar el operador al tuyo', actualizar: 'Actualizar' };
+  var DECISIONES_IMP = { comparar: 'Dejar para comparar', nuevo: 'Importar como nuevo', omitir: 'No importar', asignar: 'Asignar el operador al tuyo', actualizar: 'Actualizar' };
   var PILL_IMP = { nuevo: 'p-nuevo', parecido: 'p-pendiente', igual: 'p-cancelado', repetido: 'p-cancelado', actualiza: 'p-consultado', sin_cambios: 'p-completado', error: 'p-cancelado' };
 
   function normH(s) { return sinTildes(s).replace(/[^a-z0-9]+/g, ' ').trim(); }
@@ -1236,7 +1317,7 @@
   }
   function decisionDe(r) { return (S.imp.decisiones && S.imp.decisiones[r.n]) || r.decision; }
   function resumenDecisiones() {
-    var t = { nuevo: 0, asignar: 0, actualizar: 0, omitir: 0, error: 0 };
+    var t = { nuevo: 0, comparar: 0, asignar: 0, actualizar: 0, omitir: 0, error: 0 };
     S.imp.previa.filas.forEach(function (r) { if (r.accion === 'error') t.error++; else t[decisionDe(r)] = (t[decisionDe(r)] || 0) + 1; });
     return t;
   }
@@ -1285,8 +1366,8 @@
       var pv = im.previa, tot = pv.totales, f = im.filtro || 'todos', rs = resumenDecisiones();
       var provNuevos = {}; pv.filas.forEach(function (r) { if (r.proveedor_nuevo && r.accion !== 'error' && decisionDe(r) !== 'omitir') provNuevos[r.operador] = 1; });
       h += '<section class="sec"><h3>3. Vista previa</h3><p style="margin:0 0 6px">' + esc(im.archivo) + ': se van a crear <b>' + rs.nuevo + '</b> servicios nuevos' + (rs.actualizar ? ', actualizar <b>' + rs.actualizar + '</b>' : '') + (rs.asignar ? ', asignar operador a <b>' + rs.asignar + '</b> de los tuyos' : '') +
-        ' y <b>' + rs.omitir + '</b> no se importan' + (rs.error ? ' (<span class="deuda">' + rs.error + ' con error</span>)' : '') + '. Proveedores nuevos: <b>' + Object.keys(provNuevos).length + '</b>.</p>' +
-        '<p class="sub" style="margin:0">Los iguales a uno que ya tenés no se importan, salvo que elijas otra cosa en la fila. Nada de esto se publica hasta que lo revises en "Por publicar".</p></section>';
+        (rs.comparar ? ', dejar <b>' + rs.comparar + '</b> para comparar con los tuyos' : '') + ' y <b>' + rs.omitir + '</b> no se importan' + (rs.error ? ' (<span class="deuda">' + rs.error + ' con error</span>)' : '') + '. Proveedores nuevos: <b>' + Object.keys(provNuevos).length + '</b>.</p>' +
+        '<p class="sub" style="margin:0">Lo parecido a uno tuyo (y el mismo paseo de otro operador) queda <b>para comparar</b>: en Servicios → "Para comparar" lo ves al lado del tuyo y elegís con qué proveedor quedarte. No va a la web ni a "Por publicar". Los nuevos quedan como Nuevo hasta que los publiques.</p></section>';
       h += '<div class="bar"><div class="chips">' + ['todos'].concat(Object.keys(ACCIONES_IMP)).filter(function (k) { return k === 'todos' || tot[k]; }).map(function (k) {
         return '<button class="chip" data-imp-filtro="' + k + '" aria-pressed="' + (f === k) + '">' + esc(k === 'todos' ? 'Todas' : ACCIONES_IMP[k]) + '<span>' + (k === 'todos' ? tot.total : tot[k]) + '</span></button>';
       }).join('') + '</div>' + (tot.error ? '<button class="btn btn--sm" data-act="imp-errores">Descargar errores</button>' : '') + '</div>';
@@ -1301,7 +1382,7 @@
           return '<tr><td class="num" data-l="Fila">' + r.n + '</td><td data-l="Servicio"><b>' + esc(r.titulo || '(sin título)') + '</b><span class="sub">' + esc(r.destino ? destNombre(r.destino) : r.destino_texto) + ' · ' + esc(TIPOS_SRV[r.tipo] || r.tipo) + '</span>' +
             '<span class="sub">' + esc(r.operador) + (r.proveedor_nuevo ? ' <span class="tag">proveedor nuevo</span>' : '') + '</span></td>' +
             '<td data-l="Precio">' + (r.monto != null ? (r.moneda === 'USD' ? usd(r.monto) : brl(r.monto)) + '<span class="sub">' + esc(r.unidad ? UNIDADES[r.unidad] : 'unidad sin indicar') + (r.capacidad ? ' · hasta ' + r.capacidad : '') + '</span>' : '—') +
-            (r.publicado_estimado != null && r.tipo !== 'traslado' ? '<span class="sub">→ publicado' + pub(r.publicado_estimado) + ' por persona</span>' : '') + '</td>' +
+            (r.publicado_estimado != null && r.tipo !== 'traslado' ? '<span class="sub">→ publicado ' + pub(r.publicado_estimado) + ' por persona</span>' : '') + '</td>' +
             '<td data-l="Qué pasa">' + que + '</td><td data-l="Qué hacer">' + dec + '</td></tr>';
         }).join('') + '</tbody></table></div>' +
         '<div class="bar" style="margin:12px 0 24px"><button class="btn" data-act="imp-columnas">Volver a las columnas</button><span style="flex:1"></span><button class="btn btn--main" data-act="imp-confirmar"' + (rs.nuevo + rs.actualizar + rs.asignar ? '' : ' disabled') + '>Confirmar importación</button></div>';
@@ -1310,7 +1391,7 @@
     if (im.paso === 'listo') {
       var t = im.resultado.totales;
       return h + '<section class="sec"><h3>4. Listo</h3><div class="cuentas">' +
-        [['Servicios nuevos', t.nuevos], ['Actualizados / asignados', t.actualiza], ['Proveedores nuevos', t.proveedores_nuevos], ['Cambios para revisar', t.cambios_pendientes], ['No importados', t.omitidas + t.sin_cambios], ['Con error', t.errores]]
+        [['Servicios nuevos', t.nuevos], ['Para comparar', t.para_comparar || 0], ['Actualizados / asignados', t.actualiza], ['Proveedores nuevos', t.proveedores_nuevos], ['Cambios para revisar', t.cambios_pendientes], ['No importados', t.omitidas + t.sin_cambios], ['Con error', t.errores]]
           .map(function (x) { return '<div><small>' + x[0] + '</small><b>' + x[1] + '</b></div>'; }).join('') + '</div>' +
         '<p class="sub" style="margin:12px 0">Los nuevos están en Servicios con la etiqueta <b>Nuevo</b> y todavía no se ven en la web. Revisá los precios en "Por publicar" y publicá los que estén bien.</p>' +
         '<button class="btn btn--main" data-vista="publicar">Ir a Por publicar</button> <button class="btn" data-act="imp-reiniciar">Importar otro archivo</button></section>';
@@ -1325,11 +1406,12 @@
   }
   function confirmarImport() {
     var rs = resumenDecisiones();
-    if (!confirm('¿Importar?\n\n' + rs.nuevo + ' servicios nuevos (quedan como Nuevo, sin publicar)\n' + (rs.actualizar + rs.asignar) + ' servicios tuyos con cambios para revisar\n' + rs.omitir + ' filas no se importan')) return;
+    if (!confirm('¿Importar?\n\n' + rs.nuevo + ' servicios nuevos (quedan como Nuevo, sin publicar)\n' + (rs.actualizar + rs.asignar) + ' servicios tuyos con cambios para revisar\n' + rs.comparar + ' ofertas para comparar con las tuyas\n' + rs.omitir + ' filas no se importan')) return;
     var im = S.imp;
     im.paso = 'confirmando'; pintar();
     api('ops/importar/confirmar', { archivo: im.archivo, mapeo: im.mapeo, filas: filasMapeadas(), decisiones: im.decisiones })
-      .then(function (r) { im.resultado = r; im.paso = 'listo'; S.impHist = undefined; pintar(); cargarOps(); })
+      // cargar() y no solo cargarOps(): la importacion crea proveedores, y sin recargarlos las ofertas dicen "sin proveedor".
+      .then(function (r) { im.resultado = r; im.paso = 'listo'; S.impHist = undefined; pintar(); cargar(); })
       .catch(function (e) { im.paso = 'previa'; pintar(); toast('No se pudo importar: ' + e.message); });
   }
 
@@ -1389,6 +1471,8 @@
     if (el.id === 'q-viajes') { S.qViajes = el.value; var pv = el.selectionStart; pintar(); var qv = document.getElementById('q-viajes'); if (qv) { qv.focus(); try { qv.setSelectionRange(pv, pv); } catch (er) { /* sin rango */ } } return; }
     if (el.matches && el.matches('[data-deuda]')) { S.soloDeuda = el.checked; pintar(); return; }
     if (el.id === 'q-srv') { S.qSrv = el.value; var ps = el.selectionStart; pintar(); var qs = document.getElementById('q-srv'); if (qs) { qs.focus(); try { qs.setSelectionRange(ps, ps); } catch (er) { /* sin rango */ } } return; }
+    if (el.hasAttribute('data-cmp-unidad')) { S.cmpUnidad = S.cmpUnidad || {}; S.cmpUnidad[el.getAttribute('data-cmp-unidad')] = el.value; return; }
+    if (el.hasAttribute('data-pdes')) { if (e.type === 'change') { S.pubDest = el.value; pintar(); } return; }
     if (el.hasAttribute('data-ssel')) { if (e.type === 'change') { if (el.checked) S.srvSel[el.getAttribute('data-ssel')] = 1; else delete S.srvSel[el.getAttribute('data-ssel')]; pintar(); } return; }
     if (el.hasAttribute('data-cfg') && S.modal) { S.modal[el.getAttribute('data-cfg')] = el.value; if (el.getAttribute('data-cfg') === 'cotizacion') S.modal.fuente = ''; S.modal.st = null; return; }
     if (el.hasAttribute('data-aj') && S.modal) {
@@ -1488,6 +1572,7 @@
       pintar(); window.scrollTo(0, 0); return;
     }
     var sfc = e.target.closest('[data-sfiltro]'); if (sfc) { S.srvFiltro = sfc.getAttribute('data-sfiltro'); pintar(); return; }
+    var cm = e.target.closest('[data-cmp]'); if (cm) { elegirCmp(cm.getAttribute('data-cmp'), cm.getAttribute('data-cmp-id')); return; }
     var pp = e.target.closest('[data-papelera],[data-recuperar],[data-borrar]');
     if (pp) {
       var pid = pp.getAttribute('data-papelera') || pp.getAttribute('data-recuperar') || pp.getAttribute('data-borrar');
@@ -1569,7 +1654,7 @@
       case 'srv-publicar': guardarSrv(true); break;
       case 'pub-sel': if (confirm('¿Publicar ' + Object.keys(S.sel).length + ' cambio(s)? Se ven en la web en hasta 1 minuto.')) publicarCambios(Object.keys(S.sel)); break;
       case 'desc-sel': descartarCambios(Object.keys(S.sel)); break;
-      case 'sel-todos': var todos = S.ops.datos.pendientes, ya = Object.keys(S.sel).length === todos.length; S.sel = {}; if (!ya) todos.forEach(function (c) { S.sel[c.id] = 1; }); pintar(); break;
+      case 'sel-todos': var todos = S.pubVisibles || [], ya = Object.keys(S.sel).length === todos.length; S.sel = {}; if (!ya) todos.forEach(function (id) { S.sel[id] = 1; }); pintar(); break;
     }
   });
   document.addEventListener('keydown', function (e) {

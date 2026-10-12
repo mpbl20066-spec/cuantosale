@@ -26,14 +26,13 @@
 const fs = require('fs');
 const path = require('path');
 const model = require('../lib/model.js');
+const traslados = require('../lib/traslados.js');
 
 const RAIZ = path.join(__dirname, '..');
 const JSON_PATH = path.join(RAIZ, 'data', 'transfer-precios.json');
 const MODEL_PATH = path.join(RAIZ, 'lib', 'model.js');
 const CLIENTE_PATH = path.join(RAIZ, 'public', 'transfer-precios.js');
 
-const GLOBAL = 'CS_TRANSFER_PRICES';
-const GLOBAL_PROV = 'CS_TRANSFER_PRICES_PROVENANCE';
 const INICIO = 'const TRANSFER_PRICES = {';
 const FIN = '\n};';
 
@@ -41,23 +40,9 @@ const datos = JSON.parse(fs.readFileSync(JSON_PATH, 'utf8'));
 const D = datos.destinos;
 
 /* ---------- 1. bloque del modelo ---------- */
-const lineas = Object.keys(D).map((k) => {
-  const v = D[k];
-  const partes = [
-    'iata: ' + JSON.stringify(v.iata),
-    'modo: ' + JSON.stringify(v.modo)
-  ];
-  if (v.km != null) partes.push('km: ' + v.km);
-  partes.push('compartido: ' + v.compartido);
-  partes.push('privado: ' + v.privado);
-  if (v.appRideUsd != null) partes.push('appRideUsd: ' + v.appRideUsd);
-  if (v.soloPrivado) partes.push('soloPrivado: true');
-  // Precio del privado segun la cantidad de personas (BRL por vehiculo). Lista
-  // vacia = sin precio cargado: la app muestra "Consultar".
-  if (v.compartido_consultar) partes.push('compartidoConsultar: true');
-  partes.push('escalones: ' + JSON.stringify(v.privado_escalones || []));
-  return '  ' + k + ': { ' + partes.join(', ') + ' },';
-}).join('\n');
+// El generador vive en lib/traslados.js: el server arma la misma tabla en vivo desde
+// Supabase, y los dos tienen que dar exactamente lo mismo.
+const lineas = traslados.lineasModelo(D);
 
 const modelo = fs.readFileSync(MODEL_PATH, 'utf8');
 const desde = modelo.indexOf(INICIO);
@@ -70,89 +55,7 @@ const cambioModelo = nuevoModelo !== modelo;
 if (cambioModelo) fs.writeFileSync(MODEL_PATH, nuevoModelo, 'utf8');
 
 /* ---------- 2. archivo del cliente ---------- */
-const cuerpo = Object.keys(D).map((k) => {
-  const v = D[k];
-  const partes = [
-    'name: ' + JSON.stringify((model.DEST[k] && model.DEST[k].name) || '?'),
-    'iata: ' + JSON.stringify(v.iata),
-    'modo: ' + JSON.stringify(v.modo)
-  ];
-  if (v.km != null) partes.push('km: ' + v.km);
-  partes.push('compartido: ' + v.compartido, 'privado: ' + v.privado);
-  // Precio propio en reales (planilla de transfers): el cliente lo usa tal cual
-  // cuando la pantalla esta en BRL, en vez de USD * tasa.
-  if (v.compartido_brl != null) partes.push('compartido_brl: ' + v.compartido_brl);
-  if (v.privado_brl != null) partes.push('privado_brl: ' + v.privado_brl);
-  if (v.appRideUsd != null) partes.push('appRideUsd: ' + v.appRideUsd);
-  if (v.soloPrivado) partes.push('soloPrivado: true');
-  if (v.compartido_consultar) partes.push('compartidoConsultar: true');
-  partes.push('escalones: ' + JSON.stringify(v.privado_escalones || []));
-  return '  ' + k + ': { ' + partes.join(', ') + ' }';
-}).join(',\n');
-
-// La procedencia, que hasta ahora se descartaba al generar el cliente. Va en un
-// segundo objeto y NO como campos de la tabla: los validadores comparan
-// Object.keys(cliente) contra las claves del JSON, asi que una clave enumerable
-// extra los rompe.
-//
-// El campo `real` del JSON es lo que hace util este panel: dice que modalidades
-// de cada destino tienen tarifa publicada y cuales salen del modelo de
-// distancia. Rio tiene las dos; buz solo la compartida. Mostrar "estimado" a
-// secas para las dos seria menos preciso de lo que allows los datos.
-const literal = (valor, sangria) => {
-  const texto = JSON.stringify(valor, null, 2);
-  const pre = ' '.repeat(sangria);
-  return texto.split('\n').map((linea, i) => (i === 0 ? linea : pre + linea)).join('\n');
-};
-
-const cuerpoProv = Object.keys(D).map((k) => {
-  const v = D[k];
-  const p = { fuente: v.fuente, confianza: v.confianza, verificado: v.verificado };
-  // Que modalidades tienen precio publicado. El default es "ninguna": si el
-  // JSON no lo dice, no se muestra ninguna como real.
-  p.real = Array.isArray(v.real) ? v.real : [];
-  if (v.derivacion) p.derivacion = v.derivacion;
-  if (v.km != null) p.km = v.km;
-  if (v.horas != null) p.horas = v.horas;
-  if (v.modo && v.modo !== 'car') p.modo = v.modo;
-  if (v.appRideUsd != null) p.appRideUsd = v.appRideUsd;
-  if (v.soloPrivado) p.soloPrivado = true;
-  return '  ' + k + ': ' + literal(p, 4);
-}).join(',\n');
-
-// El _meta del JSON: unidades, formulas del modelo y calibracion. Es el texto que
-// responde "¿de dónde sale US$ 120 de transfer a Búzios?" cuando la respuesta es
-// "del modelo, y estos son los km".
-const metaProv = {
-  unidad: (datos._meta && datos._meta.unidad) || {},
-  por_que_no_ida_y_vuelta: (datos._meta && datos._meta.por_que_no_ida_y_vuelta) || '',
-  appRide: (datos._meta && datos._meta.appRide) || '',
-  modelo: (datos._meta && datos._meta.modelo) || {}
-};
-
-const cliente =
-  "'use strict';\n" +
-  '/* GENERADO. No editar a mano: corré `npm run build:transfer`.\n' +
-  '   Fuente: data/transfer-precios.json (que a su vez documenta, por destino, de\n' +
-  '   dónde sale el número, cuándo se verificó y cuánta confianza tiene).\n' +
-  '\n' +
-  '   compartido: USD por persona. privado: USD por vehículo de hasta 4 personas.\n' +
-  '   Los dos son solo ida (aeropuerto -> hotel). */\n' +
-  '(function (root, tabla, proc) {\n' +
-  '  root.' + GLOBAL + ' = tabla;\n' +
-  '  // De dónde sale cada precio y si es una tarifa publicada o el modelo de\n' +
-  '  // distancia. Pocas celdas tienen tarifa publicada; el resto se declara.\n' +
-  '  root.' + GLOBAL_PROV + ' = proc;\n' +
-  '  // La prueba de test.js lo requirea para compararlo con el modelo, asi que\n' +
-  '  // tiene que servir tanto en el navegador como en node.\n' +
-  '  if (typeof module !== \'undefined\' && module.exports) {\n' +
-  '    module.exports = tabla;\n' +
-  '    // enumerable: false a propósito: los validadores comparan Object.keys(cliente)\n' +
-  '    // contra las claves del JSON, y una clave enumerable extra las rompe.\n' +
-  '    Object.defineProperty(module.exports, \'provenance\', { value: proc, enumerable: false });\n' +
-  '  }\n' +
-  "})(typeof globalThis !== 'undefined' ? globalThis : this, {\n" + cuerpo + '\n}, {\n' +
-  '  _meta: ' + literal(metaProv, 4) + ',\n' + cuerpoProv + '\n});\n';
+const cliente = traslados.generarCliente(datos, model.DEST);
 
 const anterior = fs.existsSync(CLIENTE_PATH) ? fs.readFileSync(CLIENTE_PATH, 'utf8') : null;
 const cambioCliente = anterior !== cliente;
