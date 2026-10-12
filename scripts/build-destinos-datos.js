@@ -48,14 +48,27 @@ function mediosDe(key) {
   return l;
 }
 
+/* `horas`: horas de viaje de ida por medio, del mismo modelo. Avion y bus salen del texto `dur` del modo ("unas 6 h con
+   escala"); el auto, de las horas de manejo de ROADTRIP_ROUTES (OSRM). /presupuesto las usa para no recomendar un auto
+   de 17 h de manejo cuando el vuelo entra en el presupuesto. */
+function horasDe(key) {
+  const modos = (model.DEST[key] && model.DEST[key].modes) || {}, h = {};
+  const num = function (txt) { const m = /(\d+(?:[.,]\d+)?)\s*h/.exec(String(txt || '')); return m ? Number(m[1].replace(',', '.')) : null; };
+  if (modos.avion_mvd && num(modos.avion_mvd.dur) != null) h.avion = num(modos.avion_mvd.dur);
+  if (modos.bus && num(modos.bus.dur) != null) h.bus = num(modos.bus.dur);
+  if (model.isRoadtripAllowed(key) && model.ROADTRIP_ROUTES[key]) h.auto = model.ROADTRIP_ROUTES[key].hours;
+  return h;
+}
+
 const datos = Object.keys(model.DEST).map(function (k) {
-  return { k: k, name: model.DEST[k].name, region: model.DEST[k].region, group: model.DEST[k].group || 'beach', medios: mediosDe(k) };
+  return { k: k, name: model.DEST[k].name, region: model.DEST[k].region, group: model.DEST[k].group || 'beach', medios: mediosDe(k), horas: horasDe(k) };
 });
 
 const CABECERA = '/* Snapshot de lib/model.js DEST: los mismos 40 destinos que ofrece cuantosale.uy, con su region\n'
   + '   y los medios de transporte que el sistema puede cotizar para cada uno (`medios`).\n'
   + '   `group` es la clasificacion del modelo (beach / city / nature): de ahi sale el\n'
   + '   filtro por tipo de lugar de /web, para que no vuelva a ser una lista a mano.\n'
+  + '   `horas`: horas de viaje de ida por medio (avion, bus, auto), para recomendar el medio en /presupuesto.\n'
   + '   NO EDITAR A MANO: se regenera con `node scripts/build-destinos-datos.js`. */\n';
 
 fs.writeFileSync(SALIDA, CABECERA + 'window.CS_DESTS = ' + JSON.stringify(datos) + ';\n', 'utf8');
