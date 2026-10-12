@@ -206,8 +206,11 @@
      Asi no hace falta otra columna en la base; el formulario los edita por separado y los vuelve a juntar. */
   function partesProv(pr) {
     var s = String(pr.servicios || ''), i = s.indexOf(' · ');
-    var dest = i < 0 ? '' : s.slice(i + 3);
-    return { hace: i < 0 ? s : s.slice(0, i), destinos: dest.split(',').map(function (x) { return x.trim(); }).filter(Boolean) };
+    var dest = i < 0 ? '' : s.slice(i + 3), vistos = {};
+    /* Los importados vienen con "|", repetidos y cortados a 200 letras: si se corto, el ultimo queda a medias y se descarta. */
+    var lista = dest.split(/[,|]/).map(function (x) { return x.trim(); });
+    if (s.length >= 200) lista.pop();
+    return { hace: i < 0 ? s : s.slice(0, i), destinos: lista.filter(function (x) { var k = x.toLowerCase(); if (!x || vistos[k]) return false; vistos[k] = 1; return true; }) };
   }
   function vistaProveedores(d) {
     var enPapelera = d.proveedores.filter(function (pr) { return pr.eliminado_at; }).length;
