@@ -33,6 +33,10 @@
       "schedule": "0 13 * * *"
     },
     {
+      "path": "/api/precalentar?ronda=5",
+      "schedule": "0 21 * * *"
+    },
+    {
       "path": "/api/alertas/revisar",
       "schedule": "0 11 * * *"
     }

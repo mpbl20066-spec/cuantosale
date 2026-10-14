@@ -885,7 +885,7 @@ async function precargarHotelesBooking(pares) {
   });
 }
 function fetchBookingHotels(destKey, destName, style, extra) {
-  const ttl = bookingHotelsTtlMs();
+  const ttl = (extra && extra.ttlMs) || bookingHotelsTtlMs();   // la precarga de populares guarda mas tiempo
   const key = claveHotelesBooking(destName, extra);
   const hit = bookingHotelsCache.get(key);
   if (hit && Date.now() < hit.expiresAt) return Promise.resolve(hit.value);
@@ -1951,8 +1951,46 @@ async function precalentarVuelos(req, res) {
   const maxGuias = topeEnv('PRECALENTAR_GUIAS_MAX', 100);
   const maxHoteles = topeEnv('PRECALENTAR_HOTELES_MAX', 4);
   const hasta = Date.now() + topeEnv('PRECALENTAR_SEGUNDOS', 30) * 1000;
-  const r = await Promise.all([flightProviders.precalentar(rutas, 'eq'), flightProviders.precalentarMeses(meses, 'ahorro', maxGuias, hasta), calibrarHoteles(maxHoteles)]);
-  return sendJson(res, 200, Object.assign({ rutas: rutas.length }, r[0], { guias: Object.assign({ rutas: meses.length }, r[1]), hoteles: r[2] }));
+  const r = await Promise.all([flightProviders.precalentar(rutas, 'eq'), flightProviders.precalentarMeses(meses, 'ahorro', maxGuias, hasta), calibrarHoteles(maxHoteles),
+    precalentarPopulares(topeEnv('PRECALENTAR_POPULARES_MAX', 6))]);
+  return sendJson(res, 200, Object.assign({ rutas: rutas.length }, r[0], { guias: Object.assign({ rutas: meses.length }, r[1]), hoteles: r[2], populares: r[3] }));
+}
+
+/* El viaje que abre la web sin tocar las fechas (las de home-calcular.html y home-flujo.html: 26/12 al 2/1, 2 personas)
+   en los destinos mas mirados de las ultimas 2 semanas (contador de uso: guias abiertas y "Calcula tu viaje"),
+   completados con PRECALENTAR_DESTINOS_DEFAULT. Deja listos los vuelos (la misma busqueda de /api/vuelos/buscar, 48 h
+   de cache) y los hoteles (la misma de /api/hoteles, guardada POPULARES_HOTELES_H horas, 8 por defecto, en vez de 30 min
+   para que llegue a la proxima visita). Lo que ya esta guardado no se vuelve a pedir. Gasto por destino, solo cuando
+   vence: 1 busqueda de Ignav y hasta 13 de Booking (la ciudad y sus playas). PRECALENTAR_POPULARES_MAX=0 lo apaga. */
+const POPULARES_IDA = '2026-12-26', POPULARES_VUELTA = '2027-01-02', POPULARES_PAX = 2;
+async function destinosPopulares(max) {
+  const cuenta = {};
+  try {
+    const u = await usoApi().resumen(14);
+    (u.filas || []).forEach(function (f) {
+      if (['guias_abrir', 'guias_cotizar', 'guia_calcular_viaje'].indexOf(f.evento) >= 0 && AIR_DESTINATIONS[f.detalle]) cuenta[f.detalle] = (cuenta[f.detalle] || 0) + (Number(f.n) || 0);
+    });
+  } catch (e) { /* sin contador: los de siempre */ }
+  const orden = Object.keys(cuenta).sort(function (a, b) { return cuenta[b] - cuenta[a]; });
+  PRECALENTAR_DESTINOS_DEFAULT.forEach(function (k) { if (orden.indexOf(k) < 0) orden.push(k); });
+  return orden.slice(0, max);
+}
+async function precalentarPopulares(max) {
+  const out = { destinos: [], vuelos: 0, hoteles: 0, fallidos: 0 };
+  if (!max || POPULARES_IDA <= model.iso(model.getToday())) return out;
+  out.destinos = await destinosPopulares(max);
+  const nights = model.daysBetween(model.parse(POPULARES_IDA), model.parse(POPULARES_VUELTA));
+  const ttlMs = (Number(process.env.POPULARES_HOTELES_H) || 8) * 3600000;
+  await Promise.all(out.destinos.map(async function (k) {
+    const tareas = [
+      flightProviders.isLive() ? flightProviders.searchOffers({ origin: 'MVD', destination: AIR_DESTINATIONS[k], departureDate: POPULARES_IDA, returnDate: POPULARES_VUELTA, passengers: POPULARES_PAX, style: 'ahorro' })
+        .then(function (x) { if (x && x.offers && x.offers.length) out.vuelos++; else out.fallidos++; }) : null,
+      bookingSettings().key ? hotelRecommendations(k, model.DEST[k].name, 'ahorro', { dep: POPULARES_IDA, ret: POPULARES_VUELTA, pax: POPULARES_PAX, nights: nights, hotelType: 'economico', subcategory: '', ttlMs: ttlMs }, {})
+        .then(function (h) { if (h && h.length) out.hoteles++; else out.fallidos++; }) : null
+    ].filter(Boolean);
+    await Promise.all(tareas.map(function (p) { return p.catch(function () { out.fallidos++; }); }));
+  }));
+  return out;
 }
 
 /* Para /admin: cobertura de la precarga de las guias (vuelos por mes y hoteles calibrados) y gasto de hoy. */
