@@ -457,6 +457,11 @@ body{display:flex!important;align-items:stretch!important;justify-content:center
   [data-pagina="flujo"] .f-scroll[data-paso="1"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="2"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="3"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="3"]>.xr{align-self:start;margin-top:0}
   [data-pagina="flujo"] .f-scroll[data-paso="1"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="2"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="3"]>.opt,[data-pagina="flujo"] .f-scroll[data-paso="3"]>.xr{grid-column:auto}
   [data-pagina="flujo"] .f-scroll[data-paso="3"]>.xr{align-self:stretch}
+  /* Todas las tarjetas de tours y traslados del mismo alto: la fila se estiraba a la mas alta (la de la etiqueta
+     "Recomendado" o el titulo en dos lineas) y cada fila quedaba distinta. 120px entra la etiqueta, tres lineas de
+     titulo y la duracion; el titulo se corta en tres lineas para que ninguna se pase. */
+  [data-pagina="flujo"] .f-scroll[data-paso="3"]>.xr{min-height:120px}
+  [data-pagina="flujo"] .f-scroll[data-paso="3"]>.xr .xr__b b{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
   /* ventanas emergentes: dialogo centrado en vez de hoja pegada al borde inferior */
   [data-pagina="flujo"] .f-modal{justify-content:center;align-items:center}
   [data-pagina="flujo"] .f-modal__sheet{width:min(640px,calc(100% - 32px));max-height:88%;border-radius:22px}
