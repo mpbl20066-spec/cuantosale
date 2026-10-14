@@ -36,6 +36,8 @@
     '#cs-wa:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 #0B1F3A}#cs-wa:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #0B1F3A}' +
     '#cs-wa:focus-visible{outline:3px solid #0B1F3A;outline-offset:3px}' +
     '#cs-wa svg{width:30px;height:30px}' +
+    /* El tema oscuro de la app pinta de amarillo los svg (fill): sobre el fondo mostaza el icono desaparecia. */
+    '#cs-wa svg,#cs-wa svg path{fill:#0B1F3A!important;color:#0B1F3A!important;opacity:1!important}' +
     '@media (prefers-reduced-motion:reduce){#cs-wa{transition:none}}' +
     '@media print{#cs-wa{display:none}}';
   document.head.appendChild(css);
