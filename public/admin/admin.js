@@ -773,12 +773,23 @@
       })
       .catch(function (e) { alert('No salió el mail: ' + e.message); });
   }
+  /* Avisos que tambien van por mail, con el mismo nombre de tipo (POST pedido/mail). */
+  var MAIL_CON_WA = { sena: 1, saldo: 1, cancelado: 1, servicio_cancelado: 1 };
+  function mandarAviso(tipo, id, extra) {
+    return api('pedido/mail', { pedido_id: id, tipo: tipo, reembolso: extra && extra.reembolso, servicios: extra && extra.servicios })
+      .then(function (r) {
+        toast('Mail enviado a ' + r.email);
+        if (Array.isArray(r.historial)) [S.draft && S.draft.id === id ? S.draft : null].concat((S.datos.pedidos || []).filter(function (x) { return x.id === id; })).forEach(function (x) { if (x) x.historial = r.historial.slice(); });
+      })
+      .catch(function (e) { alert('No salió el mail: ' + e.message); });
+  }
   function enviarWa(tipo, id, i, extra) {
     var p = S.draft && S.draft.id === id ? S.draft : (S.datos.pedidos || []).filter(function (x) { return x.id === id; })[0];
     if (!p) return;
     if (S.draft && S.draft.id === id && S.dirty) { alert('Guardá los cambios del pedido antes de mandar el WhatsApp.'); return; }
     var d = datosWa(tipo, p, i, extra);
-    if (!extra && !confirm('¿Mandarle ' + WA_QUE[tipo] + ' a ' + (d.a || p.cliente_nombre || 'el cliente') + ' por WhatsApp?')) return;   // con extra ya se pregunto
+    var conMail = MAIL_CON_WA[tipo] && p.cliente_email;   // el mismo aviso va tambien por mail: llega aunque la plantilla de WhatsApp falle
+    if (!extra && !confirm('¿Mandarle ' + WA_QUE[tipo] + ' a ' + (d.a || p.cliente_nombre || 'el cliente') + ' por WhatsApp' + (conMail ? ' y por mail' : '') + '?')) return;   // con extra ya se pregunto
     toast('Enviando…');
     api('whatsapp/enviar', { tipo: tipo, pedido_id: id, item: i, texto: d.texto, params: d.params })
       .then(function (r) {
@@ -791,7 +802,9 @@
         if (!Array.isArray(r.historial)) { S.waLocal = S.waLocal || {}; S.waLocal[id] = (S.waLocal[id] || []).concat([ev]); }
         pintarFondo(); if (S.draft && S.draft.id === id) refrescarPanel();
       })
-      .catch(function (e) { alert(e.message); });
+      .catch(function (e) { alert(e.message); })
+      /* Despues del WhatsApp (salga o no): los dos anotan en el historial y a la vez uno pisaria al otro. */
+      .then(function () { if (conMail) return mandarAviso(tipo, id, extra); });
   }
   /* ---------- ficha del pedido ----------
      Arriba quien y a donde, las etapas y el proximo paso; despues los servicios (un renglon cada uno, el detalle se
@@ -2338,7 +2351,9 @@
         var dev = calc(S.draft).devolver;
         if (dev > 0 && confirm('¿Registrar que le devolviste ' + usd(dev) + ' a ' + (S.draft.cliente_nombre || 'el cliente') + '?')) {
           S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: dev, reembolso: true, medio: S.draft.medio_pago || '', nota: 'Reembolso' });
-          S.dirty = true; refrescarPanel(); guardar();
+          S.dirty = true; refrescarPanel();
+          var idR = S.draft.id, mailR = S.draft.cliente_email;   // el comprobante del reembolso sale por mail cuando quedo guardado
+          guardar().then(function () { if (mailR && S.draft && S.draft.id === idR && !S.dirty && confirm('Reembolso registrado. ¿Le mandás el comprobante por mail a ' + mailR + '?')) mandarAviso('reembolso', idR); });
         }
         break;
       case 'add-pago': S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: 0, medio: S.draft.medio_pago || '', nota: '' }); S.dirty = true; refrescarPanel(); break;

@@ -3049,7 +3049,7 @@ const PRELAUNCH_PUBLIC_API = new Set(['/api/config', '/api/guia/token', '/api/tr
 // el único que lo necesitaba era el webhook de Duffel, que ya no existe porque
 // la app ya no emite boletos. Todos los endpoints de la API, incluido el
 // calendario de vuelos, siguen pidiendo user/pass.
-const PRELAUNCH_EXEMPT = new Set(['/api/precalentar', '/api/alertas/revisar']);   // traen su propio secreto (CRON_SECRET)
+const PRELAUNCH_EXEMPT = new Set(['/api/precalentar', '/api/alertas/revisar', '/api/mails/revisar']);   // traen su propio secreto (CRON_SECRET)
 
 function denyPrelaunchJson(res) {
   // Sin WWW-Authenticate a propósito: en una respuesta a un fetch de la app
@@ -3564,6 +3564,16 @@ function handleRequest(req, res) {
       if (url.pathname.indexOf('/api/alertas/push') === 0) return al.apiPush(req, res, url).catch(alFallarAl);
       if (req.method !== 'GET') return sendJson(res, 405, { error: 'Método no permitido.' });
       return (url.pathname === '/api/alertas/baja' ? al.baja(req, res, url) : al.revisar(req, res)).catch(alFallarAl);
+    }
+    /* Mails automaticos al cliente (lib/mail-avisos.js): recordatorio del saldo, antes y despues del viaje. Cron diario
+       con CRON_SECRET, como /api/alertas/revisar. */
+    if (req.method === 'GET' && url.pathname === '/api/mails/revisar') {
+      const cron = String(process.env.CRON_SECRET || '').trim();
+      if (cron && req.headers.authorization !== 'Bearer ' + cron) { res.writeHead(401); return res.end(); }
+      return require('./lib/mail-avisos').revisar({ tasas: getTasas }).then(function (r) { sendJson(res, 200, r); }).catch(function (e) {
+        console.error('[mails]', e.message);
+        sendJson(res, 500, { error: e.message });
+      });
     }
     if (req.method === 'GET' && url.pathname === '/api/precalentar') {
       return precalentarVuelos(req, res).catch(function (e) {
