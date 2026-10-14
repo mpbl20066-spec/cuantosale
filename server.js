@@ -1927,6 +1927,7 @@ async function precalentarVuelos(req, res) {
   const claves = String(process.env.PRECALENTAR_DESTINOS || '').split(',').map(function (k) { return k.trim().toLowerCase(); }).filter(Boolean);
   const destinos = (claves.length ? claves : PRECALENTAR_DESTINOS_DEFAULT).filter(function (k) { return AIR_DESTINATIONS[k]; });
   const salidas = Math.max(1, Math.min(6, Number(process.env.PRECALENTAR_SALIDAS) || 2));
+  const ronda = String(new URL(req.url, 'http://x').searchParams.get('ronda') || '');
   const hoy = model.getToday();
   const rutas = [];
   const vistos = new Set();
@@ -1950,9 +1951,13 @@ async function precalentarVuelos(req, res) {
   const topeEnv = function (n, def) { const v = process.env[n]; return v !== undefined && v !== '' && Number(v) >= 0 ? Number(v) : def; };
   const maxGuias = topeEnv('PRECALENTAR_GUIAS_MAX', 100);
   const maxHoteles = topeEnv('PRECALENTAR_HOTELES_MAX', 4);
-  const hasta = Date.now() + topeEnv('PRECALENTAR_SEGUNDOS', 30) * 1000;
+  /* La de populares (9 y 21 UTC) le deja la mitad del tiempo a las guias: juntas pasaban los 60 s de Vercel */
+  const conPopulares = ronda === '' || ronda === '5';
+  const hasta = Date.now() + topeEnv('PRECALENTAR_SEGUNDOS', 30) * (conPopulares ? 500 : 1000);
   const r = await Promise.all([flightProviders.precalentar(rutas, 'eq'), flightProviders.precalentarMeses(meses, 'ahorro', maxGuias, hasta), calibrarHoteles(maxHoteles),
-    precalentarPopulares(topeEnv('PRECALENTAR_POPULARES_MAX', 6))]);
+    /* Solo en la de las 9 (sin ronda) y la de las 21 UTC (ronda=5): con los hoteles guardados 8 h alcanza, y sumada a
+       las guias la corrida rozaba el tope de 60 s de Vercel (medido: 63 s) */
+    conPopulares ? precalentarPopulares(topeEnv('PRECALENTAR_POPULARES_MAX', 6)) : null]);
   return sendJson(res, 200, Object.assign({ rutas: rutas.length }, r[0], { guias: Object.assign({ rutas: meses.length }, r[1]), hoteles: r[2], populares: r[3] }));
 }
 
