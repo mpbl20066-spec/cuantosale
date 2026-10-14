@@ -736,6 +736,7 @@
       '<label class="f">Medio de pago preferido<input ' + f('medio_pago') + ' value="' + esc(p.medio_pago) + '"></label></div>' +
       (waConf ? '<p style="margin:12px 0 0"><a class="btn btn--wa" href="#" data-wa-enviar="confirmacion" data-wa-pedido="' + esc(p.id) + '">Enviar confirmación por WhatsApp</a></p>' : '') +
       (wa ? '<p style="margin:10px 0 0"><a class="lnk" href="#" data-wa-enviar="saludo" data-wa-pedido="' + esc(p.id) + '">Escribirle al cliente por WhatsApp</a></p>' : '') +
+      (wa && p.estado !== 'cancelado' ? '<p style="margin:10px 0 0"><button type="button" class="btn btn--sm btn--danger" data-act="cancelar-avisar">Cancelar pedido y avisar por WhatsApp</button></p>' : '') +
       (p.created_at ? '<p class="sub" style="margin-top:8px">Recibido ' + esc(fechaHora(p.created_at)) + ' · origen: ' + esc(p.origen || 'web') + '</p>' : '') + '</section>' +
       '<section class="sec"><h3>Servicios y proveedores</h3><div id="items-box">' + (p.items.length ? p.items.map(itemHtml).join('') : '<p class="sub">Sin servicios todavía.</p>') + '</div>' +
       '<button type="button" class="btn btn--sm" data-act="add-item">+ Agregar servicio</button></section>' +
@@ -1786,8 +1787,9 @@
       toast('Guardado'); return api('datos').then(function (d) { S.datos = d; pintarFondo(); refrescarPanel(); });
     }).then(function () {
       /* Paso a Cancelado: se ofrece avisarle al cliente (pedido_cancelado). */
+      var yaPregunto = S.avisarCancelacion; S.avisarCancelacion = false;
       if (!recienCancelado || S.dirty || !S.draft || !S.draft.cliente_telefono) return;
-      if (confirm('Pedido cancelado. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp que se canceló?')) enviarWa('cancelado', S.draft.id, undefined, {});
+      if (yaPregunto || confirm('Pedido cancelado. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp que se canceló?')) enviarWa('cancelado', S.draft.id, undefined, {});
     }).catch(function (e) { mensaje(e.message, true); });
   }
   function borrarPedido() {
@@ -2012,6 +2014,11 @@
       case 'registrar-saldo': registrarSaldo(); break;
       case 'guardar': guardar(); break;
       case 'borrar-pedido': borrarPedido(); break;
+      case 'cancelar-avisar':
+        if (!S.draft || !confirm('¿Cancelar el pedido ' + S.draft.ref + ' y avisarle a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp?')) break;
+        S.draft.estado = 'cancelado'; S.dirty = true; S.avisarCancelacion = true;
+        guardar().then(function () { S.avisarCancelacion = false; });   // si el guardado falla, que no quede armado para otro
+        break;
       case 'guardar-prov': guardarProv(); break;
       case 'papelera-prov': papeleraProv(); break;
       case 'ver-papelera': S.provPapelera = !S.provPapelera; pintar(); break;
