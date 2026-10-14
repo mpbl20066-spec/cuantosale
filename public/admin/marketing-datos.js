@@ -1479,7 +1479,7 @@ window.CS_MKT = {
   },
   {
    "t": "Pedido de reseña (cliente que volvió)",
-   "copy": "¡Hola [nombre]! ¿Qué tal [destino]? Esperamos que el [paseo/traslado] haya salido bien. Nos ayudaría muchísimo una reseña cortita en Trustpilot, buena o mala, la que corresponda: [link de Trustpilot]. Y si tenés una foto del paseo y nos dejás publicarla (sin tu nombre), ¡mejor! Gracias por confiar en Cuánto Sale 💛"
+   "copy": "¡Hola [nombre]! ¿Qué tal [destino]? Esperamos que el [paseo/traslado] haya salido bien. Nos ayudaría muchísimo una reseña cortita en Trustpilot, buena o mala, la que corresponda: https://www.trustpilot.com/evaluate/cuantosale.uy. Y si tenés una foto del paseo y nos dejás publicarla (sin tu nombre), ¡mejor! Gracias por confiar en Cuánto Sale 💛"
   }
  ],
  "manuales": [
