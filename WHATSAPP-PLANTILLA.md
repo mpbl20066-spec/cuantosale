@@ -150,3 +150,35 @@ Referencia: {{5}}
 Gracias por viajar con CuántoSale.
 ```
 Ejemplos: `Juan` · `US$ 41,18` · `São Paulo` · `US$ 123,52` · `CS-MV7HTN3-B05A2C`
+
+**`pedir_saldo`**, Español (Utilidad). Botón "Pedir saldo por WhatsApp" (aparece con la seña cobrada):
+
+```
+Hola {{1}}, te escribimos por el saldo de tu reserva en {{2}}, que se abona antes del viaje: {{3}}.
+
+Cómo pagar: {{4}}
+Referencia: {{5}}
+
+Cuando pagues, respondé este mensaje con el comprobante.
+```
+Ejemplos: `Juan` · `São Paulo` · `US$ 123,52` · `Prex cuenta 361333, a nombre de Maria Batista; Mercado Pago con tarjeta por US$ 129,70 (solo este medio tiene 5 % de recargo)` · `CS-MV7HTN3-B05A2C`
+
+**`saldo_recibido`**, Español (Utilidad). "Registrar saldo cobrado" y aceptar el aviso:
+
+```
+Hola {{1}}, recibimos tu pago de {{2}} y tu reserva en {{3}} quedó paga en su totalidad.
+Referencia: {{4}}
+
+Buen viaje y gracias por elegir CuántoSale.
+```
+Ejemplos: `Juan` · `US$ 123,52` · `São Paulo` · `CS-MV7HTN3-B05A2C`
+
+**`pedido_cancelado`**, Español (Utilidad). Al guardar el pedido en estado Cancelado y aceptar el aviso:
+
+```
+Hola {{1}}, te confirmamos que tu reserva en {{2}} fue cancelada.
+Referencia: {{3}}
+
+Si tenés alguna consulta, respondé este mensaje.
+```
+Ejemplos: `Juan` · `São Paulo` · `CS-MV7HTN3-B05A2C`

@@ -554,12 +554,10 @@
     return sim + (moneda === 'UYU' ? Math.ceil(v) : Math.ceil(v * 100) / 100).toLocaleString('es-UY', { minimumFractionDigits: dec, maximumFractionDigits: dec });
   }
   function recargoTarjeta() { var r = S.datos && S.datos.pago && Number(S.datos.pago.recargo_tarjeta); return r >= 0 ? r : 0.05; }
-  function mensajeSena(p) {
-    var c = calc(p), m = S.senaMoneda, dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
-    var monto = c.senaPend, conTarjeta = r2(monto * (1 + recargoTarjeta()));
-    var L = ['Hola ' + (String(p.cliente_nombre || '').trim().split(' ')[0] || '') + '! Buenas noticias: el proveedor confirmó tu reserva' + (p.destino ? ' en ' + p.destino : '') + '.', '',
-      'Para dejarla reservada te pedimos una seña (50 % de los traslados y 25 % de los tours):'];
-    /* Los dos precios juntos arriba: el de los medios sin recargo y el de Mercado Pago, que es el unico con el 5 %. */
+  /* Los dos precios juntos arriba (el de los medios sin recargo y el de Mercado Pago, el unico con el 5 %) y abajo los
+     datos para pagar. Lo usan el pedido de sena y el de saldo. */
+  function lineasPago(monto, m) {
+    var dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {}, conTarjeta = r2(monto * (1 + recargoTarjeta())), L = [];
     var sinRecargo = ['Transferencia', dp.transferencia, 'Prex', dp.prex, 'Pix', dp.pix, 'Abitab', dp.abitab_redpagos].filter(function (x, i, a) { return i % 2 === 0 && a[i + 1]; });
     if (sinRecargo.length) L.push('*' + plata(monto, m) + '* por ' + sinRecargo.join(', ').replace(/, ([^,]*)$/, ' o $1') + ' (sin recargo)');
     L.push('*' + plata(conTarjeta, m) + '* por Mercado Pago con tarjeta (' + Math.round(recargoTarjeta() * 100) + ' % de recargo)', '', '*Datos para pagar:*');
@@ -568,7 +566,25 @@
     if (dp.pix) L.push('- Pix: ' + dp.pix);
     if (dp.abitab_redpagos) L.push('- Abitab: ' + dp.abitab_redpagos);
     L.push('- Mercado Pago: te mandamos el link de pago por ' + plata(conTarjeta, m) + '.');
+    return L;
+  }
+  /* Lo mismo en una linea, para la variable de la plantilla (Meta no deja saltos de linea). */
+  function formasLinea(monto, m) {
+    var dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
+    return [dp.transferencia && 'transferencia ' + dp.transferencia, dp.prex && 'Prex ' + dp.prex, dp.pix && 'Pix ' + dp.pix, dp.abitab_redpagos && 'Abitab ' + dp.abitab_redpagos,
+      'Mercado Pago con tarjeta por ' + plata(r2(monto * (1 + recargoTarjeta())), m) + ' (solo este medio tiene ' + Math.round(recargoTarjeta() * 100) + ' % de recargo)'].filter(Boolean).join('; ');
+  }
+  function mensajeSena(p) {
+    var L = ['Hola ' + (String(p.cliente_nombre || '').trim().split(' ')[0] || '') + '! Buenas noticias: el proveedor confirmó tu reserva' + (p.destino ? ' en ' + p.destino : '') + '.', '',
+      'Para dejarla reservada te pedimos una seña (50 % de los traslados y 25 % de los tours):'];
+    L = L.concat(lineasPago(calc(p).senaPend, S.senaMoneda));
     L.push('', 'Cuando pagues, mandanos el comprobante por acá. El resto se abona antes del viaje.', 'Ref: ' + (p.ref || ''));
+    return L.join('\n');
+  }
+  function mensajeSaldo(p) {
+    var L = ['Hola ' + (String(p.cliente_nombre || '').trim().split(' ')[0] || '') + '! Te escribimos por el saldo de tu reserva' + (p.destino ? ' en ' + p.destino : '') + ', que se abona antes del viaje:'];
+    L = L.concat(lineasPago(calc(p).saldo, S.senaMoneda));
+    L.push('', 'Cuando pagues, mandanos el comprobante por acá.', 'Ref: ' + (p.ref || ''));
     return L.join('\n');
   }
   function mensajeProveedor(p, it, pr) {
@@ -577,18 +593,23 @@
   }
   /* Los botones de WhatsApp de la ficha salen por la Cloud API (lib/wa-panel.js): con la ventana de 24 h abierta va el
      texto de siempre; si no, la plantilla, con estos datos en una linea cada uno. */
-  var WA_QUE = { confirmacion: 'la confirmación', sena: 'el pedido de seña', sena_recibida: 'la confirmación de la seña', saludo: 'un saludo por su pedido', proveedor: 'el pedido de reserva' };
+  var WA_QUE = { confirmacion: 'la confirmación', sena: 'el pedido de seña', sena_recibida: 'la confirmación de la seña', saldo: 'el pedido del saldo', saldo_recibido: 'la confirmación del pago total', cancelado: 'el aviso de cancelación', saludo: 'un saludo por su pedido', proveedor: 'el pedido de reserva' };
   function datosWa(tipo, p, i, extra) {
     var nombre = String(p.cliente_nombre || '').trim().split(' ')[0] || 'viajero';
     var fechas = p.fechas_txt || (p.fecha_ida ? fecha(p.fecha_ida) + (p.fecha_vuelta ? ' al ' + fecha(p.fecha_vuelta) : '') : '');
     var personas = p.personas_txt || (p.personas ? p.personas + (p.personas == 1 ? ' persona' : ' personas') : '');
     var items = (p.items || []).filter(function (x) { return x.estado !== 'cancelado' && x.nombre; });
     if (tipo === 'confirmacion') return { texto: mensajeConfirmacion(p), params: [nombre, [p.destino, fechas, personas].filter(Boolean).join(' · '), items.map(function (x) { return x.nombre + (x.detalle ? ' (' + x.detalle + ')' : ''); }).join('; '), usd(calc(p).total), p.ref] };
-    if (tipo === 'sena') {
-      var c = calc(p), m = S.senaMoneda, dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
-      var formas = [dp.transferencia && 'transferencia ' + dp.transferencia, dp.prex && 'Prex ' + dp.prex, dp.pix && 'Pix ' + dp.pix, dp.abitab_redpagos && 'Abitab ' + dp.abitab_redpagos,
-        'Mercado Pago con tarjeta por ' + plata(r2(c.senaPend * (1 + recargoTarjeta())), m) + ' (solo este medio tiene ' + Math.round(recargoTarjeta() * 100) + ' % de recargo)'].filter(Boolean).join('; ');
-      return { texto: mensajeSena(p), params: [nombre, p.destino || 'Brasil', plata(c.senaPend, m), formas, p.ref] };
+    if (tipo === 'sena') { var cs = calc(p); return { texto: mensajeSena(p), params: [nombre, p.destino || 'Brasil', plata(cs.senaPend, S.senaMoneda), formasLinea(cs.senaPend, S.senaMoneda), p.ref] }; }
+    if (tipo === 'saldo') { var cl = calc(p); return { texto: mensajeSaldo(p), params: [nombre, p.destino || 'Brasil', plata(cl.saldo, S.senaMoneda), formasLinea(cl.saldo, S.senaMoneda), p.ref] }; }
+    if (tipo === 'cancelado') {
+      var dc = p.destino || 'Brasil';
+      return { texto: 'Hola ' + nombre + '. Te confirmamos que tu reserva en ' + dc + ' fue cancelada.\nRef: ' + p.ref + '\n\nSi tenés alguna consulta, escribinos por acá.', params: [nombre, dc, p.ref] };
+    }
+    if (tipo === 'saldo_recibido') {
+      var y = extra || {}, dd = p.destino || 'Brasil';
+      return { texto: '¡Hola ' + nombre + '! Recibimos tu pago de *' + y.monto + '*. Tu reserva en ' + dd + ' quedó paga en su totalidad.\nRef: ' + p.ref + '\n\n¡Buen viaje y gracias por elegir CuántoSale!',
+        params: [nombre, y.monto, dd, p.ref] };
     }
     if (tipo === 'sena_recibida') {
       var x = extra || {}, dest = p.destino || 'Brasil';
@@ -611,6 +632,20 @@
       if (S.dirty || !S.draft || S.draft.id !== p0.id || !S.draft.cliente_telefono) return;
       if (!confirm('Seña registrada. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp que la recibiste?')) return;
       enviarWa('sena_recibida', S.draft.id, undefined, { monto: plata(monto, m), saldo: plata(calc(S.draft).saldo, m) });
+    });
+  }
+  /* Lo mismo para el saldo: anota el pago total, guarda y ofrece avisarle (saldo_recibido). */
+  function registrarSaldo() {
+    var cs = calc(S.draft);
+    if (!(cs.saldo > 0)) return;
+    var monto = cs.saldo, m = S.senaMoneda;
+    S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: monto, medio: S.draft.medio_pago || '', nota: 'Saldo' });
+    S.dirty = true; refrescarPanel();
+    var p0 = S.draft;
+    return guardar().then(function () {
+      if (S.dirty || !S.draft || S.draft.id !== p0.id || !S.draft.cliente_telefono) return;
+      if (!confirm('Saldo registrado: el pedido quedó pago. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp?')) return;
+      enviarWa('saldo_recibido', S.draft.id, undefined, { monto: plata(monto, m) });
     });
   }
   function enviarWa(tipo, id, i, extra) {
@@ -638,6 +673,13 @@
         '<label class="f" style="min-width:200px">Moneda para el cliente<select data-sena-moneda>' + opts(MONEDA_SENA, m) + '</select></label>' +
         (wa ? '<a class="btn btn--wa" href="#" data-wa-enviar="sena" data-wa-pedido="' + esc(p.id) + '">Pedir seña por WhatsApp</a>' : '<span class="sub">Cargá el teléfono del cliente para mandarle la seña.</span>') +
         '<button type="button" class="btn btn--sm" data-act="registrar-sena">Registrar seña cobrada</button></div>' : '') +
+      (!c.senaPend && c.saldo > 0 && p.id ? '<div class="cuentas" style="margin-top:10px"><div><small>Saldo pendiente</small><b class="deuda">' + plata(c.saldo, m) + '</b></div>' +
+        '<div><small>Con tarjeta (+' + Math.round(recargoTarjeta() * 100) + ' %)</small><b>' + plata(r2(c.saldo * (1 + recargoTarjeta())), m) + '</b></div></div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px">' +
+        '<label class="f" style="min-width:200px">Moneda para el cliente<select data-sena-moneda>' + opts(MONEDA_SENA, m) + '</select></label>' +
+        (p.cliente_telefono ? '<a class="btn btn--wa" href="#" data-wa-enviar="saldo" data-wa-pedido="' + esc(p.id) + '">Pedir saldo por WhatsApp</a>' : '<span class="sub">Cargá el teléfono del cliente para pedirle el saldo.</span>') +
+        '<button type="button" class="btn btn--sm" data-act="registrar-saldo">Registrar saldo cobrado</button></div>' : '') +
+      (!c.senaPend && !c.saldo && c.total > 0 ? '<p class="sub" style="margin-top:8px"><b class="ok">Pedido pago en su totalidad.</b></p>' : '') +
       (c.senaPend && p.estado !== 'confirmado' ? '<p class="sub" style="margin-top:8px">Pedila cuando el proveedor confirme (estado "Confirmado").</p>' : '') +
       (sinTasa ? '<p class="sub">' + (S.tasas && S.tasas.error ? 'No se pudo traer la cotización: el monto queda en dólares.' : 'Cargando cotización…') + '</p>' : '') +
       (faltan && c.senaPend ? '<p class="aviso">Faltan tus datos para cobrar: cargá PAGO_PREX, PAGO_PIX y PAGO_ABITAB_REDPAGOS (Abitab) en las variables de Vercel. Mientras tanto el mensaje solo ofrece tarjeta.</p>' : '');
@@ -1736,10 +1778,16 @@
     var cuerpo = { estado: p.estado, cliente_nombre: p.cliente_nombre, cliente_telefono: p.cliente_telefono, cliente_email: p.cliente_email, destino: p.destino,
       fecha_ida: p.fecha_ida || null, fecha_vuelta: p.fecha_vuelta || null, personas: p.personas, medio_pago: p.medio_pago, notas: p.notas, items: p.items, pagos: p.pagos };
     var llamada = p.id ? api('pedido/actualizar', { id: p.id, cambios: cuerpo }) : api('pedido/crear', cuerpo);
+    var antes = p.id && (S.datos.pedidos || []).filter(function (x) { return x.id === p.id; })[0];
+    var recienCancelado = antes && antes.estado !== 'cancelado' && p.estado === 'cancelado';
     mensaje('Guardando…');
     return llamada.then(function (r) {
       S.draft = JSON.parse(JSON.stringify(r.pedido)); S.dirty = false;
       toast('Guardado'); return api('datos').then(function (d) { S.datos = d; pintarFondo(); refrescarPanel(); });
+    }).then(function () {
+      /* Paso a Cancelado: se ofrece avisarle al cliente (pedido_cancelado). */
+      if (!recienCancelado || S.dirty || !S.draft || !S.draft.cliente_telefono) return;
+      if (confirm('Pedido cancelado. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp que se canceló?')) enviarWa('cancelado', S.draft.id, undefined, {});
     }).catch(function (e) { mensaje(e.message, true); });
   }
   function borrarPedido() {
@@ -1961,6 +2009,7 @@
       case 'add-pago': S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: 0, medio: S.draft.medio_pago || '', nota: '' }); S.dirty = true; refrescarPanel(); break;
       case 'cobrar-saldo': var c = calc(S.draft); if (c.saldo > 0) { S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: c.saldo, medio: S.draft.medio_pago || '', nota: 'Saldo' }); S.dirty = true; refrescarPanel(); } break;
       case 'registrar-sena': registrarSena(); break;
+      case 'registrar-saldo': registrarSaldo(); break;
       case 'guardar': guardar(); break;
       case 'borrar-pedido': borrarPedido(); break;
       case 'guardar-prov': guardarProv(); break;
