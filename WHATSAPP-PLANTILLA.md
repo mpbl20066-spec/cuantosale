@@ -114,7 +114,7 @@ Referencia: {{5}}
 
 Cuando pagues, respondé este mensaje con el comprobante. El resto se abona antes del viaje.
 ```
-Ejemplos: `Juan` · `Praia do Rosa` · `US$ 45` · `transferencia BROU 001234567; tarjeta de crédito con link de Mercado Pago por US$ 47,25` · `CS-MV7HTN3-B05A2C`
+Ejemplos: `Juan` · `Praia do Rosa` · `US$ 45` · `Prex cuenta 361333, a nombre de Maria Batista; Mercado Pago con tarjeta por US$ 47,25 (solo este medio tiene 5 % de recargo)` · `CS-MV7HTN3-B05A2C`
 
 **`retomar_pedido`**, Español:
 
