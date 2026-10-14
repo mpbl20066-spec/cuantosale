@@ -19,22 +19,41 @@
 <style>
 :root{--bg:#F4F5F8;--card:#fff;--ink:#0F172A;--muted:#64748B;--line:#E2E6EE;--brand:#0A101A;--accent:#F6B21B;--ok:#16825D;--okbg:#E4F5EE;--warn:#B45309;--warnbg:#FEF3C7;--bad:#B42318;--badbg:#FDE8E6;--info:#1D4ED8;--infobg:#E3ECFF;--r:12px}
 @media (prefers-color-scheme:dark){:root{--bg:#0B1020;--card:#141B2E;--ink:#E8ECF6;--muted:#97A3C0;--line:#26304A;--brand:#05080F;--ok:#3DD6A0;--okbg:#0E2E26;--warn:#F5B94A;--warnbg:#33260B;--bad:#FF8A7A;--badbg:#3A1512;--info:#8FB2FF;--infobg:#14224A}}
+@font-face{font-family:Poppins;src:url(/fonts/poppins-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:Poppins;src:url(/fonts/poppins-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:Poppins;src:url(/fonts/poppins-600.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:Poppins;src:url(/fonts/poppins-700.woff2) format("woff2");font-weight:700;font-display:swap}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);-webkit-text-size-adjust:100%}
+body{font:14px/1.5 Poppins,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);-webkit-text-size-adjust:100%}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 [hidden]{display:none!important}
 .wrap{max-width:1240px;margin:0 auto;padding:0 16px}
 .top{background:var(--brand);color:#fff;position:sticky;top:0;z-index:20}
-.top .wrap{display:flex;align-items:center;gap:12px;min-height:56px;flex-wrap:wrap}
-.top h1{font-size:17px;margin:0;flex:1;white-space:nowrap}
+.top .wrap{display:flex;align-items:center;gap:8px 24px;min-height:64px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.top h1{font-size:19px;font-weight:700;margin:0;white-space:nowrap;letter-spacing:-.2px}
 .top h1 i{font-style:normal;color:var(--accent)}
-/* Las pestanas se deslizan de costado en el celular en vez de ensanchar la pagina. */
-.tabs{display:flex;gap:4px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+.top h1 span{color:#9CA3AF;font-weight:500}
+/* 4 secciones; en el celular entran en una linea y si no, se deslizan de costado. */
+.tabs{display:flex;gap:4px;overflow-x:auto;max-width:100%;scrollbar-width:none;flex:1 1 auto}
 .tabs::-webkit-scrollbar{display:none}
-.tab{background:transparent;border:0;color:#cbd5e1;padding:8px 12px;border-radius:8px;font-weight:600;white-space:nowrap;flex:none}
-.tab[aria-selected=true]{background:rgba(255,255,255,.14);color:#fff}
+.tab{background:transparent;border:0;color:#E5E7EB;padding:9px 16px;border-radius:999px;font-weight:500;white-space:nowrap;flex:none;display:inline-flex;align-items:center;gap:8px;min-height:40px}
+.tab:hover{background:rgba(255,255,255,.08)}
+.tab[aria-current=page]{background:var(--accent);color:#0B0F17;font-weight:600}
+.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#22C55E;color:#052E16;font-size:12px;font-weight:700;line-height:1}
+.tab[aria-current=page] .badge{background:#0B0F17;color:var(--accent)}
+.top__acc{display:flex;gap:8px;align-items:center}
+.btn--icono{width:40px;min-height:40px;padding:0;display:inline-grid;place-items:center;border-radius:999px}
+.top .btn--sm{min-height:40px;border-radius:999px;padding:0 16px}
+.top .btn--icono{padding:0}
+.subtabs{display:flex;gap:4px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin:20px 0 0;width:max-content;max-width:100%}
+.subtab{border:0;background:transparent;padding:8px 14px;border-radius:9px;font-weight:500;color:var(--muted);min-height:38px;display:inline-flex;align-items:center;gap:6px}
+.subtab[aria-current=page]{background:var(--brand);color:#fff;font-weight:600}
+.vhead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin:24px 0 16px}
+.vhead h2{margin:0;font-size:26px;font-weight:700;letter-spacing:-.4px}
+.vhead p{margin:2px 0 0;color:var(--muted)}
+.btn--lg{min-height:44px;padding:0 20px;border-radius:12px;font-size:15px}
 .btn{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:8px 14px;font-weight:600;min-height:38px}
 .btn:hover{border-color:var(--muted)}
 .btn--main{background:var(--accent);border-color:var(--accent);color:#1b1300}
@@ -55,10 +74,12 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 textarea{min-height:76px;resize:vertical}
 .err{color:var(--bad);font-size:13.5px;margin:0}
 .aviso{background:var(--warnbg);color:var(--warn);border-radius:var(--r);padding:10px 14px;margin:14px 0;font-size:14px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:16px 0}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
-.kpi small{display:block;color:var(--muted);font-weight:600;font-size:12.5px}
-.kpi b{display:block;font-size:22px;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:20px 0}
+.kpis--4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:900px){.kpis--4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.kpi small{display:block;color:var(--muted);font-weight:500;font-size:13px}
+.kpi b{display:block;font-size:24px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
 .kpi em{font-style:normal;font-size:12px;color:var(--muted)}
 .kpi--btn{font:inherit;color:inherit;text-align:left;cursor:pointer}
 .kpi--btn:hover{border-color:var(--muted)}
@@ -83,7 +104,49 @@ textarea{min-height:76px;resize:vertical}
 .chip[aria-pressed=true]{background:var(--brand);color:#fff;border-color:var(--brand)}
 .chip span{opacity:.65;margin-left:4px}
 .bar input[type=search]{max-width:260px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+/* Lista de pedidos: filtros arriba y una fila por pedido con el proximo paso. En el celular cada fila es una tarjeta. */
+.filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+.filtros__der{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.filtros input[type=search]{width:280px;max-width:100%}
+.fsel{width:auto;min-height:40px;padding:0 10px;font-size:13px}
+.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--bg);padding:4px;border-radius:12px}
+.seg__b{border:0;background:transparent;padding:7px 12px;border-radius:9px;font-size:13px;color:var(--muted);font-weight:500;min-height:36px}
+.seg__b span{opacity:.7}
+.seg__b[aria-pressed=true]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.plist__h,.prow{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.6fr) minmax(0,1.4fr) minmax(0,1fr) minmax(0,.9fr) minmax(0,1.4fr);gap:16px;align-items:center;padding:14px 16px}
+.plist__h{padding-top:10px;padding-bottom:10px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:color-mix(in srgb,var(--bg) 50%,var(--card))}
+.prow{border-top:1px solid var(--line);cursor:pointer}
+.prow:hover{background:color-mix(in srgb,var(--info) 5%,transparent)}
+.prow--off{opacity:.6}
+.prow b{font-weight:600}
+.prow__cli{display:flex;gap:12px;align-items:center;min-width:0}
+.avatar{width:40px;height:40px;flex:none;border-radius:999px;background:var(--warnbg);color:var(--warn);display:grid;place-items:center;font-weight:600;font-size:13px}
+.sub.warn{color:var(--warn);font-weight:500}
+.pend{color:var(--warn);font-weight:500}
+.paso{white-space:nowrap;text-decoration:none;min-height:36px;display:inline-flex;align-items:center;border-radius:10px}
+@media (max-width:760px){
+  .plist__h{display:none}
+  .prow{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}
+  .prow__viaje,.prow__serv{grid-column:1}
+  .prow__total{grid-column:2;grid-row:1}
+  .prow__estado{grid-column:2;grid-row:2;justify-self:end}
+  .prow__paso{grid-column:1 / -1}
+  .prow__paso .paso{width:100%;justify-content:center;min-height:44px}
+  .filtros input[type=search],.fsel{flex:1 1 140px;width:auto}
+  .subtabs{width:100%}
+  /* Celular: logo y botones en un renglon, las 4 secciones en el de abajo, parejas. */
+  .top h1{flex:1;font-size:17px}
+  .tabs{order:3;flex:1 1 100%}
+  .tab{flex:1 1 0;justify-content:center;padding:9px 6px;font-size:13px;gap:5px}
+  .seg{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:100%}
+  .seg::-webkit-scrollbar{display:none}
+  .seg__b{white-space:nowrap;flex:none}
+  .kpi{padding:12px 14px}
+  .kpi b{font-size:20px}
+  .vhead{margin-top:16px}
+  .vhead h2{font-size:22px}
+}
 table{width:100%;border-collapse:collapse}
 th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
 td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -171,6 +234,6 @@ a.lnk:hover{text-decoration:underline}
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=42"></script>
+<script src="/admin/admin.js?v=43"></script>
 </body>
 </html>
