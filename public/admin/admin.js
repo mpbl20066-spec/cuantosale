@@ -733,9 +733,8 @@
     S.dirty = true; refrescarPanel();
     var p0 = S.draft;
     return guardar().then(function () {
-      if (S.dirty || !S.draft || S.draft.id !== p0.id || !S.draft.cliente_telefono) return;
-      if (!confirm('Seña registrada. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp que la recibiste?')) return;
-      enviarWa('sena_recibida', S.draft.id, undefined, { monto: plata(monto, m), saldo: plata(calc(S.draft).saldo, m) });
+      if (S.dirty || !S.draft || S.draft.id !== p0.id) return;
+      avisarPago('Seña registrada.', 'sena_recibida', 'sena', { monto: plata(monto, m), saldo: plata(calc(S.draft).saldo, m) });
     });
   }
   /* Lo mismo para el saldo: anota el pago total, guarda y ofrece avisarle (saldo_recibido). */
@@ -747,10 +746,29 @@
     S.dirty = true; refrescarPanel();
     var p0 = S.draft;
     return guardar().then(function () {
-      if (S.dirty || !S.draft || S.draft.id !== p0.id || !S.draft.cliente_telefono) return;
-      if (!confirm('Saldo registrado: el pedido quedó pago. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp?')) return;
-      enviarWa('saldo_recibido', S.draft.id, undefined, { monto: plata(monto, m) });
+      if (S.dirty || !S.draft || S.draft.id !== p0.id) return;
+      avisarPago('Saldo registrado: el pedido quedó pago.', 'saldo_recibido', 'saldo', { monto: plata(monto, m) });
     });
+  }
+  /* Una sola pregunta para avisarle del pago: WhatsApp (si tiene celular) y el recibo o voucher por mail (si tiene
+     email). Salen por separado: si la plantilla de WhatsApp falla, el mail sale igual. */
+  function tieneMail(p) { return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(p.cliente_email || '').trim()); }
+  function avisarPago(intro, tipoWa, tipoMail, extra) {
+    var p = S.draft, tel = !!p.cliente_telefono, mail = tieneMail(p);
+    if (!tel && !mail) return;
+    var quien = p.cliente_nombre || 'el cliente', doc = tipoMail === 'saldo' ? 'el voucher' : 'el recibo';
+    var pregunta = tel ? '¿Le avisás a ' + quien + ' por WhatsApp' + (mail ? ' y le mandás ' + doc + ' por mail' : '') + '?' : '¿Le mandás ' + doc + ' por mail a ' + quien + '?';
+    if (!confirm(intro + ' ' + pregunta)) return;
+    if (mail) mandarRecibo(tipoMail, p.id);
+    if (tel) enviarWa(tipoWa, p.id, undefined, extra);
+  }
+  function mandarRecibo(tipo, id) {
+    return api('pedido/recibo', { pedido_id: id, tipo: tipo })
+      .then(function (r) {
+        toast((tipo === 'saldo' ? 'Voucher' : 'Recibo') + ' enviado a ' + r.email);
+        if (Array.isArray(r.historial)) [S.draft && S.draft.id === id ? S.draft : null].concat((S.datos.pedidos || []).filter(function (x) { return x.id === id; })).forEach(function (x) { if (x) x.historial = r.historial.slice(); });
+      })
+      .catch(function (e) { alert('No salió el mail: ' + e.message); });
   }
   function enviarWa(tipo, id, i, extra) {
     var p = S.draft && S.draft.id === id ? S.draft : (S.datos.pedidos || []).filter(function (x) { return x.id === id; })[0];
@@ -898,6 +916,7 @@
       (esNuevo ? '' : '<div id="etapas-box">' + etapasHtml(p) + '</div><div id="paso-box">' + pasoHtml(p) + '</div>') +
       '<section class="sec"><div class="sec__cab"><h3>Servicios</h3><button type="button" class="btn btn--sm" data-act="add-item">+ Agregar servicio</button></div><div id="items-box">' + (p.items.length ? p.items.map(itemHtml).join('') : '<p class="sub">Sin servicios todavía.</p>') + '</div></section>' +
       (esNuevo ? '' : '<section class="sec"><div class="sec__cab"><h3>Pagos del cliente</h3><div class="item__acc"><button type="button" class="btn btn--sm" data-act="add-pago">+ Registrar cobro</button><button type="button" class="btn btn--sm" data-act="cobrar-saldo">Cobró todo</button>' +
+        (c.cobrado > 0 && tieneMail(p) ? '<button type="button" class="btn btn--sm" data-act="mail-recibo">' + (c.saldo > 0 ? 'Mandar recibo por mail' : 'Mandar voucher por mail') + '</button>' : '') +
         (c.devolver > 0 ? '<button type="button" class="btn btn--sm btn--danger" data-act="registrar-reembolso">Registrar reembolso de ' + usd(c.devolver) + '</button>' : '') + '</div></div>' +
         '<div id="sena-box">' + pagosResumenHtml(p) + '</div><div id="pagos-box">' + (p.pagos.length ? p.pagos.map(pagoHtml).join('') : '<p class="sub">Todavía no registraste cobros.</p>') + '</div></section>') +
       '<section class="sec sec--franja" aria-label="Cuentas"><div class="cuentas cuentas--franja" id="cuentas-box">' + cuentasHtml(p) + '</div></section>' +
@@ -2323,6 +2342,11 @@
       case 'cobrar-saldo': var c = calc(S.draft); if (c.saldo > 0) { S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: c.saldo, medio: S.draft.medio_pago || '', nota: 'Saldo' }); S.dirty = true; refrescarPanel(); } break;
       case 'registrar-sena': registrarSena(); break;
       case 'registrar-saldo': registrarSaldo(); break;
+      case 'mail-recibo':
+        if (S.dirty) { alert('Guardá los cambios del pedido antes de mandar el mail.'); break; }
+        var cr = calc(S.draft), tr = cr.saldo > 0 ? 'sena' : 'saldo';
+        if (confirm('¿Mandarle el ' + (tr === 'saldo' ? 'voucher' : 'recibo') + ' a ' + S.draft.cliente_email + '?')) mandarRecibo(tr, S.draft.id);
+        break;
       case 'guardar': guardar(); break;
       case 'borrar-pedido': borrarPedido(); break;
       case 'estado-a':
