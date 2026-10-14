@@ -1115,7 +1115,8 @@
         var a = (c.antes || {})[k], d = c.despues[k];
         return '<span class="sub"><b>' + esc(CAMPO_NOMBRE[k]) + ':</b> ' + (a ? verProv(a, 'el de antes') : '—') + ' → ' + (d ? verProv(d) : '—') + '</span>';
       }
-      return '<span class="sub"><b>' + esc(CAMPO_NOMBRE[k] || k) + ':</b> ' + esc(valorCampo(k, (c.antes || {})[k])) + ' → ' + esc(valorCampo(k, c.despues[k])) + '</span>';
+      var antes = (c.antes || {})[k], sinAntes = antes == null || antes === '';   // servicio nuevo: solo el valor
+      return '<span class="sub"><b>' + esc(CAMPO_NOMBRE[k] || k) + ':</b> ' + (sinAntes ? '' : esc(valorCampo(k, antes)) + ' → ') + esc(valorCampo(k, c.despues[k])) + '</span>';
     }).join('');
   }
 
@@ -1133,32 +1134,38 @@
     S.sel = S.sel || {};
     Object.keys(S.sel).forEach(function (k) { if (!d.pendientes.some(function (c) { return c.id === k; })) delete S.sel[k]; });
     var nSel = Object.keys(S.sel).length;
-    var h = '<div class="bar"><div class="chips"><b>' + (d.pendientes.length ? d.pendientes.length + ' cambio(s) esperando tu revisión' : 'Nada para publicar') + '</b></div>' +
-      (d.pendientes.length ? '<button class="btn btn--sm" data-act="sel-todos">' + (nSel === d.pendientes.length ? 'Ninguno' : 'Seleccionar todos') + '</button>' +
-        '<button class="btn btn--sm btn--danger" data-act="desc-sel"' + (nSel ? '' : ' disabled') + '>Descartar (' + nSel + ')</button>' +
-        '<button class="btn btn--main" data-act="pub-sel"' + (nSel ? '' : ' disabled') + '>Publicar (' + nSel + ')</button>' : '') + '</div>' +
-      '<p class="sub" style="margin:-4px 0 12px">Nada de esto se ve en la web hasta que lo publicás. Los cambios de más de 20 % aparecen en rojo.</p>' +
-      (Object.keys(destPend).length > 1 ? '<div class="bar"><select data-pdes style="max-width:280px"><option value="">Todos los destinos (' + d0.pendientes.length + ')</option>' +
-        Object.keys(destPend).sort(function (a, b) { return destNombre(a).localeCompare(destNombre(b), 'es'); }).map(function (k) { return '<option value="' + esc(k) + '"' + (S.pubDest === k ? ' selected' : '') + '>' + esc(destNombre(k)) + ' (' + destPend[k] + ')</option>'; }).join('') + '</select></div>' : '');
-    if (!d.pendientes.length) return h + '<div class="card"><p class="vacio">Cuando edites un precio o importes un archivo, los cambios quedan acá para que los revises antes de publicarlos.</p></div>';
-    h += '<div class="card"><table><thead><tr><th></th><th>Servicio</th><th>Qué cambia</th><th class="num">Publicado hoy</th><th class="num">Quedaría</th><th>Origen</th><th></th></tr></thead><tbody>';
+    var dests = Object.keys(destPend).sort(function (a, b) { return destNombre(a).localeCompare(destNombre(b), 'es'); });
+    var h = '<div class="vhead"><div><h2>Por publicar</h2><p>' + (d0.pendientes.length ? d0.pendientes.length + (d0.pendientes.length === 1 ? ' cambio esperando' : ' cambios esperando') + ' tu revisión. ' : '') + 'Nada de esto se ve en la web hasta que lo publicás; los cambios de precio de más de 20 % aparecen en rojo.</p></div></div>';
+    if (!d0.pendientes.length) return h + '<div class="card"><p class="vacio">Cuando edites un precio o importes un archivo, los cambios quedan acá para que los revises antes de publicarlos.</p></div>';
+    /* Barra de acciones: queda a la vista mientras se baja por la lista. */
+    h += '<div class="pubbar"><label class="pubbar__todos"><input type="checkbox" data-act="sel-todos"' + (nSel && nSel === d.pendientes.length ? ' checked' : '') + '> ' + (nSel ? nSel + ' elegido' + (nSel > 1 ? 's' : '') : 'Elegir todos') + '</label>' +
+      (dests.length > 1 ? '<select class="fsel" data-pdes aria-label="Destino"><option value="">Todos los destinos (' + d0.pendientes.length + ')</option>' + dests.map(function (k) { return '<option value="' + esc(k) + '"' + (S.pubDest === k ? ' selected' : '') + '>' + esc(destNombre(k)) + ' (' + destPend[k] + ')</option>'; }).join('') + '</select>' : '') +
+      '<span class="pubbar__esp"></span>' +
+      '<button class="btn btn--txt-danger" data-act="desc-sel"' + (nSel ? '' : ' disabled') + '>Descartar (' + nSel + ')</button>' +
+      '<button class="btn btn--main" data-act="pub-sel"' + (nSel ? '' : ' disabled') + '>Publicar (' + nSel + ')</button></div>';
+    h += '<div class="pubs">';
     d.pendientes.forEach(function (c) {
       var s = porId[c.tour_id] || {}, p = pctTxt(c.publicado_antes, c.publicado_despues);
       var fuerte = c.publicado_antes && c.publicado_despues != null && Math.abs((c.publicado_despues - c.publicado_antes) / c.publicado_antes) >= 0.2;
       var noSe = c.publicado_despues == null && (c.despues.activo === true || (c.despues.activo === undefined && s.activo));
       /* Igual que en lib/operaciones.js publicar(): importado sin unidad, hay que confirmarla en el editor. */
       var sinUnidad = c.origen === 'importacion' && s.revision === 'pendiente' && /unidad|persona o por/.test(s.revision_motivo || '') && c.despues.activo === true;
-      h += '<tr><td data-l="Elegir"><input type="checkbox" data-sel="' + esc(c.id) + '" style="width:auto;min-height:0"' + (S.sel[c.id] ? ' checked' : '') + '></td>' +
-        '<td data-l="Servicio"><a class="lnk" href="#" data-srv="' + esc(c.tour_id || '') + '">' + esc(s.titulo || String(c.tour_clave).split('#')[1] || '?') + '</a><span class="sub">' + esc(destNombre(s.destino || String(c.tour_clave).split('#')[0])) + (s.precio_publicado == null && !s.activo ? ' · nuevo' : '') + '</span>' + (s.id ? faltaHtml(s) : '') + '</td>' +
-        '<td data-l="Qué cambia">' + difsHtml(c) + (c.nota ? '<span class="sub"><i>' + esc(c.nota) + '</i></span>' : '') +
-          (!('link_web' in c.despues) && verProv(s.link_web) ? '<span class="sub">' + verProv(s.link_web) + '</span>' : '') + '</td>' +
-        '<td class="num" data-l="Publicado hoy">' + (c.publicado_antes != null ? pub(c.publicado_antes) + '<span class="sub">' + usd(c.publicado_antes) + '</span>' : '—') + '</td>' +
-        '<td class="num" data-l="Quedaría">' + (noSe ? '<span class="deuda">no se puede calcular</span>' : (c.publicado_despues != null ? '<b' + (fuerte ? ' class="deuda"' : '') + '>' + pub(c.publicado_despues) + '</b><span class="sub">' + usd(c.publicado_despues) + ' · ' + esc(p) + '</span>' : '—')) +
-          (sinUnidad ? '<span class="sub deuda">Falta confirmar si es por persona o por vehículo: abrilo y publicalo desde ahí</span>' : '') + '</td>' +
-        '<td data-l="Origen">' + esc(ORIGENES[c.origen] || c.origen) + '<span class="sub">' + esc(fechaHora(c.creado_at)) + (c.creado_por ? ' · ' + esc(c.creado_por) : '') + '</span></td>' +
-        '<td data-l=""><button class="btn btn--sm" data-pub-uno="' + esc(c.id) + '">Publicar</button></td></tr>';
+      var nuevo = s.precio_publicado == null && !s.activo;
+      var precio = noSe ? '<span class="deuda">No se puede calcular el precio</span>'
+        : (c.publicado_despues != null ? (c.publicado_antes != null ? '<span class="sub">Hoy ' + pub(c.publicado_antes) + ' →</span>' : '<span class="sub">' + (nuevo ? 'Precio en la web' : 'Quedaría') + '</span>') +
+          '<b' + (fuerte ? ' class="deuda"' : '') + '>' + pub(c.publicado_despues) + '</b><span class="sub">' + usd(c.publicado_despues) + (c.publicado_antes != null ? ' · ' + esc(p) : '') + '</span>' : '<span class="sub">El precio no cambia</span>');
+      h += '<article class="pub' + (S.sel[c.id] ? ' pub--sel' : '') + '"><div class="pub__cab">' +
+        '<input type="checkbox" data-sel="' + esc(c.id) + '" aria-label="Elegir"' + (S.sel[c.id] ? ' checked' : '') + '>' +
+        '<div class="pub__srv"><a class="lnk" href="#" data-srv="' + esc(c.tour_id || '') + '">' + esc(s.titulo || String(c.tour_clave).split('#')[1] || '?') + '</a>' +
+          '<span class="sub">' + esc(destNombre(s.destino || String(c.tour_clave).split('#')[0])) + (nuevo ? ' · <span class="tag">nuevo</span>' : '') + ' · ' + esc(ORIGENES[c.origen] || c.origen) + ', ' + esc(fechaHora(c.creado_at)) + (c.creado_por ? ' · ' + esc(c.creado_por) : '') + '</span>' + (s.id ? faltaHtml(s) : '') + '</div>' +
+        '<div class="pub__precio num">' + precio + '</div>' +
+        '<div class="pub__acc"><button class="btn btn--sm btn--txt-danger" data-desc-uno="' + esc(c.id) + '">Descartar</button><button class="btn btn--sm btn--main" data-pub-uno="' + esc(c.id) + '">Publicar</button></div></div>' +
+        (sinUnidad ? '<p class="aviso" style="margin:0">Falta confirmar si es por persona o por vehículo: abrilo y publicalo desde ahí.</p>' : '') +
+        '<div class="pub__difs">' + difsHtml(c) + '</div>' +
+        (c.nota ? '<p class="sub"><i>' + esc(c.nota) + '</i></p>' : '') +
+        (!('link_web' in c.despues) && verProv(s.link_web) ? '<p class="sub">' + verProv(s.link_web) + '</p>' : '') + '</article>';
     });
-    return h + '</tbody></table></div>';
+    return h + '</div>';
   }
 
   /* El editor arranca desde lo publicado mas el cambio pendiente, si hay: se sigue editando ese mismo cambio. */
