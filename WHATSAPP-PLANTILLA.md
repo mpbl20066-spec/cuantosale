@@ -182,3 +182,14 @@ Referencia: {{3}}
 Si tenés alguna consulta, respondé este mensaje.
 ```
 Ejemplos: `Juan` · `São Paulo` · `CS-MV7HTN3-B05A2C`
+
+**`servicio_cancelado`**, Español (Utilidad). Al guardar un servicio del pedido en estado Cancelado (con el pedido en pie) y aceptar el aviso:
+
+```
+Hola {{1}}, te confirmamos que se canceló de tu reserva en {{2}}: {{3}}.
+Nuevo total: {{4}}
+Referencia: {{5}}
+
+Si tenés alguna consulta, respondé este mensaje.
+```
+Ejemplos: `Juan` · `São Paulo` · `City Tour Histórico, Paulista y Liberdade` · `US$ 82,35` · `CS-MV7HTN3-B05A2C`

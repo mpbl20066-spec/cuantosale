@@ -593,7 +593,7 @@
   }
   /* Los botones de WhatsApp de la ficha salen por la Cloud API (lib/wa-panel.js): con la ventana de 24 h abierta va el
      texto de siempre; si no, la plantilla, con estos datos en una linea cada uno. */
-  var WA_QUE = { confirmacion: 'la confirmación', sena: 'el pedido de seña', sena_recibida: 'la confirmación de la seña', saldo: 'el pedido del saldo', saldo_recibido: 'la confirmación del pago total', cancelado: 'el aviso de cancelación', saludo: 'un saludo por su pedido', proveedor: 'el pedido de reserva' };
+  var WA_QUE = { confirmacion: 'la confirmación', sena: 'el pedido de seña', sena_recibida: 'la confirmación de la seña', saldo: 'el pedido del saldo', saldo_recibido: 'la confirmación del pago total', cancelado: 'el aviso de cancelación', servicio_cancelado: 'el aviso del servicio cancelado', saludo: 'un saludo por su pedido', proveedor: 'el pedido de reserva' };
   function datosWa(tipo, p, i, extra) {
     var nombre = String(p.cliente_nombre || '').trim().split(' ')[0] || 'viajero';
     var fechas = p.fechas_txt || (p.fecha_ida ? fecha(p.fecha_ida) + (p.fecha_vuelta ? ' al ' + fecha(p.fecha_vuelta) : '') : '');
@@ -602,6 +602,11 @@
     if (tipo === 'confirmacion') return { texto: mensajeConfirmacion(p), params: [nombre, [p.destino, fechas, personas].filter(Boolean).join(' · '), items.map(function (x) { return x.nombre + (x.detalle ? ' (' + x.detalle + ')' : ''); }).join('; '), usd(calc(p).total), p.ref] };
     if (tipo === 'sena') { var cs = calc(p); return { texto: mensajeSena(p), params: [nombre, p.destino || 'Brasil', plata(cs.senaPend, S.senaMoneda), formasLinea(cs.senaPend, S.senaMoneda), p.ref] }; }
     if (tipo === 'saldo') { var cl = calc(p); return { texto: mensajeSaldo(p), params: [nombre, p.destino || 'Brasil', plata(cl.saldo, S.senaMoneda), formasLinea(cl.saldo, S.senaMoneda), p.ref] }; }
+    if (tipo === 'servicio_cancelado') {
+      var ds = p.destino || 'Brasil', z = extra || {};
+      return { texto: 'Hola ' + nombre + '. Te confirmamos que se canceló de tu reserva en ' + ds + ': *' + z.servicios + '*.\nNuevo total: *' + z.total + '*\nRef: ' + p.ref + '\n\nSi tenés alguna consulta, escribinos por acá.',
+        params: [nombre, ds, z.servicios, z.total, p.ref] };
+    }
     if (tipo === 'cancelado') {
       var dc = p.destino || 'Brasil';
       return { texto: 'Hola ' + nombre + '. Te confirmamos que tu reserva en ' + dc + ' fue cancelada.\nRef: ' + p.ref + '\n\nSi tenés alguna consulta, escribinos por acá.', params: [nombre, dc, p.ref] };
@@ -1781,6 +1786,10 @@
     var llamada = p.id ? api('pedido/actualizar', { id: p.id, cambios: cuerpo }) : api('pedido/crear', cuerpo);
     var antes = p.id && (S.datos.pedidos || []).filter(function (x) { return x.id === p.id; })[0];
     var recienCancelado = antes && antes.estado !== 'cancelado' && p.estado === 'cancelado';
+    /* Servicios que pasan a Cancelado con el pedido sigue en pie: se ofrece avisarle cuales (servicio_cancelado). */
+    var estabaCanc = {};
+    ((antes && antes.items) || []).forEach(function (x) { if (x.id) estabaCanc[x.id] = x.estado === 'cancelado'; });
+    var serviciosCancelados = antes && p.estado !== 'cancelado' ? (p.items || []).filter(function (x) { return x.id && x.estado === 'cancelado' && estabaCanc[x.id] === false; }).map(function (x) { return x.nombre + (x.detalle ? ' (' + x.detalle + ')' : ''); }) : [];
     mensaje('Guardando…');
     return llamada.then(function (r) {
       S.draft = JSON.parse(JSON.stringify(r.pedido)); S.dirty = false;
@@ -1788,6 +1797,11 @@
     }).then(function () {
       /* Paso a Cancelado: se ofrece avisarle al cliente (pedido_cancelado). */
       var yaPregunto = S.avisarCancelacion; S.avisarCancelacion = false;
+      if (serviciosCancelados.length && !S.dirty && S.draft && S.draft.cliente_telefono) {
+        if (confirm('Cancelaste ' + serviciosCancelados.join(', ') + '. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp?'))
+          enviarWa('servicio_cancelado', S.draft.id, undefined, { servicios: serviciosCancelados.join('; '), total: usd(calc(S.draft).total) });
+        return;
+      }
       if (!recienCancelado || S.dirty || !S.draft || !S.draft.cliente_telefono) return;
       if (yaPregunto || confirm('Pedido cancelado. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp que se canceló?')) enviarWa('cancelado', S.draft.id, undefined, {});
     }).catch(function (e) { mensaje(e.message, true); });
