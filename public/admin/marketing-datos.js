@@ -92,7 +92,7 @@ window.CS_MKT = {
     "- **Anuncios: US$ 50 como máximo** para todo el mes (ver Estrategia > Anuncios).",
     "- **Margen:** el que asignás en Catálogo. La comisión a creadores y alianzas sale de ahí: hasta la mitad del margen de cada servicio.",
     "- **Nadie de la marca figura con nombre.** Todo se firma \"Cuánto Sale\"; la confianza sale del proceso claro, el número oficial y clientes reales.",
-    "- **Los reels ya están en TikTok:** ahí solo se fijan y se cambia la bio.",
+    "- **Los 3 fijados se publican el día 1** en Instagram y TikTok (todavía no están en ninguna).",
     "- Pendiente: ¿los 44 destinos van a estar en la web? Mientras tanto se comunica 40."
    ]
   },
@@ -289,104 +289,146 @@ window.CS_MKT = {
  ],
  "fijados": {
   "intro": [
-   "> Evaluación de los que ya tenés: están bien hechos (grabaciones reales, portadas distintas, orden 3 → 2 → 1). Dos cambios:",
-   "- **\"¿Qué es Cuánto Sale?\"** lista 8 funciones en el texto. Para alguien que entra por primera vez, una promesa y tres pruebas.",
-   "- **\"Viajá más barato\"** es sobre vuelos y nafta: no dice que le resolvés lo de allá. Lo reemplazaría por **\"¿Por qué es distinto?\"**, que muestra traslado y paseos (la plata).",
-   "- Si ya los publicaste, no los borres: subí el nuevo 3 y fijalo en lugar de \"Viajá más barato\".",
-   "- **Voz:** sin cámara y sin tu voz. Texto en pantalla grande (se mira sin sonido) + voz sintética opcional (ya tenés las de Mateo y Valentina) + subtítulos automáticos de Instagram/TikTok."
+   "> Los 3 están listos para publicar (14/10/2026). Orden: 3 → 2 → 1, así \"¿Qué es Cuánto Sale?\" queda primero en el perfil.",
+   "- **1 · ¿Qué es Cuánto Sale?** Rehecho el 14/10: una promesa y tres pruebas, y termina en \"lo de allá lo reservás acá\" (traslados y paseos). La versión vieja quedó en la carpeta _anterior.",
+   "- **2 · ¿Cómo funciona?** Queda como estaba.",
+   "- **3 · Viajá más barato.** Queda como estaba por ahora. Más adelante se puede cambiar por \"¿Por qué es distinto?\" (guion abajo), que necesita una grabación nueva de Maragogi.",
+   "- **Voz:** sin cámara y sin tu voz. El texto en pantalla ya está en los videos; la voz sintética es opcional."
   ],
   "reels": [
    {
     "n": 1,
     "t": "¿Qué es Cuánto Sale?",
-    "dur": "15–18 s",
-    "estado": "Rehacer el texto (las tomas del 12/10 sirven)",
-    "carpeta": "reel-00-que-es-cuantosale",
+    "dur": "15 s",
+    "estado": "Listo (rehecho el 14/10/2026)",
+    "carpeta": "reel-00-que-es-cuantosale → reel-que-es-cuantosale.mp4",
     "escenas": [
      [
-      "0–2 s",
-      "Foto de playa del Nordeste + celular con la home",
+      "0–2,5 s",
+      "Home de la app con \"Tengo un presupuesto\"",
       "¿Cuánto sale DE VERDAD tu viaje a Brasil?"
      ],
      [
-      "2–6 s",
-      "Grabación: el presupuesto desglosado (vuelo, alojamiento, traslado, comidas, paseos)",
-      "No el vuelo. TODO sumado."
+      "2,5–5,5 s",
+      "US$ 900 por persona → \"Con tu plata llegás a 32 destinos\" (sello: 32)",
+      "Decinos cuánto tenés y te decimos a dónde llegás"
      ],
      [
-      "6–11 s",
-      "Grabación: \"Tengo un presupuesto\" → mapa de destinos",
-      "Decinos cuánto tenés → te decimos a dónde llegás"
+      "5,5–9 s",
+      "Resumen del viaje a Camboriú: vuelo, traslado, alojamiento, comidas",
+      "No el vuelo: todo sumado"
      ],
      [
-      "11–15 s",
-      "Grabación: tarjetas de traslado y paseos",
-      "Y lo de allá lo reservás con nosotros: traslado y paseos"
+      "9–12,5 s",
+      "\"Los tours y traslados se gestionan desde Cuánto Sale\"",
+      "Y lo de allá lo reservás acá"
      ],
      [
-      "15–18 s",
-      "Logo sobre fondo oscuro",
-      "Gratis · cuantosale.uy"
+      "12,5–15 s",
+      "Cierre sobre la foto de Camboriú",
+      "Primero la plata, después el viaje · cuantosale.uy · Gratis"
      ]
     ],
-    "voz": "¿Cuánto sale de verdad tu viaje a Brasil? No el vuelo: todo. Decinos cuánto tenés y te decimos a dónde llegás. Y lo de allá, el traslado y los paseos, lo reservás con nosotros. Gratis, en cuantosale punto uy.",
-    "copy": "¿Qué es Cuánto Sale? 💛\n\nTe decimos cuánto sale de verdad tu viaje a Brasil, antes de salir de Montevideo: vuelo, alojamiento, comidas, traslado y paseos, todo sumado.\n\n💰 ¿Tenés un presupuesto? Te decimos a dónde llegás\n📍 ¿Ya sabés a dónde vas? Te decimos cuánto sale\n🚐 Y lo de allá (traslado y paseos) lo reservás con nosotros\n\nPrimero la plata, después el viaje.\nProbalo gratis en cuantosale.uy (link en la bio).\n\n#viajarabrasil #brasil #uruguay #presupuestodeviaje #vacaciones2027 #cuantosale",
-    "cta": "Probalo gratis en cuantosale.uy (link en la bio)"
+    "voz": "¿Cuánto sale de verdad tu viaje a Brasil? Decinos cuánto tenés y te decimos a dónde llegás. No el vuelo: todo sumado. Y lo de allá, el traslado y los paseos, lo reservás con nosotros. Gratis, en cuantosale punto uy.",
+    "cta": "Probalo gratis en cuantosale.uy (link en la bio)",
+    "copy": "¿Qué es Cuánto Sale? 💛\n\nTe decimos cuánto sale de verdad tu viaje a Brasil, antes de salir de Montevideo: vuelo, alojamiento, comidas, traslado y paseos, todo sumado.\n\n💰 ¿Tenés un presupuesto? Te decimos a dónde llegás\n📍 ¿Ya sabés a dónde vas? Te decimos cuánto sale\n🚐 Y lo de allá (traslado y paseos) lo reservás con nosotros, con una seña recién cuando confirmamos\n\nPrimero la plata, después el viaje.\nProbalo gratis en cuantosale.uy (link en la bio).\n\nEjemplo del video: Balneário Camboriú, de a 2, 7 noches (9 al 16 de febrero). Grabado en la app el 13/10/2026. Los precios cambian con las fechas y el día.\nFondo: foto de Alex Caceres (Unsplash).\n\n#viajarabrasil #brasil #uruguay #presupuestodeviaje #vacaciones2027 #cuantosale"
    },
    {
     "n": 2,
     "t": "¿Cómo funciona?",
-    "dur": "25–30 s",
-    "estado": "Sirve como está; sumar el cierre de reserva",
-    "carpeta": "reel-00b-como-funciona",
+    "dur": "26 s",
+    "estado": "Listo (como estaba)",
+    "carpeta": "reel-00b-como-funciona → reel-como-funciona.mp4",
     "escenas": [
      [
-      "0–2 s",
-      "Celular con la home, foto de Camboriú",
-      "¿Cómo funciona? En 30 segundos 👇"
+      "Paso 1",
+      "Elegir destino y fechas",
+      "1. Elegís a dónde"
      ],
      [
-      "2–7 s",
-      "Grabación: elegir destino y fechas",
-      "1 · Elegís a dónde y cuándo"
+      "Paso 2",
+      "Vuelo (US$ 713 los 2)",
+      "2. El vuelo"
      ],
      [
-      "7–12 s",
-      "Grabación: vuelo y calendario de precios",
-      "2 · Ves el vuelo y qué día sale menos"
+      "Paso 3",
+      "Traslado (US$ 55 compartido, los 2)",
+      "3. El traslado"
      ],
      [
-      "12–17 s",
-      "Grabación: traslado del aeropuerto",
-      "3 · El traslado del aeropuerto, ya sumado"
+      "Paso 4",
+      "Alojamiento (US$ 449, 7 noches)",
+      "4. Dónde dormir"
      ],
      [
-      "17–22 s",
-      "Grabación: alojamiento y paseos",
-      "4 · Dónde dormir y los paseos que quieras"
+      "Paso 5",
+      "Paseos",
+      "5. Los paseos"
      ],
      [
-      "22–27 s",
-      "Grabación: total desglosado",
-      "Tu viaje entero, en un número"
+      "Final",
+      "Total US$ 826 por persona y estado del viaje",
+      "Listo: tu viaje entero · Y lo organizás"
      ],
      [
-      "27–30 s",
-      "Texto sobre fondo oscuro",
-      "Traslado y paseos: los reservás con seña. Nada se cobra en la web."
+      "Cierre",
+      "Foto de Camboriú",
+      "¿Cuánto sale el tuyo? · cuantosale.uy"
      ]
     ],
-    "voz": "Así funciona. Elegís a dónde y cuándo. Ves el vuelo y qué día sale menos. El traslado del aeropuerto ya viene sumado. Elegís dónde dormir y los paseos que quieras. Y listo: tu viaje entero en un número.",
+    "voz": "Así funciona. Elegís a dónde y cuándo. Ves el vuelo. El traslado del aeropuerto ya viene sumado. Elegís dónde dormir y los paseos que quieras. Y listo: tu viaje entero en un número.",
     "cta": "¿Cuánto sale el tuyo? cuantosale.uy (link en la bio)",
     "copy": "¿Cómo funciona Cuánto Sale? Te lo mostramos en 30 segundos 👇\n\n1️⃣ Elegís a dónde (o nos decís cuánto tenés)\n2️⃣ El vuelo: precio real de Google Flights\n3️⃣ El traslado del aeropuerto a tu alojamiento\n4️⃣ Dónde dormir: opciones de Booking\n5️⃣ Los paseos: sumás solo los que quieras\n\nListo: tu viaje entero, desglosado. Y después seguís qué reservaste y qué te falta.\n\nEjemplo: Balneário Camboriú de a 2, 7 noches (9 al 16 de febrero), saliendo de Montevideo:\nvuelo US$ 713 · traslado compartido US$ 55 · hotel US$ 449 · comidas y transporte local US$ 434\n= US$ 826 por persona (US$ 1.652 los 2).\nGrabado en la app el 13/10/2026. Los precios cambian con las fechas y el día.\n\n¿Cuánto sale el tuyo? Probalo en cuantosale.uy (link en la bio).\n\n#viajarabrasil #camboriu #brasil #uruguay #presupuestodeviaje #vacaciones2027 #cuantosale"
    },
    {
     "n": 3,
-    "t": "¿Por qué es distinto?",
+    "t": "Viajá más barato",
+    "dur": "17 s",
+    "estado": "Listo (como estaba)",
+    "carpeta": "reel-00c-viaja-mas-barato → reel-viaja-mas-barato.mp4",
+    "escenas": [
+     [
+      "Inicio",
+      "\"Dónde podés ahorrar\"",
+      "Viajá más barato · 4 formas de pagar menos"
+     ],
+     [
+      "1",
+      "Salir el 31/12 en vez del 3/1 (-US$ 224)",
+      "1. Salí otro día"
+     ],
+     [
+      "2",
+      "Clima y precios mes a mes",
+      "2. Elegí temporada baja"
+     ],
+     [
+      "3",
+      "Alerta de precio",
+      "3. Te avisamos si baja el vuelo"
+     ],
+     [
+      "4",
+      "Ruta en auto (US$ 302 los 2)",
+      "4. ¿Y si vas en auto?"
+     ],
+     [
+      "Cierre",
+      "Foto de Arraial do Cabo",
+      "El mismo viaje, más barato · cuantosale.uy"
+     ]
+    ],
+    "voz": "Cuatro formas de pagar menos por el mismo viaje: salí otro día, elegí temporada baja, dejá que te avisemos si baja el vuelo, o calculá cuánto sale ir en auto.",
+    "cta": "Guardalo para cuando armes tu viaje",
+    "copy": "El mismo viaje, más barato 💛 4 formas de pagar menos:\n\n1️⃣ Salí otro día: la app compara los días de al lado. Camboriú de a 2, saliendo el 31/12 en vez del 3/1: US$ 224 menos, mismas noches\n2️⃣ Elegí temporada baja: en la guía de cada destino ves precios y clima mes por mes\n3️⃣ Te avisamos si baja el vuelo: lo revisamos todos los días y te llega un email\n4️⃣ ¿Y si vas en auto? Te calcula nafta y peajes: Montevideo - Camboriú ida y vuelta, US$ 302 los 2 (2.620 km)\n\nSaliendo de Montevideo. Grabado en la app el 13/10/2026. Los precios cambian con las fechas y el día.\n\nGuardalo para cuando armes tu viaje 📌\ncuantosale.uy (link en la bio)\n\n#viajarabrasil #camboriu #brasil #uruguay #viajarbarato #vacaciones2027 #cuantosale"
+   },
+   {
+    "n": 4,
+    "t": "Para más adelante: ¿Por qué es distinto?",
     "dur": "18–22 s",
-    "estado": "NUEVO · hay que grabar",
+    "estado": "Opcional · hay que grabar",
     "carpeta": "(nueva) reel-00d-por-que-distinto",
-    "grabar": "Grabá en el celular, sin tu cuenta a la vista: (1) un destino del Nordeste, por ejemplo Maragogi, en \"Ya sé a dónde voy\" hasta el total; (2) el paso de traslado mostrando compartido y privado; (3) el paso de paseos agregando uno (las piscinas de Galés); (4) la pantalla \"Reservá tu viaje\" sin completar datos personales. Esquivá cualquier cuadro con nombre o email.",
+    "grabar": "Grabá en el celular, sin tu cuenta a la vista: (1) Maragogi en \"Ya sé a dónde voy\" hasta el total; (2) el paso de traslado mostrando compartido y privado; (3) el paso de paseos agregando las piscinas de Galés; (4) la pantalla \"Reservá tu viaje\" sin completar datos personales. Esquivá cualquier cuadro con nombre o email.",
     "escenas": [
      [
       "0–3 s",
@@ -432,7 +474,7 @@ window.CS_MKT = {
    "tema": "Presentación del perfil: los 3 fijados",
    "ig": {
     "tipo": "Reels fijados",
-    "pieza": "Publicar los 3 fijados: 3 → 2 → 1 (o el nuevo \"¿Por qué es distinto?\" cuando esté) y fijarlos",
+    "pieza": "Publicar los 3 fijados: 3 → 2 → 1 y fijarlos",
     "carpeta": "reel-00c-viaja-mas-barato · reel-00b-como-funciona · reel-00-que-es-cuantosale",
     "gancho": "¿Qué es Cuánto Sale?",
     "guion": [
@@ -440,12 +482,12 @@ window.CS_MKT = {
      "Se publican 3 → 2 → 1 con 10 minutos entre cada uno y se fijan los tres."
     ],
     "cta": "Probalo en cuantosale.uy (link en la bio)",
-    "copy": "¿Qué es Cuánto Sale? 💛\n\nTe decimos cuánto sale tu viaje, antes de viajar.\n\n💰 Decinos cuánto tenés y te mostramos a dónde llegás\n📍 ¿Ya sabés a dónde vas? Buscás por destino\n📅 Ves qué fecha sale más barata\n✈️ El viaje entero: vuelo, alojamiento, traslados, comidas y paseos\n🐷 Cuánto juntar por mes para llegar a tu viaje\n👥 Gastos en grupo: quién le paga a quién, sin hacer cuentas\n📖 La guía de cada destino: playas, clima y precios mes a mes\n💱 Conversor de monedas con la cotización del día\n\nPrimero la plata, después el viaje.\nProbalo en cuantosale.uy (link en la bio).\n\nGrabado en la app el 12/10/2026. Los precios cambian con las fechas y el día.\n\n#viajarabrasil #brasil #uruguay #presupuestodeviaje #vacaciones2027 #cuantosale"
+    "copy": "¿Qué es Cuánto Sale? 💛\n\nTe decimos cuánto sale de verdad tu viaje a Brasil, antes de salir de Montevideo: vuelo, alojamiento, comidas, traslado y paseos, todo sumado.\n\n💰 ¿Tenés un presupuesto? Te decimos a dónde llegás\n📍 ¿Ya sabés a dónde vas? Te decimos cuánto sale\n🚐 Y lo de allá (traslado y paseos) lo reservás con nosotros, con una seña recién cuando confirmamos\n\nPrimero la plata, después el viaje.\nProbalo gratis en cuantosale.uy (link en la bio).\n\nEjemplo del video: Balneário Camboriú, de a 2, 7 noches (9 al 16 de febrero). Grabado en la app el 13/10/2026. Los precios cambian con las fechas y el día.\nFondo: foto de Alex Caceres (Unsplash).\n\n#viajarabrasil #brasil #uruguay #presupuestodeviaje #vacaciones2027 #cuantosale"
    },
    "tt": {
-    "tipo": "Ya están subidos",
-    "pieza": "Fijá los 3 reels (en el video: \"...\" > Fijar) y cambiá la bio y el link (Perfil y mensajes)",
-    "cambio": "Si subís el nuevo \"¿Por qué es distinto?\", fijalo en lugar de \"Viajá más barato\"."
+    "tipo": "Reels fijados (los mismos videos)",
+    "pieza": "Subí los 3 (3 → 2 → 1) y fijalos (en el video: \"...\" > Fijar). Cambiá la bio y el link (Perfil y mensajes)",
+    "cambio": "En TikTok el texto corto: primer renglón + \"Link en el perfil\"."
    },
    "hist": [
     "Historia 1: compartí \"¿Cómo funciona?\" con sticker de enlace a cuantosale.uy/?utm_source=ig_historia y el texto \"En 30 segundos 👇\".",
