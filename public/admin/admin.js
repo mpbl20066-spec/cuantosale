@@ -464,7 +464,7 @@
   function cargarMkt() {
     S.mkt = { cargando: true };
     var datos = window.CS_MKT ? Promise.resolve() : new Promise(function (ok, mal) {
-      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=7'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
+      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=8'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
       document.head.appendChild(s);
     });
     Promise.all([datos, api('marketing'), api('uso?dias=90').catch(function () { return null; })]).then(function (r) {

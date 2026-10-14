@@ -1421,6 +1421,14 @@ window.CS_MKT = {
    "- El Observador: teléfono 2418 9086, pedí por Café y Negocios",
    "- Montevideo Portal y El País: no muestran un contacto de redacción. Por el periodista que firma las notas de viajes.",
    "- **Radios:** los programas de la mañana. Buscá el Instagram del programa y escribile a la producción con el mismo mensaje.",
+   "## El dato para el primer envío",
+   "> Precios de cuantosale.uy al 14/10/2026, por persona. Antes de mandarlo, revisalos en Catálogo: si cambiaron, actualizá los números.",
+   "- **La idea:** \"El vuelo no es el viaje\". Lo que casi nadie suma antes de salir de Montevideo es el traslado del aeropuerto y el paseo por el que fue al destino.",
+   "- **Búzios** (se llega por el aeropuerto de Río, a 174 km): traslado compartido ida y vuelta US$ 61,54 + paseo en barco US$ 24,45 = **US$ 85,99 por persona**.",
+   "- **Porto de Galinhas** (aeropuerto de Recife, a 53 km): traslado compartido ida y vuelta US$ 17,30 + jangada a las piscinas naturales US$ 19 + Praia dos Carneiros con catamarán US$ 42,34 = **US$ 78,64 por persona**.",
+   "- **Maragogi** (aeropuerto de Maceió, a 129 km): traslado compartido ida y vuelta US$ 35,38 + piscinas naturales de Galés US$ 35,34 = **US$ 70,72 por persona**.",
+   "- **Un dato que sorprende:** en Río, para dos personas, el traslado privado (US$ 21,15 el auto, por tramo) sale más barato que el compartido (US$ 30 por persona).",
+   "- **Cómo usarlo:** en el mensaje, uno o dos destinos alcanzan. Si el periodista responde, le pasás la tabla completa.",
    "- **Seguimiento:** una sola vez, a la semana. Si no responden, probá con otro periodista del mismo medio.",
    "- **Ojo con el nombre:** casi siempre piden a alguien para entrevistar. Ofrecé responder por escrito como \"el equipo de Cuánto Sale\"; si piden una persona, decidilo antes de contestar.",
    "## Alianzas con negocios",
@@ -1462,6 +1470,10 @@ window.CS_MKT = {
   {
    "t": "Mensaje Prensa · periodista o programa",
    "copy": "Hola [nombre], ¿cómo estás? Te escribimos de Cuánto Sale (cuantosale.uy), una app uruguaya y gratis que calcula cuánto sale de verdad un viaje a Brasil saliendo de Montevideo: vuelo, alojamiento, comidas, traslado del aeropuerto y paseos, todo en dólares.\n\nVimos tu nota sobre [tema]. Para este verano tenemos un dato que te puede servir: [dato, con precio consultado esta semana]. Te pasamos los números por escrito, por destino.\n\n¿Te interesa? ¡Gracias!"
+  },
+  {
+   "t": "Mensaje Prensa · con el dato listo",
+   "copy": "Hola [nombre], ¿cómo estás? Te escribimos de Cuánto Sale (cuantosale.uy), una app uruguaya y gratis que calcula cuánto sale de verdad un viaje a Brasil saliendo de Montevideo, todo sumado y en dólares.\n\nVimos tu nota sobre [tema]. Un dato para este verano: el pasaje no es el viaje. Para ir a Búzios se llega por el aeropuerto de Río, a 174 km; solo el traslado compartido de ida y vuelta y un paseo en barco suman unos US$ 86 por persona, y casi nadie lo calcula antes de salir. En Porto de Galinhas, traslado y dos paseos son unos US$ 79.\n\nTenemos los números de otros destinos de Brasil, con precios consultados esta semana. ¿Te los pasamos? ¡Gracias!"
   },
   {
    "t": "Pedido de reseña (cliente que volvió)",
