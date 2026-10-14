@@ -464,7 +464,7 @@
   function cargarMkt() {
     S.mkt = { cargando: true };
     var datos = window.CS_MKT ? Promise.resolve() : new Promise(function (ok, mal) {
-      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=11'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
+      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=12'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
       document.head.appendChild(s);
     });
     Promise.all([datos, api('marketing'), api('uso?dias=90').catch(function () { return null; })]).then(function (r) {
@@ -666,6 +666,23 @@
   }
   /* Le escribiste hace una semana o mas y no respondio: toca el seguimiento (una sola vez). */
   function tocaSeguimiento(c) { return c.estado === 'escrito' && c.fecha && difDias(c.fecha, hoyUY()) >= 7; }
+  /* El mensaje de la tarjeta, con las plantillas del plan (CS_MKT.plantillasContacto). A una persona se la tutea; a
+     una redaccion, un formulario o una produccion se le habla de ustedes. Ya escrito: el seguimiento. */
+  function mensajeContacto(c) {
+    var P = (window.CS_MKT.plantillasContacto || {})[c.tipo];
+    if (!P) return null;
+    var seguir = c.estado === 'escrito';
+    var persona = String(c.persona || '').trim();
+    var esPersona = c.tipo === 'creador' || (c.tipo === 'prensa' && persona && !/formulario|secci|buscal|producci|redacci|programa|contacto/i.test(persona));
+    var nombre = esPersona && persona && !/buscal/i.test(persona) ? persona.split(/\s+/)[0] : '';
+    var tema = String(c.tema || '').trim();
+    var r = esPersona ? { Te: 'Te', te: 'te', tu: 'tu', vos: 'vos' } : { Te: 'Les', te: 'les', tu: 'su', vos: 'ustedes' };
+    r.saludo = esPersona ? (nombre ? 'Hola ' + nombre + ', ¿cómo estás?' : '¡Hola! ¿Cómo estás?') : 'Hola, ¿cómo están?';
+    r.tema = tema;
+    var poner = function (t) { return String(t || '').replace(/\{(\w+)\}/g, function (m, k) { return r[k] != null ? r[k] : m; }); };
+    r.vimos = poner(tema ? P.vimos : P.vimosSin);
+    return { texto: poner(seguir ? P.seguimiento : P.primero), etapa: seguir ? 'Mensaje de seguimiento' : 'Primer mensaje' };
+  }
   function vistaMktContactos() {
     var todos = contactosMkt(), tipo = S.mktCtTipo || 'todos';
     var l = todos.filter(function (c) { return tipo === 'todos' || c.tipo === tipo; });
@@ -695,8 +712,14 @@
         '<label class="f">Número, @usuario, mail o link<input' + a('dato') + ' value="' + esc(c.dato || '') + '" placeholder="099 123 456 · @usuario · mail · https://…"></label>' +
         '<label class="f">Estado<select' + a('estado') + '>' + opts(ESTADOS_CT, c.estado) + '</select></label>' +
         '<label class="f">Último contacto<input type="date"' + a('fecha') + ' value="' + esc(c.fecha || '') + '"></label>' +
-        '</div><label class="f" style="margin-top:8px">Notas<textarea rows="2"' + a('nota') + ' placeholder="Qué le mandaste, qué respondió, cuándo volver a escribir…">' + esc(c.nota || '') + '</textarea></label>' +
-        '<div class="mkt-ct__acc">' + (url ? '<a class="btn btn--sm" href="' + esc(url) + '" target="_blank" rel="noopener">Abrir ' + esc(CANALES_CT[c.canal] || 'link') + '</a>' : '') +
+        '<label class="f">Qué nota o publicación viste (opcional)<input' + a('tema') + ' value="' + esc(c.tema || '') + '" placeholder="Ej.: los precios del verano en Brasil"></label>' +
+        '</div><label class="f" style="margin-top:8px">Notas<textarea rows="2"' + a('nota') + ' placeholder="Qué le mandaste, qué respondió, cuándo volver a escribir…">' + esc(c.nota || '') + '</textarea></label>';
+      var msj = c.estado === 'pendiente' || c.estado === 'escrito' ? mensajeContacto(c) : null;   // el seguimiento se manda una sola vez
+      if (msj) h += copiable(msj.texto, msj.etapa + (c.canal === 'instagram' ? ' · copialo y pegalo en Instagram' : c.canal === 'form' ? ' · copialo y pegalo en el formulario' : ''));
+      /* WhatsApp con el mensaje ya escrito: wa.me acepta el texto; Instagram no, por eso ahi es copiar y pegar. */
+      var waTxt = msj && c.canal === 'whatsapp' && url ? url + '?text=' + encodeURIComponent(msj.texto) : '';
+      h += '<div class="mkt-ct__acc">' + (waTxt ? '<a class="btn btn--sm btn--wa" href="' + esc(waTxt) + '" target="_blank" rel="noopener">Mandar por WhatsApp</a>' : '') +
+        (url ? '<a class="btn btn--sm" href="' + esc(url) + '" target="_blank" rel="noopener">Abrir ' + esc(CANALES_CT[c.canal] || 'link') + '</a>' : '') +
         '<button class="btn btn--sm" data-mkt-ct-quitar="' + esc(c.id) + '">Quitar</button></div></section>';
     });
     return h + '</div>';
@@ -2532,8 +2555,9 @@
       if (campo === 'estado' && (t.value === 'escrito' || t.value === 'seguimiento')) cc.fecha = hoyUY();
       guardarMkt({ contacto: { id: t.getAttribute('data-mkt-ct'), campos: cc } }).then(function () {
         toast('Guardado');
-        /* Los textos no repintan: si se pasa con Tab al campo siguiente, repintar le sacaria el foco. */
-        if (t.tagName === 'SELECT' || t.type === 'date') pintar();
+        /* Repinta para que el mensaje tome el cambio, salvo si se paso con Tab a otro campo: le sacaria el foco. */
+        var foco = document.activeElement;
+        if (t.tagName === 'SELECT' || t.type === 'date' || !foco || !/^(INPUT|TEXTAREA|SELECT)$/.test(foco.tagName)) pintar();
       });
     }
   });

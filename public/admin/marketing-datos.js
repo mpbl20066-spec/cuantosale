@@ -1515,6 +1515,26 @@ window.CS_MKT = {
    "dato": "@viajero.conmochila"
   }
  ],
+ "plantillasContacto": {
+  "prensa": {
+   "vimos": "Vimos {tu} nota sobre {tema}. ",
+   "vimosSin": "",
+   "primero": "{saludo} {Te} escribimos de Cuánto Sale (cuantosale.uy), una app uruguaya y gratis que calcula cuánto sale de verdad un viaje a Brasil saliendo de Montevideo, todo sumado y en dólares.\n\n{vimos}Un dato para este verano: el pasaje no es el viaje. Para ir a Búzios se llega por el aeropuerto de Río, a 174 km; solo el traslado compartido de ida y vuelta y un paseo en barco suman unos US$ 86 por persona, y casi nadie lo calcula antes de salir. En Porto de Galinhas, el traslado y dos paseos son unos US$ 79.\n\nTenemos los números de otros destinos de Brasil, con precios consultados esta semana. Si {te} interesa, {te} mandamos la tabla completa. ¡Gracias!",
+   "seguimiento": "{saludo} {Te} escribimos la semana pasada desde Cuánto Sale (cuantosale.uy) por lo que cuesta de verdad viajar a Brasil este verano. Si {te} sirve para alguna nota, {te} pasamos los números por destino, con precios consultados esta semana. Si no es para {vos}, ¡gracias igual!"
+  },
+  "creador": {
+   "vimos": "Vimos lo que publicaste sobre {tema} y nos pareció",
+   "vimosSin": "Nos pareció",
+   "primero": "{saludo} Te escribimos de Cuánto Sale (cuantosale.uy), una app uruguaya y gratis que te dice cuánto sale de verdad un viaje a Brasil saliendo de Montevideo: vuelo, alojamiento, comidas, traslado y paseos.\n\n{vimos} que a tu comunidad le podría servir. ¿Te interesaría una colaboración sin costo para vos? Te armamos tu viaje (o el de tus seguidores) con la app, te damos un link propio y te llevás una comisión por cada traslado o paseo que se reserve con tu código.\n\nSi te interesa, te pasamos los detalles. ¡Gracias!",
+   "seguimiento": "{saludo} Te escribimos la semana pasada desde Cuánto Sale (cuantosale.uy). Si te interesa, te contamos cómo funciona la colaboración y la comisión. Si no es para vos, cero drama. ¡Abrazo!"
+  },
+  "alianza": {
+   "vimos": "",
+   "vimosSin": "",
+   "primero": "{saludo} Les escribimos de Cuánto Sale (cuantosale.uy), una app uruguaya y gratis que ayuda a calcular cuánto sale un viaje a Brasil desde Montevideo.\n\nMuchos de sus clientes viajan a Brasil y pensamos que les podría servir. Les proponemos algo simple y sin costo: una tarjeta con QR para sus clientes o material sobre el viaje, y ustedes reciben una comisión por cada traslado o paseo que se reserve desde su link. Nosotros los mencionamos en nuestras redes.\n\n¿Les podemos contar más en 10 minutos? ¡Gracias!",
+   "seguimiento": "{saludo} Les escribimos la semana pasada desde Cuánto Sale (cuantosale.uy) por una propuesta sin costo para sus clientes que viajan a Brasil. ¿Les podemos contar en 10 minutos? ¡Gracias!"
+  }
+ },
  "mensajes": [
   {
    "t": "Bio de Instagram",
