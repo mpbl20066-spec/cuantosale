@@ -262,9 +262,9 @@
   }
   function vistaProveedores(d) {
     var enPapelera = d.proveedores.filter(function (pr) { return pr.eliminado_at; }).length;
-    var h = '<div class="bar"><div class="chips"><b>' + (S.provPapelera ? 'Papelera de proveedores' : 'Proveedores a los que tercerizás') + '</b></div>' +
-      (enPapelera || S.provPapelera ? '<button class="btn btn--sm" data-act="ver-papelera">' + (S.provPapelera ? 'Volver a los proveedores' : 'Papelera (' + enPapelera + ')') + '</button>' : '') +
-      '<button class="btn btn--main" data-act="nuevo-prov">+ Proveedor</button></div>';
+    var h = '<div class="vhead"><div><h2>' + (S.provPapelera ? 'Papelera de proveedores' : 'Proveedores') + '</h2><p>' + (S.provPapelera ? 'Los que sacaste: no se ofrecen en los pedidos.' : 'Los operadores a los que tercerizás tours y traslados.') + '</p></div><div class="top__acc">' +
+      (enPapelera || S.provPapelera ? '<button class="btn" data-act="ver-papelera">' + (S.provPapelera ? 'Volver a los proveedores' : 'Papelera (' + enPapelera + ')') + '</button>' : '') +
+      '<button class="btn btn--main btn--lg" data-act="nuevo-prov">+ Proveedor</button></div></div>';
     d = Object.assign({}, d, { proveedores: d.proveedores.filter(function (pr) { return S.provPapelera ? pr.eliminado_at : !pr.eliminado_at; }) });
     var enCatalogo = {}; ((S.ops && S.ops.datos && S.ops.datos.servicios) || []).forEach(function (sv) { if (sv.proveedor_id) enCatalogo[sv.proveedor_id] = (enCatalogo[sv.proveedor_id] || 0) + 1; });
     if (!d.proveedores.length && S.provPapelera) return h + '<div class="card"><p class="vacio">La papelera está vacía.</p></div>';
@@ -273,11 +273,19 @@
     d.proveedores.forEach(function (pr) { partesProv(pr).destinos.forEach(function (x) { cuenta[x] = (cuenta[x] || 0) + 1; }); });
     var dests = Object.keys(cuenta).sort(function (a, b) { return a.localeCompare(b, 'es'); });
     if (S.provDest !== 'todos' && !cuenta[S.provDest]) S.provDest = 'todos';
-    h += '<div class="bar"><div class="chips">' + ['todos'].concat(dests).map(function (x) {
-      return '<button class="chip" data-pdest="' + esc(x) + '" aria-pressed="' + (S.provDest === x) + '">' + esc(x === 'todos' ? 'Todos' : x) + '<span>' + (x === 'todos' ? d.proveedores.length : cuenta[x]) + '</span></button>';
-    }).join('') + '</div></div>';
-    var lista = d.proveedores.filter(function (pr) { return S.provDest === 'todos' || partesProv(pr).destinos.indexOf(S.provDest) >= 0; });
-    h += '<div class="card"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Contacto</th><th>Hace</th><th>Datos de pago</th><th>Tarifa neta</th><th class="num">En catálogo</th><th class="num">En pedidos</th><th class="num">Le debemos</th></tr></thead><tbody>';
+    /* Buscador y destino en un desplegable: con 40 destinos, un boton por destino ocupaba cuatro renglones. */
+    var qp = String(S.qProv || '').trim().toLowerCase();
+    var lista = d.proveedores.filter(function (pr) {
+      if (S.provDest !== 'todos' && partesProv(pr).destinos.indexOf(S.provDest) < 0) return false;
+      return !qp || [pr.nombre, pr.contacto, pr.telefono, pr.email, pr.servicios].join(' ').toLowerCase().indexOf(qp) >= 0;
+    });
+    h += '<div class="card"><div class="filtros"><b>' + lista.length + (lista.length === 1 ? ' proveedor' : ' proveedores') + '</b><div class="filtros__der">' +
+      '<input type="search" id="q-prov" placeholder="Buscar proveedor, contacto o teléfono" value="' + esc(S.qProv || '') + '" aria-label="Buscar proveedor">' +
+      '<select class="fsel" data-fsel="provDest" aria-label="Destino">' + ['todos'].concat(dests).map(function (x) {
+        return '<option value="' + esc(x) + '"' + (S.provDest === x ? ' selected' : '') + '>' + esc(x === 'todos' ? 'Destino: todos (' + d.proveedores.length + ')' : x + ' (' + cuenta[x] + ')') + '</option>';
+      }).join('') + '</select></div></div>';
+    if (!lista.length) return h + '<p class="vacio">Ningún proveedor coincide con la búsqueda.</p></div>';
+    h += '<div style="overflow-x:auto"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Contacto</th><th>Hace</th><th>Datos de pago</th><th>Tarifa neta</th><th class="num">En catálogo</th><th class="num">En pedidos</th><th class="num">Le debemos</th></tr></thead><tbody>';
     lista.forEach(function (pr) {
       var dp = deudaProveedor(pr.id), pp = partesProv(pr);
       h += '<tr class="row" data-prov="' + esc(pr.id) + '"><td data-l="Proveedor"><b>' + esc(pr.nombre) + '</b>' + (pr.activo === false ? ' <span class="pill p-cancelado">inactivo</span>' : '') + '</td>' +
@@ -289,7 +297,7 @@
         '<td class="num" data-l="En pedidos">' + dp.servicios + '<span class="sub">en ' + dp.pedidos + ' pedido(s)</span></td>' +
         '<td class="num" data-l="Le debemos">' + (dp.aPagar ? '<span class="deuda">' + usd(dp.aPagar) + '</span>' : '<span class="ok">al día</span>') + '</td></tr>';
     });
-    return h + '</tbody></table></div>';
+    return h + '</tbody></table></div></div>';
   }
 
   /* ---------- Viajes guardados ----------
@@ -1951,6 +1959,7 @@
     var el = e.target;
     if (el.id === 'chat-txt') { S.borrador = el.value; return; }
     if (el.id === 'q') { S.q = el.value; var pos = el.selectionStart; pintar(); var q = document.getElementById('q'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (er) { /* sin rango */ } } return; }
+    if (el.id === 'q-prov') { S.qProv = el.value; var pp = el.selectionStart; pintar(); var qp = document.getElementById('q-prov'); if (qp) { qp.focus(); try { qp.setSelectionRange(pp, pp); } catch (er) { /* sin rango */ } } return; }
     if (el.id === 'q-viajes') { S.qViajes = el.value; var pv = el.selectionStart; pintar(); var qv = document.getElementById('q-viajes'); if (qv) { qv.focus(); try { qv.setSelectionRange(pv, pv); } catch (er) { /* sin rango */ } } return; }
     if (el.hasAttribute && el.hasAttribute('data-fsel')) { if (e.type === 'change') { S[el.getAttribute('data-fsel')] = el.value; pintar(); } return; }
     if (el.id === 'q-srv') { S.qSrv = el.value; var ps = el.selectionStart; pintar(); var qs = document.getElementById('q-srv'); if (qs) { qs.focus(); try { qs.setSelectionRange(ps, ps); } catch (er) { /* sin rango */ } } return; }
