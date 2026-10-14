@@ -1018,7 +1018,7 @@
     else if (enReales && cfg.margen) m = { tipo: cfg.margen.tipo, valor: cfg.margen.valor, de: 'general' };
     var v = m ? (m.tipo === 'pct' ? base * (1 + m.valor / 100) : base + m.valor) : base;
     if (m) pasos.push((m.tipo === 'pct' ? '+ ' + m.valor + ' %' : '+ ' + usd(m.valor)) + ' de margen ' + m.de);
-    return { valor: Number(v.toFixed(2)), pasos: pasos };
+    return { valor: Number(v.toFixed(2)), pasos: pasos, base: base, margen: m };
   }
 
   function cargarOps() {
@@ -1056,24 +1056,23 @@
     /* Ultimo cambio: lo mas nuevo entre la ultima vez que se toco la fila y su cambio sin publicar. */
     var ultimo = function (s) { var p = pend[s.id], a = s.updated_at || ''; return p && p.creado_at > a ? p.creado_at : a; };
     if (S.srvOrden === 'reciente') lista.sort(function (a, b) { return ultimo(b).localeCompare(ultimo(a)); });
+    else if (S.srvOrden === 'margen') lista.sort(function (a, b) { return gananciaDe(a) - gananciaDe(b); });
     else if (S.srvOrden === 'precio') lista.sort(function (a, b) { return (Number(conPendiente(a).precio_brl) || 0) - (Number(conPendiente(b).precio_brl) || 0); });
     var destUsados = {}, provUsados = {};
     d.servicios.forEach(function (s) { destUsados[s.destino] = 1; if (s.proveedor_id) provUsados[s.proveedor_id] = 1; });
-    var h = '<div class="bar"><div class="chips"><b>Servicios: tours, actividades y traslados</b></div><button class="btn" data-act="cfg-abrir">Cotización y margen</button><button class="btn btn--main" data-act="nuevo-srv">+ Servicio</button></div>' +
-      '<p class="sub" style="margin:-4px 0 12px">Cotización ' + esc(String(d.config.cotizacion).replace('.', ',')) + (d.config.cotizacion_fuente ? ' (' + esc(d.config.cotizacion_fuente) + ')' : '') +
-      ' · margen general ' + (d.config.margen ? (d.config.margen.tipo === 'pct' ? d.config.margen.valor + ' %' : usd(d.config.margen.valor) + ' (' + pub(d.config.margen.valor) + ')') + ' por persona sobre precios en reales' : 'sin margen') +
-      ' · los precios publicados se muestran en reales; la web los guarda en dólares</p>' +
-      '<div class="bar"><div class="chips">' + Object.keys(nombres).map(function (k) {
-        return '<button class="chip" data-sfiltro="' + k + '" aria-pressed="' + (f === k) + '">' + esc(nombres[k]) + '<span>' + cuenta[k] + '</span></button>';
-      }).join('') + '</div></div>' +
-      '<div class="bar"><select data-sdest style="max-width:220px"><option value="">Todos los destinos</option>' + Object.keys(destUsados).map(function (k) { return { k: k, n: destNombre(k) }; })
+    var mg = d.config.margen ? (d.config.margen.tipo === 'pct' ? d.config.margen.valor + ' %' : usd(d.config.margen.valor)) + ' por persona' : 'sin margen';
+    var h = '<div class="vhead"><div><h2>Servicios</h2><p>Tours, actividades y traslados · cotización ' + esc(String(d.config.cotizacion).replace('.', ',')) + (d.config.cotizacion_fuente ? ' (' + esc(d.config.cotizacion_fuente) + ')' : '') + ' · margen general ' + esc(mg) + '</p></div>' +
+      '<div class="top__acc"><button class="btn" data-act="cfg-abrir">Cotización y margen</button><button class="btn btn--main btn--lg" data-act="nuevo-srv">+ Servicio</button></div></div>';
+    var barra = '<div class="filtros"><div class="filtros__der">' +
+      '<select class="fsel" data-sfiltro-sel aria-label="Ver">' + Object.keys(nombres).map(function (k) { return '<option value="' + k + '"' + (f === k ? ' selected' : '') + '>' + esc(k === 'todos' ? 'Ver: todos' : nombres[k]) + ' (' + cuenta[k] + ')</option>'; }).join('') + '</select>' +
+      '<select class="fsel" data-sdest aria-label="Destino"><option value="">Destino: todos</option>' + Object.keys(destUsados).map(function (k) { return { k: k, n: destNombre(k) }; })
         .sort(function (a, b) { return a.n.localeCompare(b.n, 'es'); }).map(function (x) { return '<option value="' + esc(x.k) + '"' + (S.srvDest === x.k ? ' selected' : '') + '>' + esc(x.n) + '</option>'; }).join('') + '</select>' +
-      '<select data-sprov style="max-width:240px"><option value="">Todos los proveedores</option><option value="-"' + (S.srvProv === '-' ? ' selected' : '') + '>Sin proveedor</option>' +
+      '<select class="fsel" data-sprov aria-label="Proveedor"><option value="">Proveedor: todos</option><option value="-"' + (S.srvProv === '-' ? ' selected' : '') + '>Sin proveedor</option>' +
         S.datos.proveedores.filter(function (p) { return provUsados[p.id]; }).map(function (p) { return '<option value="' + esc(p.id) + '"' + (S.srvProv === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>' +
-      '<input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '">' +
-      '<select data-sorden style="max-width:210px"><option value="">Ordenar por destino</option><option value="reciente"' + (S.srvOrden === 'reciente' ? ' selected' : '') + '>Último cambio primero</option><option value="precio"' + (S.srvOrden === 'precio' ? ' selected' : '') + '>Precio del proveedor</option></select></div>';
-    if (f === 'comparar') return h + vistaComparar(lista);
-    if (!lista.length) return h + '<div class="card"><p class="vacio">' + (f === 'papelera' ? 'La papelera está vacía.' : 'No hay servicios con ese filtro.') + '</p></div>';
+      '<select class="fsel" data-sorden aria-label="Orden"><option value="">Orden: por destino</option><option value="reciente"' + (S.srvOrden === 'reciente' ? ' selected' : '') + '>Último cambio primero</option><option value="precio"' + (S.srvOrden === 'precio' ? ' selected' : '') + '>Precio del proveedor</option><option value="margen"' + (S.srvOrden === 'margen' ? ' selected' : '') + '>Margen, de menor a mayor</option></select>' +
+      '</div><input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '" aria-label="Buscar servicio"></div>';
+    if (f === 'comparar') return h + '<div class="card">' + barra + '</div>' + vistaComparar(lista);
+    if (!lista.length) return h + '<div class="card">' + barra + '<p class="vacio">' + (f === 'papelera' ? 'La papelera está vacía.' : 'No hay servicios con ese filtro.') + '</p></div>';
     if (f === 'papelera') h += '<p class="sub" style="margin:-4px 0 12px">Lo que está en la papelera no se ve en la web. "Recuperar" lo deja como estaba; "Borrar" lo elimina para siempre (su historial de precios queda).</p>';
     S.srvSel = S.srvSel || {};
     S.srvVisibles = lista.map(function (s) { return s.id; });
@@ -1083,7 +1082,7 @@
         '<button class="btn btn--sm" data-act="sel-filtro">Elegir los ' + lista.length + ' de este filtro</button>' +
         (nSel ? '<button class="btn btn--sm" data-act="sel-limpiar">Quitar selección</button><button class="btn btn--sm" data-act="fotos-auto">Traer fotos del proveedor</button><button class="btn btn--main btn--sm" data-act="aj-abrir">Ajustar precio %</button>' : '') + '</div>';
     }
-    h += '<div class="card"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Precio del proveedor</th><th class="num">Publicado</th><th class="num">Sin publicar</th><th>Estado</th><th>Verificado</th><th>Último cambio</th><th></th></tr></thead><tbody>';
+    h += '<div class="card">' + barra + '<div style="overflow-x:auto"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Precio del proveedor</th><th>Margen</th><th class="num">Publicado</th><th class="num">Sin publicar</th><th>Estado</th><th>Verificado</th><th>Último cambio</th><th></th></tr></thead><tbody>';
     lista.forEach(function (s) {
       var pr = provDe(s.proveedor_id), p = pend[s.id], c = clase(s);
       var estado = s.eliminado_at ? '<span class="pill p-cancelado">en la papelera</span>' : (!s.publicado_at ? '<span class="pill p-nuevo">Nuevo</span>' : (s.activo ? '<span class="pill p-confirmado">Activo</span>' : '<span class="pill p-cancelado">Apagado</span>'));
@@ -1094,6 +1093,7 @@
         // Un nuevo tiene su precio en el cambio sin publicar: se muestra ese.
         '<td data-l="Proveedor cobra">' + origenTxt(conPendiente(s)) + (verProv(p && p.despues.link_web || s.link_web) ? '<span class="sub">' + verProv(p && p.despues.link_web || s.link_web) + '</span>' : '') +
           (pr && !s.eliminado_at && tarifaHtml(pr, [s]) ? '<span class="sub">' + tarifaHtml(pr, [s]) + '</span>' : '') + '</td>' +
+        '<td data-l="Margen">' + margenHtml(s) + '</td>' +
         '<td class="num" data-l="Publicado">' + (s.precio_publicado != null ? '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + ' por persona</span>' : '—') + '</td>' +
         '<td class="num" data-l="Sin publicar">' + (p ? (p.publicado_despues != null ? pub(p.publicado_despues) : 'cambio') + '<span class="sub">' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) + '</span>' : '') + '</td>' +
         '<td data-l="Estado">' + estado + '</td>' +
@@ -1103,9 +1103,31 @@
           ? '<button class="btn btn--sm" data-recuperar="' + esc(s.id) + '">Recuperar</button> <button class="btn btn--sm btn--danger" data-borrar="' + esc(s.id) + '">Borrar</button>'
           : '<button class="btn btn--sm btn--x" data-papelera="' + esc(s.id) + '" title="Mandar a la papelera" aria-label="Mandar a la papelera">🗑</button>') + '</td></tr>';
     });
-    return h + '</tbody></table></div>';
+    return h + '</tbody></table></div></div>';
   }
 
+  /* Margen de cada servicio, editable ahi mismo: el general, o uno propio en % o en US$ por persona. Guardar crea un
+     cambio en "Por publicar" (ops/proponer, como el editor): la web no cambia hasta publicarlo. */
+  function margenDe(s) { var x = conPendiente(s); return calcPub(x, provDe(x.proveedor_id), S.ops.datos.config); }
+  function gananciaDe(s) { var c = margenDe(s); return c.error ? -1 : r2(c.valor - c.base); }
+  function margenHtml(s) {
+    if (s.eliminado_at) return '';
+    var x = conPendiente(s), c = margenDe(s), propio = !!(x.margen_tipo && x.margen_valor != null && x.margen_valor !== '');
+    var tipo = propio ? x.margen_tipo : '';
+    var ganTxt = c.error ? '<span class="sub">sin precio</span>' : '<span class="sub">' + (c.margen ? '+' + usd(r2(c.valor - c.base)) + ' por persona' + (c.margen.de !== 'propio' ? ' · ' + esc(c.margen.de) : '') : 'sin margen') + '</span>';
+    return '<div class="mg" data-mg="' + esc(s.id) + '"><select class="mg__t" data-mg-tipo aria-label="Tipo de margen"><option value=""' + (!tipo ? ' selected' : '') + '>General</option><option value="pct"' + (tipo === 'pct' ? ' selected' : '') + '>%</option><option value="usd"' + (tipo === 'usd' ? ' selected' : '') + '>US$</option></select>' +
+      '<input class="mg__v" data-mg-valor type="number" step="0.5" min="0" inputmode="decimal" aria-label="Valor del margen" value="' + (propio ? esc(x.margen_valor) : '') + '" placeholder="' + (c.margen && c.margen.de !== 'propio' ? esc(c.margen.tipo === 'pct' ? c.margen.valor : c.margen.valor) : '') + '"' + (tipo ? '' : ' disabled') + '></div>' + ganTxt;
+  }
+  function guardarMargen(caja) {
+    var id = caja.getAttribute('data-mg'), tipo = caja.querySelector('[data-mg-tipo]').value, v = caja.querySelector('[data-mg-valor]').value;
+    if (tipo && v === '') { caja.querySelector('[data-mg-valor]').disabled = false; caja.querySelector('[data-mg-valor]').focus(); return; }
+    var cambios = tipo ? { margen_tipo: tipo, margen_valor: Number(v) } : { margen_tipo: null, margen_valor: null };
+    toast('Guardando margen…');
+    api('ops/proponer', { id: id, cambios: cambios, publicar: false }).then(function (r) {
+      toast(!r.cambio ? 'Sin cambios' : 'Margen guardado en "Por publicar"');
+      return cargarOps();
+    }).catch(function (e) { alert(e.message); });
+  }
   function valorCampo(k, v) {
     if (v === null || v === undefined || v === '') return '—';
     if (k === 'precio_brl') return brl(v);
@@ -2096,6 +2118,8 @@
     if (el.id === 'imp-archivo') { if (e.type === 'change' && el.files && el.files[0]) leerArchivo(el.files[0]); return; }
     if (el.hasAttribute('data-imp-col')) { if (e.type === 'change') { S.imp.mapeo[el.getAttribute('data-imp-col')] = el.value; pintar(); } return; }
     if (el.hasAttribute('data-imp-dec')) { if (e.type === 'change') { S.imp.decisiones[el.getAttribute('data-imp-dec')] = el.value; pintar(); } return; }
+    if (el.hasAttribute('data-sfiltro-sel')) { if (e.type === 'change') { S.srvFiltro = el.value; pintar(); } return; }
+    if (el.hasAttribute('data-mg-tipo') || el.hasAttribute('data-mg-valor')) { if (e.type === 'change') guardarMargen(el.closest('[data-mg]')); return; }
     if (el.hasAttribute('data-sorden')) { if (e.type === 'change') { S.srvOrden = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sdest')) { if (e.type === 'change') { S.srvDest = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sprov')) { if (e.type === 'change') { S.srvProv = el.value; pintar(); } return; }
@@ -2240,7 +2264,7 @@
       }).catch(function (er) { toast(er.message); });
       return;
     }
-    var sv = e.target.closest('[data-srv]'); if (sv && !e.target.closest('input')) { e.preventDefault(); if (S.dirty && document.getElementById('drawer') && !confirm('Tenés cambios sin guardar. ¿Seguir?')) return; abrirServicio(sv.getAttribute('data-srv')); return; }
+    var sv = e.target.closest('[data-srv]'); if (sv && !e.target.closest('input') && !e.target.closest('.mg')) { e.preventDefault(); if (S.dirty && document.getElementById('drawer') && !confirm('Tenés cambios sin guardar. ¿Seguir?')) return; abrirServicio(sv.getAttribute('data-srv')); return; }
     var pu = e.target.closest('[data-pub-uno]'); if (pu) { if (S.dirty && !confirm('Lo que editaste y no guardaste se pierde. ¿Publicar igual?')) return; S.dirty = false; publicarCambios([pu.getAttribute('data-pub-uno')]); return; }
     var du = e.target.closest('[data-desc-uno]'); if (du) { S.dirty = false; descartarCambios([du.getAttribute('data-desc-uno')]); return; }
     var rv = e.target.closest('[data-revertir]'); if (rv) {

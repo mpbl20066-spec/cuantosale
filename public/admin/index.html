@@ -207,6 +207,13 @@ tbody tr.row:hover{background:color-mix(in srgb,var(--info) 6%,transparent)}
   .pub__acc{grid-column:1 / -1}
   .pub__acc .btn{flex:1;min-height:40px}
 }
+/* Servicios: margen editable en la fila */
+.mg{display:flex;gap:4px;align-items:center}
+.mg__t{width:auto;min-height:34px;padding:0 6px;font-size:13px}
+.mg__v{width:72px;min-height:34px;padding:0 8px;font-size:13px}
+.mg__v:disabled{background:var(--bg);color:var(--muted)}
+td .mg + .sub{margin-top:4px;white-space:nowrap}
+td[data-l=Servicio]{min-width:210px}
 /* Ficha del pedido */
 .ficha__cab{align-items:flex-start;padding:18px 20px}
 .ficha__quien{flex:1;min-width:0}
@@ -336,6 +343,6 @@ a.lnk:hover{text-decoration:underline}
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=48"></script>
+<script src="/admin/admin.js?v=49"></script>
 </body>
 </html>
