@@ -138,3 +138,15 @@ Poderiam confirmar a disponibilidade? Obrigado!
 Ejemplos: `Carlos` · `Paddle en Lagoa de Ibiraquera (2 horas)` · `26 nov. al 3 dic.` · `2` · `Juan Pérez` · `CS-MV7HTN3-B05A2C`
 
 Nombres distintos se configuran con `WHATSAPP_TEMPLATE_CONFIRMACION`, `WHATSAPP_TEMPLATE_SENA`, `WHATSAPP_TEMPLATE_RETOMAR` y `WHATSAPP_TEMPLATE_RESERVA_PROV`.
+
+**`sena_recibida`**, Español (Utilidad). Sale al tocar "Registrar seña cobrada" y aceptar el aviso:
+
+```
+Hola {{1}}, recibimos tu seña de {{2}} y tu reserva en {{3}} quedó confirmada.
+
+Saldo pendiente: {{4}}, que se abona antes del viaje.
+Referencia: {{5}}
+
+Gracias por viajar con CuántoSale.
+```
+Ejemplos: `Juan` · `US$ 41,18` · `São Paulo` · `US$ 123,52` · `CS-MV7HTN3-B05A2C`

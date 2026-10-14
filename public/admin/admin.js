@@ -577,8 +577,8 @@
   }
   /* Los botones de WhatsApp de la ficha salen por la Cloud API (lib/wa-panel.js): con la ventana de 24 h abierta va el
      texto de siempre; si no, la plantilla, con estos datos en una linea cada uno. */
-  var WA_QUE = { confirmacion: 'la confirmación', sena: 'el pedido de seña', saludo: 'un saludo por su pedido', proveedor: 'el pedido de reserva' };
-  function datosWa(tipo, p, i) {
+  var WA_QUE = { confirmacion: 'la confirmación', sena: 'el pedido de seña', sena_recibida: 'la confirmación de la seña', saludo: 'un saludo por su pedido', proveedor: 'el pedido de reserva' };
+  function datosWa(tipo, p, i, extra) {
     var nombre = String(p.cliente_nombre || '').trim().split(' ')[0] || 'viajero';
     var fechas = p.fechas_txt || (p.fecha_ida ? fecha(p.fecha_ida) + (p.fecha_vuelta ? ' al ' + fecha(p.fecha_vuelta) : '') : '');
     var personas = p.personas_txt || (p.personas ? p.personas + (p.personas == 1 ? ' persona' : ' personas') : '');
@@ -590,16 +590,35 @@
         'Mercado Pago con tarjeta por ' + plata(r2(c.senaPend * (1 + recargoTarjeta())), m) + ' (solo este medio tiene ' + Math.round(recargoTarjeta() * 100) + ' % de recargo)'].filter(Boolean).join('; ');
       return { texto: mensajeSena(p), params: [nombre, p.destino || 'Brasil', plata(c.senaPend, m), formas, p.ref] };
     }
+    if (tipo === 'sena_recibida') {
+      var x = extra || {}, dest = p.destino || 'Brasil';
+      return { texto: '¡Hola ' + nombre + '! Recibimos tu seña de *' + x.monto + '* y tu reserva en ' + dest + ' quedó confirmada.\n\nSaldo pendiente: *' + x.saldo + '*, que se abona antes del viaje.\nRef: ' + p.ref + '\n\n¡Gracias por viajar con CuántoSale!',
+        params: [nombre, x.monto, dest, x.saldo, p.ref] };
+    }
     if (tipo === 'saludo') return { texto: 'Hola ' + nombre + '! Te escribimos de CuántoSale por tu pedido ' + p.ref + '.', params: [nombre, p.ref] };
     var it = (p.items || [])[i] || {}, pr = S.datos.proveedores.filter(function (x) { return x.id === it.proveedor_id; })[0] || {};
     return { texto: mensajeProveedor(p, it, pr), params: [pr.contacto || pr.nombre || 'equipe', it.nombre + (it.detalle ? ' (' + it.detalle + ')' : ''), fechas, String(p.personas || ''), p.cliente_nombre || nombre, p.ref], a: pr.nombre };
   }
-  function enviarWa(tipo, id, i) {
+  /* Anota la seña cobrada, guarda el pedido y ofrece avisarle al cliente (sena_recibida, con el saldo que le queda). */
+  function registrarSena() {
+    var cs = calc(S.draft);
+    if (!(cs.senaPend > 0)) return;
+    var monto = cs.senaPend, m = S.senaMoneda;
+    S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: monto, medio: S.draft.medio_pago || '', nota: 'Seña' });
+    S.dirty = true; refrescarPanel();
+    var p0 = S.draft;
+    return guardar().then(function () {
+      if (S.dirty || !S.draft || S.draft.id !== p0.id || !S.draft.cliente_telefono) return;
+      if (!confirm('Seña registrada. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp que la recibiste?')) return;
+      enviarWa('sena_recibida', S.draft.id, undefined, { monto: plata(monto, m), saldo: plata(calc(S.draft).saldo, m) });
+    });
+  }
+  function enviarWa(tipo, id, i, extra) {
     var p = S.draft && S.draft.id === id ? S.draft : (S.datos.pedidos || []).filter(function (x) { return x.id === id; })[0];
     if (!p) return;
     if (S.draft && S.draft.id === id && S.dirty) { alert('Guardá los cambios del pedido antes de mandar el WhatsApp.'); return; }
-    var d = datosWa(tipo, p, i);
-    if (!confirm('¿Mandarle ' + WA_QUE[tipo] + ' a ' + (d.a || p.cliente_nombre || 'el cliente') + ' por WhatsApp?')) return;
+    var d = datosWa(tipo, p, i, extra);
+    if (!extra && !confirm('¿Mandarle ' + WA_QUE[tipo] + ' a ' + (d.a || p.cliente_nombre || 'el cliente') + ' por WhatsApp?')) return;   // con extra ya se pregunto
     toast('Enviando…');
     api('whatsapp/enviar', { tipo: tipo, pedido_id: id, item: i, texto: d.texto, params: d.params })
       .then(function (r) { toast(r.modo === 'texto' ? 'Enviado por WhatsApp' : 'Enviado con la plantilla ' + r.plantilla + ' (no escribió en las últimas 24 h)'); })
@@ -1941,7 +1960,7 @@
       case 'add-item': S.draft.items.push(itemVacio()); S.dirty = true; refrescarPanel(); break;
       case 'add-pago': S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: 0, medio: S.draft.medio_pago || '', nota: '' }); S.dirty = true; refrescarPanel(); break;
       case 'cobrar-saldo': var c = calc(S.draft); if (c.saldo > 0) { S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: c.saldo, medio: S.draft.medio_pago || '', nota: 'Saldo' }); S.dirty = true; refrescarPanel(); } break;
-      case 'registrar-sena': var cs = calc(S.draft); if (cs.senaPend > 0) { S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: cs.senaPend, medio: S.draft.medio_pago || '', nota: 'Seña' }); S.dirty = true; refrescarPanel(); } break;
+      case 'registrar-sena': registrarSena(); break;
       case 'guardar': guardar(); break;
       case 'borrar-pedido': borrarPedido(); break;
       case 'guardar-prov': guardarProv(); break;
