@@ -5,7 +5,8 @@
   Solo van las rutas que el server sirve de verdad y que tienen contenido para
   un buscador:
     - /            la app de cotizacion
-    - /privacidad, /terminos y /como-calculamos, que el server expone sin .html
+    - /privacidad, /terminos, /como-calculamos, /preguntas-frecuentes y
+      /quienes-somos, que el server expone sin .html
     - /grupo       el reparto de gastos, que ademas es el link que la gente
                    manda por WhatsApp: /grupo/<uuid> no se lista porque cada uno
                    es el gasto de un viaje puntual y no tiene nada que buscar.
@@ -223,6 +224,16 @@
     <loc>https://cuantosale.uy/grupo</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://cuantosale.uy/preguntas-frecuentes</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://cuantosale.uy/quienes-somos</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://cuantosale.uy/como-calculamos</loc>
