@@ -187,14 +187,30 @@
     return true;
   }
   /* Lo que hay que hacer con cada pedido. Seña y saldo salen directo por WhatsApp; lo demas abre la ficha. */
+  /* Cuando se le pidio la sena o el saldo por WhatsApp (historial del pedido), si fue despues del ultimo cobro.
+     Los eventos viejos no traen `wa`: se reconocen por el texto que anota lib/admin.js. */
+  var WA_PEDIDO_TXT = { sena: 'WhatsApp: pedido de seña', saldo: 'WhatsApp: pedido del saldo' };
+  function pedidoEl(p, wa) {
+    var ult = null;
+    (p.historial || []).forEach(function (e) { if (e && (e.wa === wa || (!e.wa && String(e.texto || '').indexOf(WA_PEDIDO_TXT[wa]) === 0))) ult = e.t; });
+    if (!ult) return null;
+    var cobro = (p.pagos || []).filter(function (x) { return !x.reembolso; }).map(function (x) { return x.fecha || ''; }).sort().pop() || '';
+    return cobro && cobro > ult.slice(0, 10) ? null : ult;
+  }
+  function hace(iso) {
+    var m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
+    return m < 60 ? 'hace ' + (m || 1) + ' min' : m < 1440 ? 'hace ' + Math.round(m / 60) + ' h' : 'hace ' + Math.round(m / 1440) + (Math.round(m / 1440) === 1 ? ' día' : ' días');
+  }
   function proximoPaso(p) {
     if (p.estado === 'cancelado') return { t: 'Cancelado', tipo: 'nada' };
     if (p.estado === 'completado') return { t: 'Completado', tipo: 'nada' };
     var c = calc(p), act = (p.items || []).filter(function (i) { return i.estado !== 'cancelado'; });
     var sinProv = act.filter(function (i) { return !i.proveedor_id; }).length;
     if (!act.length) return { t: 'Cargar servicios', tipo: 'abrir' };
-    if (p.estado === 'confirmado' && c.senaPend > 0 && p.cliente_telefono) return { t: 'Pedir seña', tipo: 'wa', wa: 'sena' };
-    if (p.estado === 'confirmado' && c.saldo > 0 && p.cliente_telefono) return { t: 'Cobrar saldo', tipo: 'wa', wa: 'saldo' };
+    /* Ya pedido: queda esperando el pago (se registra en la ficha) y se puede reenviar desde ahi. */
+    var cuando;
+    if (p.estado === 'confirmado' && c.senaPend > 0 && p.cliente_telefono) return (cuando = pedidoEl(p, 'sena')) ? { t: 'Seña pedida ' + hace(cuando), tipo: 'wa', wa: 'sena', pedida: cuando } : { t: 'Pedir seña', tipo: 'wa', wa: 'sena' };
+    if (p.estado === 'confirmado' && c.saldo > 0 && p.cliente_telefono) return (cuando = pedidoEl(p, 'saldo')) ? { t: 'Saldo pedido ' + hace(cuando), tipo: 'wa', wa: 'saldo', pedida: cuando } : { t: 'Cobrar saldo', tipo: 'wa', wa: 'saldo' };
     if (sinProv) return { t: 'Asignar proveedor' + (sinProv > 1 ? ' (' + sinProv + ')' : ''), tipo: 'abrir' };
     if (p.estado === 'nuevo' || p.estado === 'en_gestion') return { t: 'Confirmar con proveedor', tipo: 'abrir' };
     if (c.saldo <= 0) return { t: 'Marcar completado', tipo: 'abrir' };
@@ -214,7 +230,7 @@
     dests.sort(function (a, b) { return a.localeCompare(b, 'es'); });
     var sel = function (k, etiqueta, ops) { return '<select class="fsel" data-fsel="' + k + '" aria-label="' + etiqueta + '">' + ops.map(function (o) { return '<option value="' + esc(o[0]) + '"' + ((S[k] || ops[0][0]) === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; };
     var lista = pedidosFiltrados();
-    var nuevos = d.tablero.nuevos || 0, conPlata = d.pedidos.filter(function (p) { var x = proximoPaso(p); return x.tipo === 'wa'; }).length;
+    var nuevos = d.tablero.nuevos || 0, conPlata = d.pedidos.filter(function (p) { var x = proximoPaso(p); return x.tipo === 'wa' && !x.pedida; }).length;
     var h = '<div class="vhead"><div><h2>Pedidos</h2><p>' + (nuevos ? nuevos + ' nuevo' + (nuevos > 1 ? 's' : '') + ' para gestionar' : 'Sin pedidos nuevos') + (conPlata ? ' · ' + conPlata + ' para cobrar' : '') + '</p></div>' +
       '<button class="btn btn--main btn--lg" data-act="nuevo">+ Pedido manual</button></div>';
     h += '<div class="card"><div class="filtros"><div class="seg" role="group" aria-label="Estado">' + tabs + '</div><div class="filtros__der">' +
@@ -229,7 +245,8 @@
       var c = p.cuentas, cc = calc(p), act = (p.items || []).filter(function (i) { return i.estado !== 'cancelado' && i.nombre; });
       var sinProv = act.filter(function (i) { return !i.proveedor_id; }).length, paso = proximoPaso(p);
       var falta = p.estado === 'cancelado' ? '' : (p.estado === 'confirmado' && cc.senaPend > 0 ? '<span class="pend">seña ' + usd(cc.senaPend) + '</span>' : (c.saldo_cliente_usd ? '<span class="deuda">falta ' + usd(c.saldo_cliente_usd) + '</span>' : (c.total_usd ? '<span class="ok">pagado</span>' : '')));
-      var boton = paso.tipo === 'wa' ? '<a href="#" class="btn btn--sm btn--main btn-paso" data-wa-enviar="' + paso.wa + '" data-wa-pedido="' + esc(p.id) + '">' + esc(paso.t) + ' →</a>'
+      var boton = paso.pedida ? '<button type="button" class="btn btn--sm btn-paso" title="Ya se le pidió por WhatsApp. Abrí el pedido para registrar el pago o reenviar.">✓ ' + esc(paso.t) + '</button>'
+        : paso.tipo === 'wa' ? '<a href="#" class="btn btn--sm btn--main btn-paso" data-wa-enviar="' + paso.wa + '" data-wa-pedido="' + esc(p.id) + '">' + esc(paso.t) + ' →</a>'
         : paso.tipo === 'abrir' ? '<button type="button" class="btn btn--sm btn-paso">' + esc(paso.t) + ' →</button>' : '<span class="sub">' + esc(paso.t) + '</span>';
       h += '<div class="prow' + (p.estado === 'cancelado' ? ' prow--off' : '') + '" data-abrir="' + esc(p.id) + '">' +
         '<div class="prow__cli"><span class="avatar" aria-hidden="true">' + esc(iniciales(p.cliente_nombre)) + '</span><div><b>' + esc(p.cliente_nombre || '—') + '</b><span class="sub">' + esc(String(p.ref || '').split('-').pop()) + ' · ' + esc(fechaHora(p.created_at)) + (p.origen === 'manual' ? ' · manual' : '') + '</span></div></div>' +
@@ -723,7 +740,15 @@
     if (!extra && !confirm('¿Mandarle ' + WA_QUE[tipo] + ' a ' + (d.a || p.cliente_nombre || 'el cliente') + ' por WhatsApp?')) return;   // con extra ya se pregunto
     toast('Enviando…');
     api('whatsapp/enviar', { tipo: tipo, pedido_id: id, item: i, texto: d.texto, params: d.params })
-      .then(function (r) { toast(r.modo === 'texto' ? 'Enviado por WhatsApp' : 'Enviado con la plantilla ' + r.plantilla + ' (no escribió en las últimas 24 h)'); })
+      .then(function (r) {
+        toast(r.modo === 'texto' ? 'Enviado por WhatsApp' : 'Enviado con la plantilla ' + r.plantilla + ' (no escribió en las últimas 24 h)');
+        /* Al historial en memoria, asi el proximo paso pasa a "Seña pedida" sin recargar. */
+        var ev = { t: new Date().toISOString(), tipo: 'whatsapp', wa: tipo, texto: WA_QUE[tipo] || '' };
+        [S.draft && S.draft.id === id ? S.draft : null].concat((S.datos.pedidos || []).filter(function (x) { return x.id === id; })).forEach(function (x) {
+          if (x) x.historial = Array.isArray(r.historial) ? r.historial.slice() : (x.historial || []).concat([ev]);
+        });
+        pintarFondo(); if (S.draft && S.draft.id === id) refrescarPanel();
+      })
       .catch(function (e) { alert(e.message); });
   }
   /* ---------- ficha del pedido ----------
@@ -760,6 +785,12 @@
       moneda = '<label class="f paso__moneda">Moneda<select data-sena-moneda>' + opts(MONEDA_SENA, m) + '</select></label>';
       botones = '<a href="#" class="btn btn--main btn--lg" data-wa-enviar="' + x.wa + '" data-wa-pedido="' + esc(p.id) + '">' + ICONO_WA + (esSena ? 'Pedir seña' : 'Pedir saldo') + ' por WhatsApp</a>' +
         '<button type="button" class="btn btn--lg" data-act="' + (esSena ? 'registrar-sena' : 'registrar-saldo') + '">Ya pagó ' + (esSena ? 'la seña' : 'el saldo') + '</button>';
+      /* Ya pedido: lo principal pasa a ser registrar el pago; reenviar queda al costado. */
+      if (x.pedida) {
+        cuerpo = '<b class="paso__t">✓ ' + (esSena ? 'Seña' : 'Saldo') + ' de ' + esc(plata(monto, m)) + ' pedido por WhatsApp ' + hace(x.pedida) + '</b><span class="sub">Esperando el pago. Cuando te avise que pagó, registralo acá.</span>';
+        botones = '<button type="button" class="btn btn--main btn--lg" data-act="' + (esSena ? 'registrar-sena' : 'registrar-saldo') + '">Ya pagó ' + (esSena ? 'la seña' : 'el saldo') + '</button>' +
+          '<a href="#" class="btn btn--lg" data-wa-enviar="' + x.wa + '" data-wa-pedido="' + esc(p.id) + '">' + ICONO_WA + 'Reenviar</a>';
+      }
       if (m !== 'USD' && enMoneda(1, m) === null) aviso = '<p class="sub">' + (S.tasas && S.tasas.error ? 'No se pudo traer la cotización: el monto queda en dólares.' : 'Cargando cotización…') + '</p>';
       if (!medios) aviso += '<p class="aviso">Faltan tus datos para cobrar: cargá PAGO_PREX, PAGO_PIX y PAGO_ABITAB_REDPAGOS (Abitab) en las variables de Vercel. Mientras tanto el mensaje solo ofrece tarjeta.</p>';
     } else if (/^Asignar/.test(x.t)) {
