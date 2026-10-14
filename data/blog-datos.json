@@ -2161,37 +2161,6 @@
    }
   },
   {
-   "clave": "pip",
-   "nombre": "Pipa",
-   "region": "Río Grande do Norte",
-   "dep": "2027-01-26",
-   "ret": "2027-02-02",
-   "masBarato": {
-    "modo": "avion_mvd",
-    "pp": 802
-   },
-   "vuelo": "real",
-   "hotel": "estimado",
-   "porMedio": {
-    "avion_mvd": {
-     "pp": 802,
-     "total": 1603,
-     "dur": "unas 10 h con escala",
-     "parts": {
-      "pasajes": 981,
-      "bus": 0,
-      "alojamiento": 318,
-      "comidas": 238,
-      "local": 42,
-      "traslados": 24,
-      "auto": 0,
-      "tours": 0
-     },
-     "vueloReal": true
-    }
-   }
-  },
-  {
    "clave": "rec",
    "nombre": "Recife",
    "region": "Pernambuco",
@@ -2277,6 +2246,37 @@
       "comidas": 336,
       "local": 112,
       "traslados": 98,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "pip",
+   "nombre": "Pipa",
+   "region": "Río Grande do Norte",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 846
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 846,
+     "total": 1692,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 981,
+      "bus": 0,
+      "alojamiento": 407,
+      "comidas": 238,
+      "local": 42,
+      "traslados": 24,
       "auto": 0,
       "tours": 0
      },
@@ -2385,19 +2385,19 @@
    "ret": "2027-01-19",
    "masBarato": {
     "modo": "avion_mvd",
-    "pp": 910
+    "pp": 914
    },
    "vuelo": "real",
-   "hotel": "estimado",
+   "hotel": "calibrado",
    "porMedio": {
     "avion_mvd": {
-     "pp": 910,
-     "total": 1820,
+     "pp": 914,
+     "total": 1827,
      "dur": "unas 10 h con escala",
      "parts": {
       "pasajes": 1085,
       "bus": 0,
-      "alojamiento": 292,
+      "alojamiento": 299,
       "comidas": 364,
       "local": 56,
       "traslados": 23,
@@ -2633,19 +2633,19 @@
    "ret": "2027-01-19",
    "masBarato": {
     "modo": "avion_mvd",
-    "pp": 1037
+    "pp": 1045
    },
    "vuelo": "real",
-   "hotel": "estimado",
+   "hotel": "calibrado",
    "porMedio": {
     "avion_mvd": {
-     "pp": 1037,
-     "total": 2073,
+     "pp": 1045,
+     "total": 2090,
      "dur": "unas 10 h con escala",
      "parts": {
       "pasajes": 1085,
       "bus": 0,
-      "alojamiento": 334,
+      "alojamiento": 351,
       "comidas": 448,
       "local": 56,
       "traslados": 150,
@@ -2695,19 +2695,19 @@
    "ret": "2027-02-02",
    "masBarato": {
     "modo": "avion_mvd",
-    "pp": 1626
+    "pp": 1591
    },
    "vuelo": "real",
-   "hotel": "estimado",
+   "hotel": "calibrado",
    "porMedio": {
     "avion_mvd": {
-     "pp": 1626,
-     "total": 3251,
+     "pp": 1591,
+     "total": 3181,
      "dur": "unas 11 h con escala",
      "parts": {
       "pasajes": 1592,
       "bus": 0,
-      "alojamiento": 830,
+      "alojamiento": 760,
       "comidas": 700,
       "local": 56,
       "traslados": 73,
@@ -3619,19 +3619,19 @@
    "ret": "2027-03-31",
    "masBarato": {
     "modo": "avion_mvd",
-    "pp": 733
+    "pp": 736
    },
    "vuelo": "real",
-   "hotel": "estimado",
+   "hotel": "calibrado",
    "porMedio": {
     "avion_mvd": {
-     "pp": 733,
-     "total": 1466,
+     "pp": 736,
+     "total": 1471,
      "dur": "unas 10 h con escala",
      "parts": {
       "pasajes": 830,
       "bus": 0,
-      "alojamiento": 193,
+      "alojamiento": 198,
       "comidas": 364,
       "local": 56,
       "traslados": 23,
@@ -3697,37 +3697,6 @@
       "comidas": 350,
       "local": 70,
       "traslados": 108,
-      "auto": 0,
-      "tours": 0
-     },
-     "vueloReal": true
-    }
-   }
-  },
-  {
-   "clave": "pip",
-   "nombre": "Pipa",
-   "region": "Río Grande do Norte",
-   "dep": "2027-03-02",
-   "ret": "2027-03-09",
-   "masBarato": {
-    "modo": "avion_mvd",
-    "pp": 763
-   },
-   "vuelo": "real",
-   "hotel": "estimado",
-   "porMedio": {
-    "avion_mvd": {
-     "pp": 763,
-     "total": 1525,
-     "dur": "unas 10 h con escala",
-     "parts": {
-      "pasajes": 1011,
-      "bus": 0,
-      "alojamiento": 210,
-      "comidas": 238,
-      "local": 42,
-      "traslados": 24,
       "auto": 0,
       "tours": 0
      },
@@ -3891,6 +3860,37 @@
    }
   },
   {
+   "clave": "pip",
+   "nombre": "Pipa",
+   "region": "Río Grande do Norte",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 792
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 792,
+     "total": 1584,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 1011,
+      "bus": 0,
+      "alojamiento": 269,
+      "comidas": 238,
+      "local": 42,
+      "traslados": 24,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
    "clave": "nat",
    "nombre": "Natal",
    "region": "Río Grande do Norte",
@@ -3960,19 +3960,19 @@
    "ret": "2027-03-31",
    "masBarato": {
     "modo": "avion_mvd",
-    "pp": 852
+    "pp": 858
    },
    "vuelo": "real",
-   "hotel": "estimado",
+   "hotel": "calibrado",
    "porMedio": {
     "avion_mvd": {
-     "pp": 852,
-     "total": 1704,
+     "pp": 858,
+     "total": 1715,
      "dur": "unas 10 h con escala",
      "parts": {
       "pasajes": 830,
       "bus": 0,
-      "alojamiento": 220,
+      "alojamiento": 231,
       "comidas": 448,
       "local": 56,
       "traslados": 150,
@@ -4177,19 +4177,19 @@
    "ret": "2027-03-30",
    "masBarato": {
     "modo": "avion_mvd",
-    "pp": 1425
+    "pp": 1402
    },
    "vuelo": "real",
-   "hotel": "estimado",
+   "hotel": "calibrado",
    "porMedio": {
     "avion_mvd": {
-     "pp": 1425,
-     "total": 2849,
+     "pp": 1402,
+     "total": 2803,
      "dur": "unas 11 h con escala",
      "parts": {
       "pasajes": 1471,
       "bus": 0,
-      "alojamiento": 549,
+      "alojamiento": 503,
       "comidas": 700,
       "local": 56,
       "traslados": 73,
@@ -4200,5 +4200,8215 @@
     }
    }
   }
- ]
+ ],
+ "rankingEnero2027Pax4": [
+  {
+   "clave": "rosa",
+   "nombre": "Praia do Rosa",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 422
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 422,
+     "total": 1686,
+     "dur": "unas 16.2 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 684,
+      "comidas": 616,
+      "local": 112,
+      "traslados": 0,
+      "auto": 274,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 848,
+     "total": 3392,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1869,
+      "bus": 0,
+      "alojamiento": 684,
+      "comidas": 616,
+      "local": 112,
+      "traslados": 111,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "picarras",
+   "nombre": "Piçarras",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 425
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 425,
+     "total": 1700,
+     "dur": "unas 17.9 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 558,
+      "comidas": 728,
+      "local": 112,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 849,
+     "total": 3396,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1869,
+      "bus": 0,
+      "alojamiento": 558,
+      "comidas": 728,
+      "local": 112,
+      "traslados": 129,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "poa",
+   "nombre": "Porto Alegre",
+   "region": "Río Grande do Sul",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 425
+   },
+   "vuelo": null,
+   "hotel": "estimado",
+   "porMedio": {
+    "auto": {
+     "pp": 425,
+     "total": 1700,
+     "dur": "unas 11.6 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 617,
+      "comidas": 756,
+      "local": 112,
+      "traslados": 0,
+      "auto": 215,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 489,
+     "total": 1954,
+     "dur": "unas 12 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 469,
+      "alojamiento": 617,
+      "comidas": 756,
+      "local": 112,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 756,
+     "total": 3024,
+     "dur": "unas 2 h de vuelo",
+     "parts": {
+      "pasajes": 1493,
+      "bus": 0,
+      "alojamiento": 617,
+      "comidas": 756,
+      "local": 112,
+      "traslados": 46,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ferrugem",
+   "nombre": "Ferrugem",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 449
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 449,
+     "total": 1797,
+     "dur": "unas 16.2 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 710,
+      "comidas": 728,
+      "local": 84,
+      "traslados": 0,
+      "auto": 275,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 876,
+     "total": 3505,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1869,
+      "bus": 0,
+      "alojamiento": 710,
+      "comidas": 728,
+      "local": 84,
+      "traslados": 114,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 451
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 451,
+     "total": 1805,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 562,
+      "comidas": 784,
+      "local": 168,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 601,
+     "total": 2402,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 888,
+      "alojamiento": 562,
+      "comidas": 784,
+      "local": 168,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 857,
+     "total": 3429,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1869,
+      "bus": 0,
+      "alojamiento": 562,
+      "comidas": 784,
+      "local": 168,
+      "traslados": 46,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "garopaba",
+   "nombre": "Garopaba",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 455
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 455,
+     "total": 1820,
+     "dur": "unas 16.3 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 758,
+      "comidas": 700,
+      "local": 84,
+      "traslados": 0,
+      "auto": 278,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 879,
+     "total": 3514,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1869,
+      "bus": 0,
+      "alojamiento": 758,
+      "comidas": 700,
+      "local": 84,
+      "traslados": 103,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "canoa",
+   "nombre": "Capão da Canoa",
+   "region": "Río Grande do Sul",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 455
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 455,
+     "total": 1818,
+     "dur": "unas 12.7 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 803,
+      "comidas": 700,
+      "local": 84,
+      "traslados": 0,
+      "auto": 231,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 807,
+     "total": 3228,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 1493,
+      "bus": 0,
+      "alojamiento": 803,
+      "comidas": 700,
+      "local": 84,
+      "traslados": 148,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 457
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 457,
+     "total": 1827,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 657,
+      "comidas": 728,
+      "local": 140,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 876,
+     "total": 3505,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 1869,
+      "bus": 0,
+      "alojamiento": 657,
+      "comidas": 728,
+      "local": 140,
+      "traslados": 111,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "torres",
+   "nombre": "Torres",
+   "region": "Río Grande do Sul",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 471
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 471,
+     "total": 1885,
+     "dur": "unas 13.1 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 836,
+      "comidas": 728,
+      "local": 84,
+      "traslados": 0,
+      "auto": 237,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 832,
+     "total": 3326,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 1493,
+      "bus": 0,
+      "alojamiento": 836,
+      "comidas": 728,
+      "local": 84,
+      "traslados": 185,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "bombinhas",
+   "nombre": "Bombinhas",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 483
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 483,
+     "total": 1932,
+     "dur": "unas 17.9 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 871,
+      "comidas": 560,
+      "local": 196,
+      "traslados": 0,
+      "auto": 305,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 900,
+     "total": 3599,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1869,
+      "bus": 0,
+      "alojamiento": 871,
+      "comidas": 560,
+      "local": 196,
+      "traslados": 103,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "itapema",
+   "nombre": "Itapema",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 526
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 526,
+     "total": 2103,
+     "dur": "unas 17.9 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 876,
+      "comidas": 784,
+      "local": 140,
+      "traslados": 0,
+      "auto": 303,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 943,
+     "total": 3772,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 1869,
+      "bus": 0,
+      "alojamiento": 876,
+      "comidas": 784,
+      "local": 140,
+      "traslados": 103,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "canela",
+   "nombre": "Canela",
+   "region": "Río Grande do Sul",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 527
+   },
+   "vuelo": null,
+   "hotel": "estimado",
+   "porMedio": {
+    "auto": {
+     "pp": 527,
+     "total": 2107,
+     "dur": "unas 13.5 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 1058,
+      "comidas": 672,
+      "local": 140,
+      "traslados": 0,
+      "auto": 237,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 873,
+     "total": 3491,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 1493,
+      "bus": 0,
+      "alojamiento": 1058,
+      "comidas": 672,
+      "local": 140,
+      "traslados": 128,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "gram",
+   "nombre": "Gramado",
+   "region": "Río Grande do Sul",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 605
+   },
+   "vuelo": null,
+   "hotel": "estimado",
+   "porMedio": {
+    "auto": {
+     "pp": 605,
+     "total": 2419,
+     "dur": "unas 13.3 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 1008,
+      "comidas": 1036,
+      "local": 140,
+      "traslados": 0,
+      "auto": 235,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 950,
+     "total": 3800,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 1493,
+      "bus": 0,
+      "alojamiento": 1008,
+      "comidas": 1036,
+      "local": 140,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "cabo",
+   "nombre": "Cabo Frio",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 673
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 673,
+     "total": 2693,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1170,
+      "bus": 0,
+      "alojamiento": 622,
+      "comidas": 616,
+      "local": 112,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 683
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 683,
+     "total": 2732,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1170,
+      "bus": 0,
+      "alojamiento": 689,
+      "comidas": 644,
+      "local": 56,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 717
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 717,
+     "total": 2866,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1170,
+      "bus": 0,
+      "alojamiento": 758,
+      "comidas": 784,
+      "local": 112,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 719
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 719,
+     "total": 2875,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1170,
+      "bus": 0,
+      "alojamiento": 440,
+      "comidas": 980,
+      "local": 112,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "paraty",
+   "nombre": "Paraty",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 730
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 730,
+     "total": 2919,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1170,
+      "bus": 0,
+      "alojamiento": 818,
+      "comidas": 588,
+      "local": 112,
+      "traslados": 231,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "angra",
+   "nombre": "Angra dos Reis",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 745
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 745,
+     "total": 2980,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1170,
+      "bus": 0,
+      "alojamiento": 842,
+      "comidas": 644,
+      "local": 112,
+      "traslados": 212,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "sao",
+   "nombre": "São Paulo",
+   "region": "São Paulo",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 782
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 782,
+     "total": 3127,
+     "dur": "unas 3 h de vuelo",
+     "parts": {
+      "pasajes": 1559,
+      "bus": 0,
+      "alojamiento": 413,
+      "comidas": 980,
+      "local": 112,
+      "traslados": 63,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ubatuba",
+   "nombre": "Ubatuba",
+   "region": "São Paulo",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 784
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 784,
+     "total": 3136,
+     "dur": "unas 7 h con escala",
+     "parts": {
+      "pasajes": 1559,
+      "bus": 0,
+      "alojamiento": 522,
+      "comidas": 700,
+      "local": 140,
+      "traslados": 215,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "porto",
+   "nombre": "Porto de Galinhas",
+   "region": "Pernambuco",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 791
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 791,
+     "total": 3162,
+     "dur": "unas 8 h con escala",
+     "parts": {
+      "pasajes": 1751,
+      "bus": 0,
+      "alojamiento": 642,
+      "comidas": 616,
+      "local": 84,
+      "traslados": 69,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "rec",
+   "nombre": "Recife",
+   "region": "Pernambuco",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 823
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 823,
+     "total": 3291,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1751,
+      "bus": 0,
+      "alojamiento": 710,
+      "comidas": 700,
+      "local": 84,
+      "traslados": 46,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ssa",
+   "nombre": "Salvador de Bahía",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 830
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 830,
+     "total": 3319,
+     "dur": "unas 8 h con escala",
+     "parts": {
+      "pasajes": 1939,
+      "bus": 0,
+      "alojamiento": 494,
+      "comidas": 700,
+      "local": 140,
+      "traslados": 46,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ilhabela",
+   "nombre": "Ilhabela",
+   "region": "São Paulo",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 832
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 832,
+     "total": 3326,
+     "dur": "unas 7 h con escala",
+     "parts": {
+      "pasajes": 1559,
+      "bus": 0,
+      "alojamiento": 676,
+      "comidas": 672,
+      "local": 224,
+      "traslados": 195,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "morro",
+   "nombre": "Morro de São Paulo",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 840
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 840,
+     "total": 3359,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1939,
+      "bus": 0,
+      "alojamiento": 788,
+      "comidas": 532,
+      "local": 28,
+      "traslados": 72,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ajuda",
+   "nombre": "Arraial d’Ajuda",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 841
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 841,
+     "total": 3363,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1939,
+      "bus": 0,
+      "alojamiento": 642,
+      "comidas": 532,
+      "local": 112,
+      "traslados": 138,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "pip",
+   "nombre": "Pipa",
+   "region": "Río Grande do Norte",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 847
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 847,
+     "total": 3387,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 1963,
+      "bus": 0,
+      "alojamiento": 816,
+      "comidas": 476,
+      "local": 84,
+      "traslados": 48,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "nat",
+   "nombre": "Natal",
+   "region": "Río Grande do Norte",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 848
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 848,
+     "total": 3391,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 1963,
+      "bus": 0,
+      "alojamiento": 542,
+      "comidas": 728,
+      "local": 112,
+      "traslados": 46,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ilha",
+   "nombre": "Ilha Grande",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 902
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 902,
+     "total": 3606,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1170,
+      "bus": 0,
+      "alojamiento": 1367,
+      "comidas": 784,
+      "local": 112,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "for",
+   "nombre": "Fortaleza",
+   "region": "Ceará",
+   "dep": "2027-01-12",
+   "ret": "2027-01-19",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 914
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 914,
+     "total": 3655,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 2170,
+      "bus": 0,
+      "alojamiento": 599,
+      "comidas": 728,
+      "local": 112,
+      "traslados": 46,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "portoseguro",
+   "nombre": "Porto Seguro",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 919
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 919,
+     "total": 3674,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1939,
+      "bus": 0,
+      "alojamiento": 514,
+      "comidas": 924,
+      "local": 112,
+      "traslados": 185,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "joaopessoa",
+   "nombre": "João Pessoa",
+   "region": "Paraíba",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 919
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 919,
+     "total": 3675,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 2193,
+      "bus": 0,
+      "alojamiento": 596,
+      "comidas": 728,
+      "local": 112,
+      "traslados": 46,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "maragogi",
+   "nombre": "Maragogi",
+   "region": "Alagoas",
+   "dep": "2027-01-20",
+   "ret": "2027-01-27",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 922
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 922,
+     "total": 3689,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 2059,
+      "bus": 0,
+      "alojamiento": 704,
+      "comidas": 672,
+      "local": 112,
+      "traslados": 142,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "mcz",
+   "nombre": "Maceió",
+   "region": "Alagoas",
+   "dep": "2027-01-20",
+   "ret": "2027-01-27",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 930
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 930,
+     "total": 3719,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 2059,
+      "bus": 0,
+      "alojamiento": 772,
+      "comidas": 700,
+      "local": 84,
+      "traslados": 104,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "forte",
+   "nombre": "Praia do Forte",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 942
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 942,
+     "total": 3767,
+     "dur": "unas 8 h con escala",
+     "parts": {
+      "pasajes": 1939,
+      "bus": 0,
+      "alojamiento": 1135,
+      "comidas": 532,
+      "local": 84,
+      "traslados": 77,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "trancoso",
+   "nombre": "Trancoso",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 1008
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 1008,
+     "total": 4033,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1939,
+      "bus": 0,
+      "alojamiento": 716,
+      "comidas": 1064,
+      "local": 140,
+      "traslados": 174,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "jericoacoara",
+   "nombre": "Jericoacoara",
+   "region": "Ceará",
+   "dep": "2027-01-12",
+   "ret": "2027-01-19",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 1045
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 1045,
+     "total": 4180,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 2170,
+      "bus": 0,
+      "alojamiento": 702,
+      "comidas": 896,
+      "local": 112,
+      "traslados": 300,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "itacare",
+   "nombre": "Itacaré",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 1064
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 1064,
+     "total": 4255,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1939,
+      "bus": 0,
+      "alojamiento": 918,
+      "comidas": 896,
+      "local": 140,
+      "traslados": 362,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "fernando",
+   "nombre": "Fernando de Noronha",
+   "region": "Pernambuco",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 1591
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 1591,
+     "total": 6364,
+     "dur": "unas 11 h con escala",
+     "parts": {
+      "pasajes": 3185,
+      "bus": 0,
+      "alojamiento": 1521,
+      "comidas": 1400,
+      "local": 112,
+      "traslados": 146,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  }
+ ],
+ "rioPorMes": [
+  {
+   "mes": "noviembre 2026",
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2026-11-10",
+   "ret": "2026-11-17",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 652
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 652,
+     "total": 1303,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 562,
+      "bus": 0,
+      "alojamiento": 251,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "diciembre 2026",
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2026-12-08",
+   "ret": "2026-12-15",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 648
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 648,
+     "total": 1295,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 469,
+      "bus": 0,
+      "alojamiento": 336,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "enero 2027",
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 727
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 727,
+     "total": 1454,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 379,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "febrero 2027",
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-02-24",
+   "ret": "2027-03-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 593
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 593,
+     "total": 1186,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 374,
+      "bus": 0,
+      "alojamiento": 322,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "marzo 2027",
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 552
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 552,
+     "total": 1103,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 367,
+      "bus": 0,
+      "alojamiento": 246,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "abril 2027",
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-04-15",
+   "ret": "2027-04-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 621
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 621,
+     "total": 1241,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 530,
+      "bus": 0,
+      "alojamiento": 221,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "mayo 2027",
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-05-15",
+   "ret": "2027-05-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 593
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 593,
+     "total": 1186,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 500,
+      "bus": 0,
+      "alojamiento": 196,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "junio 2027",
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-06-15",
+   "ret": "2027-06-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 629
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 629,
+     "total": 1258,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 560,
+      "bus": 0,
+      "alojamiento": 208,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "julio 2027",
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-07-15",
+   "ret": "2027-07-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 616
+   },
+   "vuelo": "estimado",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 616,
+     "total": 1231,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 442,
+      "bus": 0,
+      "alojamiento": 299,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  },
+  {
+   "mes": "agosto 2027",
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-08-15",
+   "ret": "2027-08-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 658
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 658,
+     "total": 1315,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 240,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "septiembre 2027",
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-09-15",
+   "ret": "2027-09-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 522
+   },
+   "vuelo": "estimado",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 522,
+     "total": 1044,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 332,
+      "bus": 0,
+      "alojamiento": 222,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  }
+ ],
+ "buziosPorMes": [
+  {
+   "mes": "noviembre 2026",
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2026-11-10",
+   "ret": "2026-11-17",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 688
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 688,
+     "total": 1375,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 562,
+      "bus": 0,
+      "alojamiento": 144,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "diciembre 2026",
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2026-12-08",
+   "ret": "2026-12-15",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 668
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 668,
+     "total": 1336,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 469,
+      "bus": 0,
+      "alojamiento": 198,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "enero 2027",
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 737
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 737,
+     "total": 1474,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 220,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "febrero 2027",
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-02-24",
+   "ret": "2027-03-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 616
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 616,
+     "total": 1232,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 374,
+      "bus": 0,
+      "alojamiento": 189,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "marzo 2027",
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 591
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 591,
+     "total": 1181,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 367,
+      "bus": 0,
+      "alojamiento": 145,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "abril 2027",
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-04-15",
+   "ret": "2027-04-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 665
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 665,
+     "total": 1329,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 530,
+      "bus": 0,
+      "alojamiento": 130,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "mayo 2027",
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-05-15",
+   "ret": "2027-05-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 642
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 642,
+     "total": 1284,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 500,
+      "bus": 0,
+      "alojamiento": 115,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "junio 2027",
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-06-15",
+   "ret": "2027-06-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 676
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 676,
+     "total": 1351,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 560,
+      "bus": 0,
+      "alojamiento": 122,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "julio 2027",
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-07-15",
+   "ret": "2027-07-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 639
+   },
+   "vuelo": "estimado",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 639,
+     "total": 1277,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 432,
+      "bus": 0,
+      "alojamiento": 176,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  },
+  {
+   "mes": "agosto 2027",
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-08-15",
+   "ret": "2027-08-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 695
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 695,
+     "total": 1389,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 135,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "septiembre 2027",
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-09-15",
+   "ret": "2027-09-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 562
+   },
+   "vuelo": "estimado",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 562,
+     "total": 1123,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 324,
+      "bus": 0,
+      "alojamiento": 130,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  }
+ ],
+ "arraialPorMes": [
+  {
+   "mes": "noviembre 2026",
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2026-11-10",
+   "ret": "2026-11-17",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 655
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 655,
+     "total": 1309,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 562,
+      "bus": 0,
+      "alojamiento": 224,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "diciembre 2026",
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2026-12-08",
+   "ret": "2026-12-15",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 651
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 651,
+     "total": 1302,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 469,
+      "bus": 0,
+      "alojamiento": 310,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "enero 2027",
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 727
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 727,
+     "total": 1453,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 345,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "febrero 2027",
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-02-24",
+   "ret": "2027-03-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 596
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 596,
+     "total": 1191,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 374,
+      "bus": 0,
+      "alojamiento": 294,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "marzo 2027",
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 558
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 558,
+     "total": 1115,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 367,
+      "bus": 0,
+      "alojamiento": 225,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "abril 2027",
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-04-15",
+   "ret": "2027-04-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 629
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 629,
+     "total": 1257,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 530,
+      "bus": 0,
+      "alojamiento": 204,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "mayo 2027",
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-05-15",
+   "ret": "2027-05-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 600
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 600,
+     "total": 1200,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 500,
+      "bus": 0,
+      "alojamiento": 177,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "junio 2027",
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-06-15",
+   "ret": "2027-06-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 636
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 636,
+     "total": 1272,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 560,
+      "bus": 0,
+      "alojamiento": 189,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "julio 2027",
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-07-15",
+   "ret": "2027-07-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 604
+   },
+   "vuelo": "estimado",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 604,
+     "total": 1207,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 408,
+      "bus": 0,
+      "alojamiento": 276,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  },
+  {
+   "mes": "agosto 2027",
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-08-15",
+   "ret": "2027-08-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 661
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 661,
+     "total": 1322,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 214,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "septiembre 2027",
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-09-15",
+   "ret": "2027-09-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 515
+   },
+   "vuelo": "estimado",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 515,
+     "total": 1030,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 307,
+      "bus": 0,
+      "alojamiento": 200,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  }
+ ],
+ "nordestePorMes": {
+  "porto": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "porto",
+    "nombre": "Porto de Galinhas",
+    "region": "Pernambuco",
+    "dep": "2026-11-04",
+    "ret": "2026-11-11",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 736
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 736,
+      "total": 1472,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 872,
+       "bus": 0,
+       "alojamiento": 215,
+       "comidas": 308,
+       "local": 42,
+       "traslados": 35,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "porto",
+    "nombre": "Porto de Galinhas",
+    "region": "Pernambuco",
+    "dep": "2026-12-08",
+    "ret": "2026-12-15",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 810
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 810,
+      "total": 1620,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 943,
+       "bus": 0,
+       "alojamiento": 292,
+       "comidas": 308,
+       "local": 42,
+       "traslados": 35,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "porto",
+    "nombre": "Porto de Galinhas",
+    "region": "Pernambuco",
+    "dep": "2027-01-27",
+    "ret": "2027-02-03",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 791
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 791,
+      "total": 1582,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 876,
+       "bus": 0,
+       "alojamiento": 321,
+       "comidas": 308,
+       "local": 42,
+       "traslados": 35,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "porto",
+    "nombre": "Porto de Galinhas",
+    "region": "Pernambuco",
+    "dep": "2027-02-23",
+    "ret": "2027-03-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 759
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 759,
+      "total": 1518,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 840,
+       "bus": 0,
+       "alojamiento": 293,
+       "comidas": 308,
+       "local": 42,
+       "traslados": 35,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "porto",
+    "nombre": "Porto de Galinhas",
+    "region": "Pernambuco",
+    "dep": "2027-03-02",
+    "ret": "2027-03-09",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 722
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 722,
+      "total": 1443,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 840,
+       "bus": 0,
+       "alojamiento": 218,
+       "comidas": 308,
+       "local": 42,
+       "traslados": 35,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "porto",
+    "nombre": "Porto de Galinhas",
+    "region": "Pernambuco",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 837
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 837,
+      "total": 1674,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1097,
+       "bus": 0,
+       "alojamiento": 192,
+       "comidas": 308,
+       "local": 42,
+       "traslados": 35,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "porto",
+    "nombre": "Porto de Galinhas",
+    "region": "Pernambuco",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 790
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 790,
+      "total": 1580,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1026,
+       "bus": 0,
+       "alojamiento": 169,
+       "comidas": 308,
+       "local": 42,
+       "traslados": 35,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "porto",
+    "nombre": "Porto de Galinhas",
+    "region": "Pernambuco",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 797
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 797,
+      "total": 1593,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1026,
+       "bus": 0,
+       "alojamiento": 182,
+       "comidas": 308,
+       "local": 42,
+       "traslados": 35,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "porto",
+    "nombre": "Porto de Galinhas",
+    "region": "Pernambuco",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 835
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 835,
+      "total": 1670,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1026,
+       "bus": 0,
+       "alojamiento": 259,
+       "comidas": 308,
+       "local": 42,
+       "traslados": 35,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "porto",
+    "nombre": "Porto de Galinhas",
+    "region": "Pernambuco",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 697
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 697,
+      "total": 1393,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 804,
+       "bus": 0,
+       "alojamiento": 204,
+       "comidas": 308,
+       "local": 42,
+       "traslados": 35,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "porto",
+    "nombre": "Porto de Galinhas",
+    "region": "Pernambuco",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 619
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 619,
+      "total": 1238,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 661,
+       "bus": 0,
+       "alojamiento": 192,
+       "comidas": 308,
+       "local": 42,
+       "traslados": 35,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   }
+  ],
+  "mcz": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "mcz",
+    "nombre": "Maceió",
+    "region": "Alagoas",
+    "dep": "2026-11-25",
+    "ret": "2026-12-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 777
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 777,
+      "total": 1553,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 836,
+       "bus": 0,
+       "alojamiento": 263,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 62,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "mcz",
+    "nombre": "Maceió",
+    "region": "Alagoas",
+    "dep": "2026-12-08",
+    "ret": "2026-12-15",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 855
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 855,
+      "total": 1709,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 907,
+       "bus": 0,
+       "alojamiento": 348,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 62,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "mcz",
+    "nombre": "Maceió",
+    "region": "Alagoas",
+    "dep": "2027-01-20",
+    "ret": "2027-01-27",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 936
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 936,
+      "total": 1871,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1030,
+       "bus": 0,
+       "alojamiento": 387,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 62,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "mcz",
+    "nombre": "Maceió",
+    "region": "Alagoas",
+    "dep": "2027-02-16",
+    "ret": "2027-02-23",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 986
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 986,
+      "total": 1971,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1154,
+       "bus": 0,
+       "alojamiento": 363,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 62,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "mcz",
+    "nombre": "Maceió",
+    "region": "Alagoas",
+    "dep": "2027-03-15",
+    "ret": "2027-03-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 905
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 905,
+      "total": 1810,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1099,
+       "bus": 0,
+       "alojamiento": 257,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 62,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "mcz",
+    "nombre": "Maceió",
+    "region": "Alagoas",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 682
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 682,
+      "total": 1363,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 680,
+       "bus": 0,
+       "alojamiento": 229,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 62,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "mcz",
+    "nombre": "Maceió",
+    "region": "Alagoas",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 878
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 878,
+      "total": 1755,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1099,
+       "bus": 0,
+       "alojamiento": 202,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 62,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "mcz",
+    "nombre": "Maceió",
+    "region": "Alagoas",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 651
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 651,
+      "total": 1301,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 634,
+       "bus": 0,
+       "alojamiento": 213,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 62,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "mcz",
+    "nombre": "Maceió",
+    "region": "Alagoas",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 969
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 969,
+      "total": 1937,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1176,
+       "bus": 0,
+       "alojamiento": 307,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 62,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "mcz",
+    "nombre": "Maceió",
+    "region": "Alagoas",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 949
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 949,
+      "total": 1898,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1206,
+       "bus": 0,
+       "alojamiento": 238,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 62,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "mcz",
+    "nombre": "Maceió",
+    "region": "Alagoas",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 876
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 876,
+      "total": 1751,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1066,
+       "bus": 0,
+       "alojamiento": 231,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 62,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "maragogi": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "maragogi",
+    "nombre": "Maragogi",
+    "region": "Alagoas",
+    "dep": "2026-11-25",
+    "ret": "2026-12-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 770
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 770,
+      "total": 1540,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 836,
+       "bus": 0,
+       "alojamiento": 241,
+       "comidas": 336,
+       "local": 56,
+       "traslados": 71,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "maragogi",
+    "nombre": "Maragogi",
+    "region": "Alagoas",
+    "dep": "2026-12-08",
+    "ret": "2026-12-15",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 843
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 843,
+      "total": 1686,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 907,
+       "bus": 0,
+       "alojamiento": 316,
+       "comidas": 336,
+       "local": 56,
+       "traslados": 71,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "maragogi",
+    "nombre": "Maragogi",
+    "region": "Alagoas",
+    "dep": "2027-01-20",
+    "ret": "2027-01-27",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 923
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 923,
+      "total": 1846,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1030,
+       "bus": 0,
+       "alojamiento": 353,
+       "comidas": 336,
+       "local": 56,
+       "traslados": 71,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "maragogi",
+    "nombre": "Maragogi",
+    "region": "Alagoas",
+    "dep": "2027-02-16",
+    "ret": "2027-02-23",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 973
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 973,
+      "total": 1945,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1154,
+       "bus": 0,
+       "alojamiento": 328,
+       "comidas": 336,
+       "local": 56,
+       "traslados": 71,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "maragogi",
+    "nombre": "Maragogi",
+    "region": "Alagoas",
+    "dep": "2027-03-15",
+    "ret": "2027-03-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 896
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 896,
+      "total": 1792,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1099,
+       "bus": 0,
+       "alojamiento": 230,
+       "comidas": 336,
+       "local": 56,
+       "traslados": 71,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "maragogi",
+    "nombre": "Maragogi",
+    "region": "Alagoas",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 658
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 658,
+      "total": 1316,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 649,
+       "bus": 0,
+       "alojamiento": 204,
+       "comidas": 336,
+       "local": 56,
+       "traslados": 71,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "maragogi",
+    "nombre": "Maragogi",
+    "region": "Alagoas",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 871
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 871,
+      "total": 1742,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1099,
+       "bus": 0,
+       "alojamiento": 180,
+       "comidas": 336,
+       "local": 56,
+       "traslados": 71,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "maragogi",
+    "nombre": "Maragogi",
+    "region": "Alagoas",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 633
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 633,
+      "total": 1266,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 611,
+       "bus": 0,
+       "alojamiento": 192,
+       "comidas": 336,
+       "local": 56,
+       "traslados": 71,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "maragogi",
+    "nombre": "Maragogi",
+    "region": "Alagoas",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 958
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 958,
+      "total": 1916,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1176,
+       "bus": 0,
+       "alojamiento": 277,
+       "comidas": 336,
+       "local": 56,
+       "traslados": 71,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "maragogi",
+    "nombre": "Maragogi",
+    "region": "Alagoas",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 943
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 943,
+      "total": 1885,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1206,
+       "bus": 0,
+       "alojamiento": 216,
+       "comidas": 336,
+       "local": 56,
+       "traslados": 71,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "maragogi",
+    "nombre": "Maragogi",
+    "region": "Alagoas",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 867
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 867,
+      "total": 1733,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1066,
+       "bus": 0,
+       "alojamiento": 204,
+       "comidas": 336,
+       "local": 56,
+       "traslados": 71,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "nat": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "nat",
+    "nombre": "Natal",
+    "region": "Río Grande do Norte",
+    "dep": "2026-11-25",
+    "ret": "2026-12-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 712
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 712,
+      "total": 1423,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 793,
+       "bus": 0,
+       "alojamiento": 187,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "nat",
+    "nombre": "Natal",
+    "region": "Río Grande do Norte",
+    "dep": "2026-12-09",
+    "ret": "2026-12-16",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 775
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 775,
+      "total": 1550,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 862,
+       "bus": 0,
+       "alojamiento": 245,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "nat",
+    "nombre": "Natal",
+    "region": "Río Grande do Norte",
+    "dep": "2027-01-26",
+    "ret": "2027-02-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 848
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 848,
+      "total": 1695,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 981,
+       "bus": 0,
+       "alojamiento": 271,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "nat",
+    "nombre": "Natal",
+    "region": "Río Grande do Norte",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 859
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 859,
+      "total": 1718,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1026,
+       "bus": 0,
+       "alojamiento": 249,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "nat",
+    "nombre": "Natal",
+    "region": "Río Grande do Norte",
+    "dep": "2027-03-02",
+    "ret": "2027-03-09",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 817
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 817,
+      "total": 1633,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1011,
+       "bus": 0,
+       "alojamiento": 179,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "nat",
+    "nombre": "Natal",
+    "region": "Río Grande do Norte",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 877
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 877,
+      "total": 1753,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1150,
+       "bus": 0,
+       "alojamiento": 160,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "nat",
+    "nombre": "Natal",
+    "region": "Río Grande do Norte",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 590
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 590,
+      "total": 1180,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 598,
+       "bus": 0,
+       "alojamiento": 139,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "nat",
+    "nombre": "Natal",
+    "region": "Río Grande do Norte",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 830
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 830,
+      "total": 1659,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1065,
+       "bus": 0,
+       "alojamiento": 151,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "nat",
+    "nombre": "Natal",
+    "region": "Río Grande do Norte",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 705
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 705,
+      "total": 1409,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 750,
+       "bus": 0,
+       "alojamiento": 216,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "nat",
+    "nombre": "Natal",
+    "region": "Río Grande do Norte",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 669
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 669,
+      "total": 1337,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 727,
+       "bus": 0,
+       "alojamiento": 167,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "nat",
+    "nombre": "Natal",
+    "region": "Río Grande do Norte",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 775
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 775,
+      "total": 1549,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 950,
+       "bus": 0,
+       "alojamiento": 156,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "pip": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "pip",
+    "nombre": "Pipa",
+    "region": "Río Grande do Norte",
+    "dep": "2026-11-25",
+    "ret": "2026-12-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 694
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 694,
+      "total": 1388,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 793,
+       "bus": 0,
+       "alojamiento": 291,
+       "comidas": 238,
+       "local": 42,
+       "traslados": 24,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "pip",
+    "nombre": "Pipa",
+    "region": "Río Grande do Norte",
+    "dep": "2026-12-09",
+    "ret": "2026-12-16",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 766
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 766,
+      "total": 1531,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 862,
+       "bus": 0,
+       "alojamiento": 365,
+       "comidas": 238,
+       "local": 42,
+       "traslados": 24,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "pip",
+    "nombre": "Pipa",
+    "region": "Río Grande do Norte",
+    "dep": "2027-01-26",
+    "ret": "2027-02-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 846
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 846,
+      "total": 1692,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 981,
+       "bus": 0,
+       "alojamiento": 407,
+       "comidas": 238,
+       "local": 42,
+       "traslados": 24,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "pip",
+    "nombre": "Pipa",
+    "region": "Río Grande do Norte",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 859
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 859,
+      "total": 1717,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1026,
+       "bus": 0,
+       "alojamiento": 387,
+       "comidas": 238,
+       "local": 42,
+       "traslados": 24,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "pip",
+    "nombre": "Pipa",
+    "region": "Río Grande do Norte",
+    "dep": "2027-03-02",
+    "ret": "2027-03-09",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 792
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 792,
+      "total": 1584,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1011,
+       "bus": 0,
+       "alojamiento": 269,
+       "comidas": 238,
+       "local": 42,
+       "traslados": 24,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "pip",
+    "nombre": "Pipa",
+    "region": "Río Grande do Norte",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 848
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 848,
+      "total": 1695,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1150,
+       "bus": 0,
+       "alojamiento": 241,
+       "comidas": 238,
+       "local": 42,
+       "traslados": 24,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "pip",
+    "nombre": "Pipa",
+    "region": "Río Grande do Norte",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 550
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 550,
+      "total": 1100,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 582,
+       "bus": 0,
+       "alojamiento": 214,
+       "comidas": 238,
+       "local": 42,
+       "traslados": 24,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "pip",
+    "nombre": "Pipa",
+    "region": "Río Grande do Norte",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 799
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 799,
+      "total": 1597,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1065,
+       "bus": 0,
+       "alojamiento": 228,
+       "comidas": 238,
+       "local": 42,
+       "traslados": 24,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "pip",
+    "nombre": "Pipa",
+    "region": "Río Grande do Norte",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 704
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 704,
+      "total": 1407,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 776,
+       "bus": 0,
+       "alojamiento": 327,
+       "comidas": 238,
+       "local": 42,
+       "traslados": 24,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "pip",
+    "nombre": "Pipa",
+    "region": "Río Grande do Norte",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 636
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 636,
+      "total": 1271,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 708,
+       "bus": 0,
+       "alojamiento": 259,
+       "comidas": 238,
+       "local": 42,
+       "traslados": 24,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "pip",
+    "nombre": "Pipa",
+    "region": "Río Grande do Norte",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 749
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 749,
+      "total": 1497,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 950,
+       "bus": 0,
+       "alojamiento": 243,
+       "comidas": 238,
+       "local": 42,
+       "traslados": 24,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "ssa": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "ssa",
+    "nombre": "Salvador de Bahía",
+    "region": "Bahía",
+    "dep": "2026-11-25",
+    "ret": "2026-12-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 737
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 737,
+      "total": 1473,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 853,
+       "bus": 0,
+       "alojamiento": 177,
+       "comidas": 350,
+       "local": 70,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "ssa",
+    "nombre": "Salvador de Bahía",
+    "region": "Bahía",
+    "dep": "2026-12-09",
+    "ret": "2026-12-16",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 800
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 800,
+      "total": 1599,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 930,
+       "bus": 0,
+       "alojamiento": 226,
+       "comidas": 350,
+       "local": 70,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "ssa",
+    "nombre": "Salvador de Bahía",
+    "region": "Bahía",
+    "dep": "2027-01-27",
+    "ret": "2027-02-03",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 830
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 830,
+      "total": 1660,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 969,
+       "bus": 0,
+       "alojamiento": 248,
+       "comidas": 350,
+       "local": 70,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "ssa",
+    "nombre": "Salvador de Bahía",
+    "region": "Bahía",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 845
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 845,
+      "total": 1690,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1007,
+       "bus": 0,
+       "alojamiento": 240,
+       "comidas": 350,
+       "local": 70,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "ssa",
+    "nombre": "Salvador de Bahía",
+    "region": "Bahía",
+    "dep": "2027-03-02",
+    "ret": "2027-03-09",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 778
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 778,
+      "total": 1555,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 947,
+       "bus": 0,
+       "alojamiento": 165,
+       "comidas": 350,
+       "local": 70,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "ssa",
+    "nombre": "Salvador de Bahía",
+    "region": "Bahía",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 811
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 811,
+      "total": 1622,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1032,
+       "bus": 0,
+       "alojamiento": 147,
+       "comidas": 350,
+       "local": 70,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "ssa",
+    "nombre": "Salvador de Bahía",
+    "region": "Bahía",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 609
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 609,
+      "total": 1218,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 644,
+       "bus": 0,
+       "alojamiento": 131,
+       "comidas": 350,
+       "local": 70,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "ssa",
+    "nombre": "Salvador de Bahía",
+    "region": "Bahía",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 804
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 804,
+      "total": 1607,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 140,
+       "comidas": 350,
+       "local": 70,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "ssa",
+    "nombre": "Salvador de Bahía",
+    "region": "Bahía",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 834
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 834,
+      "total": 1667,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 200,
+       "comidas": 350,
+       "local": 70,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "ssa",
+    "nombre": "Salvador de Bahía",
+    "region": "Bahía",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 670
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 670,
+      "total": 1340,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 737,
+       "bus": 0,
+       "alojamiento": 160,
+       "comidas": 350,
+       "local": 70,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "ssa",
+    "nombre": "Salvador de Bahía",
+    "region": "Bahía",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 774
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 774,
+      "total": 1547,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 956,
+       "bus": 0,
+       "alojamiento": 148,
+       "comidas": 350,
+       "local": 70,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "for": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "for",
+    "nombre": "Fortaleza",
+    "region": "Ceará",
+    "dep": "2026-11-24",
+    "ret": "2026-12-01",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 791
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 791,
+      "total": 1581,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 940,
+       "bus": 0,
+       "alojamiento": 198,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "for",
+    "nombre": "Fortaleza",
+    "region": "Ceará",
+    "dep": "2026-12-08",
+    "ret": "2026-12-15",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 814
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 814,
+      "total": 1628,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 913,
+       "bus": 0,
+       "alojamiento": 272,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "for",
+    "nombre": "Fortaleza",
+    "region": "Ceará",
+    "dep": "2027-01-12",
+    "ret": "2027-01-19",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 914
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 914,
+      "total": 1827,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1085,
+       "bus": 0,
+       "alojamiento": 299,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "for",
+    "nombre": "Fortaleza",
+    "region": "Ceará",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 885
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 885,
+      "total": 1769,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1048,
+       "bus": 0,
+       "alojamiento": 278,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "for",
+    "nombre": "Fortaleza",
+    "region": "Ceará",
+    "dep": "2027-03-24",
+    "ret": "2027-03-31",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 736
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 736,
+      "total": 1471,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 830,
+       "bus": 0,
+       "alojamiento": 198,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "for",
+    "nombre": "Fortaleza",
+    "region": "Ceará",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 865
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 865,
+      "total": 1729,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1113,
+       "bus": 0,
+       "alojamiento": 173,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "for",
+    "nombre": "Fortaleza",
+    "region": "Ceará",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 645
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 645,
+      "total": 1289,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 692,
+       "bus": 0,
+       "alojamiento": 154,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "for",
+    "nombre": "Fortaleza",
+    "region": "Ceará",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 871
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 871,
+      "total": 1741,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1130,
+       "bus": 0,
+       "alojamiento": 168,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "for",
+    "nombre": "Fortaleza",
+    "region": "Ceará",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 752
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 752,
+      "total": 1503,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 818,
+       "bus": 0,
+       "alojamiento": 242,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "for",
+    "nombre": "Fortaleza",
+    "region": "Ceará",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 839
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 839,
+      "total": 1677,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1048,
+       "bus": 0,
+       "alojamiento": 186,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "for",
+    "nombre": "Fortaleza",
+    "region": "Ceará",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 692
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 692,
+      "total": 1383,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 766,
+       "bus": 0,
+       "alojamiento": 174,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "jericoacoara": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "jericoacoara",
+    "nombre": "Jericoacoara",
+    "region": "Ceará",
+    "dep": "2026-11-24",
+    "ret": "2026-12-01",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 913
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 913,
+      "total": 1825,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 940,
+       "bus": 0,
+       "alojamiento": 231,
+       "comidas": 448,
+       "local": 56,
+       "traslados": 150,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "jericoacoara",
+    "nombre": "Jericoacoara",
+    "region": "Ceará",
+    "dep": "2026-12-08",
+    "ret": "2026-12-15",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 942
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 942,
+      "total": 1883,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 913,
+       "bus": 0,
+       "alojamiento": 316,
+       "comidas": 448,
+       "local": 56,
+       "traslados": 150,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "jericoacoara",
+    "nombre": "Jericoacoara",
+    "region": "Ceará",
+    "dep": "2027-01-12",
+    "ret": "2027-01-19",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 1045
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 1045,
+      "total": 2090,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1085,
+       "bus": 0,
+       "alojamiento": 351,
+       "comidas": 448,
+       "local": 56,
+       "traslados": 150,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "jericoacoara",
+    "nombre": "Jericoacoara",
+    "region": "Ceará",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 1015
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 1015,
+      "total": 2029,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1048,
+       "bus": 0,
+       "alojamiento": 327,
+       "comidas": 448,
+       "local": 56,
+       "traslados": 150,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "jericoacoara",
+    "nombre": "Jericoacoara",
+    "region": "Ceará",
+    "dep": "2027-03-24",
+    "ret": "2027-03-31",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 858
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 858,
+      "total": 1715,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 830,
+       "bus": 0,
+       "alojamiento": 231,
+       "comidas": 448,
+       "local": 56,
+       "traslados": 150,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "jericoacoara",
+    "nombre": "Jericoacoara",
+    "region": "Ceará",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 987
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 987,
+      "total": 1974,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1113,
+       "bus": 0,
+       "alojamiento": 207,
+       "comidas": 448,
+       "local": 56,
+       "traslados": 150,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "jericoacoara",
+    "nombre": "Jericoacoara",
+    "region": "Ceará",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 751
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 751,
+      "total": 1501,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 666,
+       "bus": 0,
+       "alojamiento": 181,
+       "comidas": 448,
+       "local": 56,
+       "traslados": 150,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "jericoacoara",
+    "nombre": "Jericoacoara",
+    "region": "Ceará",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 989
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 989,
+      "total": 1978,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1130,
+       "bus": 0,
+       "alojamiento": 194,
+       "comidas": 448,
+       "local": 56,
+       "traslados": 150,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "jericoacoara",
+    "nombre": "Jericoacoara",
+    "region": "Ceará",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 888
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 888,
+      "total": 1776,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 843,
+       "bus": 0,
+       "alojamiento": 279,
+       "comidas": 448,
+       "local": 56,
+       "traslados": 150,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "jericoacoara",
+    "nombre": "Jericoacoara",
+    "region": "Ceará",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 961
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 961,
+      "total": 1921,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 1048,
+       "bus": 0,
+       "alojamiento": 219,
+       "comidas": 448,
+       "local": 56,
+       "traslados": 150,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "jericoacoara",
+    "nombre": "Jericoacoara",
+    "region": "Ceará",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 813
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 813,
+      "total": 1626,
+      "dur": "unas 10 h con escala",
+      "parts": {
+       "pasajes": 766,
+       "bus": 0,
+       "alojamiento": 206,
+       "comidas": 448,
+       "local": 56,
+       "traslados": 150,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "morro": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "morro",
+    "nombre": "Morro de São Paulo",
+    "region": "Bahía",
+    "dep": "2026-11-25",
+    "ret": "2026-12-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 741
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 741,
+      "total": 1481,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 853,
+       "bus": 0,
+       "alojamiento": 276,
+       "comidas": 266,
+       "local": 14,
+       "traslados": 72,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "morro",
+    "nombre": "Morro de São Paulo",
+    "region": "Bahía",
+    "dep": "2026-12-09",
+    "ret": "2026-12-16",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 823
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 823,
+      "total": 1646,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 930,
+       "bus": 0,
+       "alojamiento": 364,
+       "comidas": 266,
+       "local": 14,
+       "traslados": 72,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "morro",
+    "nombre": "Morro de São Paulo",
+    "region": "Bahía",
+    "dep": "2027-01-27",
+    "ret": "2027-02-03",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 858
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 858,
+      "total": 1716,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 969,
+       "bus": 0,
+       "alojamiento": 395,
+       "comidas": 266,
+       "local": 14,
+       "traslados": 72,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "morro",
+    "nombre": "Morro de São Paulo",
+    "region": "Bahía",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 867
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 867,
+      "total": 1734,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1007,
+       "bus": 0,
+       "alojamiento": 375,
+       "comidas": 266,
+       "local": 14,
+       "traslados": 72,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "morro",
+    "nombre": "Morro de São Paulo",
+    "region": "Bahía",
+    "dep": "2027-03-02",
+    "ret": "2027-03-09",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 782
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 782,
+      "total": 1563,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 947,
+       "bus": 0,
+       "alojamiento": 264,
+       "comidas": 266,
+       "local": 14,
+       "traslados": 72,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "morro",
+    "nombre": "Morro de São Paulo",
+    "region": "Bahía",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 810
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 810,
+      "total": 1620,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1032,
+       "bus": 0,
+       "alojamiento": 236,
+       "comidas": 266,
+       "local": 14,
+       "traslados": 72,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "morro",
+    "nombre": "Morro de São Paulo",
+    "region": "Bahía",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 619
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 619,
+      "total": 1238,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 678,
+       "bus": 0,
+       "alojamiento": 208,
+       "comidas": 266,
+       "local": 14,
+       "traslados": 72,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "morro",
+    "nombre": "Morro de São Paulo",
+    "region": "Bahía",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 800
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 800,
+      "total": 1599,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 223,
+       "comidas": 266,
+       "local": 14,
+       "traslados": 72,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "morro",
+    "nombre": "Morro de São Paulo",
+    "region": "Bahía",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 849
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 849,
+      "total": 1698,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 322,
+       "comidas": 266,
+       "local": 14,
+       "traslados": 72,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "morro",
+    "nombre": "Morro de São Paulo",
+    "region": "Bahía",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 698
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 698,
+      "total": 1395,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 792,
+       "bus": 0,
+       "alojamiento": 251,
+       "comidas": 266,
+       "local": 14,
+       "traslados": 72,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "morro",
+    "nombre": "Morro de São Paulo",
+    "region": "Bahía",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 774
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 774,
+      "total": 1547,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 956,
+       "bus": 0,
+       "alojamiento": 239,
+       "comidas": 266,
+       "local": 14,
+       "traslados": 72,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "portoseguro": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "portoseguro",
+    "nombre": "Porto Seguro",
+    "region": "Bahía",
+    "dep": "2026-11-25",
+    "ret": "2026-12-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 871
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 871,
+      "total": 1741,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 853,
+       "bus": 0,
+       "alojamiento": 185,
+       "comidas": 462,
+       "local": 56,
+       "traslados": 185,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "portoseguro",
+    "nombre": "Porto Seguro",
+    "region": "Bahía",
+    "dep": "2026-12-09",
+    "ret": "2026-12-16",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 939
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 939,
+      "total": 1878,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 930,
+       "bus": 0,
+       "alojamiento": 245,
+       "comidas": 462,
+       "local": 56,
+       "traslados": 185,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "portoseguro",
+    "nombre": "Porto Seguro",
+    "region": "Bahía",
+    "dep": "2027-01-27",
+    "ret": "2027-02-03",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 965
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 965,
+      "total": 1930,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 969,
+       "bus": 0,
+       "alojamiento": 258,
+       "comidas": 462,
+       "local": 56,
+       "traslados": 185,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "portoseguro",
+    "nombre": "Porto Seguro",
+    "region": "Bahía",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 981
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 981,
+      "total": 1962,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1007,
+       "bus": 0,
+       "alojamiento": 252,
+       "comidas": 462,
+       "local": 56,
+       "traslados": 185,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "portoseguro",
+    "nombre": "Porto Seguro",
+    "region": "Bahía",
+    "dep": "2027-03-02",
+    "ret": "2027-03-09",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 916
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 916,
+      "total": 1831,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 947,
+       "bus": 0,
+       "alojamiento": 181,
+       "comidas": 462,
+       "local": 56,
+       "traslados": 185,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "portoseguro",
+    "nombre": "Porto Seguro",
+    "region": "Bahía",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 945
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 945,
+      "total": 1890,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1032,
+       "bus": 0,
+       "alojamiento": 155,
+       "comidas": 462,
+       "local": 56,
+       "traslados": 185,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "portoseguro",
+    "nombre": "Porto Seguro",
+    "region": "Bahía",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 755
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 755,
+      "total": 1510,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 666,
+       "bus": 0,
+       "alojamiento": 141,
+       "comidas": 462,
+       "local": 56,
+       "traslados": 185,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "portoseguro",
+    "nombre": "Porto Seguro",
+    "region": "Bahía",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 937
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 937,
+      "total": 1873,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 146,
+       "comidas": 462,
+       "local": 56,
+       "traslados": 185,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "portoseguro",
+    "nombre": "Porto Seguro",
+    "region": "Bahía",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 971
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 971,
+      "total": 1942,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 215,
+       "comidas": 462,
+       "local": 56,
+       "traslados": 185,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "portoseguro",
+    "nombre": "Porto Seguro",
+    "region": "Bahía",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 837
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 837,
+      "total": 1673,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 800,
+       "bus": 0,
+       "alojamiento": 170,
+       "comidas": 462,
+       "local": 56,
+       "traslados": 185,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "portoseguro",
+    "nombre": "Porto Seguro",
+    "region": "Bahía",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 909
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 909,
+      "total": 1818,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 956,
+       "bus": 0,
+       "alojamiento": 159,
+       "comidas": 462,
+       "local": 56,
+       "traslados": 185,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "itacare": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "itacare",
+    "nombre": "Itacaré",
+    "region": "Bahía",
+    "dep": "2026-11-25",
+    "ret": "2026-12-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 941
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 941,
+      "total": 1881,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 853,
+       "bus": 0,
+       "alojamiento": 329,
+       "comidas": 448,
+       "local": 70,
+       "traslados": 181,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "itacare",
+    "nombre": "Itacaré",
+    "region": "Bahía",
+    "dep": "2026-12-09",
+    "ret": "2026-12-16",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 1026
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 1026,
+      "total": 2052,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 930,
+       "bus": 0,
+       "alojamiento": 423,
+       "comidas": 448,
+       "local": 70,
+       "traslados": 181,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "itacare",
+    "nombre": "Itacaré",
+    "region": "Bahía",
+    "dep": "2027-01-27",
+    "ret": "2027-02-03",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 1064
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 1064,
+      "total": 2127,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 969,
+       "bus": 0,
+       "alojamiento": 459,
+       "comidas": 448,
+       "local": 70,
+       "traslados": 181,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "itacare",
+    "nombre": "Itacaré",
+    "region": "Bahía",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 1074
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 1074,
+      "total": 2148,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1007,
+       "bus": 0,
+       "alojamiento": 442,
+       "comidas": 448,
+       "local": 70,
+       "traslados": 181,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "itacare",
+    "nombre": "Itacaré",
+    "region": "Bahía",
+    "dep": "2027-03-02",
+    "ret": "2027-03-09",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 979
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 979,
+      "total": 1958,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 947,
+       "bus": 0,
+       "alojamiento": 312,
+       "comidas": 448,
+       "local": 70,
+       "traslados": 181,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "itacare",
+    "nombre": "Itacaré",
+    "region": "Bahía",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 1005
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 1005,
+      "total": 2009,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1032,
+       "bus": 0,
+       "alojamiento": 278,
+       "comidas": 448,
+       "local": 70,
+       "traslados": 181,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "itacare",
+    "nombre": "Itacaré",
+    "region": "Bahía",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 814
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 814,
+      "total": 1627,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 683,
+       "bus": 0,
+       "alojamiento": 245,
+       "comidas": 448,
+       "local": 70,
+       "traslados": 181,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "itacare",
+    "nombre": "Itacaré",
+    "region": "Bahía",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 992
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 992,
+      "total": 1984,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 261,
+       "comidas": 448,
+       "local": 70,
+       "traslados": 181,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "itacare",
+    "nombre": "Itacaré",
+    "region": "Bahía",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 1050
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 1050,
+      "total": 2099,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 376,
+       "comidas": 448,
+       "local": 70,
+       "traslados": 181,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "itacare",
+    "nombre": "Itacaré",
+    "region": "Bahía",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 912
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 912,
+      "total": 1823,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 828,
+       "bus": 0,
+       "alojamiento": 296,
+       "comidas": 448,
+       "local": 70,
+       "traslados": 181,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "itacare",
+    "nombre": "Itacaré",
+    "region": "Bahía",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 967
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 967,
+      "total": 1933,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 956,
+       "bus": 0,
+       "alojamiento": 278,
+       "comidas": 448,
+       "local": 70,
+       "traslados": 181,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "forte": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "forte",
+    "nombre": "Praia do Forte",
+    "region": "Bahía",
+    "dep": "2026-11-25",
+    "ret": "2026-12-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 800
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 800,
+      "total": 1600,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 853,
+       "bus": 0,
+       "alojamiento": 401,
+       "comidas": 266,
+       "local": 42,
+       "traslados": 38,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "forte",
+    "nombre": "Praia do Forte",
+    "region": "Bahía",
+    "dep": "2026-12-09",
+    "ret": "2026-12-16",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 900
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 900,
+      "total": 1800,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 930,
+       "bus": 0,
+       "alojamiento": 524,
+       "comidas": 266,
+       "local": 42,
+       "traslados": 38,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "forte",
+    "nombre": "Praia do Forte",
+    "region": "Bahía",
+    "dep": "2027-01-27",
+    "ret": "2027-02-03",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 942
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 942,
+      "total": 1883,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 969,
+       "bus": 0,
+       "alojamiento": 568,
+       "comidas": 266,
+       "local": 42,
+       "traslados": 38,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "forte",
+    "nombre": "Praia do Forte",
+    "region": "Bahía",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 947
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 947,
+      "total": 1894,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1007,
+       "bus": 0,
+       "alojamiento": 541,
+       "comidas": 266,
+       "local": 42,
+       "traslados": 38,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "forte",
+    "nombre": "Praia do Forte",
+    "region": "Bahía",
+    "dep": "2027-03-02",
+    "ret": "2027-03-09",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 837
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 837,
+      "total": 1674,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 947,
+       "bus": 0,
+       "alojamiento": 381,
+       "comidas": 266,
+       "local": 42,
+       "traslados": 38,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "forte",
+    "nombre": "Praia do Forte",
+    "region": "Bahía",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 860
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 860,
+      "total": 1720,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1032,
+       "bus": 0,
+       "alojamiento": 342,
+       "comidas": 266,
+       "local": 42,
+       "traslados": 38,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "forte",
+    "nombre": "Praia do Forte",
+    "region": "Bahía",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 656
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 656,
+      "total": 1311,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 662,
+       "bus": 0,
+       "alojamiento": 303,
+       "comidas": 266,
+       "local": 42,
+       "traslados": 38,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "forte",
+    "nombre": "Praia do Forte",
+    "region": "Bahía",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 846
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 846,
+      "total": 1691,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 321,
+       "comidas": 266,
+       "local": 42,
+       "traslados": 38,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "forte",
+    "nombre": "Praia do Forte",
+    "region": "Bahía",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 916
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 916,
+      "total": 1831,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 461,
+       "comidas": 266,
+       "local": 42,
+       "traslados": 38,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "forte",
+    "nombre": "Praia do Forte",
+    "region": "Bahía",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 765
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 765,
+      "total": 1530,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 821,
+       "bus": 0,
+       "alojamiento": 363,
+       "comidas": 266,
+       "local": 42,
+       "traslados": 38,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "forte",
+    "nombre": "Praia do Forte",
+    "region": "Bahía",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 820
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 820,
+      "total": 1640,
+      "dur": "unas 8 h con escala",
+      "parts": {
+       "pasajes": 956,
+       "bus": 0,
+       "alojamiento": 338,
+       "comidas": 266,
+       "local": 42,
+       "traslados": 38,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "ajuda": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "ajuda",
+    "nombre": "Arraial d’Ajuda",
+    "region": "Bahía",
+    "dep": "2026-11-25",
+    "ret": "2026-12-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 745
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 745,
+      "total": 1490,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 853,
+       "bus": 0,
+       "alojamiento": 224,
+       "comidas": 266,
+       "local": 56,
+       "traslados": 91,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "ajuda",
+    "nombre": "Arraial d’Ajuda",
+    "region": "Bahía",
+    "dep": "2026-12-09",
+    "ret": "2026-12-16",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 818
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 818,
+      "total": 1635,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 930,
+       "bus": 0,
+       "alojamiento": 292,
+       "comidas": 266,
+       "local": 56,
+       "traslados": 91,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "ajuda",
+    "nombre": "Arraial d’Ajuda",
+    "region": "Bahía",
+    "dep": "2027-01-27",
+    "ret": "2027-02-03",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 851
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 851,
+      "total": 1702,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 969,
+       "bus": 0,
+       "alojamiento": 320,
+       "comidas": 266,
+       "local": 56,
+       "traslados": 91,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "ajuda",
+    "nombre": "Arraial d’Ajuda",
+    "region": "Bahía",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 863
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 863,
+      "total": 1725,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1007,
+       "bus": 0,
+       "alojamiento": 305,
+       "comidas": 266,
+       "local": 56,
+       "traslados": 91,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "ajuda",
+    "nombre": "Arraial d’Ajuda",
+    "region": "Bahía",
+    "dep": "2027-03-02",
+    "ret": "2027-03-09",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 787
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 787,
+      "total": 1574,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 947,
+       "bus": 0,
+       "alojamiento": 214,
+       "comidas": 266,
+       "local": 56,
+       "traslados": 91,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "ajuda",
+    "nombre": "Arraial d’Ajuda",
+    "region": "Bahía",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 819
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 819,
+      "total": 1638,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1032,
+       "bus": 0,
+       "alojamiento": 193,
+       "comidas": 266,
+       "local": 56,
+       "traslados": 91,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "ajuda",
+    "nombre": "Arraial d’Ajuda",
+    "region": "Bahía",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 643
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 643,
+      "total": 1285,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 705,
+       "bus": 0,
+       "alojamiento": 167,
+       "comidas": 266,
+       "local": 56,
+       "traslados": 91,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "ajuda",
+    "nombre": "Arraial d’Ajuda",
+    "region": "Bahía",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 809
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 809,
+      "total": 1618,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 181,
+       "comidas": 266,
+       "local": 56,
+       "traslados": 91,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "ajuda",
+    "nombre": "Arraial d’Ajuda",
+    "region": "Bahía",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 849
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 849,
+      "total": 1697,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 260,
+       "comidas": 266,
+       "local": 56,
+       "traslados": 91,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "ajuda",
+    "nombre": "Arraial d’Ajuda",
+    "region": "Bahía",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 719
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 719,
+      "total": 1438,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 824,
+       "bus": 0,
+       "alojamiento": 201,
+       "comidas": 266,
+       "local": 56,
+       "traslados": 91,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "ajuda",
+    "nombre": "Arraial d’Ajuda",
+    "region": "Bahía",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 781
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 781,
+      "total": 1561,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 956,
+       "bus": 0,
+       "alojamiento": 192,
+       "comidas": 266,
+       "local": 56,
+       "traslados": 91,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "trancoso": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "trancoso",
+    "nombre": "Trancoso",
+    "region": "Bahía",
+    "dep": "2026-11-25",
+    "ret": "2026-12-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 896
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 896,
+      "total": 1791,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 853,
+       "bus": 0,
+       "alojamiento": 249,
+       "comidas": 532,
+       "local": 70,
+       "traslados": 87,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "trancoso",
+    "nombre": "Trancoso",
+    "region": "Bahía",
+    "dep": "2026-12-09",
+    "ret": "2026-12-16",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 976
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 976,
+      "total": 1952,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 930,
+       "bus": 0,
+       "alojamiento": 333,
+       "comidas": 532,
+       "local": 70,
+       "traslados": 87,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "trancoso",
+    "nombre": "Trancoso",
+    "region": "Bahía",
+    "dep": "2027-01-27",
+    "ret": "2027-02-03",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 1008
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 1008,
+      "total": 2016,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 969,
+       "bus": 0,
+       "alojamiento": 358,
+       "comidas": 532,
+       "local": 70,
+       "traslados": 87,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "trancoso",
+    "nombre": "Trancoso",
+    "region": "Bahía",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 1019
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 1019,
+      "total": 2038,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1007,
+       "bus": 0,
+       "alojamiento": 342,
+       "comidas": 532,
+       "local": 70,
+       "traslados": 87,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "trancoso",
+    "nombre": "Trancoso",
+    "region": "Bahía",
+    "dep": "2027-03-02",
+    "ret": "2027-03-09",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 938
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 938,
+      "total": 1876,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 947,
+       "bus": 0,
+       "alojamiento": 240,
+       "comidas": 532,
+       "local": 70,
+       "traslados": 87,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "trancoso",
+    "nombre": "Trancoso",
+    "region": "Bahía",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 969
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 969,
+      "total": 1937,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1032,
+       "bus": 0,
+       "alojamiento": 216,
+       "comidas": 532,
+       "local": 70,
+       "traslados": 87,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "trancoso",
+    "nombre": "Trancoso",
+    "region": "Bahía",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 788
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 788,
+      "total": 1575,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 696,
+       "bus": 0,
+       "alojamiento": 190,
+       "comidas": 532,
+       "local": 70,
+       "traslados": 87,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "trancoso",
+    "nombre": "Trancoso",
+    "region": "Bahía",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 958
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 958,
+      "total": 1915,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 202,
+       "comidas": 532,
+       "local": 70,
+       "traslados": 87,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "trancoso",
+    "nombre": "Trancoso",
+    "region": "Bahía",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 1002
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 1002,
+      "total": 2004,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1024,
+       "bus": 0,
+       "alojamiento": 291,
+       "comidas": 532,
+       "local": 70,
+       "traslados": 87,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "trancoso",
+    "nombre": "Trancoso",
+    "region": "Bahía",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 879
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 879,
+      "total": 1758,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 838,
+       "bus": 0,
+       "alojamiento": 231,
+       "comidas": 532,
+       "local": 70,
+       "traslados": 87,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "trancoso",
+    "nombre": "Trancoso",
+    "region": "Bahía",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 930
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 930,
+      "total": 1860,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 956,
+       "bus": 0,
+       "alojamiento": 215,
+       "comidas": 532,
+       "local": 70,
+       "traslados": 87,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ],
+  "rec": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "rec",
+    "nombre": "Recife",
+    "region": "Pernambuco",
+    "dep": "2026-11-04",
+    "ret": "2026-11-11",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 762
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 762,
+      "total": 1524,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 872,
+       "bus": 0,
+       "alojamiento": 237,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "rec",
+    "nombre": "Recife",
+    "region": "Pernambuco",
+    "dep": "2026-12-08",
+    "ret": "2026-12-15",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 842
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 842,
+      "total": 1683,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 943,
+       "bus": 0,
+       "alojamiento": 325,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "rec",
+    "nombre": "Recife",
+    "region": "Pernambuco",
+    "dep": "2027-01-27",
+    "ret": "2027-02-03",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 823
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 823,
+      "total": 1646,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 876,
+       "bus": 0,
+       "alojamiento": 355,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "rec",
+    "nombre": "Recife",
+    "region": "Pernambuco",
+    "dep": "2027-02-23",
+    "ret": "2027-03-02",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 789
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 789,
+      "total": 1578,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 840,
+       "bus": 0,
+       "alojamiento": 323,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "rec",
+    "nombre": "Recife",
+    "region": "Pernambuco",
+    "dep": "2027-03-02",
+    "ret": "2027-03-09",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 747
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 747,
+      "total": 1494,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 840,
+       "bus": 0,
+       "alojamiento": 239,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "rec",
+    "nombre": "Recife",
+    "region": "Pernambuco",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 863
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 863,
+      "total": 1726,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1097,
+       "bus": 0,
+       "alojamiento": 214,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "rec",
+    "nombre": "Recife",
+    "region": "Pernambuco",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 814
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 814,
+      "total": 1627,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1026,
+       "bus": 0,
+       "alojamiento": 186,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "rec",
+    "nombre": "Recife",
+    "region": "Pernambuco",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 820
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 820,
+      "total": 1640,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1026,
+       "bus": 0,
+       "alojamiento": 199,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "rec",
+    "nombre": "Recife",
+    "region": "Pernambuco",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 864
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 864,
+      "total": 1728,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1026,
+       "bus": 0,
+       "alojamiento": 287,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "rec",
+    "nombre": "Recife",
+    "region": "Pernambuco",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 786
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 786,
+      "total": 1571,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 933,
+       "bus": 0,
+       "alojamiento": 223,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "rec",
+    "nombre": "Recife",
+    "region": "Pernambuco",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 674
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 674,
+      "total": 1347,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 723,
+       "bus": 0,
+       "alojamiento": 209,
+       "comidas": 350,
+       "local": 42,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   }
+  ],
+  "joaopessoa": [
+   {
+    "mes": "noviembre 2026",
+    "clave": "joaopessoa",
+    "nombre": "João Pessoa",
+    "region": "Paraíba",
+    "dep": "2026-11-04",
+    "ret": "2026-11-11",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 899
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 899,
+      "total": 1798,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1155,
+       "bus": 0,
+       "alojamiento": 200,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "diciembre 2026",
+    "clave": "joaopessoa",
+    "nombre": "João Pessoa",
+    "region": "Paraíba",
+    "dep": "2026-12-08",
+    "ret": "2026-12-15",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 889
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 889,
+      "total": 1778,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1063,
+       "bus": 0,
+       "alojamiento": 272,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "enero 2027",
+    "clave": "joaopessoa",
+    "nombre": "João Pessoa",
+    "region": "Paraíba",
+    "dep": "2027-01-27",
+    "ret": "2027-02-03",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 919
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 919,
+      "total": 1838,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1097,
+       "bus": 0,
+       "alojamiento": 298,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "febrero 2027",
+    "clave": "joaopessoa",
+    "nombre": "João Pessoa",
+    "region": "Paraíba",
+    "dep": "2027-02-15",
+    "ret": "2027-02-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 942
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 942,
+      "total": 1883,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1155,
+       "bus": 0,
+       "alojamiento": 285,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "marzo 2027",
+    "clave": "joaopessoa",
+    "nombre": "João Pessoa",
+    "region": "Paraíba",
+    "dep": "2027-03-10",
+    "ret": "2027-03-17",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 900
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 900,
+      "total": 1799,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1155,
+       "bus": 0,
+       "alojamiento": 201,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "abril 2027",
+    "clave": "joaopessoa",
+    "nombre": "João Pessoa",
+    "region": "Paraíba",
+    "dep": "2027-04-15",
+    "ret": "2027-04-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 698
+    },
+    "vuelo": "estimado",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 698,
+      "total": 1396,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 773,
+       "bus": 0,
+       "alojamiento": 180,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": false
+     }
+    }
+   },
+   {
+    "mes": "mayo 2027",
+    "clave": "joaopessoa",
+    "nombre": "João Pessoa",
+    "region": "Paraíba",
+    "dep": "2027-05-15",
+    "ret": "2027-05-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 879
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 879,
+      "total": 1757,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1155,
+       "bus": 0,
+       "alojamiento": 159,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "junio 2027",
+    "clave": "joaopessoa",
+    "nombre": "João Pessoa",
+    "region": "Paraíba",
+    "dep": "2027-06-15",
+    "ret": "2027-06-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 884
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 884,
+      "total": 1767,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1155,
+       "bus": 0,
+       "alojamiento": 169,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "julio 2027",
+    "clave": "joaopessoa",
+    "nombre": "João Pessoa",
+    "region": "Paraíba",
+    "dep": "2027-07-15",
+    "ret": "2027-07-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 921
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 921,
+      "total": 1842,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1155,
+       "bus": 0,
+       "alojamiento": 244,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "agosto 2027",
+    "clave": "joaopessoa",
+    "nombre": "João Pessoa",
+    "region": "Paraíba",
+    "dep": "2027-08-15",
+    "ret": "2027-08-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 894
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 894,
+      "total": 1788,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1155,
+       "bus": 0,
+       "alojamiento": 190,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   },
+   {
+    "mes": "septiembre 2027",
+    "clave": "joaopessoa",
+    "nombre": "João Pessoa",
+    "region": "Paraíba",
+    "dep": "2027-09-15",
+    "ret": "2027-09-22",
+    "masBarato": {
+     "modo": "avion_mvd",
+     "pp": 1008
+    },
+    "vuelo": "real",
+    "hotel": "calibrado",
+    "porMedio": {
+     "avion_mvd": {
+      "pp": 1008,
+      "total": 2015,
+      "dur": "unas 9 h con escala",
+      "parts": {
+       "pasajes": 1393,
+       "bus": 0,
+       "alojamiento": 179,
+       "comidas": 364,
+       "local": 56,
+       "traslados": 23,
+       "auto": 0,
+       "tours": 0
+      },
+      "vueloReal": true
+     }
+    }
+   }
+  ]
+ }
 }
