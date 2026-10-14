@@ -15,9 +15,7 @@
   function r2(n) { return Math.round(n * 100) / 100; }
   function opts(map, sel) { return Object.keys(map).map(function (k) { return '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + esc(map[k]) + '</option>'; }).join(''); }
   function digitos(t) { return String(t || '').replace(/\D/g, ''); }
-  function waUrl(tel, texto) { var d = digitos(tel); return 'https://wa.me/' + d + '?text=' + encodeURIComponent(texto); }
-  /* La confirmacion de reserva ya escrita, la misma que arma lib/pedidos.js para el email. Sin emojis: WhatsApp Web
-     los muestra como "?" cuando llegan dentro de un enlace wa.me. */
+  /* La confirmacion de reserva ya escrita, la misma que arma lib/pedidos.js para el email. */
   function mensajeConfirmacion(p) {
     var items = (p.items || []).filter(function (i) { return i.estado !== 'cancelado' && i.nombre; });
     var fechas = p.fechas_txt || (p.fecha_ida ? fecha(p.fecha_ida) + (p.fecha_vuelta ? ' al ' + fecha(p.fecha_vuelta) : '') : '');
@@ -179,7 +177,7 @@
       h += '<tr class="row" data-abrir="' + esc(p.id) + '">' +
         '<td data-l="Pedido"><b>' + esc(p.ref) + '</b><span class="sub">' + esc(fechaHora(p.created_at)) + (p.origen === 'manual' ? ' · manual' : '') + '</span></td>' +
         '<td data-l="Cliente"><b>' + esc(p.cliente_nombre || '—') + '</b><span class="sub">' + esc(p.cliente_telefono) + '</span>' +
-          (p.cliente_telefono && items.length && p.estado !== 'cancelado' ? '<a class="lnk sub" target="_blank" rel="noopener" href="' + esc(waUrl(p.cliente_telefono, mensajeConfirmacion(p))) + '">Confirmar por WhatsApp</a>' : '') + '</td>' +
+          (p.cliente_telefono && items.length && p.estado !== 'cancelado' ? '<a class="lnk sub" href="#" data-wa-enviar="confirmacion" data-wa-pedido="' + esc(p.id) + '">Confirmar por WhatsApp</a>' : '') + '</td>' +
         '<td data-l="Viaje">' + esc(p.destino || '—') + '<span class="sub">' + fecha(p.fecha_ida) + ' → ' + fecha(p.fecha_vuelta) + ' · ' + esc(p.personas) + ' pers.</span></td>' +
         '<td data-l="Servicios" style="text-align:left">' + servs + '</td>' +
         '<td class="num" data-l="Total"><b>' + usd(c.total_usd) + '</b></td>' +
@@ -569,19 +567,53 @@
     L.push('', 'Cuando pagues, mandanos el comprobante por acá. El resto se abona antes del viaje.', 'Ref: ' + (p.ref || ''));
     return L.join('\n');
   }
+  function mensajeProveedor(p, it, pr) {
+    return 'Hola' + (pr && pr.contacto ? ' ' + pr.contacto : '') + '! Te consulto disponibilidad para: ' + it.nombre + (it.detalle ? ' (' + it.detalle + ')' : '') +
+      '. Fecha: ' + fecha(p.fecha_ida) + (p.fecha_vuelta ? ' al ' + fecha(p.fecha_vuelta) : '') + '. Pasajeros: ' + p.personas + '. A nombre de ' + p.cliente_nombre + '. Ref ' + p.ref + '. ¡Gracias!';
+  }
+  /* Los botones de WhatsApp de la ficha salen por la Cloud API (lib/wa-panel.js): con la ventana de 24 h abierta va el
+     texto de siempre; si no, la plantilla, con estos datos en una linea cada uno. */
+  var WA_QUE = { confirmacion: 'la confirmación', sena: 'el pedido de seña', saludo: 'un saludo por su pedido', proveedor: 'el pedido de reserva' };
+  function datosWa(tipo, p, i) {
+    var nombre = String(p.cliente_nombre || '').trim().split(' ')[0] || 'viajero';
+    var fechas = p.fechas_txt || (p.fecha_ida ? fecha(p.fecha_ida) + (p.fecha_vuelta ? ' al ' + fecha(p.fecha_vuelta) : '') : '');
+    var personas = p.personas_txt || (p.personas ? p.personas + (p.personas == 1 ? ' persona' : ' personas') : '');
+    var items = (p.items || []).filter(function (x) { return x.estado !== 'cancelado' && x.nombre; });
+    if (tipo === 'confirmacion') return { texto: mensajeConfirmacion(p), params: [nombre, [p.destino, fechas, personas].filter(Boolean).join(' · '), items.map(function (x) { return x.nombre + (x.detalle ? ' (' + x.detalle + ')' : ''); }).join('; '), usd(calc(p).total), p.ref] };
+    if (tipo === 'sena') {
+      var c = calc(p), m = S.senaMoneda, dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
+      var formas = [dp.transferencia && 'transferencia ' + dp.transferencia, dp.prex && 'Prex ' + dp.prex, dp.pix && 'Pix ' + dp.pix, dp.abitab_redpagos && 'Abitab/Redpagos ' + dp.abitab_redpagos,
+        'tarjeta de crédito con link de Mercado Pago por ' + plata(r2(c.senaPend * (1 + recargoTarjeta())), m)].filter(Boolean).join('; ');
+      return { texto: mensajeSena(p), params: [nombre, p.destino || 'Brasil', plata(c.senaPend, m), formas, p.ref] };
+    }
+    if (tipo === 'saludo') return { texto: 'Hola ' + nombre + '! Te escribimos de CuántoSale por tu pedido ' + p.ref + '.', params: [nombre, p.ref] };
+    var it = (p.items || [])[i] || {}, pr = S.datos.proveedores.filter(function (x) { return x.id === it.proveedor_id; })[0] || {};
+    return { texto: mensajeProveedor(p, it, pr), params: [pr.contacto || pr.nombre || 'equipe', it.nombre + (it.detalle ? ' (' + it.detalle + ')' : ''), fechas, String(p.personas || ''), p.cliente_nombre || nombre, p.ref], a: pr.nombre };
+  }
+  function enviarWa(tipo, id, i) {
+    var p = S.draft && S.draft.id === id ? S.draft : (S.datos.pedidos || []).filter(function (x) { return x.id === id; })[0];
+    if (!p) return;
+    if (S.draft && S.draft.id === id && S.dirty) { alert('Guardá los cambios del pedido antes de mandar el WhatsApp.'); return; }
+    var d = datosWa(tipo, p, i);
+    if (!confirm('¿Mandarle ' + WA_QUE[tipo] + ' a ' + (d.a || p.cliente_nombre || 'el cliente') + ' por WhatsApp?')) return;
+    toast('Enviando…');
+    api('whatsapp/enviar', { tipo: tipo, pedido_id: id, item: i, texto: d.texto, params: d.params })
+      .then(function (r) { toast(r.modo === 'texto' ? 'Enviado por WhatsApp' : 'Enviado con la plantilla ' + r.plantilla + ' (no escribió en las últimas 24 h)'); })
+      .catch(function (e) { alert(e.message); });
+  }
   function senaHtml(p) {
     var c = calc(p);
     if (!c.sena) return '<p class="sub">Este pedido no lleva seña: solo los traslados (50 %) y los tours (25 %) se señan.</p>';
     var m = S.senaMoneda, dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
     var faltan = !dp.transferencia && !dp.prex && !dp.pix && !dp.abitab_redpagos;
     var sinTasa = m !== 'USD' && enMoneda(1, m) === null;
-    var wa = p.cliente_telefono && c.senaPend > 0 ? waUrl(p.cliente_telefono, mensajeSena(p)) : '';
+    var wa = p.cliente_telefono && c.senaPend > 0 && p.id;
     return '<div class="cuentas"><div><small>Seña del pedido</small><b>' + usd(c.sena) + '</b></div>' +
       '<div><small>Seña pendiente</small><b' + (c.senaPend ? ' class="deuda"' : ' class="ok"') + '>' + (c.senaPend ? plata(c.senaPend, m) : 'Cobrada') + '</b></div>' +
       (c.senaPend ? '<div><small>Con tarjeta (+' + Math.round(recargoTarjeta() * 100) + ' %)</small><b>' + plata(r2(c.senaPend * (1 + recargoTarjeta())), m) + '</b></div>' : '') + '</div>' +
       (c.senaPend ? '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px">' +
         '<label class="f" style="min-width:200px">Moneda para el cliente<select data-sena-moneda>' + opts(MONEDA_SENA, m) + '</select></label>' +
-        (wa ? '<a class="btn btn--wa" target="_blank" rel="noopener" href="' + esc(wa) + '">Pedir seña por WhatsApp</a>' : '<span class="sub">Cargá el teléfono del cliente para mandarle la seña.</span>') +
+        (wa ? '<a class="btn btn--wa" href="#" data-wa-enviar="sena" data-wa-pedido="' + esc(p.id) + '">Pedir seña por WhatsApp</a>' : '<span class="sub">Cargá el teléfono del cliente para mandarle la seña.</span>') +
         '<button type="button" class="btn btn--sm" data-act="registrar-sena">Registrar seña cobrada</button></div>' : '') +
       (c.senaPend && p.estado !== 'confirmado' ? '<p class="sub" style="margin-top:8px">Pedila cuando el proveedor confirme (estado "Confirmado").</p>' : '') +
       (sinTasa ? '<p class="sub">' + (S.tasas && S.tasas.error ? 'No se pudo traer la cotización: el monto queda en dólares.' : 'Cargando cotización…') + '</p>' : '') +
@@ -589,8 +621,7 @@
   }
   function itemHtml(it, i) {
     var pr = S.datos.proveedores.filter(function (x) { return x.id === it.proveedor_id; })[0];
-    var msgProv = 'Hola' + (pr && pr.contacto ? ' ' + pr.contacto : '') + '! Te consulto disponibilidad para: ' + it.nombre + (it.detalle ? ' (' + it.detalle + ')' : '') +
-      '. Fecha: ' + fecha(S.draft.fecha_ida) + (S.draft.fecha_vuelta ? ' al ' + fecha(S.draft.fecha_vuelta) : '') + '. Pasajeros: ' + S.draft.personas + '. A nombre de ' + S.draft.cliente_nombre + '. Ref ' + S.draft.ref + '. ¡Gracias!';
+    var msgProv = mensajeProveedor(S.draft, it, pr);
     var f = function (campo, tipo, extra) { return 'data-i="' + i + '" data-f="' + campo + '"' + (tipo ? ' type="' + tipo + '"' : '') + (extra || ''); };
     return '<div class="item"><div class="item__top"><input ' + f('nombre') + ' value="' + esc(it.nombre) + '" placeholder="Servicio (ej. Traslado aeropuerto – hotel)" aria-label="Servicio">' +
       '<button type="button" class="btn btn--sm btn--danger btn--x" data-quitar-item="' + i + '" aria-label="Quitar servicio">✕</button></div>' +
@@ -604,7 +635,7 @@
       '<label class="f">Código de reserva del proveedor<input ' + f('ref_proveedor') + ' value="' + esc(it.ref_proveedor) + '"></label></div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
       '<button type="button" class="btn btn--sm" data-pagado-total="' + i + '">Marcar pagado al proveedor</button>' +
-      (pr && pr.telefono ? '<a class="lnk" target="_blank" rel="noopener" href="' + esc(waUrl(pr.telefono, msgProv)) + '">WhatsApp a ' + esc(pr.nombre) + '</a>' : '') +
+      (pr && (pr.whatsapp || pr.telefono) && S.draft.id ? '<a class="lnk" href="#" data-wa-enviar="proveedor" data-wa-pedido="' + esc(S.draft.id) + '" data-wa-item="' + i + '">WhatsApp a ' + esc(pr.nombre) + '</a>' : '') +
       (pr && pr.email ? '<a class="lnk" href="mailto:' + esc(pr.email) + '?subject=' + encodeURIComponent('Reserva ' + S.draft.ref) + '&body=' + encodeURIComponent(msgProv) + '">Email</a>' : '') +
       (pr && pr.datos_pago ? '<span class="sub">Pagar a: ' + esc(pr.datos_pago) + '</span>' : '') + '</div></div>';
   }
@@ -618,8 +649,8 @@
   }
   function abrirPanel() {
     var p = S.draft, esNuevo = !p.id;
-    var wa = p.cliente_telefono ? waUrl(p.cliente_telefono, 'Hola ' + (p.cliente_nombre || '').split(' ')[0] + '! Te escribimos de CuántoSale por tu pedido ' + p.ref + '.') : '';
-    var waConf = p.cliente_telefono && p.items.length ? waUrl(p.cliente_telefono, mensajeConfirmacion(p)) : '';
+    var wa = p.cliente_telefono && p.id;
+    var waConf = p.cliente_telefono && p.items.length && p.id;
     var el = document.getElementById('drawer');
     if (!el) { el = document.createElement('div'); el.id = 'drawer'; el.className = 'drawer'; document.body.appendChild(el); }
     var f = function (campo) { return 'data-f="' + campo + '"'; };
@@ -638,8 +669,8 @@
       '<label class="f">Vuelta<input ' + f('fecha_vuelta') + ' type="date" value="' + esc(p.fecha_vuelta || '') + '"></label>' +
       '<label class="f">Personas<input ' + f('personas') + ' type="number" min="1" max="60" value="' + esc(p.personas) + '"></label>' +
       '<label class="f">Medio de pago preferido<input ' + f('medio_pago') + ' value="' + esc(p.medio_pago) + '"></label></div>' +
-      (waConf ? '<p style="margin:12px 0 0"><a class="btn btn--wa" target="_blank" rel="noopener" href="' + esc(waConf) + '">Enviar confirmación por WhatsApp</a></p>' : '') +
-      (wa ? '<p style="margin:10px 0 0"><a class="lnk" target="_blank" rel="noopener" href="' + esc(wa) + '">Escribirle al cliente por WhatsApp</a></p>' : '') +
+      (waConf ? '<p style="margin:12px 0 0"><a class="btn btn--wa" href="#" data-wa-enviar="confirmacion" data-wa-pedido="' + esc(p.id) + '">Enviar confirmación por WhatsApp</a></p>' : '') +
+      (wa ? '<p style="margin:10px 0 0"><a class="lnk" href="#" data-wa-enviar="saludo" data-wa-pedido="' + esc(p.id) + '">Escribirle al cliente por WhatsApp</a></p>' : '') +
       (p.created_at ? '<p class="sub" style="margin-top:8px">Recibido ' + esc(fechaHora(p.created_at)) + ' · origen: ' + esc(p.origen || 'web') + '</p>' : '') + '</section>' +
       '<section class="sec"><h3>Servicios y proveedores</h3><div id="items-box">' + (p.items.length ? p.items.map(itemHtml).join('') : '<p class="sub">Sin servicios todavía.</p>') + '</div>' +
       '<button type="button" class="btn btn--sm" data-act="add-item">+ Agregar servicio</button></section>' +
@@ -1815,6 +1846,8 @@
 
   document.addEventListener('click', function (e) {
     var tm = e.target.closest('[data-tarifa-marca]'); if (tm) { e.preventDefault(); var pz = tm.getAttribute('data-tarifa-marca').split('|'); marcarTarifa(pz[0], pz[1]); return; }
+    var we = e.target.closest('a[data-wa-enviar]');
+    if (we) { e.preventDefault(); e.stopPropagation(); enviarWa(we.getAttribute('data-wa-enviar'), we.getAttribute('data-wa-pedido'), we.hasAttribute('data-wa-item') ? Number(we.getAttribute('data-wa-item')) : undefined); return; }
     var ta = e.target.closest('a[data-tarifa-api]');
     if (ta) {
       e.preventDefault();

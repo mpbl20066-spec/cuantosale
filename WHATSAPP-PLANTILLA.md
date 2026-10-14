@@ -83,3 +83,58 @@ Equipe CuántoSale
 Ejemplos para la revisión: `{{1}}` = `5 Amigos Tour`, `{{2}}` = `Bate e volta a Maragogi (Porto de Galinhas); Buggy ponta a ponta (Porto de Galinhas)`.
 
 Variables opcionales en Vercel: `WHATSAPP_TEMPLATE_TARIFA` (por defecto `pedido_tarifa`) y `WHATSAPP_TEMPLATE_TARIFA_LANG` (por defecto `pt_BR`).
+
+## Plantillas de la ficha del pedido (confirmación, seña, saludo y reserva al proveedor)
+
+Los botones de WhatsApp de la ficha del pedido salen por la API (lib/wa-panel.js). Si la persona escribió en las últimas 24 h va el mensaje de siempre como texto; si no, WhatsApp exige plantilla. Todas en categoría **Utilidad**. Los textos tienen que ser exactamente estos (están en `PLANTILLAS` de lib/wa-panel.js).
+
+**`pedido_confirmado`**, Español:
+
+```
+Hola {{1}}, recibimos tu solicitud de reserva en CuántoSale.
+
+Viaje: {{2}}
+Servicios: {{3}}
+Total estimado: {{4}}
+Referencia: {{5}}
+
+Te confirmamos la disponibilidad con el proveedor y ahí te pedimos una seña para reservar. Gracias por elegirnos.
+```
+Ejemplos: `Juan` · `Praia do Rosa · 26 nov. al 3 dic. · 2 personas` · `Paddle en Lagoa de Ibiraquera (2 horas); Avistaje de ballenas (4 horas)` · `US$ 179` · `CS-MV7HTN3-B05A2C`
+
+**`pedir_sena`**, Español:
+
+```
+Hola {{1}}, el proveedor confirmó tu reserva en {{2}}.
+
+Para dejarla reservada te pedimos una seña de {{3}}.
+
+Cómo pagar: {{4}}
+Referencia: {{5}}
+
+Cuando pagues, respondé este mensaje con el comprobante. El resto se abona antes del viaje.
+```
+Ejemplos: `Juan` · `Praia do Rosa` · `US$ 45` · `transferencia BROU 001234567; tarjeta de crédito con link de Mercado Pago por US$ 47,25` · `CS-MV7HTN3-B05A2C`
+
+**`retomar_pedido`**, Español:
+
+```
+Hola {{1}}, te escribimos de CuántoSale por tu pedido {{2}}. Respondé este mensaje y seguimos con tu reserva por acá.
+```
+Ejemplos: `Juan` · `CS-MV7HTN3-B05A2C`
+
+**`reserva_proveedor`**, Portugués (BR):
+
+```
+Olá, {{1}}! Somos a CuántoSale (cuantosale.uy) e gostaríamos de reservar: {{2}}.
+
+Data: {{3}}
+Pessoas: {{4}}
+Em nome de: {{5}}
+Referência: {{6}}
+
+Poderiam confirmar a disponibilidade? Obrigado!
+```
+Ejemplos: `Carlos` · `Paddle en Lagoa de Ibiraquera (2 horas)` · `26 nov. al 3 dic.` · `2` · `Juan Pérez` · `CS-MV7HTN3-B05A2C`
+
+Nombres distintos se configuran con `WHATSAPP_TEMPLATE_CONFIRMACION`, `WHATSAPP_TEMPLATE_SENA`, `WHATSAPP_TEMPLATE_RETOMAR` y `WHATSAPP_TEMPLATE_RESERVA_PROV`.
