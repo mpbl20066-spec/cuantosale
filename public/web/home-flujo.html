@@ -2741,7 +2741,8 @@
   function pantalla11() {
     var d = datosFinal(), lista = serviciosCs(S.csK), personas = personasTxt(), dt = S.datos || {}, er = S.datosErr || {};
     var total = sum(lista, function (x) { return x.precio; });
-    var cab = '<h1 class="f-h" style="margin-top:4px">Confirmá tu reserva</h1><p class="f-sub" style="margin:4px 0 12px">Completá tus datos para finalizar la reserva de los servicios seleccionados.</p>' +
+    var cambio = !!(S.csK && S.sol && S.sol[S.csK] && !S.res[S.csK]);   // ya pedido: lo que se manda ahora es un cambio
+    var cab = '<h1 class="f-h" style="margin-top:4px">' + (cambio ? 'Enviá el cambio de tu pedido' : 'Confirmá tu reserva') + '</h1><p class="f-sub" style="margin:4px 0 12px">' + (cambio ? 'Reemplaza lo que pediste antes. Revisá tus datos y envialo: el asesor te confirma por WhatsApp.' : 'Completá tus datos para finalizar la reserva de los servicios seleccionados.') + '</p>' +
       '<div class="cf-trip"><div class="cf-trip__top"><span class="cf-trip__img" aria-hidden="true"></span><span><b>' + esc(DEST) + '</b><small>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personas + '</small></span></div></div>';
     if (!lista.length) return cab + '<div class="cf-vacio"><b>' + (S.csK === 'tras' ? 'Todavía no elegiste un transfer.' : S.csK === 'tours' ? 'Todavía no elegiste tours ni actividades.' : 'Todavía no elegiste traslados ni tours.') + '</b><span>Elegí lo que quieras reservar con CuántoSale y volvé acá.</span>' +
       (S.csK !== 'tours' ? '<button type="button" class="g-btn g-btn--main" data-ir="1" data-sub="t" data-evento="flujo_cs_elegir_traslado">Elegir traslado</button>' : '') +
@@ -2760,7 +2761,7 @@
       /* Solo mayores de 18: lo exigen los terminos y el servidor vuelve a controlarlo (lib/reservas.js). */
       '<label class="cf-acepto" for="cf-mayor"><input id="cf-mayor" type="checkbox"' + (dt.mayor ? ' checked' : '') + '><span>Soy mayor de 18 años y acepto los <a href="/terminos" target="_blank" rel="noopener">Términos</a> y la <a href="/privacidad" target="_blank" rel="noopener">Política de privacidad</a>.</span></label>' + err('mayor') +
       '<p class="cf-nota">Al reservar te enviamos un WhatsApp con tu pedido. Un asesor de CuántoSale lo confirma.</p>' + err('envio') +
-      '<button type="submit" class="g-btn g-btn--main" id="cf-reservar" style="margin-top:16px">Reservar</button></form>';
+      '<button type="submit" class="g-btn g-btn--main" id="cf-reservar" style="margin-top:16px">' + (cambio ? 'Enviar el cambio' : 'Reservar') + '</button></form>';
   }
 
   /* El mensaje que se manda es exactamente el que se muestra en la vista previa. */
@@ -2822,16 +2823,16 @@
       tours: toursSel.length ? toursSel.slice(0, 2).map(function (e) { return esc(e.nom || e.titulo || ''); }).filter(Boolean).join(', ') + (toursSel.length > 2 ? ' y ' + (toursSel.length - 2) + ' más' : '') : 'Excursiones y actividades en ' + esc(DEST)
     };
     function svc(ico, tono, titulo, clave, precio) {
-      var ok = !!S.res[clave], sol = !ok && S.sol && S.sol[clave];
-      var badge = ok ? '<span class="st-b st-b--ok">Reservado</span>' : (sol ? '<span class="st-b st-b--sol">Solicitado</span>' : '<span class="st-b st-b--pen">Pendiente</span>');
-      var estado = ok ? ' <em class="st-svc__x">' + (clave === 'aloj' && S.alojReservado ? esc(S.alojReservado.nombre) : '') + '</em>' : '';
+      var ok = !!S.res[clave], sol = !ok && S.sol && S.sol[clave], mod = conCambios(clave);
+      var badge = ok ? '<span class="st-b st-b--ok">Reservado</span>' : (mod ? '<span class="st-b st-b--pen">Con cambios</span>' : (sol ? '<span class="st-b st-b--sol">Solicitado</span>' : '<span class="st-b st-b--pen">Pendiente</span>'));
+      var estado = ok ? ' <em class="st-svc__x">' + (clave === 'aloj' && S.alojReservado ? esc(S.alojReservado.nombre) : '') + '</em>' : (mod ? ' <em class="st-svc__x">· Cambiaste lo que pediste: tocá para enviar el cambio</em>' : '');
       return '<button type="button" class="st-svc' + (ok ? ' is-ok' : '') + '" data-estado="' + clave + '">' +
         '<span class="fin-ico fin-ico--' + tono + ' st-svc__ico">' + ic(I[ico], 24) + '</span>' +
         '<span class="st-svc__t"><b>' + titulo + '</b>' + badge + '</span>' +
         '<span class="st-svc__d">' + desc[clave] + estado + '</span>' +
         '<span class="st-svc__r"><b>' + precio + '</b></span></button>';
     }
-    var primero = partesLista().filter(function (k) { return !S.res[k]; })[0];
+    var primero = partesLista().filter(function (k) { return !S.res[k] && (!(S.sol && S.sol[k]) || conCambios(k)); })[0];   // lo ya solicitado (sin cambios) lo confirma el asesor: se sigue con lo que falta
     var pIcon = '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>';
     var cIcon = '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>';
     var gIcon = '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.8a3.3 3.3 0 0 1 0 6.4M18.5 14.3c1.7.8 3 2.5 3 5.2"/>';
@@ -2861,6 +2862,7 @@
             '<span class="st-svc__r"><b>' + (S.seguro && S.seguro.desde ? 'Desde ' + f(S.seguro.desde) : 'Cotizar') + '</b></span></button>' +
           (S.alojReservado && S.alojReservado.precio ? '<p class="ed-act">Presupuesto actualizado: <b>' + f(d.total) + '</b> (' + (d.tAloj - d.tAlojEst >= 0 ? '+' : '−') + f(Math.abs(d.tAloj - d.tAlojEst)) + ' en alojamiento vs. lo estimado)</p>' : '') +
           (S.avisoCs ? '<p class="st-aviso" role="status">' + esc(S.avisoCs) + '</p>' : '') +
+          (S.avisoCs && S.avisoCambio ? '<button type="button" class="g-btn" data-cambio-cs="' + esc(S.avisoCambio) + '">Enviar un cambio</button>' : '') +
         '</section>' +
         '<aside class="st-side">' +
           '<section class="st-card st-res" aria-label="Resumen de tu viaje">' +
@@ -2900,18 +2902,24 @@
      pregunta a /api/reserva-estado y, cuando el asesor confirma en /admin, el servicio pasa a "Reservado". */
   var CLAVE_VIAJE = [CLAVE_DEST, IDA, VUELTA, pax].join('|');
   function pedidosGuardados() { try { var l = JSON.parse(localStorage.getItem('cs_pedidos') || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; } }
+  /* Que se pidio de cada parte (los nombres, no los precios: la cotizacion cambia sola). Si despues se cambia lo
+     elegido, el servicio queda "Con cambios" y se puede mandar el pedido de nuevo. */
+  function firmaCs(k) { return serviciosCs(k).map(function (x) { return x.nom + '|' + (x.det || ''); }).sort().join(';') + '|' + pax; }
+  function conCambios(k) { return !!(S.sol && S.sol[k] && !S.res[k] && S.solFirma && S.solFirma[k] && S.solFirma[k] !== firmaCs(k)); }
   function anotarPedido(id, k) {
     if (!id || typeof id !== 'string') return;
     var l = pedidosGuardados().filter(function (x) { return x.id !== id; });
-    l.unshift({ id: id, k: k, viaje: CLAVE_VIAJE, t: Date.now() });
+    l.unshift({ id: id, k: k, viaje: CLAVE_VIAJE, t: Date.now(), firma: firmaCs(k) });
+    S.solFirma = S.solFirma || {}; S.solFirma[k] = firmaCs(k);
     try { localStorage.setItem('cs_pedidos', JSON.stringify(l.slice(0, 30))); } catch (e) { /* modo privado */ }
     if (window.CSCuenta && CSCuenta.reservas) CSCuenta.reservas.sync().catch(function () { /* queda en el navegador */ });
   }
   function sincronizarPedidos() {
-    var mios = pedidosGuardados().filter(function (x) { return x.viaje === CLAVE_VIAJE; });
+    /* Solo el ultimo pedido de cada parte: si se mando un cambio, el anterior ya no cuenta. */
+    var vistos = {}, mios = pedidosGuardados().filter(function (x) { if (x.viaje !== CLAVE_VIAJE || vistos[x.k]) return false; vistos[x.k] = true; return true; });
     if (!mios.length || !/^https?:$/.test(location.protocol)) return;
-    S.sol = S.sol || {};
-    mios.forEach(function (x) { if (!S.res[x.k]) S.sol[x.k] = true; });
+    S.sol = S.sol || {}; S.solFirma = S.solFirma || {};
+    mios.forEach(function (x) { if (!S.res[x.k]) S.sol[x.k] = true; if (x.firma) S.solFirma[x.k] = x.firma; });
     Promise.all(mios.map(function (x) {
       return fetch('/api/reserva-estado?id=' + encodeURIComponent(x.id)).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
         .then(function (j) { return { x: x, j: j }; });
@@ -2936,6 +2944,9 @@
       fecha_ida: IDA, fecha_vuelta: VUELTA, personas_n: pax,   /* para el panel /admin: fechas, personas y montos exactos en USD */
       servicios: lista.map(function (x) { return { tipo: x.ico === 'palm' ? 'tour' : 'traslado', nombre: x.nom, detalle: x.det, precio: f(x.precio), precio_usd: Math.round(x.precio * 100) / 100 }; }), total: f(sum(lista, function (x) { return x.precio; })),
       totalUsd: Math.round(sum(lista, function (x) { return x.precio; })), cupon: dt.cupon || '', codigo: String(window.CS_VIAJE_ID || ''), mayor_edad: dt.mayor === true };
+    /* Si ya se habia pedido, es un cambio: el panel avisa a que pedido reemplaza. */
+    var kAnt = S.csK || (lista[0].ico === 'palm' ? 'tours' : 'tras'), ant = S.sol && S.sol[kAnt] ? pedidosGuardados().filter(function (x) { return x.viaje === CLAVE_VIAJE && x.k === kAnt; })[0] : null;
+    if (ant) cuerpo.reemplaza = ant.id;
     /* Con sesion el pedido viaja con el token: el servidor lo usa para canjear el cupon y sumar el XP de la reserva. */
     /* El token de Supabase a veces no responde nunca (getSession se traba) y el boton quedaba en "Enviando…" para siempre:
        si en 4 s no llega, el pedido sale igual, sin sesion (sin cupon ni XP, pero el pedido no se pierde). */
@@ -2955,7 +2966,7 @@
         try { localStorage.setItem('cs_sol_' + window.CS_VIAJE_ID, JSON.stringify({ traslado: S.traslado, tIV: S.tIV, extras: S.extras, sol: S.sol, hotel: S.hotel, habitacion: S.habitacion || null })); } catch (er) { /* modo privado */ }
         try { if (window.CS_GAME && CS_GAME.refrescar) CS_GAME.refrescar(); } catch (er) { /* el pasaporte no puede trabar la reserva */ }
         track('reserva_cs_solicitud', { servicios: lista.length, importe: Math.round(sum(lista, function (x) { return x.precio; })), con_traslado: !!S.sol.tras, con_tours: !!S.sol.tours, canal: 'asesor' });
-        S.avisoCs = j && j.whatsapp ? 'Te enviamos un WhatsApp con tu pedido. Un asesor te lo confirma.' : 'Recibimos tu pedido. Un asesor te escribe por WhatsApp para confirmarlo.';
+        S.avisoCambio = ''; S.avisoCs = j && j.whatsapp ? 'Te enviamos un WhatsApp con tu pedido. Un asesor te lo confirma.' : 'Recibimos tu pedido. Un asesor te escribe por WhatsApp para confirmarlo.';
         ir(7, 'solicitud_cuantosale');
       })
       .catch(function (e) {
@@ -3629,12 +3640,13 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
     if (t.dataset.parada) { usarParada(+t.dataset.parada); track('flujo_parada', { parada: PA + 1, via: 'pestana' }); if (!S.hotelesListos) cargarHoteles(); render(true); return; }
     if (t.dataset.entre) { S.entre = !S.entre; track('flujo_traslado_entre_paradas', { activo: S.entre, precio: Math.round(PAR ? PAR.tramo.pp * pax : 0) }); render(false); $('main').scrollTop = y; return; }
+    if (t.dataset.cambioCs) { S.avisoCs = ''; S.avisoCambio = ''; reservar('cs:' + (t.dataset.cambioCs === 'tras' ? 'traslado' : 'tours')); return; }
     if (t.dataset.wa) {
       var lista = serviciosCs(S.csK), total = sum(lista, function (x) { return x.precio; }), dt = S.datos || {};
       S.sol = S.sol || {};
@@ -3648,7 +3660,7 @@
     }
     else if (t.dataset.resumen) { S.resumenAbierto = !S.resumenAbierto; track('flujo_cs_ver_resumen', { abierto: S.resumenAbierto }); }
     else if (t.dataset.estado) { var ac = t.dataset.estado; if (ac === 'vuelo') { abrirVueloIr(); } else if (ac === 'aloj') { abrirAlojIr(); } else if (S.res[ac]) { S.confK = ac; ir(13, 'ver_confirmacion'); }
-    else if (S.sol && S.sol[ac]) { S.avisoCs = 'Estamos confirmando la disponibilidad con el proveedor y te escribimos por WhatsApp. Cuando quede confirmada, la vas a ver acá.'; render(false); }
+    else if (S.sol && S.sol[ac] && !conCambios(ac)) { S.avisoCs = 'Ya lo pediste: estamos confirmando la disponibilidad con el proveedor y te escribimos por WhatsApp. Cuando quede confirmado, lo vas a ver acá. Si querés cambiar algo, modificalo y mandá el cambio.'; S.avisoCambio = ac; render(false); }
     else { reservar('cs:' + (ac === 'tras' ? 'traslado' : 'tours')); } return; }
     else if (t.dataset.booking) { abrirAlojIr(); return; }
     else if (t.dataset.seguro) { abrirSeguroIr(); return; }

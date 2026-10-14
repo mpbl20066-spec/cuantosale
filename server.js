@@ -3492,7 +3492,11 @@ function guardarMensaje(m) {
 }
 async function guardarPedido(cuerpo) {
   try {
-    const r = await pedidosStore.crearPedido(pedidosStore.desdeSolicitud(cuerpo));
+    const nuevo = pedidosStore.desdeSolicitud(cuerpo);
+    /* El cliente cambio algo que ya habia pedido: el pedido nuevo avisa a cual reemplaza (el anterior lo cancela el asesor). */
+    const ant = cuerpo && typeof cuerpo.reemplaza === 'string' ? await pedidosStore.obtenerPedido(cuerpo.reemplaza.slice(0, 40)).catch(function () { return null; }) : null;
+    if (ant && ant.ref) nuevo.notas = 'Cambio del pedido ' + ant.ref + ' (el cliente modificó lo que había pedido): cancelá el anterior.';
+    const r = await pedidosStore.crearPedido(nuevo);
     if (r.nuevo) adminPanel.avisarPedidoNuevo(r.pedido);
     /* El id (uuid) vuelve al navegador del cliente: con el consulta /api/reserva-estado si el asesor ya lo confirmo. */
     return r.pedido ? (r.pedido.id || true) : false;
