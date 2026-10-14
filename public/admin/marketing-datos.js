@@ -1410,6 +1410,19 @@ window.CS_MKT = {
    "- **Comisión:** un porcentaje del margen que asignaste en Catálogo, no del precio. Regla: hasta la mitad del margen de ese servicio. Pagada cuando el cliente viajó (después de la ventana de cancelación).",
    "- **Cómo se atribuye:** el cliente dice el código del creador al reservar por WhatsApp (o el link con utm). Anotalo en las notas del pedido.",
    "- **Le pedís:** 1 reel o 3 historias con su viaje o su destino favorito armado en la app, y el link en sus historias.",
+   "## Prensa: salir en los medios gratis",
+   "- **Cuándo:** octubre y noviembre, antes de que la gente cierre el verano. Una nota trae más visitas que todo el presupuesto de anuncios.",
+   "- **Qué contar:** un dato, no \"existe una app\". Por ejemplo, cuánto sale de verdad una semana en un destino desde Montevideo, todo sumado, o cuánto suman el traslado y los paseos que casi nadie calcula. Con precios consultados esa semana.",
+   "- **El mejor camino: el periodista, no la redacción.** Buscá en Google \"viajar a Brasil desde Uruguay\" o \"verano Brasil uruguayos\", mirá quién firmó la nota y escribile por Instagram, X o LinkedIn con el Mensaje Prensa. Funciona más que los formularios.",
+   "- **Contactos de las redacciones (encontrados el 14/10/2026; no publican WhatsApp para noticias):**",
+   "- la diaria: formulario por sección (elegí Economía) en ayuda.ladiaria.com.uy/contacto",
+   "- Telemundo (Canal 12): formulario en teledoce.com/contacto · teléfono 2208 3555",
+   "- Subrayado (Canal 10): formulario en subrayado.com.uy/contactanos · teléfono 2410 2120",
+   "- El Observador: teléfono 2418 9086, pedí por Café y Negocios",
+   "- Montevideo Portal y El País: no muestran un contacto de redacción. Por el periodista que firma las notas de viajes.",
+   "- **Radios:** los programas de la mañana. Buscá el Instagram del programa y escribile a la producción con el mismo mensaje.",
+   "- **Seguimiento:** una sola vez, a la semana. Si no responden, probá con otro periodista del mismo medio.",
+   "- **Ojo con el nombre:** casi siempre piden a alguien para entrevistar. Ofrecé responder por escrito como \"el equipo de Cuánto Sale\"; si piden una persona, decidilo antes de contestar.",
    "## Alianzas con negocios",
    "- **Academias de portugués:** les das una clase o material \"Portugués para el viaje + cuánto sale\" para sus alumnos; ellos difunden. Comisión igual que creadores.",
    "- **Tiendas de valijas y artículos de viaje:** tarjeta con QR (cuantosale.uy/?utm_source=tienda-NOMBRE) en la caja; vos los mencionás en una historia.",
@@ -1445,6 +1458,10 @@ window.CS_MKT = {
   {
    "t": "Mensaje Alianza · negocio",
    "copy": "Hola, ¿cómo están? Les escribimos de Cuánto Sale (cuantosale.uy), una app uruguaya gratis que ayuda a calcular cuánto sale un viaje a Brasil desde Montevideo.\n\nMuchos de sus clientes [alumnos] viajan a Brasil y pensamos que les podría servir. Les proponemos algo simple y sin costo: [una tarjeta con QR para sus clientes / una clase o material sobre el viaje], y ustedes reciben una comisión por cada traslado o paseo que se reserve desde su link. Nosotros los mencionamos en nuestras redes.\n\n¿Les podemos contar más en 10 minutos? ¡Gracias!"
+  },
+  {
+   "t": "Mensaje Prensa · periodista o programa",
+   "copy": "Hola [nombre], ¿cómo estás? Te escribimos de Cuánto Sale (cuantosale.uy), una app uruguaya y gratis que calcula cuánto sale de verdad un viaje a Brasil saliendo de Montevideo: vuelo, alojamiento, comidas, traslado del aeropuerto y paseos, todo en dólares.\n\nVimos tu nota sobre [tema]. Para este verano tenemos un dato que te puede servir: [dato, con precio consultado esta semana]. Te pasamos los números por escrito, por destino.\n\n¿Te interesa? ¡Gracias!"
   },
   {
    "t": "Pedido de reseña (cliente que volvió)",
