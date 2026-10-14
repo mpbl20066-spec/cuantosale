@@ -14,7 +14,7 @@ window.CS_MKT = {
     "- **La home no dice que se puede reservar algo.** Ni \"traslado\" ni \"paseo\" aparecen en la primera pantalla. El visitante entiende \"calculadora gratis\" y se va con el número. El ingreso aparece recién al final del flujo, si llega.",
     "- **No sabés de dónde vienen los pedidos.** No hay píxel de Meta, Google Analytics solo ve a quien acepta cookies y el pedido no guarda el origen. Desde hoy el link de la bio lleva ?utm_source= y el contador propio lo cuenta (Tablero > Web). Además, preguntá \"¿Cómo nos conociste?\" en cada WhatsApp y anotalo.",
     "- **El número de destinos no coincide.** Vos decís 44; la web tiene 40 en el modelo, la página de guías dice \"40 destinos\" y hay 41 guías PDF. Usá 40 (o ningún número) hasta que estén los 44 en la web: un número que no coincide le resta confianza a una marca que vende \"números claros\".",
-    "- **Confianza: es el freno más grande para cobrar una seña.** Una marca de semanas le pide a un desconocido una transferencia antes de viajar. Hoy no hay reseñas (y no hay que inventarlas), la cara de la marca no aparece y el proceso de reserva no se explica en redes. Hay que mostrar: cómo se reserva, quién hace el paseo (operador local), la cancelación gratis hasta 72 h antes en la mayoría de los servicios, el número oficial y que no se cobra nada en la web.",
+    "- **Confianza: es el freno más grande para cobrar una seña.** Una marca de semanas le pide a un desconocido una transferencia antes de viajar. Hoy no hay reseñas (y no hay que inventarlas) y el proceso de reserva no se explica en redes. Como nadie de la marca va a figurar con nombre, la confianza tiene que salir de mostrar el proceso y de clientes reales. Hay que mostrar: cómo se reserva, quién hace el paseo (operador local), la cancelación gratis hasta 72 h antes en la mayoría de los servicios, el número oficial y que no se cobra nada en la web.",
     "## Errores de comunicación a evitar",
     "- Hablar de vuelos como protagonista. El vuelo es el gancho (todos lo buscan), pero cada pieza tiene que terminar en \"y lo de allá lo resolvés con nosotros\".",
     "- Listar 8 funciones en un reel (el fijado \"¿Qué es?\" lo hace). Nadie retiene 8 cosas: una promesa y tres pruebas.",
@@ -62,12 +62,12 @@ window.CS_MKT = {
     "- Píxel de Meta: cuando haya anuncios corriendo y pedidos para medir.",
     "- Alianzas grandes (agencias, aerolíneas): hoy no tenés números para negociar.",
     "- Cambios grandes en la web: solo los de confianza y la mención de traslados y paseos en la home.",
-    "## Preguntas que me faltan (cambian el plan)",
-    "- ¿Cuánto podés poner por mes en anuncios? Supuse US$ 50–100 en total para el primer mes.",
-    "- ¿Qué margen te queda, en promedio, por paseo y por traslado? Define cuánta comisión podés ofrecer a creadores sin perder plata (más abajo está la regla).",
-    "- ¿Puede figurar el nombre de alguien de la marca (sin cámara) en Quiénes somos y en las historias? Una persona con nombre genera más confianza que un logo.",
-    "- ¿Los 44 destinos van a estar en la web pronto, o comunicamos 40?",
-    "- ¿Los fijados y los reels ya subidos están también en TikTok?"
+    "## Decisiones (14/10/2026)",
+    "- **Anuncios: US$ 50 como máximo** para todo el mes (ver Publicidad paga).",
+    "- **Margen:** el que asignás en Catálogo. La comisión a creadores y alianzas sale de ahí: hasta la mitad del margen de cada servicio.",
+    "- **Nadie de la marca figura con nombre.** Todo se firma \"Cuánto Sale\"; la confianza sale del proceso claro, el número oficial y clientes reales.",
+    "- **Los reels ya están en TikTok:** ahí solo se fijan y se cambia la bio.",
+    "- Pendiente: ¿los 44 destinos van a estar en la web? Mientras tanto se comunica 40."
    ]
   },
   {
@@ -180,7 +180,7 @@ window.CS_MKT = {
     "## Grupos y comunidades de viajeros (sin spam)",
     "- Buscá en Facebook: \"viajar a Brasil Uruguay\", \"uruguayos en Florianópolis\", \"Nordeste desde Uruguay\", \"Búzios\", \"Porto de Galinhas viajeros\". Quedate con los que tengan publicaciones de esta semana.",
     "- **Regla 4 a 1:** respondé 4 preguntas sin link (con el dato concreto: precio, horas de traslado, marea) y recién en la 5ª, si la pregunta es \"¿cuánto me sale?\", dejá el link.",
-    "- **Respuesta tipo** (adaptala, nunca la pegues igual en todos): \"Del aeropuerto de Fortaleza a Jeri son unas 5 h 30. El compartido anda en US$ 37 por persona, solo ida (precio de octubre). Si van 4, mirá el privado. Si querés ver el viaje entero sumado, lo armé en cuantosale.uy\".",
+    "- **Respuesta tipo** (adaptala, nunca la pegues igual en todos): \"Del aeropuerto de Fortaleza a Jeri son unas 5 h 30. El compartido anda en US$ 37 por persona, solo ida (precio de octubre). Si van 4, mirá el privado. Si querés ver el viaje entero sumado, se arma en cuantosale.uy\".",
     "- Reddit r/uruguay: solo responder cuando alguien pregunte por Brasil; nunca abrir un post propio de promoción.",
     "## Convertir preguntas frecuentes en contenido",
     "- Cada pregunta repetida en grupos o DMs se vuelve una pieza \"Preguntas que nos hacen #N\" (TikTok, texto en pantalla) y una respuesta guardada en WhatsApp.",
@@ -205,7 +205,7 @@ window.CS_MKT = {
     "- **Creatividad:** el reel ganador, tal cual. Link: cuantosale.uy/?utm_source=meta_ads (o a la guía del destino del reel, con el mismo utm).",
     "- **Público:** Uruguay, 25 a 45 años, Montevideo, Canelones y Maldonado. Sin intereses al principio (Meta encuentra mejor solo con poca plata).",
     "- **Ubicación:** Reels de Instagram y Facebook.",
-    "- **Plata:** US$ 3 por día, 7 días (US$ 21).",
+    "- **Plata:** US$ 3 por día, 7 días (US$ 21). Tope del mes: US$ 50.",
     "## Qué medir antes de seguir",
     "- Costo por visita a la página (Administrador de anuncios).",
     "- Llegadas con meta_ads en Tablero > Web (las que cuenta tu web, no Meta).",
@@ -218,7 +218,7 @@ window.CS_MKT = {
     "- Solo si con la Fase 1 hubo al menos un pedido con traslado o paseo que puedas atribuir (preguntá \"¿cómo nos conociste?\").",
     "- **Techo:** lo que gastás para conseguir un pedido confirmado no puede pasar el margen promedio de un pedido (el Tablero lo calcula con tus pedidos reales).",
     "## Fase 2 (si la 1 funcionó)",
-    "- Público de quienes interactuaron con tu Instagram en los últimos 30 días (no necesita píxel), con un creativo de confianza o de traslados. US$ 2 por día.",
+    "- Público de quienes interactuaron con tu Instagram en los últimos 30 días (no necesita píxel), con un creativo de confianza o de traslados. US$ 2 por día, 14 días (US$ 28): con la Fase 1 suma US$ 49, dentro del tope de US$ 50.",
     "- TikTok Ads: no por ahora. Exige presupuestos diarios mínimos más altos que Meta."
    ]
   },
@@ -417,16 +417,13 @@ window.CS_MKT = {
     "copy": "¿Qué es Cuánto Sale? 💛\n\nTe decimos cuánto sale tu viaje, antes de viajar.\n\n💰 Decinos cuánto tenés y te mostramos a dónde llegás\n📍 ¿Ya sabés a dónde vas? Buscás por destino\n📅 Ves qué fecha sale más barata\n✈️ El viaje entero: vuelo, alojamiento, traslados, comidas y paseos\n🐷 Cuánto juntar por mes para llegar a tu viaje\n👥 Gastos en grupo: quién le paga a quién, sin hacer cuentas\n📖 La guía de cada destino: playas, clima y precios mes a mes\n💱 Conversor de monedas con la cotización del día\n\nPrimero la plata, después el viaje.\nProbalo en cuantosale.uy (link en la bio).\n\nGrabado en la app el 12/10/2026. Los precios cambian con las fechas y el día.\n\n#viajarabrasil #brasil #uruguay #presupuestodeviaje #vacaciones2027 #cuantosale"
    },
    "tt": {
-    "tipo": "Reels fijados (el mismo video)",
-    "pieza": "Publicar los 3 fijados: 3 → 2 → 1 (o el nuevo \"¿Por qué es distinto?\" cuando esté) y fijarlos",
-    "carpeta": "reel-00c-viaja-mas-barato · reel-00b-como-funciona · reel-00-que-es-cuantosale",
-    "igual": true,
-    "cambio": "Subí los 3 y fijalos (en el video: \"...\" > Fijar). En TikTok el texto corto: primer renglón + \"Link en el perfil\".",
-    "copy": "¿Qué es Cuánto Sale? 💛\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
+    "tipo": "Ya están subidos",
+    "pieza": "Fijá los 3 reels (en el video: \"...\" > Fijar) y cambiá la bio y el link (Perfil y mensajes)",
+    "cambio": "Si subís el nuevo \"¿Por qué es distinto?\", fijalo en lugar de \"Viajá más barato\"."
    },
    "hist": [
     "Historia 1: compartí \"¿Cómo funciona?\" con sticker de enlace a cuantosale.uy/?utm_source=ig_historia y el texto \"En 30 segundos 👇\".",
-    "Historia 2: sticker de Preguntas: \"¿Con cuánta plata contás para tus vacaciones? Te digo a dónde llegás 👀\". Las respuestas se usan mañana."
+    "Historia 2: sticker de Preguntas: \"¿Con cuánta plata contás para tus vacaciones? Te decimos a dónde llegás 👀\". Las respuestas se usan mañana."
    ],
    "acc": [
     "Cambiá la bio de Instagram y de TikTok (texto en Colaboraciones y anuncios > Perfil) y poné el link con utm.",
@@ -451,7 +448,7 @@ window.CS_MKT = {
    },
    "hist": [
     "Elegí 3 respuestas del sticker de ayer. Para cada una: abrí cuantosale.uy > \"Tengo un presupuesto\" con ese monto, sacá captura del resultado y subila con el texto \"Con US$ [monto] por persona llegás a… 👇\" + sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
-    "Última historia: \"¿Querés que te lo calcule a vos? Mandame tu presupuesto por mensaje 📩\"."
+    "Última historia: \"¿Querés que te lo calculemos? Mandanos tu presupuesto por mensaje 📩\"."
    ],
    "acc": [
     "Armá la lista de 15 creadores (criterios en Colaboraciones). Anotá: usuario, seguidores, destinos de los que habla, si responde comentarios.",
@@ -835,7 +832,7 @@ window.CS_MKT = {
     "copy": "\"Tengo US$ [monto] y quiero playa en enero\" 👀\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
-    "Sticker de Preguntas: \"Decime cuánto tenés y a dónde soñás ir: elijo uno por semana y lo armo 👇\"."
+    "Sticker de Preguntas: \"Decinos cuánto tenés y a dónde soñás ir: elegimos uno por semana y lo armamos 👇\"."
    ],
    "acc": [
     "**Revisión semanal #2.** Primera comparación contra la semana 1: decidí 1 cosa que repetís, 1 que cambiás y 1 que dejás."
@@ -1330,7 +1327,7 @@ window.CS_MKT = {
    "- Mejor 10 chicos que respondan que uno grande que no.",
    "## La propuesta (sin honorarios)",
    "- **Le das:** un link propio (cuantosale.uy/?utm_source=creador-NOMBRE), una comisión por cada traslado o paseo que se confirme con su código, y contenido listo (grabaciones de la app, precios verificados).",
-   "- **Comisión:** un porcentaje de TU margen, no del precio. Regla: hasta la mitad de lo que ganás en ese servicio. Pagada cuando el cliente viajó (después de la ventana de cancelación).",
+   "- **Comisión:** un porcentaje del margen que asignaste en Catálogo, no del precio. Regla: hasta la mitad del margen de ese servicio. Pagada cuando el cliente viajó (después de la ventana de cancelación).",
    "- **Cómo se atribuye:** el cliente dice el código del creador al reservar por WhatsApp (o el link con utm). Anotalo en las notas del pedido.",
    "- **Le pedís:** 1 reel o 3 historias con su viaje o su destino favorito armado en la app, y el link en sus historias.",
    "## Alianzas con negocios",
@@ -1351,11 +1348,11 @@ window.CS_MKT = {
   },
   {
    "t": "Mensaje A · primer contacto a un creador",
-   "copy": "Hola [nombre]! Soy [tu nombre], de Cuánto Sale (cuantosale.uy), una app uruguaya y gratis que te dice cuánto sale de verdad un viaje a Brasil saliendo de Montevideo: vuelo, alojamiento, comidas, traslado y paseos.\n\nVi tu [reel/post] de [destino] y me pareció que a tu comunidad le podría servir. ¿Te interesaría una colaboración sin costo para vos? Te armamos tu viaje (o el de tus seguidores) con la app, te damos un link propio y te llevás una comisión por cada traslado o paseo que se reserve con tu código.\n\nSi te interesa, te paso los detalles. ¡Gracias!"
+   "copy": "Hola [nombre]! Te escribimos de Cuánto Sale (cuantosale.uy), una app uruguaya y gratis que te dice cuánto sale de verdad un viaje a Brasil saliendo de Montevideo: vuelo, alojamiento, comidas, traslado y paseos.\n\nVi tu [reel/post] de [destino] y me pareció que a tu comunidad le podría servir. ¿Te interesaría una colaboración sin costo para vos? Te armamos tu viaje (o el de tus seguidores) con la app, te damos un link propio y te llevás una comisión por cada traslado o paseo que se reserve con tu código.\n\nSi te interesa, te pasamos los detalles. ¡Gracias!"
   },
   {
    "t": "Mensaje B · seguimiento (una sola vez)",
-   "copy": "Hola [nombre]! Te escribí la semana pasada por Cuánto Sale. Te dejo un ejemplo de lo que hacemos: [link a un reel tuyo]. Si no es para vos, cero drama. Si sí, te paso cómo funciona la comisión. ¡Abrazo!"
+   "copy": "Hola [nombre]! Te escribimos la semana pasada desde Cuánto Sale. Te dejo un ejemplo de lo que hacemos: [link a un reel tuyo]. Si no es para vos, cero drama. Si sí, te contamos cómo funciona la comisión. ¡Abrazo!"
   },
   {
    "t": "Brief para creadores",
@@ -1363,11 +1360,11 @@ window.CS_MKT = {
   },
   {
    "t": "Mensaje \"Ya tengo pasaje\"",
-   "copy": "¡Hola! Vi que ya tenés el pasaje 🙌 ¿A qué destino vas y qué fechas? Te paso el precio del traslado del aeropuerto a tu alojamiento y los paseos que conviene reservar antes. Se reserva con una seña y en la mayoría cancelás gratis hasta 72 h antes. Sin compromiso."
+   "copy": "¡Hola! Vimos que ya tenés el pasaje 🙌 ¿A qué destino vas y qué fechas? Te pasamos el precio del traslado del aeropuerto a tu alojamiento y los paseos que conviene reservar antes. Se reserva con una seña y en la mayoría cancelás gratis hasta 72 h antes. Sin compromiso."
   },
   {
    "t": "Mensaje Alianza · negocio",
-   "copy": "Hola, ¿cómo están? Soy [tu nombre], de Cuánto Sale (cuantosale.uy), una app uruguaya gratis que ayuda a calcular cuánto sale un viaje a Brasil desde Montevideo.\n\nMuchos de sus clientes [alumnos] viajan a Brasil y pensamos que les podría servir. Les proponemos algo simple y sin costo: [una tarjeta con QR para sus clientes / una clase o material sobre el viaje], y ustedes reciben una comisión por cada traslado o paseo que se reserve desde su link. Nosotros los mencionamos en nuestras redes.\n\n¿Les puedo contar más en 10 minutos? ¡Gracias!"
+   "copy": "Hola, ¿cómo están? Les escribimos de Cuánto Sale (cuantosale.uy), una app uruguaya gratis que ayuda a calcular cuánto sale un viaje a Brasil desde Montevideo.\n\nMuchos de sus clientes [alumnos] viajan a Brasil y pensamos que les podría servir. Les proponemos algo simple y sin costo: [una tarjeta con QR para sus clientes / una clase o material sobre el viaje], y ustedes reciben una comisión por cada traslado o paseo que se reserve desde su link. Nosotros los mencionamos en nuestras redes.\n\n¿Les podemos contar más en 10 minutos? ¡Gracias!"
   },
   {
    "t": "Pedido de reseña (cliente que volvió)",
