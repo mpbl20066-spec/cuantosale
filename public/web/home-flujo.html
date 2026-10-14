@@ -2031,7 +2031,7 @@
       var alto = [55, 72, 46, 64, 80, 50, 68, 58, 76, 62];
       return caja('', '<div class="af3 af3--ghost" role="status" aria-label="Buscando precios de otras fechas">' + dias.map(function (iso, k) {
         return '<span class="af3-b' + (iso === IDA ? ' is-tuya' : '') + '"><span class="af3-t"><i style="height:' + alto[k % alto.length] + '%"></i></span>' + lbl(iso) + '</span>';
-      }).join('') + '</div>' + ley);
+      }).join('') + '</div><p class="af3-ley" role="status">Buscando precios de otras fechas… tarda unos segundos.</p>');
     }
     if (c.estado !== 'ok') return '';   /* sin precios de otras fechas no se muestra la comparativa */
     var tot = function (x) { return x.pp * pax; };

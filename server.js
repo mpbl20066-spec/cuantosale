@@ -857,13 +857,36 @@ async function precargarDestinosBooking(nombres) {
    cada apertura de la pantalla repetia la busqueda de la ciudad mas hasta 12 de
    playas (cada una con su searchDestination), y eso era lo que hacia lenta la
    pantalla. Dos pedidos iguales a la vez comparten la misma consulta. Solo se
-   guardan los aciertos con resultados. */
+   guardan los aciertos con resultados.
+
+   Tambien van a Supabase (misma tabla y TTL): en Vercel cada instancia arranca vacia y la misma busqueda, repetida
+   en otra instancia, volvia a pagar los ~4 s de Booking. precargarHotelesBooking trae todas las listas de una
+   pantalla (ciudad y playas) en una sola consulta. */
 const bookingHotelsCache = new Map();
 const bookingHotelsInflight = new Map();
-function fetchBookingHotels(destKey, destName, style, extra) {
+const bookingHotelsTtlMs = function () { return (Number(process.env.BOOKING_HOTELS_TTL_MIN) || 30) * 60000; };
+function claveHotelesBooking(destName, extra) {
   const e = extra || {};
-  const ttl = (Number(process.env.BOOKING_HOTELS_TTL_MIN) || 30) * 60000;
-  const key = [destName, e.dep, e.ret, e.pax, e.ninos || 0, e.nights, e.hotelType === 'all-inclusive' ? 'ai' : '', e.soloDistrito ? 'd' : ''].join('|').toLowerCase();
+  return [destName, e.dep, e.ret, e.pax, e.ninos || 0, e.nights, e.hotelType === 'all-inclusive' ? 'ai' : '', e.soloDistrito ? 'd' : ''].join('|').toLowerCase();
+}
+const claveHotelesPersistente = function (key) { return 'booking-hotels|' + key.replace(/[,()%\s]/g, '_'); };
+async function precargarHotelesBooking(pares) {
+  if (!cacheDb.enabled()) return;
+  const faltan = pares.map(function (p) { return claveHotelesBooking(p[0], p[1]); }).filter(function (k) {
+    const hit = bookingHotelsCache.get(k);
+    return !(hit && Date.now() < hit.expiresAt);
+  });
+  if (!faltan.length) return;
+  const leidos = new Map();
+  await cacheDb.prefetch(leidos, faltan.map(claveHotelesPersistente));
+  faltan.forEach(function (k) {
+    const hit = leidos.get(claveHotelesPersistente(k));
+    if (hit && Array.isArray(hit.value) && hit.value.length) bookingHotelsCache.set(k, { expiresAt: hit.expiresAt, value: hit.value });
+  });
+}
+function fetchBookingHotels(destKey, destName, style, extra) {
+  const ttl = bookingHotelsTtlMs();
+  const key = claveHotelesBooking(destName, extra);
   const hit = bookingHotelsCache.get(key);
   if (hit && Date.now() < hit.expiresAt) return Promise.resolve(hit.value);
   if (bookingHotelsInflight.has(key)) return bookingHotelsInflight.get(key);
@@ -871,6 +894,7 @@ function fetchBookingHotels(destKey, destName, style, extra) {
     if (Array.isArray(value) && value.length) {
       if (bookingHotelsCache.size >= 300) bookingHotelsCache.delete(bookingHotelsCache.keys().next().value);
       bookingHotelsCache.set(key, { expiresAt: Date.now() + ttl, value: value });
+      if (cacheDb.enabled()) cacheDb.store([{ key: claveHotelesPersistente(key), value: value, expiresAt: Date.now() + ttl }]);
     }
     return value;
   }).finally(function () { bookingHotelsInflight.delete(key); });
@@ -1003,8 +1027,17 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
   let realHotels = [];
   try {
     const conGrupos = diag && !(extra && extra.noGroups);
-    await precargarDestinosBooking([destName].concat(conGrupos ? playas.nombresDePlayas(destKey).concat(playas.nombresDeZonas(destKey)).slice(0, PLAYAS_CONSULTADAS).map(function (nombre) { return nombre + ', ' + destName; }) : []))
-      .catch(function () { /* sin la precarga se consulta a Booking como antes */ });
+    const nombres = conGrupos ? playas.nombresDePlayas(destKey).concat(playas.nombresDeZonas(destKey)).slice(0, PLAYAS_CONSULTADAS) : [];
+    const distritoExtra = Object.assign({}, hotelExtra, { soloDistrito: true });
+    await Promise.all([
+      precargarDestinosBooking([destName].concat(nombres.map(function (nombre) { return nombre + ', ' + destName; }))),
+      precargarHotelesBooking([[destName, hotelExtra]].concat(nombres.map(function (nombre) { return [nombre + ', ' + destName, distritoExtra]; })))
+    ]).catch(function () { /* sin la precarga se consulta a Booking como antes */ });
+    /* Las playas salen junto con la ciudad y no despues: encadenadas eran dos vueltas a Booking y la pantalla
+       esperaba las dos. Si la ciudad no trae nada, lo de las playas se descarta como antes. */
+    const porPlayaP = Promise.all(nombres.map(function (nombre) {
+      return fetchBookingHotels(destKey, nombre + ', ' + destName, selectedTier, distritoExtra).catch(function () { return []; });
+    }));
     realHotels = (await fetchBookingHotels(destKey, destName, selectedTier, hotelExtra)).map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName, geoKey: destKey }); });
     if (realHotels.length < 3) {
       const nearby = HOTEL_NEARBY_DESTINATIONS[destKey] || null;
@@ -1028,12 +1061,8 @@ async function hotelRecommendations(destKey, destName, style, extra, diag) {
        distrito de cada una (Canasvieiras, Ingleses...), que trae 20 propios. Van
        en paralelo y una que falle se ignora; los repetidos los saca
        uniqueHotelList. */
-    if (diag && !(extra && extra.noGroups) && realHotels.length) {
-      const nombres = playas.nombresDePlayas(destKey).concat(playas.nombresDeZonas(destKey)).slice(0, PLAYAS_CONSULTADAS);
-      const porPlaya = await Promise.all(nombres.map(function (nombre) {
-        return fetchBookingHotels(destKey, nombre + ', ' + destName, selectedTier, Object.assign({}, hotelExtra, { soloDistrito: true }))
-          .catch(function () { return []; });
-      }));
+    if (conGrupos && realHotels.length) {
+      const porPlaya = await porPlayaP;
       porPlaya.forEach(function (lista) {
         realHotels = realHotels.concat(lista.map(function (hotel) { return Object.assign({}, hotel, { areaLabel: destName, geoKey: destKey }); }));
       });
