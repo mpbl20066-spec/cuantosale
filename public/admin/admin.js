@@ -225,8 +225,8 @@
       var c = p.cuentas, cc = calc(p), act = (p.items || []).filter(function (i) { return i.estado !== 'cancelado' && i.nombre; });
       var sinProv = act.filter(function (i) { return !i.proveedor_id; }).length, paso = proximoPaso(p);
       var falta = p.estado === 'cancelado' ? '' : (p.estado === 'confirmado' && cc.senaPend > 0 ? '<span class="pend">seña ' + usd(cc.senaPend) + '</span>' : (c.saldo_cliente_usd ? '<span class="deuda">falta ' + usd(c.saldo_cliente_usd) + '</span>' : (c.total_usd ? '<span class="ok">pagado</span>' : '')));
-      var boton = paso.tipo === 'wa' ? '<a href="#" class="btn btn--sm btn--main paso" data-wa-enviar="' + paso.wa + '" data-wa-pedido="' + esc(p.id) + '">' + esc(paso.t) + ' →</a>'
-        : paso.tipo === 'abrir' ? '<button type="button" class="btn btn--sm paso">' + esc(paso.t) + ' →</button>' : '<span class="sub">' + esc(paso.t) + '</span>';
+      var boton = paso.tipo === 'wa' ? '<a href="#" class="btn btn--sm btn--main btn-paso" data-wa-enviar="' + paso.wa + '" data-wa-pedido="' + esc(p.id) + '">' + esc(paso.t) + ' →</a>'
+        : paso.tipo === 'abrir' ? '<button type="button" class="btn btn--sm btn-paso">' + esc(paso.t) + ' →</button>' : '<span class="sub">' + esc(paso.t) + '</span>';
       h += '<div class="prow' + (p.estado === 'cancelado' ? ' prow--off' : '') + '" data-abrir="' + esc(p.id) + '">' +
         '<div class="prow__cli"><span class="avatar" aria-hidden="true">' + esc(iniciales(p.cliente_nombre)) + '</span><div><b>' + esc(p.cliente_nombre || '—') + '</b><span class="sub">' + esc(String(p.ref || '').split('-').pop()) + ' · ' + esc(fechaHora(p.created_at)) + (p.origen === 'manual' ? ' · manual' : '') + '</span></div></div>' +
         '<div class="prow__viaje"><b>' + esc(p.destino || '—') + '</b><span class="sub">' + fecha(p.fecha_ida) + ' → ' + fecha(p.fecha_vuelta) + ' · ' + esc(p.personas) + ' pers.</span></div>' +
@@ -722,72 +722,127 @@
       .then(function (r) { toast(r.modo === 'texto' ? 'Enviado por WhatsApp' : 'Enviado con la plantilla ' + r.plantilla + ' (no escribió en las últimas 24 h)'); })
       .catch(function (e) { alert(e.message); });
   }
-  function senaHtml(p) {
+  /* ---------- ficha del pedido ----------
+     Arriba quien y a donde, las etapas y el proximo paso; despues los servicios (un renglon cada uno, el detalle se
+     despliega), los pagos, las cuentas en una franja y los datos del cliente plegados. */
+  var ETAPAS = ['Nuevo', 'En gestión', 'Confirmado', 'Seña', 'Saldo', 'Completado'];
+  var ICONO_WA = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>';
+  function etapaDe(p) {
     var c = calc(p);
-    if (!c.sena) return '<p class="sub">Este pedido no lleva seña: solo los traslados (50 %) y los tours (25 %) se señan.</p>';
-    var m = S.senaMoneda, dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
-    var faltan = !dp.transferencia && !dp.prex && !dp.pix && !dp.abitab_redpagos;
-    var sinTasa = m !== 'USD' && enMoneda(1, m) === null;
-    var wa = p.cliente_telefono && c.senaPend > 0 && p.id;
-    return '<div class="cuentas"><div><small>Seña del pedido</small><b>' + usd(c.sena) + '</b></div>' +
-      '<div><small>Seña pendiente</small><b' + (c.senaPend ? ' class="deuda"' : ' class="ok"') + '>' + (c.senaPend ? plata(c.senaPend, m) : 'Cobrada') + '</b></div>' +
-      (c.senaPend ? '<div><small>Con tarjeta (+' + Math.round(recargoTarjeta() * 100) + ' %)</small><b>' + plata(r2(c.senaPend * (1 + recargoTarjeta())), m) + '</b></div>' : '') + '</div>' +
-      (c.senaPend ? '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px">' +
-        '<label class="f" style="min-width:200px">Moneda para el cliente<select data-sena-moneda>' + opts(MONEDA_SENA, m) + '</select></label>' +
-        (wa ? '<a class="btn btn--wa" href="#" data-wa-enviar="sena" data-wa-pedido="' + esc(p.id) + '">Pedir seña por WhatsApp</a>' : '<span class="sub">Cargá el teléfono del cliente para mandarle la seña.</span>') +
-        '<button type="button" class="btn btn--sm" data-act="registrar-sena">Registrar seña cobrada</button></div>' : '') +
-      (!c.senaPend && c.saldo > 0 && p.id ? '<div class="cuentas" style="margin-top:10px"><div><small>Saldo pendiente</small><b class="deuda">' + plata(c.saldo, m) + '</b></div>' +
-        '<div><small>Con tarjeta (+' + Math.round(recargoTarjeta() * 100) + ' %)</small><b>' + plata(r2(c.saldo * (1 + recargoTarjeta())), m) + '</b></div></div>' +
-        '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-top:10px">' +
-        '<label class="f" style="min-width:200px">Moneda para el cliente<select data-sena-moneda>' + opts(MONEDA_SENA, m) + '</select></label>' +
-        (p.cliente_telefono ? '<a class="btn btn--wa" href="#" data-wa-enviar="saldo" data-wa-pedido="' + esc(p.id) + '">Pedir saldo por WhatsApp</a>' : '<span class="sub">Cargá el teléfono del cliente para pedirle el saldo.</span>') +
-        '<button type="button" class="btn btn--sm" data-act="registrar-saldo">Registrar saldo cobrado</button></div>' : '') +
-      (!c.senaPend && !c.saldo && c.total > 0 ? '<p class="sub" style="margin-top:8px"><b class="ok">Pedido pago en su totalidad.</b></p>' : '') +
-      (c.senaPend && p.estado !== 'confirmado' ? '<p class="sub" style="margin-top:8px">Pedila cuando el proveedor confirme (estado "Confirmado").</p>' : '') +
-      (sinTasa ? '<p class="sub">' + (S.tasas && S.tasas.error ? 'No se pudo traer la cotización: el monto queda en dólares.' : 'Cargando cotización…') + '</p>' : '') +
-      (faltan && c.senaPend ? '<p class="aviso">Faltan tus datos para cobrar: cargá PAGO_PREX, PAGO_PIX y PAGO_ABITAB_REDPAGOS (Abitab) en las variables de Vercel. Mientras tanto el mensaje solo ofrece tarjeta.</p>' : '');
+    if (p.estado === 'completado') return 6;
+    if (p.estado === 'nuevo') return 0;
+    if (p.estado === 'en_gestion') return 1;
+    if (p.estado === 'confirmado') return c.senaPend > 0 ? 3 : (c.saldo > 0 ? 4 : 5);
+    return -1;
   }
+  function etapasHtml(p) {
+    if (p.estado === 'cancelado') return '<p class="etapas__canc">Pedido cancelado</p>';
+    var n = etapaDe(p);
+    return '<ol class="etapas" aria-label="Etapas del pedido">' + ETAPAS.map(function (t, i) {
+      return '<li class="' + (i < n ? 'hecha' : (i === n ? 'actual' : '')) + '"' + (i === n ? ' aria-current="step"' : '') + '><span aria-hidden="true"></span>' + t + '</li>';
+    }).join('') + '</ol>';
+  }
+  function mediosSinRecargo() {
+    var dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
+    return ['Transferencia', dp.transferencia, 'Prex', dp.prex, 'Pix', dp.pix, 'Abitab', dp.abitab_redpagos].filter(function (x, i, a) { return i % 2 === 0 && a[i + 1]; }).join(', ').replace(/, ([^,]*)$/, ' o $1');
+  }
+  /* El recuadro de "Proximo paso": la misma regla que el boton de la lista (proximoPaso). */
+  function pasoHtml(p) {
+    if (!p.id || p.estado === 'cancelado' || p.estado === 'completado' || !(p.items || []).length) return '';
+    var x = proximoPaso(p), c = calc(p), m = S.senaMoneda, moneda = '', cuerpo, botones = '', aviso = '';
+    if (x.tipo === 'wa') {
+      var esSena = x.wa === 'sena', monto = esSena ? c.senaPend : c.saldo, medios = mediosSinRecargo();
+      cuerpo = '<b class="paso__t">' + (esSena ? 'Pedir la seña de ' : 'Cobrar el saldo de ') + esc(plata(monto, m)) + '</b><span class="sub">' + (medios ? 'Sin recargo por ' + esc(medios) + ' · ' : '') + esc(plata(r2(monto * (1 + recargoTarjeta())), m)) + ' por Mercado Pago</span>';
+      moneda = '<label class="f paso__moneda">Moneda<select data-sena-moneda>' + opts(MONEDA_SENA, m) + '</select></label>';
+      botones = '<a href="#" class="btn btn--main btn--lg" data-wa-enviar="' + x.wa + '" data-wa-pedido="' + esc(p.id) + '">' + ICONO_WA + (esSena ? 'Pedir seña' : 'Pedir saldo') + ' por WhatsApp</a>' +
+        '<button type="button" class="btn btn--lg" data-act="' + (esSena ? 'registrar-sena' : 'registrar-saldo') + '">Ya pagó ' + (esSena ? 'la seña' : 'el saldo') + '</button>';
+      if (m !== 'USD' && enMoneda(1, m) === null) aviso = '<p class="sub">' + (S.tasas && S.tasas.error ? 'No se pudo traer la cotización: el monto queda en dólares.' : 'Cargando cotización…') + '</p>';
+      if (!medios) aviso += '<p class="aviso">Faltan tus datos para cobrar: cargá PAGO_PREX, PAGO_PIX y PAGO_ABITAB_REDPAGOS (Abitab) en las variables de Vercel. Mientras tanto el mensaje solo ofrece tarjeta.</p>';
+    } else if (/^Asignar/.test(x.t)) {
+      cuerpo = '<b class="paso__t">Asignar proveedor a cada servicio</b><span class="sub">Elegilo abajo, en cada servicio, y consultale la disponibilidad por WhatsApp.</span>';
+    } else if (x.t === 'Confirmar con proveedor') {
+      cuerpo = '<b class="paso__t">Confirmar con el proveedor</b><span class="sub">Cuando te confirme la disponibilidad, pasá el pedido a Confirmado y pedí la seña.</span>';
+      botones = '<button type="button" class="btn btn--main btn--lg" data-act="estado-a" data-estado="confirmado">Ya confirmó el proveedor</button>';
+    } else if (x.t === 'Marcar completado') {
+      cuerpo = '<b class="paso__t">Pedido pago en su totalidad</b><span class="sub">Cuando termine el viaje, marcalo como completado.</span>';
+      botones = '<button type="button" class="btn btn--lg" data-act="estado-a" data-estado="completado">Marcar como completado</button>';
+    } else return '';
+    return '<section class="paso" aria-label="Próximo paso"><div class="paso__cab"><div><small>Próximo paso</small>' + cuerpo + '</div>' + moneda + '</div>' +
+      (botones ? '<div class="paso__bot">' + botones + '</div>' : '') + aviso + '</section>';
+  }
+  /* Sena y saldo lado a lado, con su estado. */
+  function pagosResumenHtml(p) {
+    var c = calc(p), m = S.senaMoneda;
+    if (!c.total) return '';
+    var tile = function (t, monto, est, cls) { return '<div class="ptile ' + cls + '"><div><span>' + t + '</span><em>' + est + '</em></div><b>' + esc(plata(monto, m)) + '</b></div>'; };
+    var despues = r2(Math.max(0, c.saldo - c.senaPend));
+    return '<div class="ptiles">' +
+      (c.sena ? tile('Seña · 50 % traslados, 25 % tours', c.senaPend || c.sena, c.senaPend ? 'Pendiente' : 'Cobrada', c.senaPend ? 'ptile--pend' : 'ptile--ok') : '') +
+      tile('Saldo antes del viaje', despues, despues ? (c.senaPend ? 'Después de la seña' : 'Pendiente') : 'Pagado', despues ? (c.senaPend ? '' : 'ptile--pend') : 'ptile--ok') + '</div>';
+  }
+  var TIPO_CHIP = { traslado: 'Traslado', tour: 'Tour', vuelo: 'Vuelo', alojamiento: 'Alojamiento', otro: 'Otro' };
+  /* Un servicio: tipo, nombre y precio en un renglon; proveedor y estado a mano; costos, reserva y edicion se despliegan. */
   function itemHtml(it, i) {
     var pr = S.datos.proveedores.filter(function (x) { return x.id === it.proveedor_id; })[0];
     var msgProv = mensajeProveedor(S.draft, it, pr);
     var f = function (campo, tipo, extra) { return 'data-i="' + i + '" data-f="' + campo + '"' + (tipo ? ' type="' + tipo + '"' : '') + (extra || ''); };
-    return '<div class="item"><div class="item__top"><input ' + f('nombre') + ' value="' + esc(it.nombre) + '" placeholder="Servicio (ej. Traslado aeropuerto – hotel)" aria-label="Servicio">' +
-      '<button type="button" class="btn btn--sm btn--danger btn--x" data-quitar-item="' + i + '" aria-label="Quitar servicio">✕</button></div>' +
-      '<div class="grid"><label class="f">Tipo<select ' + f('tipo') + '>' + opts(TIPOS, it.tipo) + '</select></label>' +
-      '<label class="f">Detalle<input ' + f('detalle') + ' value="' + esc(it.detalle) + '"></label>' +
+    var clave = it.id || String(i), abierto = !it.nombre || !!(S.itemAbierto && S.itemAbierto[clave]);
+    return '<div class="item' + (it.estado === 'cancelado' ? ' item--off' : '') + '">' +
+      '<div class="item__fila"><span class="tchip tchip--' + esc(it.tipo) + '">' + esc(TIPO_CHIP[it.tipo] || 'Otro') + '</span>' +
+      '<div class="item__nom"><b>' + esc(it.nombre || 'Servicio nuevo') + '</b>' + (it.detalle ? '<span class="sub">' + esc(it.detalle) + '</span>' : '') + '</div>' +
+      '<b class="item__precio">' + usd(it.precio_usd) + '</b></div>' +
+      '<div class="item__ctrl"><label class="f">Proveedor<select ' + f('proveedor_id') + '>' + provOpts(it.proveedor_id) + '</select></label>' +
       '<label class="f">Estado del servicio<select ' + f('estado') + '>' + opts(ESTADOS_ITEM, it.estado) + '</select></label></div>' +
-      '<div class="grid"><label class="f">Precio al cliente (US$)<input ' + f('precio_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (it.precio_usd || '') + '"></label>' +
-      '<label class="f">Proveedor<select ' + f('proveedor_id') + '>' + provOpts(it.proveedor_id) + '</select></label>' +
-      '<label class="f">Costo proveedor (US$)<input ' + f('costo_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (it.costo_usd || '') + '"></label>' +
-      '<label class="f">Ya pagado al proveedor (US$)<input ' + f('pagado_proveedor_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (it.pagado_proveedor_usd || '') + '"></label>' +
-      '<label class="f">Código de reserva del proveedor<input ' + f('ref_proveedor') + ' value="' + esc(it.ref_proveedor) + '"></label></div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
-      '<button type="button" class="btn btn--sm" data-pagado-total="' + i + '">Marcar pagado al proveedor</button>' +
-      (pr && (pr.whatsapp || pr.telefono) && S.draft.id ? '<a class="lnk" href="#" data-wa-enviar="proveedor" data-wa-pedido="' + esc(S.draft.id) + '" data-wa-item="' + i + '">WhatsApp a ' + esc(pr.nombre) + '</a>' : '') +
-      (pr && pr.email ? '<a class="lnk" href="mailto:' + esc(pr.email) + '?subject=' + encodeURIComponent('Reserva ' + S.draft.ref) + '&body=' + encodeURIComponent(msgProv) + '">Email</a>' : '') +
-      (pr && pr.datos_pago ? '<span class="sub">Pagar a: ' + esc(pr.datos_pago) + '</span>' : '') + '</div>' + politicaHtml(it) + '</div>';
+      politicaHtml(it) +
+      '<div class="item__acc">' +
+      (pr && (pr.whatsapp || pr.telefono) && S.draft.id ? '<a class="btn btn--sm btn--wa-borde" href="#" data-wa-enviar="proveedor" data-wa-pedido="' + esc(S.draft.id) + '" data-wa-item="' + i + '">' + ICONO_WA + 'WhatsApp a ' + esc(pr.nombre) + '</a>' : '') +
+      (pr && pr.email ? '<a class="btn btn--sm" href="mailto:' + esc(pr.email) + '?subject=' + encodeURIComponent('Reserva ' + S.draft.ref) + '&body=' + encodeURIComponent(msgProv) + '">Email</a>' : '') +
+      '<button type="button" class="btn btn--sm" data-item-toggle="' + esc(clave) + '" aria-expanded="' + abierto + '">' + (abierto ? 'Ocultar detalle ▲' : 'Costos y reserva ▾') + '</button></div>' +
+      (abierto ? '<div class="item__mas"><label class="f">Servicio<input ' + f('nombre') + ' value="' + esc(it.nombre) + '" placeholder="Ej. Traslado aeropuerto – hotel"></label>' +
+        '<div class="grid"><label class="f">Tipo<select ' + f('tipo') + '>' + opts(TIPOS, it.tipo) + '</select></label>' +
+        '<label class="f">Detalle<input ' + f('detalle') + ' value="' + esc(it.detalle) + '"></label>' +
+        '<label class="f">Precio al cliente (US$)<input ' + f('precio_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (it.precio_usd || '') + '"></label>' +
+        '<label class="f">Costo proveedor (US$)<input ' + f('costo_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (it.costo_usd || '') + '"></label>' +
+        '<label class="f">Ya pagado al proveedor (US$)<input ' + f('pagado_proveedor_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (it.pagado_proveedor_usd || '') + '"></label>' +
+        '<label class="f">Código de reserva del proveedor<input ' + f('ref_proveedor') + ' value="' + esc(it.ref_proveedor) + '"></label></div>' +
+        '<div class="item__acc"><button type="button" class="btn btn--sm" data-pagado-total="' + i + '">Marcar pagado al proveedor</button>' +
+        (pr && pr.datos_pago ? '<span class="sub">Pagar a: ' + esc(pr.datos_pago) + '</span>' : '') +
+        '<button type="button" class="btn btn--sm btn--txt-danger" data-quitar-item="' + i + '">Quitar servicio</button></div></div>' : '') +
+      '</div>';
   }
   function pagoHtml(pg, i) {
     var f = function (campo, tipo, extra) { return 'data-p="' + i + '" data-f="' + campo + '"' + (tipo ? ' type="' + tipo + '"' : '') + (extra || ''); };
     return '<div class="pagoRow"><input ' + f('fecha', 'date') + ' value="' + esc(pg.fecha) + '" aria-label="Fecha">' +
       '<input ' + f('monto_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (pg.monto_usd || '') + '" placeholder="US$" aria-label="Monto en US$">' +
-      '<input ' + f('medio') + ' value="' + esc(pg.medio) + '" placeholder="Medio (transferencia, Pix…)" aria-label="Medio">' +
+      '<input ' + f('medio') + ' value="' + esc(pg.medio) + '" placeholder="Medio (Prex, Pix, Abitab…)" aria-label="Medio">' +
       '<input ' + f('nota') + ' value="' + esc(pg.nota) + '" placeholder="Nota" aria-label="Nota">' +
       '<button type="button" class="btn btn--sm btn--danger btn--x" data-quitar-pago="' + i + '" aria-label="Quitar cobro">✕</button></div>';
   }
   function abrirPanel() {
-    var p = S.draft, esNuevo = !p.id;
+    var p = S.draft, esNuevo = !p.id, c = calc(p);
     var wa = p.cliente_telefono && p.id;
-    var waConf = p.cliente_telefono && p.items.length && p.id;
     var el = document.getElementById('drawer');
     if (!el) { el = document.createElement('div'); el.id = 'drawer'; el.className = 'drawer'; document.body.appendChild(el); }
     var f = function (campo) { return 'data-f="' + campo + '"'; };
+    var viaje = [p.destino, p.fecha_ida ? fecha(p.fecha_ida) + ' → ' + fecha(p.fecha_vuelta) : '', p.personas ? p.personas + (p.personas == 1 ? ' persona' : ' personas') : ''].filter(Boolean).join(' · ');
+    var aWa = function (tipo, t) { return '<a href="#" data-wa-enviar="' + tipo + '" data-wa-pedido="' + esc(p.id) + '">' + t + '</a>'; };
+    var menuWa = wa ? '<details class="wamenu"><summary class="btn btn--wa-borde">' + ICONO_WA + 'WhatsApp ▾</summary><div class="wamenu__lista">' +
+      (p.items.length ? aWa('confirmacion', 'Mandarle el resumen del pedido') : '') +
+      (p.estado === 'confirmado' && c.senaPend > 0 ? aWa('sena', 'Pedirle la seña') : '') +
+      (p.estado === 'confirmado' && !c.senaPend && c.saldo > 0 ? aWa('saldo', 'Pedirle el saldo') : '') +
+      aWa('saludo', 'Escribirle por su pedido') + '</div></details>' : '';
     el.innerHTML = '<div class="panel" role="dialog" aria-modal="true" aria-label="Detalle del pedido">' +
-      '<div class="panel__head"><h2>' + esc(esNuevo ? 'Nuevo pedido manual' : p.ref) + (esNuevo ? '' : ' <span class="pill p-' + p.estado + '" id="pill-estado">' + esc(ESTADOS[p.estado]) + '</span>') + '</h2>' +
-      '<button class="btn btn--sm" data-act="cerrar">Cerrar</button></div><div class="panel__body">' +
-      '<section class="sec"><h3>Cuentas</h3><div class="cuentas" id="cuentas-box">' + cuentasHtml(p) + '</div></section>' +
-      (esNuevo || !p.items.length ? '' : '<section class="sec"><h3>Seña</h3><div id="sena-box">' + senaHtml(p) + '</div></section>') +
-      '<section class="sec"><h3>Cliente y viaje</h3><div class="grid">' +
+      '<div class="panel__head ficha__cab">' + (esNuevo ? '<h2>Nuevo pedido manual</h2>'
+        : '<div class="ficha__quien"><h2>' + esc(p.cliente_nombre || 'Sin nombre') + ' <span class="pill p-' + p.estado + '" id="pill-estado">' + esc(ESTADOS[p.estado]) + '</span></h2>' +
+          '<p>' + esc(viaje) + '</p><p class="sub">' + [p.cliente_telefono, p.cliente_email, 'Ref ' + p.ref].filter(Boolean).map(esc).join(' · ') + '</p></div>') +
+        '<div class="ficha__acc">' + menuWa + '<button class="btn btn--icono" data-act="cerrar" aria-label="Cerrar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></div>' +
+      '<div class="panel__body">' +
+      (esNuevo ? '' : '<div id="etapas-box">' + etapasHtml(p) + '</div><div id="paso-box">' + pasoHtml(p) + '</div>') +
+      '<section class="sec"><div class="sec__cab"><h3>Servicios</h3><button type="button" class="btn btn--sm" data-act="add-item">+ Agregar servicio</button></div><div id="items-box">' + (p.items.length ? p.items.map(itemHtml).join('') : '<p class="sub">Sin servicios todavía.</p>') + '</div></section>' +
+      (esNuevo ? '' : '<section class="sec"><div class="sec__cab"><h3>Pagos del cliente</h3><div class="item__acc"><button type="button" class="btn btn--sm" data-act="add-pago">+ Registrar cobro</button><button type="button" class="btn btn--sm" data-act="cobrar-saldo">Cobró todo</button></div></div>' +
+        '<div id="sena-box">' + pagosResumenHtml(p) + '</div><div id="pagos-box">' + (p.pagos.length ? p.pagos.map(pagoHtml).join('') : '<p class="sub">Todavía no registraste cobros.</p>') + '</div></section>') +
+      '<section class="sec sec--franja" aria-label="Cuentas"><div class="cuentas cuentas--franja" id="cuentas-box">' + cuentasHtml(p) + '</div></section>' +
+      '<details class="sec datos" data-datos' + (esNuevo || S.datosAbiertos ? ' open' : '') + '><summary><h3>Datos del cliente y del viaje</h3></summary><div class="grid">' +
       '<label class="f">Estado del pedido<select ' + f('estado') + '>' + opts(ESTADOS, p.estado) + '</select></label>' +
       '<label class="f">Nombre<input ' + f('cliente_nombre') + ' value="' + esc(p.cliente_nombre) + '"></label>' +
       '<label class="f">Teléfono / WhatsApp<input ' + f('cliente_telefono') + ' value="' + esc(p.cliente_telefono) + '" inputmode="tel"></label>' +
@@ -797,16 +852,11 @@
       '<label class="f">Vuelta<input ' + f('fecha_vuelta') + ' type="date" value="' + esc(p.fecha_vuelta || '') + '"></label>' +
       '<label class="f">Personas<input ' + f('personas') + ' type="number" min="1" max="60" value="' + esc(p.personas) + '"></label>' +
       '<label class="f">Medio de pago preferido<input ' + f('medio_pago') + ' value="' + esc(p.medio_pago) + '"></label></div>' +
-      (waConf ? '<p style="margin:12px 0 0"><a class="btn btn--wa" href="#" data-wa-enviar="confirmacion" data-wa-pedido="' + esc(p.id) + '">Enviar confirmación por WhatsApp</a></p>' : '') +
-      (wa ? '<p style="margin:10px 0 0"><a class="lnk" href="#" data-wa-enviar="saludo" data-wa-pedido="' + esc(p.id) + '">Escribirle al cliente por WhatsApp</a></p>' : '') +
-      (wa && p.estado !== 'cancelado' ? '<p style="margin:10px 0 0"><button type="button" class="btn btn--sm btn--danger" data-act="cancelar-avisar">Cancelar pedido y avisar por WhatsApp</button></p>' : '') +
-      (p.created_at ? '<p class="sub" style="margin-top:8px">Recibido ' + esc(fechaHora(p.created_at)) + ' · origen: ' + esc(p.origen || 'web') + '</p>' : '') + '</section>' +
-      '<section class="sec"><h3>Servicios y proveedores</h3><div id="items-box">' + (p.items.length ? p.items.map(itemHtml).join('') : '<p class="sub">Sin servicios todavía.</p>') + '</div>' +
-      '<button type="button" class="btn btn--sm" data-act="add-item">+ Agregar servicio</button></section>' +
-      (esNuevo ? '' : '<section class="sec"><h3>Cobros del cliente</h3><div id="pagos-box">' + (p.pagos.length ? p.pagos.map(pagoHtml).join('') : '<p class="sub">Todavía no registraste cobros.</p>') + '</div>' +
-        '<button type="button" class="btn btn--sm" data-act="add-pago">+ Registrar cobro</button> <button type="button" class="btn btn--sm" data-act="cobrar-saldo">Cobrar el saldo completo</button></section>') +
+      (p.created_at ? '<p class="sub" style="margin-top:10px">Recibido ' + esc(fechaHora(p.created_at)) + ' · origen: ' + esc(p.origen || 'web') + '</p>' : '') + '</details>' +
       '<section class="sec"><h3>Notas internas</h3><textarea ' + f('notas') + '>' + esc(p.notas) + '</textarea></section></div>' +
-      '<div class="foot">' + (esNuevo ? '' : '<button class="btn btn--danger" data-act="borrar-pedido" style="margin-right:auto">Borrar pedido</button>') + '<span class="msg" id="foot-msg" role="status"></span><button class="btn" data-act="cerrar">Cancelar</button><button class="btn btn--main" data-act="guardar">' + (esNuevo ? 'Crear pedido' : 'Guardar cambios') + '</button></div></div>';
+      '<div class="foot">' + (esNuevo ? '' : '<button class="btn btn--txt-danger" data-act="borrar-pedido">Borrar</button>' +
+        (p.estado !== 'cancelado' ? '<button class="btn btn--danger" data-act="' + (wa ? 'cancelar-avisar' : 'estado-a') + '" data-estado="cancelado">Cancelar pedido</button>' : '')) +
+      '<span class="foot__msg" id="foot-msg" role="status"></span><button class="btn btn--dark btn--lg" data-act="guardar">' + (esNuevo ? 'Crear pedido' : 'Guardar cambios') + '</button></div></div>';
   }
   function refrescarPanel() {
     var y = (document.querySelector('#drawer .panel') || {}).scrollTop || 0;
@@ -2012,9 +2062,10 @@
     var cb = document.getElementById('cuentas-box'); if (cb) cb.innerHTML = cuentasHtml(S.draft);
     /* La sena se repinta en el change y no en cada tecla: tiene un select y repintarlo mientras se escribe en
        otro campo no molesta, pero si el foco estuviera en el select lo perderia. */
-    var sb = document.getElementById('sena-box'); if (sb && e.type === 'change') sb.innerHTML = senaHtml(S.draft);
+    if (e.type === 'change') [['etapas-box', etapasHtml], ['paso-box', pasoHtml], ['sena-box', pagosResumenHtml]].forEach(function (x) { var b = document.getElementById(x[0]); if (b) b.innerHTML = x[1](S.draft); });
   }
   document.addEventListener('input', alEditar);
+  document.addEventListener('toggle', function (e) { if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-datos')) S.datosAbiertos = e.target.open; }, true);
   document.addEventListener('change', alEditar);
 
   document.addEventListener('submit', function (e) {
@@ -2053,7 +2104,10 @@
 
   document.addEventListener('click', function (e) {
     var tm = e.target.closest('[data-tarifa-marca]'); if (tm) { e.preventDefault(); var pz = tm.getAttribute('data-tarifa-marca').split('|'); marcarTarifa(pz[0], pz[1]); return; }
+    var itg = e.target.closest('[data-item-toggle]');
+    if (itg) { S.itemAbierto = S.itemAbierto || {}; var kt = itg.getAttribute('data-item-toggle'); S.itemAbierto[kt] = !S.itemAbierto[kt]; refrescarPanel(); return; }
     var we = e.target.closest('a[data-wa-enviar]');
+    if (we && we.closest('.wamenu')) { var dm = we.closest('.wamenu'); if (dm) dm.open = false; }
     if (we) { e.preventDefault(); e.stopPropagation(); enviarWa(we.getAttribute('data-wa-enviar'), we.getAttribute('data-wa-pedido'), we.hasAttribute('data-wa-item') ? Number(we.getAttribute('data-wa-item')) : undefined); return; }
     var ta = e.target.closest('a[data-tarifa-api]');
     if (ta) {
@@ -2148,6 +2202,10 @@
       case 'registrar-saldo': registrarSaldo(); break;
       case 'guardar': guardar(); break;
       case 'borrar-pedido': borrarPedido(); break;
+      case 'estado-a':
+        if (!S.draft) break;
+        if (t.getAttribute('data-estado') === 'cancelado' && !confirm('¿Cancelar el pedido ' + S.draft.ref + '?')) break;
+        S.draft.estado = t.getAttribute('data-estado'); S.dirty = true; guardar(); break;
       case 'cancelar-avisar':
         var act = (S.draft && S.draft.items || []).filter(function (x) { return x.nombre && x.estado !== 'cancelado'; });
         if (S.draft) decidirSinPolitica(S.draft, act);

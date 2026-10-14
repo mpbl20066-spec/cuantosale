@@ -124,7 +124,7 @@ textarea{min-height:76px;resize:vertical}
 .avatar{width:40px;height:40px;flex:none;border-radius:999px;background:var(--warnbg);color:var(--warn);display:grid;place-items:center;font-weight:600;font-size:13px}
 .sub.warn{color:var(--warn);font-weight:500}
 .pend{color:var(--warn);font-weight:500}
-.paso{white-space:nowrap;text-decoration:none;min-height:36px;display:inline-flex;align-items:center;border-radius:10px}
+.btn-paso{white-space:nowrap;text-decoration:none;min-height:36px;display:inline-flex;align-items:center;border-radius:10px}
 @media (max-width:760px){
   .plist__h{display:none}
   .prow{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}
@@ -132,7 +132,7 @@ textarea{min-height:76px;resize:vertical}
   .prow__total{grid-column:2;grid-row:1}
   .prow__estado{grid-column:2;grid-row:2;justify-self:end}
   .prow__paso{grid-column:1 / -1}
-  .prow__paso .paso{width:100%;justify-content:center;min-height:44px}
+  .prow__paso .btn-paso{width:100%;justify-content:center;min-height:44px}
   .filtros input[type=search],.fsel{flex:1 1 140px;width:auto}
   .subtabs{width:100%}
   /* Celular: logo y botones en un renglon, las 4 secciones en el de abajo, parejas. */
@@ -168,7 +168,7 @@ tbody tr.row:hover{background:color-mix(in srgb,var(--info) 6%,transparent)}
 .panel{width:min(980px,100%);height:100%;background:var(--bg);overflow:auto;padding:0 0 90px}
 .panel__head{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:10px;align-items:center;z-index:2}
 .panel__head h2{margin:0;font-size:17px;flex:1}
-.panel__body{padding:14px 16px;display:grid;gap:14px}
+.panel__body{padding:16px 20px;display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
 .sec{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
 .sec h3{margin:0 0 10px;font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
@@ -180,7 +180,83 @@ tbody tr.row:hover{background:color-mix(in srgb,var(--info) 6%,transparent)}
 .cuentas small{display:block;color:var(--muted);font-size:12px;font-weight:600}
 .cuentas b{font-size:17px;font-variant-numeric:tabular-nums}
 .foot{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
-.foot .msg{margin-right:auto;font-size:13.5px}
+.foot .msg,.foot__msg{margin-right:auto;font-size:13.5px;max-width:none;padding:0;border-radius:0;box-shadow:none;background:none}
+/* Ficha del pedido */
+.ficha__cab{align-items:flex-start;padding:18px 20px}
+.ficha__quien{flex:1;min-width:0}
+.ficha__quien h2{font-size:21px;font-weight:700;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ficha__quien p{margin:2px 0 0}
+.ficha__acc{display:flex;gap:8px;align-items:flex-start}
+.btn--wa-borde{display:inline-flex;align-items:center;gap:6px;border-color:#16A34A;color:#166534;text-decoration:none}
+@media (prefers-color-scheme:dark){.btn--wa-borde{color:#4ADE80}}
+.btn--dark{background:var(--ink);border-color:var(--ink);color:var(--card)}
+.btn--txt-danger{border-color:transparent;background:transparent;color:var(--bad);font-weight:500}
+.btn--danger{border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
+.wamenu{position:relative}
+.wamenu summary{list-style:none;cursor:pointer}
+.wamenu summary::-webkit-details-marker{display:none}
+.wamenu__lista{position:absolute;right:0;top:calc(100% + 6px);z-index:5;min-width:250px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:6px;display:grid}
+.wamenu__lista a{padding:10px 12px;border-radius:8px;color:var(--ink);text-decoration:none;font-weight:500}
+.wamenu__lista a:hover{background:var(--bg)}
+.etapas{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.etapas li{display:grid;gap:6px;font-size:12px;color:var(--muted);min-width:0;white-space:nowrap}
+.etapas li span{height:6px;border-radius:99px;background:var(--line)}
+.etapas li.hecha{color:var(--ink);font-weight:500}.etapas li.hecha span{background:var(--ink)}
+.etapas li.actual{color:var(--warn);font-weight:700}.etapas li.actual span{background:var(--accent)}
+.etapas__canc{margin:0;padding:10px 14px;border-radius:12px;background:var(--badbg);color:var(--bad);font-weight:600}
+.paso{background:var(--warnbg);border:1px solid color-mix(in srgb,var(--accent) 70%,transparent);border-radius:16px;padding:16px 18px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.paso__cab>div{min-width:0}
+.paso__cab{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.paso small{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--warn)}
+.paso__t{display:block;font-size:18px;font-weight:600;margin-top:2px}
+.paso__moneda{min-width:180px}
+.paso__bot{display:flex;gap:8px;flex-wrap:wrap}
+.paso__bot .btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.paso .aviso{margin:0}
+.sec{border-radius:16px;padding:16px 18px}
+.sec__cab{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.sec__cab h3{margin:0}
+.sec h3{font-size:13px}
+.item{border-radius:12px;padding:12px 14px;gap:10px}
+.item--off{opacity:.6}
+.item__fila{display:flex;gap:12px;align-items:flex-start}
+.item__nom{flex:1;min-width:0}
+.item__nom b{font-weight:600}
+.item__precio{white-space:nowrap;font-variant-numeric:tabular-nums}
+.tchip{flex:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:3px 8px;border-radius:6px;background:var(--infobg);color:var(--info);margin-top:2px}
+.tchip--tour{background:#EDE9FE;color:#5B21B6}.tchip--traslado{background:var(--infobg);color:var(--info)}
+.tchip--alojamiento{background:var(--okbg);color:var(--ok)}.tchip--vuelo{background:var(--warnbg);color:var(--warn)}
+@media (prefers-color-scheme:dark){.tchip--tour{background:#2E1F5C;color:#C4B5FD}}
+.item__ctrl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.item__acc{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.item__acc .btn{text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.item__mas{display:grid;gap:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.ptiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px}
+.ptile{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.ptile div{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
+.ptile em{font-style:normal;font-size:12px;font-weight:600}
+.ptile b{display:block;font-size:20px;margin-top:4px;font-variant-numeric:tabular-nums}
+.ptile--pend{border-color:color-mix(in srgb,var(--accent) 70%,transparent);background:var(--warnbg)}.ptile--pend em{color:var(--warn)}
+.ptile--ok em{color:var(--ok)}
+.sec--franja{padding:12px 18px}
+.cuentas--franja{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.cuentas--franja div{background:transparent;padding:2px 0}
+.cuentas--franja b{font-size:15px}
+.datos summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between}
+.datos summary::-webkit-details-marker{display:none}
+.datos summary h3{margin:0}
+.datos summary::after{content:"▾";color:var(--muted)}
+.datos[open] summary{margin-bottom:12px}
+.datos[open] summary::after{content:"▴"}
+@media (max-width:760px){
+  .ficha__cab{padding:14px}
+  .etapas li{font-size:0}
+  .etapas li.actual{font-size:11px}
+  .item__ctrl{grid-template-columns:1fr}
+  .cuentas--franja{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .paso__bot .btn{flex:1 1 100%;justify-content:center}
+  .wamenu__lista{right:-48px}
+}
 a.lnk{color:var(--info);font-weight:600;text-decoration:none}
 a.lnk:hover{text-decoration:underline}
 .pagoRow{display:grid;grid-template-columns:130px 110px 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center}
@@ -234,6 +310,6 @@ a.lnk:hover{text-decoration:underline}
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=44"></script>
+<script src="/admin/admin.js?v=45"></script>
 </body>
 </html>
