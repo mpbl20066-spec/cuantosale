@@ -3778,6 +3778,14 @@ function handleRequest(req, res) {
       res.end();
       return;
     }
+    // Links cortos para la bio de las redes: se ven prolijos en el perfil y llegan a la home con ?utm_source=,
+    // que home-track.js cuenta como 'llegada' (Marketing > Tablero semanal > Llegadas por fuente).
+    const linkRed = /^\/(ig|tiktok|historia)\/?$/i.exec(url.pathname);
+    if (linkRed) {
+      const fuenteRed = { ig: 'instagram', tiktok: 'tiktok', historia: 'ig_historia' }[linkRed[1].toLowerCase()];
+      res.writeHead(302, { Location: '/?utm_source=' + fuenteRed, 'Cache-Control': 'no-store' });
+      return res.end();
+    }
     /* El panel de edicion del catalogo de tours.
      *
      * Se declara como ruta propia y no cae en el serveStatic del final por
