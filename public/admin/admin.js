@@ -646,7 +646,7 @@
       (esNuevo ? '' : '<section class="sec"><h3>Cobros del cliente</h3><div id="pagos-box">' + (p.pagos.length ? p.pagos.map(pagoHtml).join('') : '<p class="sub">Todavía no registraste cobros.</p>') + '</div>' +
         '<button type="button" class="btn btn--sm" data-act="add-pago">+ Registrar cobro</button> <button type="button" class="btn btn--sm" data-act="cobrar-saldo">Cobrar el saldo completo</button></section>') +
       '<section class="sec"><h3>Notas internas</h3><textarea ' + f('notas') + '>' + esc(p.notas) + '</textarea></section></div>' +
-      '<div class="foot"><span class="msg" id="foot-msg" role="status"></span><button class="btn" data-act="cerrar">Cancelar</button><button class="btn btn--main" data-act="guardar">' + (esNuevo ? 'Crear pedido' : 'Guardar cambios') + '</button></div></div>';
+      '<div class="foot">' + (esNuevo ? '' : '<button class="btn btn--danger" data-act="borrar-pedido" style="margin-right:auto">Borrar pedido</button>') + '<span class="msg" id="foot-msg" role="status"></span><button class="btn" data-act="cerrar">Cancelar</button><button class="btn btn--main" data-act="guardar">' + (esNuevo ? 'Crear pedido' : 'Guardar cambios') + '</button></div></div>';
   }
   function refrescarPanel() {
     var y = (document.querySelector('#drawer .panel') || {}).scrollTop || 0;
@@ -1682,6 +1682,12 @@
       toast('Guardado'); return api('datos').then(function (d) { S.datos = d; pintarFondo(); refrescarPanel(); });
     }).catch(function (e) { mensaje(e.message, true); });
   }
+  function borrarPedido() {
+    var p = S.draft;
+    if (!p || !p.id || !confirm('¿Borrar el pedido ' + (p.ref || '') + ' para siempre? No se puede deshacer.')) return;
+    mensaje('Borrando…');
+    api('pedido/borrar', { id: p.id }).then(function () { toast('Pedido ' + (p.ref || '') + ' borrado'); S.dirty = false; cerrarPanel(true); return cargar(); }).catch(function (e) { mensaje(e.message, true); });
+  }
   function guardarProv() {
     var p = S.prov;
     if (!p.nombre || p.nombre.trim().length < 2) return mensaje('Escribí el nombre del proveedor.', true);
@@ -1881,6 +1887,7 @@
       case 'cobrar-saldo': var c = calc(S.draft); if (c.saldo > 0) { S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: c.saldo, medio: S.draft.medio_pago || '', nota: 'Saldo' }); S.dirty = true; refrescarPanel(); } break;
       case 'registrar-sena': var cs = calc(S.draft); if (cs.senaPend > 0) { S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: cs.senaPend, medio: S.draft.medio_pago || '', nota: 'Seña' }); S.dirty = true; refrescarPanel(); } break;
       case 'guardar': guardar(); break;
+      case 'borrar-pedido': borrarPedido(); break;
       case 'guardar-prov': guardarProv(); break;
       case 'papelera-prov': papeleraProv(); break;
       case 'ver-papelera': S.provPapelera = !S.provPapelera; pintar(); break;
