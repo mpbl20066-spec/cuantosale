@@ -109,7 +109,7 @@
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
     { t: 'Catálogo', vistas: [['servicios', 'Servicios'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
     { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso']] },
-    { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-estrategia', 'Estrategia'], ['mkt-colabs', 'Perfil y mensajes']] }
+    { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-estrategia', 'Estrategia'], ['mkt-colabs', 'Perfil y mensajes'], ['mkt-contactos', 'Contactos']] }
   ];
   function grupoDe(v) { return GRUPOS.filter(function (g) { return g.vistas.some(function (x) { return x[0] === v; }); })[0] || GRUPOS[0]; }
   function vistaPrecarga() {
@@ -464,7 +464,7 @@
   function cargarMkt() {
     S.mkt = { cargando: true };
     var datos = window.CS_MKT ? Promise.resolve() : new Promise(function (ok, mal) {
-      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=10'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
+      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=11'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
       document.head.appendChild(s);
     });
     Promise.all([datos, api('marketing'), api('uso?dias=90').catch(function () { return null; })]).then(function (r) {
@@ -513,6 +513,7 @@
     if (S.vista === 'mkt-calendario') return h + vistaMktCalendario();
     if (S.vista === 'mkt-tablero') return h + vistaMktTablero();
     if (S.vista === 'mkt-estrategia') return h + vistaMktEstrategia();
+    if (S.vista === 'mkt-contactos') return h + vistaMktContactos();
     return h + vistaMktColabs();
   }
   function bloqueMkt(p) {
@@ -641,6 +642,64 @@
     return '<div class="vhead"><div><h2>Perfil, creadores y alianzas</h2><p>Los mensajes están listos para copiar; cambiá lo que está entre corchetes.</p></div></div>' +
       '<div class="mkt-grid"><section class="sec mkt-texto">' + textoMkt(M.colabs.txt) + '</section><section class="sec">' +
       M.mensajes.map(function (m) { return copiable(m.copy, m.t); }).join('') + '</section></div>';
+  }
+  /* Contactos: prensa, creadores y alianzas a los que se les escribe. Los que trae el plan (CS_MKT.contactos) se
+     mezclan con lo guardado (lib/marketing.js, mismo id); los agregados a mano viven solo en lo guardado. */
+  var TIPOS_CT = { prensa: 'Prensa', creador: 'Creador', alianza: 'Alianza' };
+  var CANALES_CT = { whatsapp: 'WhatsApp', instagram: 'Instagram', mail: 'Mail', form: 'Formulario web', tel: 'Teléfono', otro: 'Otro' };
+  var ESTADOS_CT = { pendiente: 'Pendiente de escribir', escrito: 'Le escribí', seguimiento: 'Mandé el seguimiento', respondio: 'Respondió', publico: 'Publicó / salió', no: 'No le interesa' };
+  function contactosMkt() {
+    var est = S.mkt.estado.contactos || {}, base = {};
+    var l = (window.CS_MKT.contactos || []).map(function (c) { base[c.id] = 1; return Object.assign({ estado: 'pendiente' }, c, est[c.id] || {}); });
+    Object.keys(est).forEach(function (id) { if (!base[id]) l.push(Object.assign({ id: id, tipo: 'prensa', canal: 'instagram', estado: 'pendiente' }, est[id])); });
+    return l.filter(function (c) { return !c.oculto; });
+  }
+  /* El dato que se carga (numero, @usuario, mail o link) convertido en un enlace que abre el canal. */
+  function linkContacto(c) {
+    var d = String(c.dato || '').trim();
+    if (!d) return '';
+    if (c.canal === 'whatsapp') { var n = d.replace(/\D/g, ''); if (/^0?9\d{7}$/.test(n)) n = '598' + n.replace(/^0/, ''); return n ? 'https://wa.me/' + n : ''; }
+    if (c.canal === 'instagram') return /^https?:\/\//.test(d) ? d : 'https://www.instagram.com/' + encodeURIComponent(d.replace(/^@/, '')) + '/';
+    if (c.canal === 'mail') return /@/.test(d) ? 'mailto:' + d : '';
+    if (c.canal === 'tel') return 'tel:' + d.replace(/[^\d+]/g, '');
+    return /^https?:\/\//.test(d) ? d : '';
+  }
+  /* Le escribiste hace una semana o mas y no respondio: toca el seguimiento (una sola vez). */
+  function tocaSeguimiento(c) { return c.estado === 'escrito' && c.fecha && difDias(c.fecha, hoyUY()) >= 7; }
+  function vistaMktContactos() {
+    var todos = contactosMkt(), tipo = S.mktCtTipo || 'todos';
+    var l = todos.filter(function (c) { return tipo === 'todos' || c.tipo === tipo; });
+    var cuenta = function (f) { return l.filter(f).length; };
+    var opts = function (obj, v) { return Object.keys(obj).map(function (k) { return '<option value="' + k + '"' + (k === v ? ' selected' : '') + '>' + esc(obj[k]) + '</option>'; }).join(''); };
+    var h = '<div class="vhead"><div><h2>Contactos</h2><p>A quién le escribiste, por dónde y qué respondió. Se guarda solo al cambiar cada campo. Los mensajes para mandar están en Perfil y mensajes.</p></div>' +
+      '<button class="btn" data-mkt-ct-nuevo>+ Agregar contacto</button></div>';
+    h += '<section class="kpis kpis--4">' + kpi('Pendientes de escribir', cuenta(function (c) { return c.estado === 'pendiente'; }), 'todavía no les escribiste') +
+      kpi('Esperando respuesta', cuenta(function (c) { return c.estado === 'escrito' || c.estado === 'seguimiento'; }), 'les escribiste') +
+      kpi('Toca seguimiento', cuenta(tocaSeguimiento), 'escritos hace 7 días o más', cuenta(tocaSeguimiento) ? 'kpi--warn' : '') +
+      kpi('Respondieron', cuenta(function (c) { return c.estado === 'respondio' || c.estado === 'publico'; }), 'o ya publicaron', cuenta(function (c) { return c.estado === 'respondio' || c.estado === 'publico'; }) ? 'kpi--ok' : '') + '</section>';
+    h += '<div class="bar"><div class="chips">' + [['todos', 'Todos']].concat(Object.keys(TIPOS_CT).map(function (k) { return [k, TIPOS_CT[k]]; })).map(function (x) {
+      return '<button class="chip" data-mkt-ct-tipo="' + x[0] + '" aria-pressed="' + (x[0] === tipo) + '">' + esc(x[1]) + ' (' + (x[0] === 'todos' ? todos.length : todos.filter(function (c) { return c.tipo === x[0]; }).length) + ')</button>';
+    }).join('') + '</div></div>';
+    if (!l.length) return h + '<div class="card"><p class="vacio">No hay contactos de este tipo. Agregá uno con el botón de arriba.</p></div>';
+    h += '<div class="mkt-grid">';
+    l.forEach(function (c) {
+      var a = function (campo) { return ' data-mkt-ct="' + esc(c.id) + '" data-mkt-ct-campo="' + campo + '"'; };
+      var url = linkContacto(c);
+      h += '<section class="sec mkt-ct"><div class="sec__cab"><h3>' + esc(c.medio || 'Contacto nuevo') + '</h3><span class="tags">' +
+        (tocaSeguimiento(c) ? '<span class="tag deuda">Toca seguimiento</span>' : '') + '<span class="tag">' + esc(ESTADOS_CT[c.estado] || c.estado) + '</span></span></div>' +
+        '<div class="grid">' +
+        '<label class="f">Medio o cuenta<input' + a('medio') + ' value="' + esc(c.medio || '') + '" placeholder="Ej.: El Observador"></label>' +
+        '<label class="f">Persona<input' + a('persona') + ' value="' + esc(c.persona || '') + '" placeholder="Nombre del periodista o la sección"></label>' +
+        '<label class="f">Tipo<select' + a('tipo') + '>' + opts(TIPOS_CT, c.tipo) + '</select></label>' +
+        '<label class="f">Por dónde<select' + a('canal') + '>' + opts(CANALES_CT, c.canal) + '</select></label>' +
+        '<label class="f">Número, @usuario, mail o link<input' + a('dato') + ' value="' + esc(c.dato || '') + '" placeholder="099 123 456 · @usuario · mail · https://…"></label>' +
+        '<label class="f">Estado<select' + a('estado') + '>' + opts(ESTADOS_CT, c.estado) + '</select></label>' +
+        '<label class="f">Último contacto<input type="date"' + a('fecha') + ' value="' + esc(c.fecha || '') + '"></label>' +
+        '</div><label class="f" style="margin-top:8px">Notas<textarea rows="2"' + a('nota') + ' placeholder="Qué le mandaste, qué respondió, cuándo volver a escribir…">' + esc(c.nota || '') + '</textarea></label>' +
+        '<div class="mkt-ct__acc">' + (url ? '<a class="btn btn--sm" href="' + esc(url) + '" target="_blank" rel="noopener">Abrir ' + esc(CANALES_CT[c.canal] || 'link') + '</a>' : '') +
+        '<button class="btn btn--sm" data-mkt-ct-quitar="' + esc(c.id) + '">Quitar</button></div></section>';
+    });
+    return h + '</div>';
   }
   function copiarTexto(t) {
     var listo = function () { toast('Copiado'); };
@@ -2466,7 +2525,17 @@
     var t = e.target;
     if (t.hasAttribute('data-mkt-hecho')) { guardarMkt({ hecho: { id: t.getAttribute('data-mkt-hecho'), valor: t.checked } }).then(function () { if (S.vista !== 'mkt-tablero') pintar(); }); return; }
     if (t.hasAttribute('data-mkt-campo')) { var c = {}; c[t.getAttribute('data-mkt-campo')] = t.value; guardarMkt({ semana: { id: t.getAttribute('data-mkt-sem-id'), campos: c } }).then(function () { toast('Guardado'); }); return; }
-    if (t.hasAttribute('data-mkt-nota')) { guardarMkt({ nota: { id: t.getAttribute('data-mkt-nota'), texto: t.value } }).then(function () { toast('Nota guardada'); }); }
+    if (t.hasAttribute('data-mkt-nota')) { guardarMkt({ nota: { id: t.getAttribute('data-mkt-nota'), texto: t.value } }).then(function () { toast('Nota guardada'); }); return; }
+    if (t.hasAttribute('data-mkt-ct')) {
+      var campo = t.getAttribute('data-mkt-ct-campo'), cc = {}; cc[campo] = t.value;
+      /* Al pasar a "Le escribi" o "Mande el seguimiento" se anota la fecha de hoy, si no se cambio a mano. */
+      if (campo === 'estado' && (t.value === 'escrito' || t.value === 'seguimiento')) cc.fecha = hoyUY();
+      guardarMkt({ contacto: { id: t.getAttribute('data-mkt-ct'), campos: cc } }).then(function () {
+        toast('Guardado');
+        /* Los textos no repintan: si se pasa con Tab al campo siguiente, repintar le sacaria el foco. */
+        if (t.tagName === 'SELECT' || t.type === 'date') pintar();
+      });
+    }
   });
 
   document.addEventListener('submit', function (e) {
@@ -2538,6 +2607,18 @@
     var ms = e.target.closest('[data-mkt-sem]'); if (ms) { S.mktSem = +ms.getAttribute('data-mkt-sem'); pintar(); return; }
     var mse = e.target.closest('[data-mkt-sec]'); if (mse) { S.mktSec = mse.getAttribute('data-mkt-sec'); pintar(); return; }
     if (e.target.closest('[data-mkt-recargar]')) { S.mkt = null; pintar(); return; }
+    var mct = e.target.closest('[data-mkt-ct-tipo]'); if (mct) { S.mktCtTipo = mct.getAttribute('data-mkt-ct-tipo'); pintar(); return; }
+    if (e.target.closest('[data-mkt-ct-nuevo]')) {
+      var tipoNuevo = S.mktCtTipo && S.mktCtTipo !== 'todos' ? S.mktCtTipo : 'prensa';
+      guardarMkt({ contacto: { id: 'c-' + Date.now().toString(36), campos: { tipo: tipoNuevo, canal: 'instagram', estado: 'pendiente' } } }).then(function () { pintar(); });
+      return;
+    }
+    var mcq = e.target.closest('[data-mkt-ct-quitar]');
+    if (mcq) {
+      if (!confirm('¿Quitar este contacto de la lista?')) return;
+      guardarMkt({ contacto: { id: mcq.getAttribute('data-mkt-ct-quitar'), campos: { oculto: true } } }).then(function () { toast('Quitado'); pintar(); });
+      return;
+    }
     var ch = e.target.closest('[data-chat]'); if (ch) { abrirChat(ch.getAttribute('data-chat')); return; }
     /* Desde Usuarios: sus viajes guardados (la lista de viajes filtrada por su correo). */
     var vd = e.target.closest('[data-viajes-de]'); if (vd) { e.preventDefault(); S.qViajes = vd.getAttribute('data-viajes-de'); S.vista = 'viajes'; if (!S.viajes || S.viajes.error) cargarViajes(); else pintar(); return; }
@@ -2676,7 +2757,7 @@
     if (e.target && e.target.id === 'chat-txt' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); var f = document.getElementById('chat-form'); if (f) f.requestSubmit(); return; } if (e.key === 'Escape' && document.getElementById('drawer')) cerrarPanel(false); });
 
   /* ---------- arranque ---------- */
-  var vq = /[?&]vista=(operaciones|servicios|publicar|proveedores|importar|mkt-hoy|mkt-calendario|mkt-tablero|mkt-estrategia|mkt-colabs)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
+  var vq = /[?&]vista=(operaciones|servicios|publicar|proveedores|importar|mkt-hoy|mkt-calendario|mkt-tablero|mkt-estrategia|mkt-colabs|mkt-contactos)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
   api('sesion').then(function (s) {
     if (!s.configurado) { app.innerHTML = '<div class="login"><div class="sec"><h1 style="margin:0 0 8px;font-size:18px">Panel sin configurar</h1><p class="sub">Definí las variables ADMIN_USER y ADMIN_PASS en el servidor (y reiniciá) para activar el panel.</p></div></div>'; return; }
     if (s.activo) cargar(); else pintarLogin();

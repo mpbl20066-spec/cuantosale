@@ -1416,6 +1416,7 @@ window.CS_MKT = {
    "- **Cuándo:** octubre y noviembre, antes de que la gente cierre el verano. Una nota trae más visitas que todo el presupuesto de anuncios.",
    "- **Qué contar:** un dato, no \"existe una app\". Por ejemplo, cuánto sale de verdad una semana en un destino desde Montevideo, todo sumado, o cuánto suman el traslado y los paseos que casi nadie calcula. Con precios consultados esa semana.",
    "- **El mejor camino: el periodista, no la redacción.** Buscá en Google \"viajar a Brasil desde Uruguay\" o \"verano Brasil uruguayos\", mirá quién firmó la nota y escribile por Instagram, X o LinkedIn con el Mensaje Prensa. Funciona más que los formularios.",
+   "- **Anotá a quién le escribiste y qué respondió en Marketing > Contactos.** Ahí ya están cargados estos medios:",
    "- **Contactos de las redacciones (encontrados el 14/10/2026; no publican WhatsApp para noticias):**",
    "- la diaria: formulario por sección (elegí Economía) en ayuda.ladiaria.com.uy/contacto",
    "- Telemundo (Canal 12): formulario en teledoce.com/contacto · teléfono 2208 3555",
@@ -1440,6 +1441,80 @@ window.CS_MKT = {
    "- **Posadas en Brasil con huéspedes uruguayos:** mandan a sus huéspedes a reservar el traslado contigo; ganan una parte del traslado."
   ]
  },
+ "contactos": [
+  {
+   "id": "pr-ladiaria",
+   "tipo": "prensa",
+   "medio": "la diaria",
+   "persona": "Formulario de Economía",
+   "canal": "form",
+   "dato": "https://ayuda.ladiaria.com.uy/contacto/"
+  },
+  {
+   "id": "pr-telemundo",
+   "tipo": "prensa",
+   "medio": "Telemundo (Canal 12)",
+   "persona": "Formulario de contacto",
+   "canal": "form",
+   "dato": "https://www.teledoce.com/contacto"
+  },
+  {
+   "id": "pr-subrayado",
+   "tipo": "prensa",
+   "medio": "Subrayado (Canal 10)",
+   "persona": "Formulario de contacto",
+   "canal": "form",
+   "dato": "https://www.subrayado.com.uy/contactanos"
+  },
+  {
+   "id": "pr-observador",
+   "tipo": "prensa",
+   "medio": "El Observador",
+   "persona": "Café y Negocios (pedí por la sección)",
+   "canal": "tel",
+   "dato": "24189086"
+  },
+  {
+   "id": "pr-mvdportal",
+   "tipo": "prensa",
+   "medio": "Montevideo Portal",
+   "persona": "Periodista que firme notas de viajes (buscalo)",
+   "canal": "instagram",
+   "dato": ""
+  },
+  {
+   "id": "pr-elpais",
+   "tipo": "prensa",
+   "medio": "El País",
+   "persona": "Periodista que firme notas de viajes (buscalo)",
+   "canal": "instagram",
+   "dato": ""
+  },
+  {
+   "id": "pr-radio",
+   "tipo": "prensa",
+   "medio": "Radio: programa de la mañana",
+   "persona": "Producción del programa (buscalo)",
+   "canal": "instagram",
+   "dato": ""
+  },
+  {
+   "id": "cr-uruguayosinfronteras",
+   "tipo": "creador",
+   "medio": "Uruguayo Sin Fronteras",
+   "persona": "",
+   "canal": "instagram",
+   "dato": "@uruguayosinfronteras"
+  },
+  {
+   "id": "cr-viajeroconmochila",
+   "tipo": "creador",
+   "medio": "Viajero con mochila",
+   "persona": "",
+   "canal": "instagram",
+   "dato": "@viajero.conmochila"
+  }
+ ],
  "mensajes": [
   {
    "t": "Bio de Instagram",
