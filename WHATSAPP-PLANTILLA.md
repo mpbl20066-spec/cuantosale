@@ -177,19 +177,27 @@ Ejemplos: `Juan` · `US$ 123,52` · `São Paulo` · `CS-MV7HTN3-B05A2C`
 
 ```
 Hola {{1}}, te confirmamos que tu reserva en {{2}} fue cancelada.
-Referencia: {{3}}
+
+{{3}}
+
+Referencia: {{4}}
 
 Si tenés alguna consulta, respondé este mensaje.
 ```
-Ejemplos: `Juan` · `São Paulo` · `CS-MV7HTN3-B05A2C`
+Ejemplos: `Juan` · `São Paulo` · `Como se canceló con la anticipación que pide el operador, te devolvemos lo que pagaste por esos servicios. Lo procesamos en las próximas 24 hs.` · `CS-MV7HTN3-B05A2C`
+
+{{3}} es la línea del reembolso, según la política de cancelación de cada servicio (lib/politicas.js).
 
 **`servicio_cancelado`**, Español (Utilidad). Al guardar un servicio del pedido en estado Cancelado (con el pedido en pie) y aceptar el aviso:
 
 ```
 Hola {{1}}, te confirmamos que se canceló de tu reserva en {{2}}: {{3}}.
-Nuevo total: {{4}}
-Referencia: {{5}}
+
+{{4}}
+
+Nuevo total: {{5}}
+Referencia: {{6}}
 
 Si tenés alguna consulta, respondé este mensaje.
 ```
-Ejemplos: `Juan` · `São Paulo` · `City Tour Histórico, Paulista y Liberdade` · `US$ 82,35` · `CS-MV7HTN3-B05A2C`
+Ejemplos: `Juan` · `São Paulo` · `City Tour Histórico, Paulista y Liberdade` · `Como se canceló con la anticipación que pide el operador, te devolvemos lo que pagaste por ese servicio. Lo procesamos en las próximas 24 hs.` · `US$ 82,35` · `CS-MV7HTN3-B05A2C`

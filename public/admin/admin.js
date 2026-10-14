@@ -604,12 +604,12 @@
     if (tipo === 'saldo') { var cl = calc(p); return { texto: mensajeSaldo(p), params: [nombre, p.destino || 'Brasil', plata(cl.saldo, S.senaMoneda), formasLinea(cl.saldo, S.senaMoneda), p.ref] }; }
     if (tipo === 'servicio_cancelado') {
       var ds = p.destino || 'Brasil', z = extra || {};
-      return { texto: 'Hola ' + nombre + '. Te confirmamos que se canceló de tu reserva en ' + ds + ': *' + z.servicios + '*.\nNuevo total: *' + z.total + '*\nRef: ' + p.ref + '\n\nSi tenés alguna consulta, escribinos por acá.',
-        params: [nombre, ds, z.servicios, z.total, p.ref] };
+      return { texto: 'Hola ' + nombre + '. Te confirmamos que se canceló de tu reserva en ' + ds + ': *' + z.servicios + '*.\n\n' + z.reembolso + '\n\nNuevo total: *' + z.total + '*\nRef: ' + p.ref + '\n\nSi tenés alguna consulta, escribinos por acá.',
+        params: [nombre, ds, z.servicios, z.reembolso, z.total, p.ref] };
     }
     if (tipo === 'cancelado') {
-      var dc = p.destino || 'Brasil';
-      return { texto: 'Hola ' + nombre + '. Te confirmamos que tu reserva en ' + dc + ' fue cancelada.\nRef: ' + p.ref + '\n\nSi tenés alguna consulta, escribinos por acá.', params: [nombre, dc, p.ref] };
+      var dc = p.destino || 'Brasil', rc = (extra && extra.reembolso) || lineaReembolso(p, (p.items || []).filter(function (x) { return x.nombre; }));
+      return { texto: 'Hola ' + nombre + '. Te confirmamos que tu reserva en ' + dc + ' fue cancelada.\n\n' + rc + '\n\nRef: ' + p.ref + '\n\nSi tenés alguna consulta, escribinos por acá.', params: [nombre, dc, rc, p.ref] };
     }
     if (tipo === 'saldo_recibido') {
       var y = extra || {}, dd = p.destino || 'Brasil';
@@ -707,7 +707,7 @@
       '<button type="button" class="btn btn--sm" data-pagado-total="' + i + '">Marcar pagado al proveedor</button>' +
       (pr && (pr.whatsapp || pr.telefono) && S.draft.id ? '<a class="lnk" href="#" data-wa-enviar="proveedor" data-wa-pedido="' + esc(S.draft.id) + '" data-wa-item="' + i + '">WhatsApp a ' + esc(pr.nombre) + '</a>' : '') +
       (pr && pr.email ? '<a class="lnk" href="mailto:' + esc(pr.email) + '?subject=' + encodeURIComponent('Reserva ' + S.draft.ref) + '&body=' + encodeURIComponent(msgProv) + '">Email</a>' : '') +
-      (pr && pr.datos_pago ? '<span class="sub">Pagar a: ' + esc(pr.datos_pago) + '</span>' : '') + '</div></div>';
+      (pr && pr.datos_pago ? '<span class="sub">Pagar a: ' + esc(pr.datos_pago) + '</span>' : '') + '</div>' + politicaHtml(it) + '</div>';
   }
   function pagoHtml(pg, i) {
     var f = function (campo, tipo, extra) { return 'data-p="' + i + '" data-f="' + campo + '"' + (tipo ? ' type="' + tipo + '"' : '') + (extra || ''); };
@@ -1789,7 +1789,8 @@
     /* Servicios que pasan a Cancelado con el pedido sigue en pie: se ofrece avisarle cuales (servicio_cancelado). */
     var estabaCanc = {};
     ((antes && antes.items) || []).forEach(function (x) { if (x.id) estabaCanc[x.id] = x.estado === 'cancelado'; });
-    var serviciosCancelados = antes && p.estado !== 'cancelado' ? (p.items || []).filter(function (x) { return x.id && x.estado === 'cancelado' && estabaCanc[x.id] === false; }).map(function (x) { return x.nombre + (x.detalle ? ' (' + x.detalle + ')' : ''); }) : [];
+    var serviciosCancelados = antes && p.estado !== 'cancelado' ? (p.items || []).filter(function (x) { return x.id && x.estado === 'cancelado' && estabaCanc[x.id] === false; }) : [];
+    var activosAntes = (p.items || []).filter(function (x) { return x.nombre && !estabaCanc[x.id]; });
     mensaje('Guardando…');
     return llamada.then(function (r) {
       S.draft = JSON.parse(JSON.stringify(r.pedido)); S.dirty = false;
@@ -1798,12 +1799,15 @@
       /* Paso a Cancelado: se ofrece avisarle al cliente (pedido_cancelado). */
       var yaPregunto = S.avisarCancelacion; S.avisarCancelacion = false;
       if (serviciosCancelados.length && !S.dirty && S.draft && S.draft.cliente_telefono) {
-        if (confirm('Cancelaste ' + serviciosCancelados.join(', ') + '. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp?'))
-          enviarWa('servicio_cancelado', S.draft.id, undefined, { servicios: serviciosCancelados.join('; '), total: usd(calc(S.draft).total) });
+        var nombres = serviciosCancelados.map(function (x) { return x.nombre + (x.detalle ? ' (' + x.detalle + ')' : ''); }).join('; ');
+        var reemb = lineaReembolso(S.draft, serviciosCancelados);
+        if (confirm('Cancelaste:\n' + resumenPoliticas(serviciosCancelados) + '\n\nLe va a decir: "' + reemb + '"\n\n¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp?'))
+          enviarWa('servicio_cancelado', S.draft.id, undefined, { servicios: nombres, reembolso: reemb, total: usd(calc(S.draft).total) });
         return;
       }
       if (!recienCancelado || S.dirty || !S.draft || !S.draft.cliente_telefono) return;
-      if (yaPregunto || confirm('Pedido cancelado. ¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp que se canceló?')) enviarWa('cancelado', S.draft.id, undefined, {});
+      var rc = lineaReembolso(S.draft, activosAntes);
+      if (yaPregunto || confirm('Pedido cancelado.\n' + resumenPoliticas(activosAntes) + '\n\nLe va a decir: "' + rc + '"\n\n¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp que se canceló?')) enviarWa('cancelado', S.draft.id, undefined, { reembolso: rc });
     }).catch(function (e) { mensaje(e.message, true); });
   }
   function borrarPedido() {
@@ -1830,7 +1834,44 @@
   }
   function abrir(id) {
     var p = S.datos.pedidos.filter(function (x) { return x.id === id; })[0]; if (!p) return;
-    S.draft = JSON.parse(JSON.stringify(p)); S.dirty = false; cargarTasas(); abrirPanel();
+    S.draft = JSON.parse(JSON.stringify(p)); S.dirty = false; cargarTasas(); abrirPanel(); cargarPoliticas(id);
+  }
+  /* Politica de cancelacion de cada servicio y si hoy tiene reembolso (POST pedido/politicas, lib/politicas.js). */
+  function cargarPoliticas(id) {
+    S.politicas = { id: id, items: {} };
+    api('pedido/politicas', { id: id }).then(function (r) {
+      if (!S.politicas || S.politicas.id !== id) return;
+      (r.items || []).forEach(function (x) { S.politicas.items[x.id] = x; });
+      if (S.draft && S.draft.id === id) refrescarPanel();
+    }).catch(function () { /* sin politicas la ficha sigue igual */ });
+  }
+  function politicaDe(it) { return (S.politicas && S.draft && S.politicas.id === S.draft.id && it && S.politicas.items[it.id]) || null; }
+  function politicaHtml(it) {
+    var x = politicaDe(it);
+    if (!x) return '';
+    var dias = x.faltan != null ? Math.floor(x.faltan / 24) : null;
+    var est = x.estado === 'reembolso' ? '<b class="ok">hoy tiene reembolso</b>' : x.estado === 'sin_reembolso' ? '<b class="deuda">ya no tiene reembolso</b>' : '<b style="color:var(--warn)">sin política cargada: revisalo con el proveedor</b>';
+    return '<p class="sub" style="margin:6px 0 0">Cancelación: ' + (x.politica ? esc(x.politica) + ' · ' : '') + est + (dias != null && dias >= 0 ? ' (faltan ' + dias + ' días para la ida)' : '') + '</p>';
+  }
+  /* Que decirle sobre el reembolso de los servicios que se cancelan. Sin cobros no hay nada que devolver. */
+  function lineaReembolso(p, items) {
+    if (!(calc(p).cobrado > 0)) return 'Como todavía no habías pagado, no hay nada que devolver.';
+    var ps = items.map(function (it) { return { it: it, x: politicaDe(it) || { estado: 'sin_dato', politica: '' } }; });
+    var todos = function (e) { return ps.every(function (y) { return y.x.estado === e; }); };
+    var uno = items.length === 1;
+    if (todos('reembolso')) return 'Como se canceló con la anticipación que pide el operador, te devolvemos lo que pagaste por ' + (uno ? 'ese servicio' : 'esos servicios') + '. Lo procesamos en las próximas 24 hs.';
+    if (todos('sin_reembolso')) return 'Según la política del operador (' + ps.map(function (y) { return y.x.politica; }).filter(Boolean).filter(function (v, i, a) { return a.indexOf(v) === i; }).join('; ') + '), ' + (uno ? 'ya no tiene' : 'ya no tienen') + ' reembolso.';
+    return ps.map(function (y) {
+      return y.it.nombre + ': ' + (y.x.estado === 'reembolso' ? 'te devolvemos lo que pagaste, lo procesamos en las próximas 24 hs.'
+        : y.x.estado === 'sin_reembolso' ? 'según la política del operador (' + y.x.politica + '), ya no tiene reembolso.' : 'te confirmamos por acá si tiene reembolso.');
+    }).join(' ');
+  }
+  /* Para el confirm del panel: que dice la politica de cada uno. */
+  function resumenPoliticas(items) {
+    return items.map(function (it) {
+      var x = politicaDe(it) || { estado: 'sin_dato' };
+      return '• ' + it.nombre + ': ' + (x.estado === 'reembolso' ? 'CON reembolso' : x.estado === 'sin_reembolso' ? 'SIN reembolso' : 'sin política (revisalo vos)') + (x.politica ? ' — ' + x.politica : '');
+    }).join('\n');
   }
   function nuevoProveedor() { return { id: null, nombre: '', contacto: '', telefono: '', email: '', servicios: '', datos_pago: '', notas: '', activo: true }; }
 
@@ -2029,7 +2070,8 @@
       case 'guardar': guardar(); break;
       case 'borrar-pedido': borrarPedido(); break;
       case 'cancelar-avisar':
-        if (!S.draft || !confirm('¿Cancelar el pedido ' + S.draft.ref + ' y avisarle a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp?')) break;
+        var act = (S.draft && S.draft.items || []).filter(function (x) { return x.nombre && x.estado !== 'cancelado'; });
+        if (!S.draft || !confirm('¿Cancelar el pedido ' + S.draft.ref + ' y avisarle a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp?\n\n' + resumenPoliticas(act) + '\n\nLe va a decir: "' + lineaReembolso(S.draft, act) + '"')) break;
         S.draft.estado = 'cancelado'; S.dirty = true; S.avisarCancelacion = true;
         guardar().then(function () { S.avisarCancelacion = false; });   // si el guardado falla, que no quede armado para otro
         break;
