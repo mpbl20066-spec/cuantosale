@@ -31,10 +31,10 @@
   var css = document.createElement('style');
   css.textContent =
     '#cs-wa{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px) + var(--cs-wa-sube,0px));z-index:2147482000;' +
-    'display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;' +
-    'box-shadow:0 4px 14px rgba(0,0,0,.28);text-decoration:none;transition:transform .15s ease,bottom .2s ease}' +
-    '#cs-wa:hover{transform:scale(1.06)}#cs-wa:active{transform:scale(.95)}' +
-    '#cs-wa:focus-visible{outline:3px solid #F7C325;outline-offset:3px}' +
+    'display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;background:#F6B21B;color:#0B1F3A;border:2px solid #0B1F3A;' +
+    'box-shadow:3px 3px 0 #0B1F3A;text-decoration:none;transition:transform .15s ease,bottom .2s ease}' +
+    '#cs-wa:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 #0B1F3A}#cs-wa:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #0B1F3A}' +
+    '#cs-wa:focus-visible{outline:3px solid #0B1F3A;outline-offset:3px}' +
     '#cs-wa svg{width:30px;height:30px}' +
     '@media (prefers-reduced-motion:reduce){#cs-wa{transition:none}}' +
     '@media print{#cs-wa{display:none}}';
