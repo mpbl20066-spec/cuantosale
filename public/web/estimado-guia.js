@@ -6,7 +6,7 @@
    defecto: 2 personas, 7 noches desde el 15 del mes, estilo ahorro, hotel economico y en avion. Se miran los proximos
    11 meses (asi la ultima salida queda dentro del año que cotiza Ignav) y gana el mas barato. Un destino sin vuelo
    usa el medio mas barato que tenga. Precios de /api/destinos-destacados con mes=1: el vuelo real de la salida mas
-   barata del mes (de los martes y miercoles que precarga el cron) y el hotel calibrado con Booking cuando el servidor
+   barata del mes (de las salidas de lunes a jueves que precarga el cron) y el hotel calibrado con Booking cuando el servidor
    ya los tiene (no gasta busquedas); el item vuelve con esas fechas. Sin precio real, el 15 y el modelo. */
 (function () {
   var MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];

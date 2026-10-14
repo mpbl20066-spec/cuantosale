@@ -1942,8 +1942,8 @@ async function precalentarVuelos(req, res) {
       rutas.push({ origin: 'MVD', destination: AIR_DESTINATIONS[k], dep: model.iso(dep), ret: model.iso(ret) });
     });
   }
-  /* Y el precio de referencia de las guias: todos los martes y miercoles de los proximos 11 meses, 7 noches, por
-     aeropuerto (los 40 destinos comparten 11 aeropuertos: ~950 fechas). Cada precio dura 14 dias (30 si sale a mas de
+  /* Y el precio de referencia de las guias: todas las salidas de lunes a jueves de los proximos 11 meses, 7 noches, por
+     aeropuerto (los 40 destinos comparten 11 aeropuertos: ~1.900 fechas). Cada precio dura 14 dias (30 si sale a mas de
      3 meses). Cada corrida pide de las que faltan, primero las mas cercanas, hasta PRECALENTAR_GUIAS_MAX (100) y sin
      arrancar ninguna despues de PRECALENTAR_SEGUNDOS (30): la funcion corta a los 60 s. El cron corre varias veces
      por dia (vercel.json). Con eso la guia muestra el "Desde" con el vuelo real mas barato del mes. */
@@ -2021,14 +2021,14 @@ async function estadoPrecarga() {
   };
 }
 
-/* Las fechas que se prueban de un mes (anio, mes 1-12) para el precio de referencia: todos los martes y miercoles
-   (suelen ser los dias mas baratos para volar), 7 noches, que salgan desde manana y cuya vuelta entre en el rango
-   que cotiza Ignav (IGNAV_MAX_DAYS, 355 dias). */
+/* Las fechas que se prueban de un mes (anio, mes 1-12) para el precio de referencia: todas las salidas de lunes a jueves
+   (martes y miercoles suelen ser los mas baratos, pero un dia antes o despues a veces sale bastante menos), 7 noches,
+   que salgan desde manana y cuya vuelta entre en el rango que cotiza Ignav (IGNAV_MAX_DAYS, 355 dias). */
 function fechasGuiaMes(anio, mes) {
   const hoy = model.getToday(), tope = model.addDays(hoy, Number(process.env.IGNAV_MAX_DAYS) || 355), fechas = [];
   for (let d = new Date(anio, mes - 1, 1, 12); d.getMonth() === mes - 1; d = model.addDays(d, 1)) {
     const ret = model.addDays(d, 7);
-    if ((d.getDay() === 2 || d.getDay() === 3) && d > hoy && ret <= tope) fechas.push({ dep: model.iso(d), ret: model.iso(ret) });
+    if (d.getDay() >= 1 && d.getDay() <= 4 && d > hoy && ret <= tope) fechas.push({ dep: model.iso(d), ret: model.iso(ret) });
   }
   return fechas;
 }

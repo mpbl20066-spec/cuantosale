@@ -1391,11 +1391,11 @@ function haversineKm(a, b) {
       assert.strictEqual(it.ret, fechaGuia.ret);
     });
   });
-  await t('con mes=1 el "Desde" usa la salida mas barata del mes (martes o miercoles) y devuelve esas fechas', async function () {
+  await t('con mes=1 el "Desde" usa la salida mas barata del mes (de lunes a jueves) y devuelve esas fechas', async function () {
     const iso = function (x) { return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
     const base = new Date(+fechaGuia.dep.slice(0, 4), +fechaGuia.dep.slice(5, 7) - 1, 1, 12), salidas = [];
     for (let d = new Date(base); d.getMonth() === base.getMonth(); d.setDate(d.getDate() + 1)) {
-      if (d.getDay() === 2 || d.getDay() === 3) salidas.push({ dep: iso(d), ret: iso(new Date(d.getTime() + 7 * 864e5)) });
+      if (d.getDay() >= 1 && d.getDay() <= 4) salidas.push({ dep: iso(d), ret: iso(new Date(d.getTime() + 7 * 864e5)) });
     }
     const barata = salidas[2];
     flights.clearCache();
