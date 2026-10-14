@@ -27,7 +27,7 @@
      palabra corta (pagina, destino, pestana). */
   var USO = { vista_pagina: 'pagina', guias_ranking: 'ranking', guias_mes: '', guias_abrir: 'destino', guias_cotizar: 'destino',
     guias_fav_agregar: 'destino', guia_fav_agregar: 'destino', guias_ver_favoritos: '', guias_buscar: '', guias_filtro_tipo: 'tipo',
-    guias_mapa_pin: 'destino', guias_mapa_zoom: 'accion', guia_calcular_viaje: 'destino', guia_alerta_creada: 'destino', alerta_precio_creada: '' };
+    guias_mapa_pin: 'destino', guias_mapa_zoom: 'accion', guia_calcular_viaje: 'destino', guia_alerta_creada: 'destino', alerta_precio_creada: '', llegada: 'origen' };
   function contar(nombre, params) {
     if (!(nombre in USO) || debug || !/^https?:$/.test(location.protocol)) return;
     var d = USO[nombre] ? String(params[USO[nombre]] || '').toLowerCase() : '';
@@ -56,4 +56,13 @@
   var fuente = (location.search.match(/[?&]fuente=([^&]+)/) || [])[1];
   var pagina = document.documentElement.getAttribute('data-pagina');
   if (pagina) window.mockTrack('vista_pagina', { pagina: pagina, fuente: fuente ? decodeURIComponent(fuente) : 'directo' });
+  /* De que red vino la visita: los enlaces de la bio, de los creadores y de los anuncios llevan ?utm_source=. Se cuenta
+     una vez por visita (pestana), para que el panel (Marketing > Tablero) sepa cuanta gente trae cada uno. */
+  var origen = (location.search.match(/[?&]utm_source=([^&#]+)/) || [])[1];
+  if (origen) {
+    try { origen = decodeURIComponent(origen).toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 24); } catch (e) { origen = ''; }
+    var yaContada = false;
+    try { yaContada = !!sessionStorage.getItem('cs_llegada'); sessionStorage.setItem('cs_llegada', origen); } catch (e) { /* modo privado */ }
+    if (origen && !yaContada) window.mockTrack('llegada', { origen: origen });
+  }
 })();

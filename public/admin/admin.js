@@ -92,7 +92,7 @@
         kpi('A pagar a proveedores', usd(k.por_pagar_proveedores_usd), 'lo que les debemos', k.por_pagar_proveedores_usd ? 'kpi--warn' : '') +
         kpi('Margen', usd(k.margen_usd), k.sin_proveedor ? k.sin_proveedor + ' servicio(s) sin proveedor' : 'facturado − costo') + '</section>';
     }
-    html += S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
+    html += S.vista.indexOf('mkt-') === 0 ? vistaMkt() : S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
       (S.vista === 'precarga' ? vistaPrecarga() : (S.vista === 'servicios' ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : (S.vista === 'importar' ? vistaImportar() : (S.vista === 'operaciones' ? vistaOperaciones() : vistaProveedores(d))))))))));
     html += '</div>';
     app.innerHTML = html;
@@ -107,7 +107,8 @@
     { t: 'Pedidos', vistas: [['pedidos', 'Pedidos']] },
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
     { t: 'Catálogo', vistas: [['servicios', 'Servicios'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
-    { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso'], ['viajes', 'Viajes guardados']] }
+    { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso'], ['viajes', 'Viajes guardados']] },
+    { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-estrategia', 'Estrategia'], ['mkt-colabs', 'Perfil y mensajes']] }
   ];
   function grupoDe(v) { return GRUPOS.filter(function (g) { return g.vistas.some(function (x) { return x[0] === v; }); })[0] || GRUPOS[0]; }
   function vistaPrecarga() {
@@ -406,6 +407,201 @@
     });
     return h + '</tbody></table></div>';
   }
+
+  /* ---------- Marketing: el plan (public/admin/marketing-datos.js, generado) y lo que se va marcando (lib/marketing.js) ----------
+     Hoy = lo que toca hacer hoy del calendario de 30 dias. Tablero = una semana (de jueves a miercoles, desde el inicio
+     del plan): lo de la web y los pedidos sale solo; lo de Instagram, TikTok y anuncios se carga a mano. */
+  var OBJ_MKT = { alcance: 'Alcance', interaccion: 'Interacción', trafico: 'Tráfico a la web', uso: 'Uso de la app', reservas: 'Reservas' };
+  var DIAS_SEM = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  function hoyUY() { return new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Montevideo' }); }
+  function fechaUY(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('sv-SE', { timeZone: 'America/Montevideo' }); }
+  function sumarDias(f, n) { var d = new Date(f + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+  function difDias(a, b) { return Math.round((new Date(b + 'T12:00:00Z') - new Date(a + 'T12:00:00Z')) / 864e5); }
+  function fechaLarga(f) { var d = new Date(f + 'T12:00:00Z'); return DIAS_SEM[d.getUTCDay()] + ' ' + d.getUTCDate() + '/' + (d.getUTCMonth() + 1); }
+  function cargarMkt() {
+    S.mkt = { cargando: true };
+    var datos = window.CS_MKT ? Promise.resolve() : new Promise(function (ok, mal) {
+      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=1'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
+      document.head.appendChild(s);
+    });
+    Promise.all([datos, api('marketing'), api('uso?dias=90').catch(function () { return null; })]).then(function (r) {
+      S.mkt = { estado: r[1].estado, almacenamiento: r[1].almacenamiento }; S.mktUso = r[2];
+      if (S.mktDia == null) S.mktDia = Math.max(0, Math.min(window.CS_MKT.dias.length - 1, difDias(window.CS_MKT.inicio, hoyUY())));
+      if (S.vista.indexOf('mkt-') === 0) pintar();
+    }).catch(function (e) { S.mkt = { error: e.message }; if (S.vista.indexOf('mkt-') === 0) pintar(); });
+  }
+  function guardarMkt(cuerpo) {
+    return api('marketing/guardar', cuerpo).then(function (r) { S.mkt.estado = r.estado; }).catch(function (e) { toast(e.message); });
+  }
+  function hechoMkt(id) { return !!(S.mkt && S.mkt.estado && S.mkt.estado.hechas[id]); }
+  /* Texto del plan: '## ' subtitulo, '- ' vinetas, '> ' recuadro, **negrita**. */
+  function textoMkt(lineas) {
+    var h = '', lista = false;
+    var fmt = function (t) { return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); };
+    (lineas || []).forEach(function (l) {
+      var esLi = l.indexOf('- ') === 0;
+      if (lista && !esLi) { h += '</ul>'; lista = false; }
+      if (esLi) { if (!lista) { h += '<ul class="mkt-ul">'; lista = true; } h += '<li>' + fmt(l.slice(2)) + '</li>'; }
+      else if (l.indexOf('## ') === 0) h += '<h4 class="mkt-h">' + fmt(l.slice(3)) + '</h4>';
+      else if (l.indexOf('> ') === 0) h += '<p class="mkt-nota">' + fmt(l.slice(2)) + '</p>';
+      else h += '<p>' + fmt(l) + '</p>';
+    });
+    return h + (lista ? '</ul>' : '');
+  }
+  /* Los textos para copiar se guardan en una lista y el boton lleva el numero: asi no van enteros en un atributo. */
+  function copiable(t, etiqueta) {
+    S.mktCopias = S.mktCopias || [];
+    var i = S.mktCopias.push(t) - 1;
+    return '<div class="mkt-copy"><div class="mkt-copy__cab"><small>' + esc(etiqueta || 'Texto para pegar') + '</small><button class="btn btn--sm" data-mkt-copiar="' + i + '">Copiar</button></div><pre>' + esc(t) + '</pre></div>';
+  }
+  function checkMkt(id, txt) {
+    return '<label class="mkt-check"><input type="checkbox" data-mkt-hecho="' + esc(id) + '"' + (hechoMkt(id) ? ' checked' : '') + '> ' + esc(txt || 'Hecho') + '</label>';
+  }
+  function vistaMkt() {
+    S.mktCopias = [];
+    if (!S.mkt) cargarMkt();
+    if (!S.mkt || S.mkt.cargando) return '<div class="card" style="margin-top:20px"><p class="vacio">Cargando el plan…</p></div>';
+    if (S.mkt.error) return '<p class="aviso">' + esc(S.mkt.error) + ' <button class="btn btn--sm" data-mkt-recargar>Reintentar</button></p>';
+    var h = S.mkt.almacenamiento === 'memoria' ? '<p class="aviso">Sin Supabase: lo que marques se pierde al reiniciar el servidor.</p>' : '';
+    if (S.vista === 'mkt-hoy') return h + vistaMktHoy();
+    if (S.vista === 'mkt-calendario') return h + vistaMktCalendario();
+    if (S.vista === 'mkt-tablero') return h + vistaMktTablero();
+    if (S.vista === 'mkt-estrategia') return h + vistaMktEstrategia();
+    return h + vistaMktColabs();
+  }
+  function bloqueMkt(p) {
+    if (!p) return '';
+    var h = '<p class="mkt-tipo"><span class="tag">' + esc(p.tipo || '') + '</span> <b>' + esc(p.pieza || '') + '</b></p>';
+    if (p.estado) h += '<p class="mkt-estado">' + esc(p.estado) + '</p>';
+    if (p.carpeta) h += '<p class="sub">Carpeta: <code>' + esc(p.carpeta) + '</code></p>';
+    if (p.gancho) h += '<p><span class="mkt-et">Gancho</span> ' + esc(p.gancho) + '</p>';
+    if (p.guion && p.guion.length) h += '<span class="mkt-et">Guion / estructura</span><ol class="mkt-ol">' + p.guion.map(function (g) { return '<li>' + esc(g) + '</li>'; }).join('') + '</ol>';
+    if (p.pantalla) h += '<p><span class="mkt-et">Texto en pantalla</span> ' + esc(p.pantalla) + '</p>';
+    if (p.cambio) h += '<p><span class="mkt-et">Qué cambia</span> ' + esc(p.cambio) + '</p>';
+    if (p.copy) h += copiable(p.copy);
+    if (p.cta) h += '<p><span class="mkt-et">Llamado a la acción</span> ' + esc(p.cta) + '</p>';
+    return h;
+  }
+  function vistaMktHoy() {
+    var M = window.CS_MKT, i = S.mktDia || 0, d = M.dias[i], hoy = difDias(M.inicio, hoyUY()), n = 'd' + d.n;
+    var hechos = ['ig', 'tt', 'hist', 'acc'].filter(function (k) { return hechoMkt(n + '-' + k); }).length;
+    var h = '<div class="vhead"><div><h2>Día ' + d.n + ' · ' + esc(fechaLarga(d.f)) + '</h2><p>' + esc(d.tema) + '</p></div>' +
+      '<div class="mkt-nav"><button class="btn" data-mkt-dia="' + (i - 1) + '"' + (i ? '' : ' disabled') + ' aria-label="Día anterior">‹</button>' +
+      (hoy >= 0 && hoy < M.dias.length && hoy !== i ? '<button class="btn" data-mkt-dia="' + hoy + '">Hoy</button>' : '') +
+      '<button class="btn" data-mkt-dia="' + (i + 1) + '"' + (i < M.dias.length - 1 ? '' : ' disabled') + ' aria-label="Día siguiente">›</button></div></div>';
+    if (hoy < 0 && i === 0) h += '<p class="aviso">El plan arranca el ' + esc(fechaLarga(M.inicio)) + '. Esto es lo del primer día.</p>';
+    h += '<section class="kpis kpis--4">' + kpi('Objetivo del día', OBJ_MKT[d.obj] || d.obj, 'lo que tiene que lograr la pieza') + kpi('Hecho hoy', hechos + ' de 4', 'Instagram, TikTok, historias, acción', hechos === 4 ? 'kpi--ok' : '') + '</section>';
+    h += '<div class="mkt-grid">';
+    h += '<section class="sec"><div class="sec__cab"><h3>Instagram</h3>' + checkMkt(n + '-ig') + '</div>' + bloqueMkt(d.ig) + '</section>';
+    h += '<section class="sec"><div class="sec__cab"><h3>TikTok</h3>' + checkMkt(n + '-tt') + '</div>' + bloqueMkt(d.tt) + '</section>';
+    h += '<section class="sec"><div class="sec__cab"><h3>Historias</h3>' + checkMkt(n + '-hist') + '</div><ol class="mkt-ol">' + (d.hist || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol></section>';
+    h += '<section class="sec"><div class="sec__cab"><h3>Acción comercial</h3>' + checkMkt(n + '-acc') + '</div>' + textoMkt((d.acc || []).map(function (x) { return '- ' + x; })) + '</section>';
+    h += '<section class="sec"><div class="sec__cab"><h3>Todos los días · 15 min</h3>' + checkMkt(n + '-rut') + '</div>' + textoMkt(M.rutina.map(function (x) { return '- ' + x; })) + '</section>';
+    return h + '</div>';
+  }
+  function vistaMktCalendario() {
+    var M = window.CS_MKT, hoy = hoyUY();
+    var h = '<div class="vhead"><div><h2>Calendario de 30 días</h2><p>Del ' + esc(fechaLarga(M.inicio)) + ' al ' + esc(fechaLarga(M.dias[M.dias.length - 1].f)) + '. Tocá un día para ver todo lo que hay que hacer.</p></div></div>';
+    h += '<div class="card"><table><thead><tr><th>Día</th><th>Tema</th><th>Instagram</th><th>TikTok</th><th>Objetivo</th><th class="num">Hecho</th></tr></thead><tbody>';
+    M.dias.forEach(function (d, i) {
+      var n = 'd' + d.n, k = ['ig', 'tt', 'hist', 'acc'].filter(function (x) { return hechoMkt(n + '-' + x); }).length;
+      h += '<tr class="row' + (d.f === hoy ? ' mkt-hoyfila' : '') + '" data-mkt-ir="' + i + '"><td data-l="Día"><b>' + d.n + '</b> <span class="sub">' + esc(fechaLarga(d.f)) + '</span></td>' +
+        '<td data-l="Tema">' + esc(d.tema) + '</td><td data-l="Instagram">' + esc(d.ig.tipo) + '</td><td data-l="TikTok">' + esc(d.tt.tipo || '') + '</td>' +
+        '<td data-l="Objetivo"><span class="tag">' + esc(OBJ_MKT[d.obj] || d.obj) + '</span></td><td class="num" data-l="Hecho"><span class="' + (k === 4 ? 'ok' : '') + '">' + k + '/4</span></td></tr>';
+    });
+    return h + '</tbody></table></div>';
+  }
+  /* Numeros de una semana [desde, hasta] (fechas de Montevideo, inclusive). */
+  function numerosSemana(desde, hasta) {
+    var filas = (S.mktUso && S.mktUso.filas || []).filter(function (f) { return f.fecha >= desde && f.fecha <= hasta; });
+    var pag = function (p) { return filas.reduce(function (t, f) { return t + (f.evento === 'vista_pagina' && f.detalle === p ? f.n : 0); }, 0); };
+    var fuentes = {}; filas.forEach(function (f) { if (f.evento === 'llegada') fuentes[f.detalle || '(sin nombre)'] = (fuentes[f.detalle || '(sin nombre)'] || 0) + f.n; });
+    var peds = ((S.datos && S.datos.pedidos) || []).filter(function (p) { var f = fechaUY(p.created_at); return f >= desde && f <= hasta; });
+    var vivos = function (p, tipo) { return (p.items || []).some(function (i) { return i.tipo === tipo && i.estado !== 'cancelado'; }); };
+    var conf = peds.filter(function (p) { return p.estado === 'confirmado' || p.estado === 'completado'; });
+    return {
+      home: pag('home'), presupuesto: pag('presupuesto'), destino: pag('destino') + pag('calcular'), flujo: pag('flujo'), costo: pag('costo'), reserva: pag('reserva'), guias: pag('guias') + pag('guia'),
+      llegadas: Object.keys(fuentes).reduce(function (t, k) { return t + fuentes[k]; }, 0), fuentes: fuentes,
+      pedidos: peds.length, conTraslado: peds.filter(function (p) { return vivos(p, 'traslado'); }).length, conTour: peds.filter(function (p) { return vivos(p, 'tour'); }).length,
+      confirmados: conf.length, conSena: peds.filter(function (p) { return calc(p).cobrado > 0; }).length,
+      margen: r2(conf.reduce(function (t, p) { return t + calc(p).margen; }, 0))
+    };
+  }
+  function vistaMktTablero() {
+    var M = window.CS_MKT, hoy = hoyUY(), nSem = Math.max(1, Math.floor(difDias(M.inicio, hoy) / 7) + 1);
+    if (S.mktSem == null || S.mktSem >= nSem) S.mktSem = nSem - 1;
+    var desde = sumarDias(M.inicio, S.mktSem * 7), hasta = sumarDias(desde, 6), id = 'sem-' + desde;
+    var x = numerosSemana(desde, hasta), ant = S.mktSem ? numerosSemana(sumarDias(desde, -7), sumarDias(desde, -1)) : null;
+    var man = (S.mkt.estado.semanas[id]) || {}, manAnt = ant ? (S.mkt.estado.semanas['sem-' + sumarDias(desde, -7)] || {}) : {};
+    var h = '<div class="vhead"><div><h2>Tablero semanal</h2><p>Semana ' + (S.mktSem + 1) + ': del ' + esc(fechaLarga(desde)) + ' al ' + esc(fechaLarga(hasta)) + '. La revisión es el miércoles.</p></div></div>';
+    h += '<div class="bar"><div class="chips">' + Array.apply(null, Array(nSem)).map(function (_, k) { return '<button class="chip" data-mkt-sem="' + k + '" aria-pressed="' + (k === S.mktSem) + '">Semana ' + (k + 1) + '</button>'; }).join('') + '</div></div>';
+    var delta = function (v, a) { if (a == null) return ''; var dd = v - a; return dd ? ' <span class="' + (dd > 0 ? 'ok' : 'deuda') + '">' + (dd > 0 ? '+' : '') + r2(dd) + '</span>' : ' <span class="sub" style="display:inline">=</span>'; };
+    var fila = function (t, v, a, nota) { return '<tr><td>' + esc(t) + (nota ? '<span class="sub">' + esc(nota) + '</span>' : '') + '</td><td class="num">' + esc(v) + delta(v, a) + '</td></tr>'; };
+    /* plata primero */
+    h += '<section class="kpis kpis--4">' +
+      kpi('Pedidos con traslado o paseo', Math.max(x.conTraslado, x.conTour) ? (x.conTraslado + ' / ' + x.conTour) : '0', 'traslado / paseo, creados esta semana', x.conTraslado + x.conTour ? 'kpi--ok' : '') +
+      kpi('Confirmados', x.confirmados, x.conSena + ' con seña o pago cobrado') +
+      kpi('Margen confirmado', usd(x.margen), 'de los pedidos de esta semana') +
+      kpi('Costo por confirmado', man.ads_gasto && x.confirmados ? usd(r2(man.ads_gasto / x.confirmados)) : '—', man.ads_gasto ? 'gasto en anuncios / confirmados' : 'sin gasto cargado') + '</section>';
+    h += '<div class="mkt-grid">';
+    h += '<section class="sec"><h3>Web (lo cuenta la app)</h3><table><tbody>' +
+      fila('Llegadas con link de redes', x.llegadas, ant && ant.llegadas, 'visitas que entraron con ?utm_source=') +
+      fila('Home', x.home, ant && ant.home) + fila('Tengo un presupuesto', x.presupuesto, ant && ant.presupuesto) + fila('Ya sé a dónde voy', x.destino, ant && ant.destino) +
+      fila('Armá tu viaje (empezó)', x.flujo, ant && ant.flujo) + fila('Tu presupuesto (completó)', x.costo, ant && ant.costo) + fila('Reservá tu viaje', x.reserva, ant && ant.reserva) + fila('Guías', x.guias, ant && ant.guias) +
+      '</tbody></table><p class="sub">Pantallas vistas, no personas. Cuenta a todos, sin cookies.</p>';
+    var fk = Object.keys(x.fuentes).sort(function (a, b) { return x.fuentes[b] - x.fuentes[a]; });
+    h += '<h3 style="margin-top:14px">Llegadas por fuente</h3>' + (fk.length ? '<table><tbody>' + fk.map(function (k) { return '<tr><td>' + esc(k) + '</td><td class="num">' + x.fuentes[k] + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="sub">Todavía ninguna. Se cuentan las visitas que entran con el link de la bio, de las historias, de creadores o de anuncios.</p>') + '</section>';
+    h += '<section class="sec"><h3>Pedidos (lo cuenta el panel)</h3><table><tbody>' +
+      fila('Pedidos nuevos', x.pedidos, ant && ant.pedidos) + fila('Con traslado', x.conTraslado, ant && ant.conTraslado) + fila('Con paseo', x.conTour, ant && ant.conTour) +
+      fila('Confirmados', x.confirmados, ant && ant.confirmados) + fila('Con seña o pago cobrado', x.conSena, ant && ant.conSena) + '</tbody></table>';
+    var tasa = function (a, b) { return b ? Math.round(a / b * 100) + ' %' : '—'; };
+    h += '<h3 style="margin-top:14px">Pasos del embudo</h3><table><tbody>' +
+      '<tr><td>Clics en el enlace / visitas al perfil (IG)</td><td class="num">' + tasa(man.ig_clics || 0, man.ig_perfil) + '</td></tr>' +
+      '<tr><td>Completaron / empezaron un presupuesto</td><td class="num">' + tasa(x.costo, x.flujo) + '</td></tr>' +
+      '<tr><td>Pedidos / presupuestos completos</td><td class="num">' + tasa(x.pedidos, x.costo) + '</td></tr>' +
+      '<tr><td>Confirmados / pedidos</td><td class="num">' + tasa(x.confirmados, x.pedidos) + '</td></tr></tbody></table>' +
+      '<p class="sub">Son tus números, no un promedio del mercado. Compará semana contra semana.</p></section>';
+    /* lo que se carga a mano */
+    var grupos = {}; M.manuales.forEach(function (m) { (grupos[m[2]] = grupos[m[2]] || []).push(m); });
+    h += '<section class="sec mkt-man"><h3>Cargá a mano (de Instagram, TikTok, Meta y WhatsApp)</h3>' + Object.keys(grupos).map(function (g) {
+      return '<h4 class="mkt-h">' + esc(g) + '</h4><div class="grid">' + grupos[g].map(function (m) {
+        var a = manAnt[m[0]];
+        return '<label class="f">' + esc(m[1]) + '<input type="number" inputmode="decimal" min="0" step="any" data-mkt-sem-id="' + id + '" data-mkt-campo="' + m[0] + '" value="' + (man[m[0]] != null ? man[m[0]] : '') + '"' + (a != null ? ' placeholder="semana anterior: ' + a + '"' : '') + '></label>';
+      }).join('') + '</div>';
+    }).join('') + '<p class="sub">Se guarda solo al salir de cada casillero.</p></section>';
+    h += '<section class="sec"><h3>Revisión de la semana</h3><p class="sub">1 cosa que repito, 1 que cambio, 1 que dejo. Y las preguntas que se repitieron.</p>' +
+      '<textarea rows="6" data-mkt-nota="' + id + '" placeholder="Repito: …&#10;Cambio: …&#10;Dejo: …&#10;Preguntas que llegaron: …">' + esc(S.mkt.estado.notas[id] || '') + '</textarea>' +
+      '<p class="sub">Cómo hacer la revisión: Estrategia > J. Revisión semanal.</p></section>';
+    return h + '</div>';
+  }
+  function vistaMktEstrategia() {
+    var M = window.CS_MKT, secs = M.estrategia.slice(0, 5).concat([{ id: 'fijados', t: 'D. Los 3 reels fijados' }], M.estrategia.slice(5));
+    var sel = S.mktSec || 'diagnostico', s = secs.filter(function (x) { return x.id === sel; })[0] || secs[0];
+    var h = '<div class="vhead"><div><h2>Estrategia</h2><p>Plan armado el 14/10/2026 con la web y el perfil de Instagram a la vista. El calendario (E) está en Hoy y Calendario.</p></div></div>';
+    h += '<div class="bar"><div class="chips">' + secs.map(function (x) { return '<button class="chip" data-mkt-sec="' + x.id + '" aria-pressed="' + (x === s) + '">' + esc(x.t) + '</button>'; }).join('') + '</div></div>';
+    if (s.id !== 'fijados') return h + '<section class="sec mkt-texto"><h3>' + esc(s.t) + '</h3>' + textoMkt(s.txt) + '</section>';
+    h += '<section class="sec mkt-texto">' + textoMkt(M.fijados.intro) + '</section>';
+    M.fijados.reels.forEach(function (r) {
+      h += '<section class="sec mkt-texto" style="margin-top:12px"><div class="sec__cab"><h3>Fijado ' + r.n + ' · ' + esc(r.t) + ' · ' + esc(r.dur) + '</h3>' + checkMkt('fijado-' + r.n, 'Publicado y fijado') + '</div>' +
+        '<p class="mkt-estado">' + esc(r.estado) + '</p><p class="sub">Carpeta: <code>' + esc(r.carpeta) + '</code></p>' +
+        (r.grabar ? '<p class="mkt-nota"><b>Qué grabar:</b> ' + esc(r.grabar) + '</p>' : '') +
+        '<table><thead><tr><th>Tiempo</th><th>Imagen</th><th>Texto en pantalla</th></tr></thead><tbody>' + r.escenas.map(function (e) { return '<tr><td data-l="Tiempo">' + esc(e[0]) + '</td><td data-l="Imagen">' + esc(e[1]) + '</td><td data-l="Texto"><b>' + esc(e[2]) + '</b></td></tr>'; }).join('') + '</tbody></table>' +
+        copiable(r.voz, 'Voz sintética (opcional)') + copiable(r.copy, 'Texto de la publicación') + '<p><span class="mkt-et">Llamado a la acción</span> ' + esc(r.cta) + '</p></section>';
+    });
+    return h;
+  }
+  function vistaMktColabs() {
+    var M = window.CS_MKT;
+    return '<div class="vhead"><div><h2>Perfil, creadores y alianzas</h2><p>Los mensajes están listos para copiar; cambiá lo que está entre corchetes.</p></div></div>' +
+      '<div class="mkt-grid"><section class="sec mkt-texto">' + textoMkt(M.colabs.txt) + '</section><section class="sec">' +
+      M.mensajes.map(function (m) { return copiable(m.copy, m.t); }).join('') + '</section></div>';
+  }
+  function copiarTexto(t) {
+    var listo = function () { toast('Copiado'); };
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t).then(listo).catch(function () { copiarViejo(t); listo(); });
+    copiarViejo(t); listo();
+  }
+  function copiarViejo(t) { var a = document.createElement('textarea'); a.value = t; a.style.position = 'fixed'; a.style.opacity = '0'; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch (e) { /* nada */ } a.remove(); }
 
   /* ---------- Mensajes: la bandeja de WhatsApp ----------
      El numero vive en la API de Meta y no en un celular: lo que escriben los clientes llega solo aca. Se actualiza
@@ -2218,6 +2414,13 @@
   document.addEventListener('input', alEditar);
   document.addEventListener('toggle', function (e) { if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-datos')) S.datosAbiertos = e.target.open; }, true);
   document.addEventListener('change', alEditar);
+  /* Marketing: tildar una tarea, un numero de la semana o la nota de la revision se guardan al cambiar. */
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.hasAttribute('data-mkt-hecho')) { guardarMkt({ hecho: { id: t.getAttribute('data-mkt-hecho'), valor: t.checked } }).then(function () { if (S.vista !== 'mkt-tablero') pintar(); }); return; }
+    if (t.hasAttribute('data-mkt-campo')) { var c = {}; c[t.getAttribute('data-mkt-campo')] = t.value; guardarMkt({ semana: { id: t.getAttribute('data-mkt-sem-id'), campos: c } }).then(function () { toast('Guardado'); }); return; }
+    if (t.hasAttribute('data-mkt-nota')) { guardarMkt({ nota: { id: t.getAttribute('data-mkt-nota'), texto: t.value } }).then(function () { toast('Nota guardada'); }); }
+  });
 
   document.addEventListener('submit', function (e) {
     if (e.target.id === 'chat-form') {
@@ -2282,6 +2485,12 @@
       return;
     }
     if (e.target.closest('a[href]:not([href="#"])')) return;   // los enlaces (WhatsApp, email) se abren solos, sin abrir el detalle
+    var mc = e.target.closest('[data-mkt-copiar]'); if (mc) { copiarTexto((S.mktCopias || [])[+mc.getAttribute('data-mkt-copiar')] || ''); return; }
+    var md = e.target.closest('[data-mkt-dia]'); if (md) { S.mktDia = +md.getAttribute('data-mkt-dia'); pintar(); window.scrollTo(0, 0); return; }
+    var mi = e.target.closest('[data-mkt-ir]'); if (mi) { S.mktDia = +mi.getAttribute('data-mkt-ir'); S.vista = 'mkt-hoy'; pintar(); window.scrollTo(0, 0); return; }
+    var ms = e.target.closest('[data-mkt-sem]'); if (ms) { S.mktSem = +ms.getAttribute('data-mkt-sem'); pintar(); return; }
+    var mse = e.target.closest('[data-mkt-sec]'); if (mse) { S.mktSec = mse.getAttribute('data-mkt-sec'); pintar(); return; }
+    if (e.target.closest('[data-mkt-recargar]')) { S.mkt = null; pintar(); return; }
     var ch = e.target.closest('[data-chat]'); if (ch) { abrirChat(ch.getAttribute('data-chat')); return; }
     var ip = e.target.closest('[data-ir-pedido]'); if (ip) { S.vista = 'pedidos'; pintar(); abrir(ip.getAttribute('data-ir-pedido')); return; }
     var pv = e.target.closest('[data-precarga]'); if (pv) { var cual = pv.getAttribute('data-precarga'); S.verPre = S.verPre === cual ? '' : cual; pintarFondo(); return; }
@@ -2418,7 +2627,7 @@
     if (e.target && e.target.id === 'chat-txt' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); var f = document.getElementById('chat-form'); if (f) f.requestSubmit(); return; } if (e.key === 'Escape' && document.getElementById('drawer')) cerrarPanel(false); });
 
   /* ---------- arranque ---------- */
-  var vq = /[?&]vista=(operaciones|servicios|publicar|proveedores|importar)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
+  var vq = /[?&]vista=(operaciones|servicios|publicar|proveedores|importar|mkt-hoy|mkt-calendario|mkt-tablero|mkt-estrategia|mkt-colabs)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
   api('sesion').then(function (s) {
     if (!s.configurado) { app.innerHTML = '<div class="login"><div class="sec"><h1 style="margin:0 0 8px;font-size:18px">Panel sin configurar</h1><p class="sub">Definí las variables ADMIN_USER y ADMIN_PASS en el servidor (y reiniciá) para activar el panel.</p></div></div>'; return; }
     if (s.activo) cargar(); else pintarLogin();

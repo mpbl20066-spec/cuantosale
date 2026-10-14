@@ -135,10 +135,11 @@ textarea{min-height:76px;resize:vertical}
   .prow__paso .btn-paso{width:100%;justify-content:center;min-height:44px}
   .filtros input[type=search],.fsel{flex:1 1 140px;width:auto}
   .subtabs{width:100%}
-  /* Celular: logo y botones en un renglon, las 4 secciones en el de abajo, parejas. */
+  /* Celular: logo y botones en un renglon, las 5 secciones en el de abajo. */
   .top h1{flex:1;font-size:17px}
   .tabs{order:3;flex:1 1 100%}
-  .tab{flex:1 1 0;justify-content:center;padding:9px 6px;font-size:13px;gap:5px}
+  .tab{flex:1 1 auto;justify-content:center;padding:9px 4px;font-size:12px;gap:4px}
+  .tab .badge{min-width:18px;height:18px;padding:0 5px;font-size:11px}
   .seg{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:100%}
   .seg::-webkit-scrollbar{display:none}
   .seg__b{white-space:nowrap;flex:none}
@@ -339,10 +340,30 @@ a.lnk:hover{text-decoration:underline}
 .cmp__f small{display:block;color:var(--muted);font-size:12px;font-weight:600}
 .cmp__acc{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:4px}
 .uso-barra{display:block;height:10px;border-radius:5px;background:var(--accent);min-width:2px}
+/* Marketing: el plan y el tablero semanal */
+.mkt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:14px;margin-bottom:24px;align-items:start}
+.mkt-nav{display:flex;gap:6px}.mkt-nav .btn{min-width:44px;min-height:44px;font-size:18px}.mkt-nav .btn[disabled]{opacity:.4;cursor:default}
+.mkt-check{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.mkt-check input{width:20px;height:20px;min-height:0;accent-color:var(--ok)}
+.mkt-tipo{margin:0 0 6px}.mkt-tipo b{font-size:15px}
+.mkt-estado{background:var(--warnbg);color:var(--warn);border-radius:9px;padding:6px 10px;font-size:13px;font-weight:500;margin:6px 0}
+.mkt-et{display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-top:8px}
+.mkt-ol,.mkt-ul{margin:4px 0 8px;padding-left:20px}.mkt-ol li,.mkt-ul li{margin:3px 0}
+.mkt-h{margin:16px 0 6px;font-size:15px}
+.mkt-nota{background:var(--infobg);color:var(--ink);border-left:3px solid var(--info);border-radius:8px;padding:10px 12px;margin:8px 0}
+.mkt-texto p{margin:6px 0}
+.mkt-copy{border:1px solid var(--line);border-radius:10px;margin:10px 0;overflow:hidden}
+.mkt-copy__cab{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;background:var(--bg)}
+.mkt-copy__cab small{font-weight:600;color:var(--muted)}
+.mkt-copy pre{margin:0;padding:10px 12px;white-space:pre-wrap;word-break:break-word;font:13px/1.5 Poppins,system-ui,sans-serif;max-height:320px;overflow:auto}
+.mkt-hoyfila td{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.mkt-man .grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.sec table td,.sec table th{padding:7px 8px}
+code{font-size:12.5px;background:var(--bg);padding:1px 5px;border-radius:5px;word-break:break-all}
 </style>
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=54"></script>
+<script src="/admin/admin.js?v=55"></script>
 </body>
 </html>
