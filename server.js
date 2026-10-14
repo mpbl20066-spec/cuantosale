@@ -3571,6 +3571,14 @@ function handleRequest(req, res) {
     }
     /* Mails automaticos al cliente (lib/mail-avisos.js): recordatorio del saldo, antes y despues del viaje. Cron diario
        con CRON_SECRET, como /api/alertas/revisar. */
+    /* La guia en PDF desde el propio dominio (/guias/<clave>.pdf): el archivo vive en Supabase Storage (bucket "guias",
+       lo sube outputs/guias/subir-guias.js), pero el mail linkea cuantosale.uy. Un link a un archivo en otro dominio
+       (supabase.co) es de lo que mas desconfian los filtros de spam. */
+    const guiaPdf = /^\/guias\/([a-z0-9-]{2,30})\.pdf$/.exec(url.pathname);
+    if (req.method === 'GET' && guiaPdf && process.env.SUPABASE_URL) {
+      res.writeHead(302, { Location: String(process.env.SUPABASE_URL).trim().replace(/\/+$/, '') + '/storage/v1/object/public/guias/guia-secreta-' + guiaPdf[1] + '.pdf', 'Cache-Control': 'public, max-age=3600' });
+      return res.end();
+    }
     if (req.method === 'GET' && url.pathname === '/api/mails/revisar') {
       const cron = String(process.env.CRON_SECRET || '').trim();
       if (cron && req.headers.authorization !== 'Bearer ' + cron) { res.writeHead(401); return res.end(); }
