@@ -215,8 +215,10 @@ window.CS_MKT = {
     "- En el presupuesto ya se puede compartir y dividir. Pedilo en las historias: \"Mandanos captura de tu viaje armado y te decimos cómo bajarlo\". Elegí uno por semana y respondelo en un reel (con permiso, sin nombre).",
     "- \"Mandáselo a quien se va con vos\" en los carruseles (los compartidos pesan más que los me gusta).",
     "## Recomendaciones de clientes",
-    "- A cada cliente que viaja: al volver, pedile una foto del paseo y permiso para publicarla, y una reseña en Google.",
-    "- Ofrecele algo concreto por recomendar: un traslado de regreso bonificado o un descuento en su próximo paseo, solo cuando el recomendado confirme. Definí el monto con tu margen."
+    "- A cada cliente que viaja: al volver, pedile una foto del paseo, permiso para publicarla y una reseña en Trustpilot (mensaje listo en Perfil y mensajes). El mail automático \"¿Cómo te fue?\" ya la pide sola si está configurado el link.",
+    "- **Reglas de Trustpilot (si no, borran reseñas o marcan la cuenta):** pedíselas a TODOS los clientes que viajaron, no solo a los contentos; nunca des nada a cambio de una reseña (ni descuento ni sorteo); nunca escribas reseñas propias, de amigos o de familia.",
+    "- **Cuándo mostrarlas:** con 5 reseñas o más, poné el puntaje en la destacada \"Reservas\", en la web (home y \"Reservá tu viaje\") y en las historias. Antes, no: un perfil vacío resta confianza.",
+    "- Ofrecele algo concreto por recomendar a un amigo (no por la reseña): un descuento en su próximo paseo, solo cuando el recomendado confirme. Definí el monto con tu margen."
    ]
   },
   {
@@ -1477,7 +1479,7 @@ window.CS_MKT = {
   },
   {
    "t": "Pedido de reseña (cliente que volvió)",
-   "copy": "¡Hola [nombre]! ¿Qué tal [destino]? Esperamos que el [paseo/traslado] haya salido bien. Nos ayudaría muchísimo una reseña cortita en Google: [link]. Y si tenés una foto del paseo y nos dejás publicarla (sin tu nombre), ¡mejor! Gracias por confiar en Cuánto Sale 💛"
+   "copy": "¡Hola [nombre]! ¿Qué tal [destino]? Esperamos que el [paseo/traslado] haya salido bien. Nos ayudaría muchísimo una reseña cortita en Trustpilot, buena o mala, la que corresponda: [link de Trustpilot]. Y si tenés una foto del paseo y nos dejás publicarla (sin tu nombre), ¡mejor! Gracias por confiar en Cuánto Sale 💛"
   }
  ],
  "manuales": [
