@@ -60,3 +60,26 @@ Mientras la cuenta esté en modo desarrollo, Meta solo permite escribirle a núm
 
 - Por IP: el mismo límite general del servidor.
 - Por número: 3 envíos por día.
+
+## Plantilla `pedido_tarifa` (pedir tarifa neta a proveedores)
+
+El link "Pedir tarifa neta (WhatsApp)" del panel la manda por la API: al proveedor nunca le escribimos, así que WhatsApp exige plantilla. Lo que conteste llega a la bandeja de WhatsApp del panel.
+
+WhatsApp Manager → Plantillas de mensajes → Crear. Categoría **Marketing**, nombre `pedido_tarifa`, idioma **Portugués (BR)**. Cuerpo:
+
+```
+Olá, {{1}}! Tudo bem?
+
+Somos a CuántoSale (cuantosale.uy), uma plataforma do Uruguai que ajuda viajantes uruguaios e argentinos a planejar e calcular quanto custa uma viagem ao Brasil.
+
+Gostaríamos de oferecer aos nossos clientes estes passeios de vocês: {{2}}.
+
+Vocês trabalham com tarifas para agências (tarifa neta ou comissão)? Poderiam nos enviar a tabela de preços netos, as formas de pagamento e a política de cancelamento?
+
+Muito obrigado!
+Equipe CuántoSale
+```
+
+Ejemplos para la revisión: `{{1}}` = `5 Amigos Tour`, `{{2}}` = `Bate e volta a Maragogi (Porto de Galinhas); Buggy ponta a ponta (Porto de Galinhas)`.
+
+Variables opcionales en Vercel: `WHATSAPP_TEMPLATE_TARIFA` (por defecto `pedido_tarifa`) y `WHATSAPP_TEMPLATE_TARIFA_LANG` (por defecto `pt_BR`).
