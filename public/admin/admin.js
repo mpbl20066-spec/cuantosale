@@ -558,13 +558,16 @@
     var c = calc(p), m = S.senaMoneda, dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
     var monto = c.senaPend, conTarjeta = r2(monto * (1 + recargoTarjeta()));
     var L = ['Hola ' + (String(p.cliente_nombre || '').trim().split(' ')[0] || '') + '! Buenas noticias: el proveedor confirmó tu reserva' + (p.destino ? ' en ' + p.destino : '') + '.', '',
-      'Para dejarla reservada te pedimos una seña de *' + plata(monto, m) + '* (50 % de los traslados y 25 % de los tours).', '', '*Cómo pagar la seña:*'];
+      'Para dejarla reservada te pedimos una seña (50 % de los traslados y 25 % de los tours):'];
+    /* Los dos precios juntos arriba: el de los medios sin recargo y el de Mercado Pago, que es el unico con el 5 %. */
+    var sinRecargo = ['Transferencia', dp.transferencia, 'Prex', dp.prex, 'Pix', dp.pix, 'Abitab', dp.abitab_redpagos].filter(function (x, i, a) { return i % 2 === 0 && a[i + 1]; });
+    if (sinRecargo.length) L.push('*' + plata(monto, m) + '* por ' + sinRecargo.join(', ').replace(/, ([^,]*)$/, ' o $1') + ' (sin recargo)');
+    L.push('*' + plata(conTarjeta, m) + '* por Mercado Pago con tarjeta (' + Math.round(recargoTarjeta() * 100) + ' % de recargo)', '', '*Datos para pagar:*');
     if (dp.transferencia) L.push('- Transferencia bancaria: ' + dp.transferencia);
     if (dp.prex) L.push('- Prex: ' + dp.prex);
     if (dp.pix) L.push('- Pix: ' + dp.pix);
     if (dp.abitab_redpagos) L.push('- Abitab: ' + dp.abitab_redpagos);
-    var sinRecargo = dp.transferencia || dp.prex || dp.pix || dp.abitab_redpagos;
-    L.push('- Mercado Pago (tarjeta de crédito): te mandamos un link por ' + plata(conTarjeta, m) + '. Es el único medio con recargo: Mercado Pago cobra ' + Math.round(recargoTarjeta() * 100) + ' %' + (sinRecargo ? ', los demás son sin recargo.' : '.'));
+    L.push('- Mercado Pago: te mandamos el link de pago por ' + plata(conTarjeta, m) + '.');
     L.push('', 'Cuando pagues, mandanos el comprobante por acá. El resto se abona antes del viaje.', 'Ref: ' + (p.ref || ''));
     return L.join('\n');
   }
