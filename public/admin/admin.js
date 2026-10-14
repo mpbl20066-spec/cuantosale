@@ -488,10 +488,30 @@
     S.chatTel = tel || null; S.conv = null; S.borrador = '';
     pintar(); if (tel) cargarConv(true);
   }
-  setInterval(function () {
+  function revisarChats() {
     if (!S.datos || document.hidden) return;
     cargarChats(); if (S.vista === 'mensajes' && S.chatTel) cargarConv(false);
-  }, 15000);
+  }
+  setInterval(revisarChats, 15000);
+  /* Pedidos nuevos y cambios sin recargar: cada 30 s en la lista de pedidos. No se repinta mientras se escribe
+     (perderia el foco) ni con cambios sin guardar; la ficha abierta no se toca. */
+  function recargarPedidos() {
+    if (!S.datos || document.hidden || S.vista !== 'pedidos' || S.dirty || S.cargandoDatos) return;
+    var a = document.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+    S.cargandoDatos = true;
+    api('datos').then(function (d) {
+      S.cargandoDatos = false;
+      if (S.dirty || S.vista !== 'pedidos') return;
+      /* Los WhatsApp recien mandados que el server todavia no guardo en el historial siguen contando. */
+      (d.pedidos || []).forEach(function (p) { var loc = S.waLocal && S.waLocal[p.id]; if (loc && !(p.historial || []).length) p.historial = loc.slice(); });
+      S.datos = d; pintarFondo();
+    }).catch(function () { S.cargandoDatos = false; });
+  }
+  setInterval(recargarPedidos, 30000);
+  /* Al volver al panel (otra pestaña, el celular bloqueado, la app en segundo plano) se revisa en el momento,
+     sin esperar la proxima vuelta: en iPhone los timers de la app instalada se frenan en segundo plano. */
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { revisarChats(); recargarPedidos(); } });
+  window.addEventListener('focus', function () { revisarChats(); });
 
   /* ---------- Notificaciones en este dispositivo (lib/push.js + /admin/sw.js) ----------
      En iPhone solo funcionan con el panel agregado a la pantalla de inicio (iOS 16.4 o mas nuevo). */
@@ -747,6 +767,7 @@
         [S.draft && S.draft.id === id ? S.draft : null].concat((S.datos.pedidos || []).filter(function (x) { return x.id === id; })).forEach(function (x) {
           if (x) x.historial = Array.isArray(r.historial) ? r.historial.slice() : (x.historial || []).concat([ev]);
         });
+        if (!Array.isArray(r.historial)) { S.waLocal = S.waLocal || {}; S.waLocal[id] = (S.waLocal[id] || []).concat([ev]); }
         pintarFondo(); if (S.draft && S.draft.id === id) refrescarPanel();
       })
       .catch(function (e) { alert(e.message); });
