@@ -421,7 +421,7 @@
   function cargarMkt() {
     S.mkt = { cargando: true };
     var datos = window.CS_MKT ? Promise.resolve() : new Promise(function (ok, mal) {
-      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=2'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
+      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=3'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
       document.head.appendChild(s);
     });
     Promise.all([datos, api('marketing'), api('uso?dias=90').catch(function () { return null; })]).then(function (r) {
@@ -571,13 +571,13 @@
     }).join('') + '<p class="sub">Se guarda solo al salir de cada casillero.</p></section>';
     h += '<section class="sec"><h3>Revisión de la semana</h3><p class="sub">1 cosa que repito, 1 que cambio, 1 que dejo. Y las preguntas que se repitieron.</p>' +
       '<textarea rows="6" data-mkt-nota="' + id + '" placeholder="Repito: …&#10;Cambio: …&#10;Dejo: …&#10;Preguntas que llegaron: …">' + esc(S.mkt.estado.notas[id] || '') + '</textarea>' +
-      '<p class="sub">Cómo hacer la revisión: Estrategia > J. Revisión semanal.</p></section>';
+      '<p class="sub">Cómo hacer la revisión: Estrategia > Revisión del miércoles.</p></section>';
     return h + '</div>';
   }
   function vistaMktEstrategia() {
-    var M = window.CS_MKT, secs = M.estrategia.slice(0, 5).concat([{ id: 'fijados', t: 'D. Los 3 reels fijados' }], M.estrategia.slice(5));
-    var sel = S.mktSec || 'diagnostico', s = secs.filter(function (x) { return x.id === sel; })[0] || secs[0];
-    var h = '<div class="vhead"><div><h2>Estrategia</h2><p>Plan armado el 14/10/2026 con la web y el perfil de Instagram a la vista. El calendario (E) está en Hoy y Calendario.</p></div></div>';
+    var M = window.CS_MKT, secs = M.estrategia.slice(0, 6).concat([{ id: 'fijados', t: 'Los 3 reels fijados' }], M.estrategia.slice(6));
+    var sel = S.mktSec || 'resumen', s = secs.filter(function (x) { return x.id === sel; })[0] || secs[0];
+    var h = '<div class="vhead"><div><h2>Estrategia</h2><p>El porqué del plan. Para el día a día no hace falta: usá Hoy.</p></div></div>';
     h += '<div class="bar"><div class="chips">' + secs.map(function (x) { return '<button class="chip" data-mkt-sec="' + x.id + '" aria-pressed="' + (x === s) + '">' + esc(x.t) + '</button>'; }).join('') + '</div></div>';
     if (s.id !== 'fijados') return h + '<section class="sec mkt-texto"><h3>' + esc(s.t) + '</h3>' + textoMkt(s.txt) + '</section>';
     h += '<section class="sec mkt-texto">' + textoMkt(M.fijados.intro) + '</section>';

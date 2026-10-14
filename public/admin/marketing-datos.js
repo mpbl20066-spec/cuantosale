@@ -5,8 +5,34 @@ window.CS_MKT = {
  "generado": "2026-10-14",
  "estrategia": [
   {
+   "id": "resumen",
+   "t": "Resumen",
+   "txt": [
+    "> Esta pestaña explica el porqué del plan. Para ejecutar no hace falta leerla: lo de cada día está en Hoy.",
+    "## El plan en 6 líneas",
+    "- **Qué somos:** la app que te dice cuánto sale DE VERDAD tu viaje a Brasil, todo sumado.",
+    "- **De qué vivimos:** traslados y paseos. Todo el contenido termina ahí; los vuelos son solo el gancho.",
+    "- **A quién le hablamos primero:** a los que ya tienen pasaje para el verano y les falta resolver lo de allá.",
+    "- **Qué cambiar ya:** la bio de Instagram y TikTok, el link de la bio y una destacada \"Reservas\" (día 1).",
+    "- **Plata:** anuncios recién desde el 25/10 y como máximo US$ 50, solo si un reel ya funcionó solo.",
+    "- **Cada miércoles:** 30 minutos en Tablero semanal para decidir qué repetir, qué cambiar y qué dejar.",
+    "## Qué hay en cada botón",
+    "- **Qué está mal:** lo que hoy frena las ventas (bio, web, confianza, medición).",
+    "- **Qué somos:** el mensaje y en qué nos diferenciamos.",
+    "- **Prioridades:** qué es urgente, qué puede esperar y lo que ya decidiste.",
+    "- **A quién le hablamos:** los 4 tipos de viajero y qué venderle a cada uno.",
+    "- **Qué publicar:** los 7 tipos de contenido y para qué sirve cada uno.",
+    "- **Los 3 reels fijados:** guion, escenas y textos de cada uno.",
+    "- **Del reel a la venta:** los pasos desde que alguien ve un reel hasta que paga la seña.",
+    "- **Crecer gratis:** grupos, creadores, alianzas y recomendaciones.",
+    "- **Anuncios:** cómo gastar los US$ 50 y cuándo cortar.",
+    "- **Qué medir:** los números que importan y los objetivos del mes.",
+    "- **Revisión del miércoles:** cómo hacerla paso a paso."
+   ]
+  },
+  {
    "id": "diagnostico",
-   "t": "A. Diagnóstico",
+   "t": "Qué está mal",
    "txt": [
     "> Lo que revisé: la web en vivo (home, términos, catálogo de tours y traslados, cómo se mide el uso) y el perfil público de Instagram (72 seguidores, 0 seguidos, 12 publicaciones entre el 25/9 y el 13/10). TikTok no se puede ver sin iniciar sesión, así que no lo analicé. No tengo métricas de alcance ni de retención de ninguna red: las tenés que cargar vos en el Tablero.",
     "## Lo que hay que corregir ya",
@@ -30,7 +56,7 @@ window.CS_MKT = {
   },
   {
    "id": "posicionamiento",
-   "t": "Posicionamiento y mensaje",
+   "t": "Qué somos",
    "txt": [
     "> **Cuánto Sale te dice cuánto sale de verdad tu viaje a Brasil —todo sumado— y te resuelve lo de allá: el traslado y los paseos, con precio claro antes de salir de Montevideo.**",
     "## Qué problema resolvemos",
@@ -63,7 +89,7 @@ window.CS_MKT = {
     "- Alianzas grandes (agencias, aerolíneas): hoy no tenés números para negociar.",
     "- Cambios grandes en la web: solo los de confianza y la mención de traslados y paseos en la home.",
     "## Decisiones (14/10/2026)",
-    "- **Anuncios: US$ 50 como máximo** para todo el mes (ver Publicidad paga).",
+    "- **Anuncios: US$ 50 como máximo** para todo el mes (ver Estrategia > Anuncios).",
     "- **Margen:** el que asignás en Catálogo. La comisión a creadores y alianzas sale de ahí: hasta la mitad del margen de cada servicio.",
     "- **Nadie de la marca figura con nombre.** Todo se firma \"Cuánto Sale\"; la confianza sale del proceso claro, el número oficial y clientes reales.",
     "- **Los reels ya están en TikTok:** ahí solo se fijan y se cambia la bio.",
@@ -72,7 +98,7 @@ window.CS_MKT = {
   },
   {
    "id": "publico",
-   "t": "B. Público objetivo",
+   "t": "A quién le hablamos",
    "txt": [
     "> Ordenados por potencial de venta de traslados y paseos, no por tamaño.",
     "## 1. \"Ya tengo el pasaje\" (prioridad máxima)",
@@ -107,7 +133,7 @@ window.CS_MKT = {
   },
   {
    "id": "pilares",
-   "t": "C. Pilares de contenido",
+   "t": "Qué publicar",
    "txt": [
     "> Una regla: cada pieza tiene un solo trabajo. En el calendario cada día dice cuál.",
     "## 1. Descubrimiento (alcance) · 30 %",
@@ -136,7 +162,7 @@ window.CS_MKT = {
   },
   {
    "id": "embudo",
-   "t": "H. Embudo: del reel a la reserva",
+   "t": "Del reel a la venta",
    "txt": [
     "> Reproducciones, seguidores y visitas no son plata. La plata es: pedido con traslado o paseo → seña cobrada → servicio hecho.",
     "## 1. Ve un reel",
@@ -175,7 +201,7 @@ window.CS_MKT = {
   },
   {
    "id": "gratis",
-   "t": "F. Usuarios sin presupuesto",
+   "t": "Crecer gratis",
    "txt": [
     "## Grupos y comunidades de viajeros (sin spam)",
     "- Buscá en Facebook: \"viajar a Brasil Uruguay\", \"uruguayos en Florianópolis\", \"Nordeste desde Uruguay\", \"Búzios\", \"Porto de Galinhas viajeros\". Quedate con los que tengan publicaciones de esta semana.",
@@ -195,7 +221,7 @@ window.CS_MKT = {
   },
   {
    "id": "publicidad",
-   "t": "G. Publicidad paga",
+   "t": "Anuncios",
    "txt": [
     "> No pongas plata en anuncios hasta que un reel orgánico muestre buena retención. Un anuncio no arregla un reel que la gente pasa de largo.",
     "## Fase 0 · días 1 a 10: nada de plata",
@@ -224,7 +250,7 @@ window.CS_MKT = {
   },
   {
    "id": "metricas",
-   "t": "I. Métricas y objetivos",
+   "t": "Qué medir",
    "txt": [
     "> La primera semana es la línea de base. No te pongo tasas de conversión inventadas: el objetivo de cada semana se fija contra la anterior, con tus números.",
     "## Lo que el panel cuenta solo",
@@ -238,12 +264,12 @@ window.CS_MKT = {
     "## Objetivos de los primeros 30 días",
     "- **De actividad (dependen de vos):** 30 días de plan cumplidos al 80 %, 20 creadores contactados, 3 grupos activos, respuesta a cada pedido el mismo día.",
     "- **De resultado:** el primer pedido de traslado o paseo que diga que vino de redes, y 2 creadores publicando con su link.",
-    "- **Semanas 2 a 4:** que suban las visitas al perfil, los clics en el enlace y los presupuestos completos contra la semana anterior. Si dos semanas seguidas no sube nada, se cambia el contenido (ver J)."
+    "- **Semanas 2 a 4:** que suban las visitas al perfil, los clics en el enlace y los presupuestos completos contra la semana anterior. Si dos semanas seguidas no sube nada, se cambia el contenido (ver Revisión del miércoles)."
    ]
   },
   {
    "id": "mejora",
-   "t": "J. Revisión semanal",
+   "t": "Revisión del miércoles",
    "txt": [
     "> Todos los miércoles, 30 minutos, en Tablero semanal. Una sola persona.",
     "## Paso 1 · Cargar (10 min)",
@@ -410,7 +436,7 @@ window.CS_MKT = {
     "carpeta": "reel-00c-viaja-mas-barato · reel-00b-como-funciona · reel-00-que-es-cuantosale",
     "gancho": "¿Qué es Cuánto Sale?",
     "guion": [
-     "Ver Estrategia > 3 reels fijados: escenas y textos de cada uno.",
+     "Ver Estrategia > Los 3 reels fijados: escenas y textos de cada uno.",
      "Se publican 3 → 2 → 1 con 10 minutos entre cada uno y se fijan los tres."
     ],
     "cta": "Probalo en cuantosale.uy (link en la bio)",
@@ -484,7 +510,7 @@ window.CS_MKT = {
     "Encuesta: \"Búzios en enero, ¿te da?\" Opciones: \"Me da 💛\" / \"Ni ahí 😅\"."
    ],
    "acc": [
-    "Unite a 3 grupos de Facebook de viajeros a Brasil (búsquedas en Estrategia > Usuarios sin presupuesto) y respondé 3 preguntas con datos, sin link.",
+    "Unite a 3 grupos de Facebook de viajeros a Brasil (búsquedas en Estrategia > Crecer gratis) y respondé 3 preguntas con datos, sin link.",
     "A cada persona que comente \"BÚZIOS\": respondele el comentario y mandale por mensaje el desglose del carrusel del 23/10 (ya está hecho)."
    ],
    "n": 3
@@ -742,7 +768,7 @@ window.CS_MKT = {
     "Historia: \"Lo que nadie te dice de Jeri: del aeropuerto son 5 h 30 de viaje 🚐\" + sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
    ],
    "acc": [
-    "**Anuncios, Fase 1** (si decidiste invertir): elegí el reel con mejor tiempo medio de reproducción de los publicados y armá la prueba de US$ 3 por día (ver Publicidad paga)."
+    "**Anuncios, Fase 1** (si decidiste invertir): elegí el reel con mejor tiempo medio de reproducción de los publicados y armá la prueba de US$ 3 por día (ver Estrategia > Anuncios)."
    ],
    "n": 11
   },
@@ -925,7 +951,7 @@ window.CS_MKT = {
     "Historia: \"Del aeropuerto de Natal a Pipa: media hora, US$ 6 por persona en compartido (catálogo al 1/10)\" + enlace."
    ],
    "acc": [
-    "Revisá el anuncio: si se cumple una regla de corte, pausalo (ver Publicidad paga)."
+    "Revisá el anuncio: si se cumple una regla de corte, pausalo (ver Estrategia > Anuncios)."
    ],
    "n": 17
   },
@@ -1239,7 +1265,7 @@ window.CS_MKT = {
     "Historia: \"El destino que más eligieron este mes fue…\" (de las encuestas) + enlace."
    ],
    "acc": [
-    "**Revisión semanal #4.** Decidí si los anuncios pasan a Fase 2 o se cortan (reglas en Publicidad paga).",
+    "**Revisión semanal #4.** Decidí si los anuncios pasan a Fase 2 o se cortan (reglas en Estrategia > Anuncios).",
     "Pedile a Claude el plan del mes siguiente con lo que aprendiste."
    ],
    "n": 28
