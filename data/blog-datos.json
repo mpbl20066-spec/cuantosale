@@ -1,0 +1,4204 @@
+{
+ "consultado": "2026-10-14",
+ "viaje": "2 personas, 7 noches, estilo ahorro, hotel economico, desde Montevideo",
+ "floripaPorMes": [
+  {
+   "mes": "noviembre 2026",
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2026-11-25",
+   "ret": "2026-12-02",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 482
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 482,
+     "total": 964,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 197,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 543,
+     "total": 1086,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 413,
+      "alojamiento": 197,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 777,
+     "total": 1554,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 858,
+      "bus": 0,
+      "alojamiento": 197,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "diciembre 2026",
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2026-12-15",
+   "ret": "2026-12-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 509
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 509,
+     "total": 1017,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 250,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 576,
+     "total": 1152,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 426,
+      "alojamiento": 250,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 785,
+     "total": 1570,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 821,
+      "bus": 0,
+      "alojamiento": 250,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "enero 2027",
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 525
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 525,
+     "total": 1049,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 282,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 601,
+     "total": 1202,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 444,
+      "alojamiento": 282,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 858,
+     "total": 1716,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 935,
+      "bus": 0,
+      "alojamiento": 282,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "febrero 2027",
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-02-24",
+   "ret": "2027-03-03",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 505
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 505,
+     "total": 1009,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 242,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 559,
+     "total": 1117,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 399,
+      "alojamiento": 242,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 727,
+     "total": 1453,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 712,
+      "bus": 0,
+      "alojamiento": 242,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "marzo 2027",
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 477
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 477,
+     "total": 954,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 187,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 517,
+     "total": 1033,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 370,
+      "alojamiento": 187,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 711,
+     "total": 1421,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 735,
+      "bus": 0,
+      "alojamiento": 187,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "abril 2027",
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-04-15",
+   "ret": "2027-04-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 466
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 466,
+     "total": 931,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 164,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 506,
+     "total": 1011,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 371,
+      "alojamiento": 164,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 850,
+     "total": 1700,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1037,
+      "bus": 0,
+      "alojamiento": 164,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "mayo 2027",
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-05-15",
+   "ret": "2027-05-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 456
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 456,
+     "total": 912,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 145,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 495,
+     "total": 990,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 369,
+      "alojamiento": 145,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 631,
+     "total": 1261,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 617,
+      "bus": 0,
+      "alojamiento": 145,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  },
+  {
+   "mes": "junio 2027",
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-06-15",
+   "ret": "2027-06-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 463
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 463,
+     "total": 925,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 158,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 492,
+     "total": 984,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 350,
+      "alojamiento": 158,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 603,
+     "total": 1205,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 548,
+      "bus": 0,
+      "alojamiento": 158,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  },
+  {
+   "mes": "julio 2027",
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-07-15",
+   "ret": "2027-07-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 498
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 498,
+     "total": 995,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 228,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 552,
+     "total": 1103,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 399,
+      "alojamiento": 228,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 728,
+     "total": 1455,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 728,
+      "bus": 0,
+      "alojamiento": 228,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  },
+  {
+   "mes": "agosto 2027",
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-08-15",
+   "ret": "2027-08-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 471
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 471,
+     "total": 942,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 175,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 523,
+     "total": 1045,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 394,
+      "alojamiento": 175,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 892,
+     "total": 1783,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1109,
+      "bus": 0,
+      "alojamiento": 175,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "septiembre 2027",
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-09-15",
+   "ret": "2027-09-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 466
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 466,
+     "total": 932,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 165,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 496,
+     "total": 991,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 350,
+      "alojamiento": 165,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 888,
+     "total": 1775,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 1111,
+      "bus": 0,
+      "alojamiento": 165,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  }
+ ],
+ "camboriuPorMes": [
+  {
+   "mes": "noviembre 2026",
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2026-11-25",
+   "ret": "2026-12-02",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 481
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 481,
+     "total": 962,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 226,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 787,
+     "total": 1573,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 858,
+      "bus": 0,
+      "alojamiento": 226,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "diciembre 2026",
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2026-12-15",
+   "ret": "2026-12-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 514
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 514,
+     "total": 1028,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 292,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 801,
+     "total": 1602,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 821,
+      "bus": 0,
+      "alojamiento": 292,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "enero 2027",
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 533
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 533,
+     "total": 1065,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 329,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 877,
+     "total": 1753,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 935,
+      "bus": 0,
+      "alojamiento": 329,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "febrero 2027",
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-02-24",
+   "ret": "2027-03-03",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 507
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 507,
+     "total": 1014,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 278,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 740,
+     "total": 1479,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 712,
+      "bus": 0,
+      "alojamiento": 278,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "marzo 2027",
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 475
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 475,
+     "total": 950,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 214,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 719,
+     "total": 1438,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 735,
+      "bus": 0,
+      "alojamiento": 214,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "abril 2027",
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-04-15",
+   "ret": "2027-04-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 464
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 464,
+     "total": 927,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 191,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 859,
+     "total": 1717,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 1037,
+      "bus": 0,
+      "alojamiento": 191,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "mayo 2027",
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-05-15",
+   "ret": "2027-05-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 453
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 453,
+     "total": 906,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 170,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 625,
+     "total": 1250,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 591,
+      "bus": 0,
+      "alojamiento": 170,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  },
+  {
+   "mes": "junio 2027",
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-06-15",
+   "ret": "2027-06-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 457
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 457,
+     "total": 914,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 178,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 596,
+     "total": 1192,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 525,
+      "bus": 0,
+      "alojamiento": 178,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  },
+  {
+   "mes": "julio 2027",
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-07-15",
+   "ret": "2027-07-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 496
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 496,
+     "total": 992,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 256,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 744,
+     "total": 1487,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 742,
+      "bus": 0,
+      "alojamiento": 256,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    }
+   }
+  },
+  {
+   "mes": "agosto 2027",
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-08-15",
+   "ret": "2027-08-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 471
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 471,
+     "total": 941,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 205,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 902,
+     "total": 1803,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 1109,
+      "bus": 0,
+      "alojamiento": 205,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "mes": "septiembre 2027",
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-09-15",
+   "ret": "2027-09-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 465
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 465,
+     "total": 929,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 193,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 897,
+     "total": 1793,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 1111,
+      "bus": 0,
+      "alojamiento": 193,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  }
+ ],
+ "rankingEnero2027": [
+  {
+   "clave": "poa",
+   "nombre": "Porto Alegre",
+   "region": "Río Grande do Sul",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 479
+   },
+   "vuelo": null,
+   "hotel": "estimado",
+   "porMedio": {
+    "auto": {
+     "pp": 479,
+     "total": 957,
+     "dur": "unas 11.6 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 308,
+      "comidas": 378,
+      "local": 56,
+      "traslados": 0,
+      "auto": 215,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 488,
+     "total": 976,
+     "dur": "unas 12 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 234,
+      "alojamiento": 308,
+      "comidas": 378,
+      "local": 56,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 756,
+     "total": 1512,
+     "dur": "unas 2 h de vuelo",
+     "parts": {
+      "pasajes": 747,
+      "bus": 0,
+      "alojamiento": 308,
+      "comidas": 378,
+      "local": 56,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "rosa",
+   "nombre": "Praia do Rosa",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 490
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 490,
+     "total": 980,
+     "dur": "unas 16.2 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 342,
+      "comidas": 308,
+      "local": 56,
+      "traslados": 0,
+      "auto": 274,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 848,
+     "total": 1696,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 935,
+      "bus": 0,
+      "alojamiento": 342,
+      "comidas": 308,
+      "local": 56,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "picarras",
+   "nombre": "Piçarras",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 501
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 501,
+     "total": 1001,
+     "dur": "unas 17.9 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 279,
+      "comidas": 364,
+      "local": 56,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 853,
+     "total": 1705,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 935,
+      "bus": 0,
+      "alojamiento": 279,
+      "comidas": 364,
+      "local": 56,
+      "traslados": 71,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "canoa",
+   "nombre": "Capão da Canoa",
+   "region": "Río Grande do Sul",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 512
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 512,
+     "total": 1024,
+     "dur": "unas 12.7 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 401,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 0,
+      "auto": 231,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 807,
+     "total": 1614,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 747,
+      "bus": 0,
+      "alojamiento": 401,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 74,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ferrugem",
+   "nombre": "Ferrugem",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 518
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 518,
+     "total": 1035,
+     "dur": "unas 16.2 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 354,
+      "comidas": 364,
+      "local": 42,
+      "traslados": 0,
+      "auto": 275,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 876,
+     "total": 1752,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 935,
+      "bus": 0,
+      "alojamiento": 354,
+      "comidas": 364,
+      "local": 42,
+      "traslados": 57,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 525
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 525,
+     "total": 1049,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 282,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 601,
+     "total": 1202,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 444,
+      "alojamiento": 282,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 858,
+     "total": 1716,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 935,
+      "bus": 0,
+      "alojamiento": 282,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "garopaba",
+   "nombre": "Garopaba",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 525
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 525,
+     "total": 1049,
+     "dur": "unas 16.3 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 379,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 0,
+      "auto": 278,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 879,
+     "total": 1758,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 935,
+      "bus": 0,
+      "alojamiento": 379,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 52,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "torres",
+   "nombre": "Torres",
+   "region": "Río Grande do Sul",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 531
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 531,
+     "total": 1061,
+     "dur": "unas 13.1 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 418,
+      "comidas": 364,
+      "local": 42,
+      "traslados": 0,
+      "auto": 237,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 834,
+     "total": 1668,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 747,
+      "bus": 0,
+      "alojamiento": 418,
+      "comidas": 364,
+      "local": 42,
+      "traslados": 97,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 533
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 533,
+     "total": 1065,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 329,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 877,
+     "total": 1753,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 935,
+      "bus": 0,
+      "alojamiento": 329,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "bombinhas",
+   "nombre": "Bombinhas",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 560
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 560,
+     "total": 1119,
+     "dur": "unas 17.9 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 436,
+      "comidas": 280,
+      "local": 98,
+      "traslados": 0,
+      "auto": 305,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 901,
+     "total": 1801,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 935,
+      "bus": 0,
+      "alojamiento": 436,
+      "comidas": 280,
+      "local": 98,
+      "traslados": 52,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "canela",
+   "nombre": "Canela",
+   "region": "Río Grande do Sul",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 586
+   },
+   "vuelo": null,
+   "hotel": "estimado",
+   "porMedio": {
+    "auto": {
+     "pp": 586,
+     "total": 1172,
+     "dur": "unas 13.5 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 529,
+      "comidas": 336,
+      "local": 70,
+      "traslados": 0,
+      "auto": 237,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 873,
+     "total": 1746,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 747,
+      "bus": 0,
+      "alojamiento": 529,
+      "comidas": 336,
+      "local": 70,
+      "traslados": 64,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "itapema",
+   "nombre": "Itapema",
+   "region": "Santa Catarina",
+   "dep": "2027-01-06",
+   "ret": "2027-01-13",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 602
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 602,
+     "total": 1203,
+     "dur": "unas 17.9 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 438,
+      "comidas": 392,
+      "local": 70,
+      "traslados": 0,
+      "auto": 303,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 944,
+     "total": 1887,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 935,
+      "bus": 0,
+      "alojamiento": 438,
+      "comidas": 392,
+      "local": 70,
+      "traslados": 52,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "gram",
+   "nombre": "Gramado",
+   "region": "Río Grande do Sul",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 664
+   },
+   "vuelo": null,
+   "hotel": "estimado",
+   "porMedio": {
+    "auto": {
+     "pp": 664,
+     "total": 1327,
+     "dur": "unas 13.3 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 504,
+      "comidas": 518,
+      "local": 70,
+      "traslados": 0,
+      "auto": 235,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 951,
+     "total": 1901,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 747,
+      "bus": 0,
+      "alojamiento": 504,
+      "comidas": 518,
+      "local": 70,
+      "traslados": 62,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "cabo",
+   "nombre": "Cabo Frio",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 717
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 717,
+     "total": 1433,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 311,
+      "comidas": 308,
+      "local": 56,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 727
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 727,
+     "total": 1453,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 345,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 727
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 727,
+     "total": 1454,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 379,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 737
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 737,
+     "total": 1474,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 220,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "sao",
+   "nombre": "São Paulo",
+   "region": "São Paulo",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 782
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 782,
+     "total": 1564,
+     "dur": "unas 3 h de vuelo",
+     "parts": {
+      "pasajes": 780,
+      "bus": 0,
+      "alojamiento": 206,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 32,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ubatuba",
+   "nombre": "Ubatuba",
+   "region": "São Paulo",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 785
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 785,
+     "total": 1569,
+     "dur": "unas 7 h con escala",
+     "parts": {
+      "pasajes": 780,
+      "bus": 0,
+      "alojamiento": 261,
+      "comidas": 350,
+      "local": 70,
+      "traslados": 108,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "paraty",
+   "nombre": "Paraty",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 788
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 788,
+     "total": 1575,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 409,
+      "comidas": 294,
+      "local": 56,
+      "traslados": 231,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "porto",
+   "nombre": "Porto de Galinhas",
+   "region": "Pernambuco",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 791
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 791,
+     "total": 1582,
+     "dur": "unas 8 h con escala",
+     "parts": {
+      "pasajes": 876,
+      "bus": 0,
+      "alojamiento": 321,
+      "comidas": 308,
+      "local": 42,
+      "traslados": 35,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "angra",
+   "nombre": "Angra dos Reis",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 798
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 798,
+     "total": 1596,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 421,
+      "comidas": 322,
+      "local": 56,
+      "traslados": 212,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "pip",
+   "nombre": "Pipa",
+   "region": "Río Grande do Norte",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 802
+   },
+   "vuelo": "real",
+   "hotel": "estimado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 802,
+     "total": 1603,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 981,
+      "bus": 0,
+      "alojamiento": 318,
+      "comidas": 238,
+      "local": 42,
+      "traslados": 24,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "rec",
+   "nombre": "Recife",
+   "region": "Pernambuco",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 823
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 823,
+     "total": 1646,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 876,
+      "bus": 0,
+      "alojamiento": 355,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ssa",
+   "nombre": "Salvador de Bahía",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 830
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 830,
+     "total": 1660,
+     "dur": "unas 8 h con escala",
+     "parts": {
+      "pasajes": 969,
+      "bus": 0,
+      "alojamiento": 248,
+      "comidas": 350,
+      "local": 70,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ilhabela",
+   "nombre": "Ilhabela",
+   "region": "São Paulo",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 832
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 832,
+     "total": 1664,
+     "dur": "unas 7 h con escala",
+     "parts": {
+      "pasajes": 780,
+      "bus": 0,
+      "alojamiento": 338,
+      "comidas": 336,
+      "local": 112,
+      "traslados": 98,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "nat",
+   "nombre": "Natal",
+   "region": "Río Grande do Norte",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 848
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 848,
+     "total": 1695,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 981,
+      "bus": 0,
+      "alojamiento": 271,
+      "comidas": 364,
+      "local": 56,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ajuda",
+   "nombre": "Arraial d’Ajuda",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 851
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 851,
+     "total": 1702,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 969,
+      "bus": 0,
+      "alojamiento": 320,
+      "comidas": 266,
+      "local": 56,
+      "traslados": 91,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "morro",
+   "nombre": "Morro de São Paulo",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 858
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 858,
+     "total": 1716,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 969,
+      "bus": 0,
+      "alojamiento": 395,
+      "comidas": 266,
+      "local": 14,
+      "traslados": 72,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "for",
+   "nombre": "Fortaleza",
+   "region": "Ceará",
+   "dep": "2027-01-12",
+   "ret": "2027-01-19",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 910
+   },
+   "vuelo": "real",
+   "hotel": "estimado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 910,
+     "total": 1820,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 1085,
+      "bus": 0,
+      "alojamiento": 292,
+      "comidas": 364,
+      "local": 56,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "joaopessoa",
+   "nombre": "João Pessoa",
+   "region": "Paraíba",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 919
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 919,
+     "total": 1838,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1097,
+      "bus": 0,
+      "alojamiento": 298,
+      "comidas": 364,
+      "local": 56,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "maragogi",
+   "nombre": "Maragogi",
+   "region": "Alagoas",
+   "dep": "2027-01-20",
+   "ret": "2027-01-27",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 923
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 923,
+     "total": 1846,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1030,
+      "bus": 0,
+      "alojamiento": 353,
+      "comidas": 336,
+      "local": 56,
+      "traslados": 71,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "mcz",
+   "nombre": "Maceió",
+   "region": "Alagoas",
+   "dep": "2027-01-20",
+   "ret": "2027-01-27",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 936
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 936,
+     "total": 1871,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1030,
+      "bus": 0,
+      "alojamiento": 387,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 62,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "forte",
+   "nombre": "Praia do Forte",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 942
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 942,
+     "total": 1883,
+     "dur": "unas 8 h con escala",
+     "parts": {
+      "pasajes": 969,
+      "bus": 0,
+      "alojamiento": 568,
+      "comidas": 266,
+      "local": 42,
+      "traslados": 38,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ilha",
+   "nombre": "Ilha Grande",
+   "region": "Río de Janeiro",
+   "dep": "2027-01-19",
+   "ret": "2027-01-26",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 945
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 945,
+     "total": 1889,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 585,
+      "bus": 0,
+      "alojamiento": 683,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "portoseguro",
+   "nombre": "Porto Seguro",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 965
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 965,
+     "total": 1930,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 969,
+      "bus": 0,
+      "alojamiento": 258,
+      "comidas": 462,
+      "local": 56,
+      "traslados": 185,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "trancoso",
+   "nombre": "Trancoso",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 1008
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 1008,
+     "total": 2016,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 969,
+      "bus": 0,
+      "alojamiento": 358,
+      "comidas": 532,
+      "local": 70,
+      "traslados": 87,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "jericoacoara",
+   "nombre": "Jericoacoara",
+   "region": "Ceará",
+   "dep": "2027-01-12",
+   "ret": "2027-01-19",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 1037
+   },
+   "vuelo": "real",
+   "hotel": "estimado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 1037,
+     "total": 2073,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 1085,
+      "bus": 0,
+      "alojamiento": 334,
+      "comidas": 448,
+      "local": 56,
+      "traslados": 150,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "itacare",
+   "nombre": "Itacaré",
+   "region": "Bahía",
+   "dep": "2027-01-27",
+   "ret": "2027-02-03",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 1064
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 1064,
+     "total": 2127,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 969,
+      "bus": 0,
+      "alojamiento": 459,
+      "comidas": 448,
+      "local": 70,
+      "traslados": 181,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "fernando",
+   "nombre": "Fernando de Noronha",
+   "region": "Pernambuco",
+   "dep": "2027-01-26",
+   "ret": "2027-02-02",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 1626
+   },
+   "vuelo": "real",
+   "hotel": "estimado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 1626,
+     "total": 3251,
+     "dur": "unas 11 h con escala",
+     "parts": {
+      "pasajes": 1592,
+      "bus": 0,
+      "alojamiento": 830,
+      "comidas": 700,
+      "local": 56,
+      "traslados": 73,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  }
+ ],
+ "rankingMarzo2027": [
+  {
+   "clave": "rosa",
+   "nombre": "Praia do Rosa",
+   "region": "Santa Catarina",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 432
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 432,
+     "total": 864,
+     "dur": "unas 16.2 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 226,
+      "comidas": 308,
+      "local": 56,
+      "traslados": 0,
+      "auto": 274,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 690,
+     "total": 1380,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 735,
+      "bus": 0,
+      "alojamiento": 226,
+      "comidas": 308,
+      "local": 56,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "canoa",
+   "nombre": "Capão da Canoa",
+   "region": "Río Grande do Sul",
+   "dep": "2027-03-15",
+   "ret": "2027-03-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 444
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 444,
+     "total": 888,
+     "dur": "unas 12.7 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 265,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 0,
+      "auto": 231,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 896,
+     "total": 1791,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 1060,
+      "bus": 0,
+      "alojamiento": 265,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 74,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "picarras",
+   "nombre": "Piçarras",
+   "region": "Santa Catarina",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 452
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 452,
+     "total": 903,
+     "dur": "unas 17.9 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 181,
+      "comidas": 364,
+      "local": 56,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 704,
+     "total": 1407,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 735,
+      "bus": 0,
+      "alojamiento": 181,
+      "comidas": 364,
+      "local": 56,
+      "traslados": 71,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ferrugem",
+   "nombre": "Ferrugem",
+   "region": "Santa Catarina",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 456
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 456,
+     "total": 911,
+     "dur": "unas 16.2 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 230,
+      "comidas": 364,
+      "local": 42,
+      "traslados": 0,
+      "auto": 275,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 714,
+     "total": 1428,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 735,
+      "bus": 0,
+      "alojamiento": 230,
+      "comidas": 364,
+      "local": 42,
+      "traslados": 57,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "torres",
+   "nombre": "Torres",
+   "region": "Río Grande do Sul",
+   "dep": "2027-03-15",
+   "ret": "2027-03-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 459
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 459,
+     "total": 917,
+     "dur": "unas 13.1 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 274,
+      "comidas": 364,
+      "local": 42,
+      "traslados": 0,
+      "auto": 237,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 919,
+     "total": 1837,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 1060,
+      "bus": 0,
+      "alojamiento": 274,
+      "comidas": 364,
+      "local": 42,
+      "traslados": 97,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "garopaba",
+   "nombre": "Garopaba",
+   "region": "Santa Catarina",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 460
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 460,
+     "total": 919,
+     "dur": "unas 16.3 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 249,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 0,
+      "auto": 278,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 714,
+     "total": 1428,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 735,
+      "bus": 0,
+      "alojamiento": 249,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 52,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "poa",
+   "nombre": "Porto Alegre",
+   "region": "Río Grande do Sul",
+   "dep": "2027-03-15",
+   "ret": "2027-03-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 464
+   },
+   "vuelo": null,
+   "hotel": "estimado",
+   "porMedio": {
+    "auto": {
+     "pp": 464,
+     "total": 927,
+     "dur": "unas 11.6 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 278,
+      "comidas": 378,
+      "local": 56,
+      "traslados": 0,
+      "auto": 215,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 471,
+     "total": 942,
+     "dur": "unas 12 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 230,
+      "alojamiento": 278,
+      "comidas": 378,
+      "local": 56,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 898,
+     "total": 1795,
+     "dur": "unas 2 h de vuelo",
+     "parts": {
+      "pasajes": 1060,
+      "bus": 0,
+      "alojamiento": 278,
+      "comidas": 378,
+      "local": 56,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "bcm",
+   "nombre": "Balneário Camboriú",
+   "region": "Santa Catarina",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 475
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 475,
+     "total": 950,
+     "dur": "unas 17.8 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 214,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 0,
+      "auto": 302,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 719,
+     "total": 1438,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 735,
+      "bus": 0,
+      "alojamiento": 214,
+      "comidas": 364,
+      "local": 70,
+      "traslados": 55,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "fln",
+   "nombre": "Florianópolis",
+   "region": "Santa Catarina",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 477
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 477,
+     "total": 954,
+     "dur": "unas 17 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 187,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 291,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "bus": {
+     "pp": 517,
+     "total": 1033,
+     "dur": "unas 22 h",
+     "parts": {
+      "pasajes": 0,
+      "bus": 370,
+      "alojamiento": 187,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 0,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 711,
+     "total": 1421,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 735,
+      "bus": 0,
+      "alojamiento": 187,
+      "comidas": 392,
+      "local": 84,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "bombinhas",
+   "nombre": "Bombinhas",
+   "region": "Santa Catarina",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 486
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 486,
+     "total": 972,
+     "dur": "unas 17.9 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 289,
+      "comidas": 280,
+      "local": 98,
+      "traslados": 0,
+      "auto": 305,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 727,
+     "total": 1454,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 735,
+      "bus": 0,
+      "alojamiento": 289,
+      "comidas": 280,
+      "local": 98,
+      "traslados": 52,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "canela",
+   "nombre": "Canela",
+   "region": "Río Grande do Sul",
+   "dep": "2027-03-15",
+   "ret": "2027-03-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 491
+   },
+   "vuelo": null,
+   "hotel": "estimado",
+   "porMedio": {
+    "auto": {
+     "pp": 491,
+     "total": 981,
+     "dur": "unas 13.5 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 338,
+      "comidas": 336,
+      "local": 70,
+      "traslados": 0,
+      "auto": 237,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 934,
+     "total": 1868,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 1060,
+      "bus": 0,
+      "alojamiento": 338,
+      "comidas": 336,
+      "local": 70,
+      "traslados": 64,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "itapema",
+   "nombre": "Itapema",
+   "region": "Santa Catarina",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 525
+   },
+   "vuelo": null,
+   "hotel": "calibrado",
+   "porMedio": {
+    "auto": {
+     "pp": 525,
+     "total": 1050,
+     "dur": "unas 17.9 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 285,
+      "comidas": 392,
+      "local": 70,
+      "traslados": 0,
+      "auto": 303,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 767,
+     "total": 1534,
+     "dur": "unas 5 h con escala",
+     "parts": {
+      "pasajes": 735,
+      "bus": 0,
+      "alojamiento": 285,
+      "comidas": 392,
+      "local": 70,
+      "traslados": 52,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "rio",
+   "nombre": "Río de Janeiro",
+   "region": "Río de Janeiro",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 552
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 552,
+     "total": 1103,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 367,
+      "bus": 0,
+      "alojamiento": 246,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 42,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "cabo",
+   "nombre": "Cabo Frio",
+   "region": "Río de Janeiro",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 553
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 553,
+     "total": 1106,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 367,
+      "bus": 0,
+      "alojamiento": 202,
+      "comidas": 308,
+      "local": 56,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "arraial",
+   "nombre": "Arraial do Cabo",
+   "region": "Río de Janeiro",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 558
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 558,
+     "total": 1115,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 367,
+      "bus": 0,
+      "alojamiento": 225,
+      "comidas": 322,
+      "local": 28,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "gram",
+   "nombre": "Gramado",
+   "region": "Río Grande do Sul",
+   "dep": "2027-03-15",
+   "ret": "2027-03-22",
+   "masBarato": {
+    "modo": "auto",
+    "pp": 576
+   },
+   "vuelo": null,
+   "hotel": "estimado",
+   "porMedio": {
+    "auto": {
+     "pp": 576,
+     "total": 1152,
+     "dur": "unas 13.3 h de manejo",
+     "parts": {
+      "pasajes": 0,
+      "bus": 0,
+      "alojamiento": 329,
+      "comidas": 518,
+      "local": 70,
+      "traslados": 0,
+      "auto": 235,
+      "tours": 0
+     },
+     "vueloReal": false
+    },
+    "avion_mvd": {
+     "pp": 1020,
+     "total": 2039,
+     "dur": "unas 4 h con escala",
+     "parts": {
+      "pasajes": 1060,
+      "bus": 0,
+      "alojamiento": 329,
+      "comidas": 518,
+      "local": 70,
+      "traslados": 62,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "buz",
+   "nombre": "Búzios",
+   "region": "Río de Janeiro",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 591
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 591,
+     "total": 1181,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 367,
+      "bus": 0,
+      "alojamiento": 145,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 123,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "paraty",
+   "nombre": "Paraty",
+   "region": "Río de Janeiro",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 608
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 608,
+     "total": 1216,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 367,
+      "bus": 0,
+      "alojamiento": 268,
+      "comidas": 294,
+      "local": 56,
+      "traslados": 231,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "angra",
+   "nombre": "Angra dos Reis",
+   "region": "Río de Janeiro",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 618
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 618,
+     "total": 1235,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 367,
+      "bus": 0,
+      "alojamiento": 278,
+      "comidas": 322,
+      "local": 56,
+      "traslados": 212,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ilha",
+   "nombre": "Ilha Grande",
+   "region": "Río de Janeiro",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 717
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 717,
+     "total": 1434,
+     "dur": "unas 6 h con escala",
+     "parts": {
+      "pasajes": 367,
+      "bus": 0,
+      "alojamiento": 446,
+      "comidas": 392,
+      "local": 56,
+      "traslados": 173,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "porto",
+   "nombre": "Porto de Galinhas",
+   "region": "Pernambuco",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 722
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 722,
+     "total": 1443,
+     "dur": "unas 8 h con escala",
+     "parts": {
+      "pasajes": 840,
+      "bus": 0,
+      "alojamiento": 218,
+      "comidas": 308,
+      "local": 42,
+      "traslados": 35,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "for",
+   "nombre": "Fortaleza",
+   "region": "Ceará",
+   "dep": "2027-03-24",
+   "ret": "2027-03-31",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 733
+   },
+   "vuelo": "real",
+   "hotel": "estimado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 733,
+     "total": 1466,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 830,
+      "bus": 0,
+      "alojamiento": 193,
+      "comidas": 364,
+      "local": 56,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "rec",
+   "nombre": "Recife",
+   "region": "Pernambuco",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 747
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 747,
+     "total": 1494,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 840,
+      "bus": 0,
+      "alojamiento": 239,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ubatuba",
+   "nombre": "Ubatuba",
+   "region": "São Paulo",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 754
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 754,
+     "total": 1508,
+     "dur": "unas 7 h con escala",
+     "parts": {
+      "pasajes": 809,
+      "bus": 0,
+      "alojamiento": 171,
+      "comidas": 350,
+      "local": 70,
+      "traslados": 108,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "pip",
+   "nombre": "Pipa",
+   "region": "Río Grande do Norte",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 763
+   },
+   "vuelo": "real",
+   "hotel": "estimado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 763,
+     "total": 1525,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 1011,
+      "bus": 0,
+      "alojamiento": 210,
+      "comidas": 238,
+      "local": 42,
+      "traslados": 24,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ssa",
+   "nombre": "Salvador de Bahía",
+   "region": "Bahía",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 778
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 778,
+     "total": 1555,
+     "dur": "unas 8 h con escala",
+     "parts": {
+      "pasajes": 947,
+      "bus": 0,
+      "alojamiento": 165,
+      "comidas": 350,
+      "local": 70,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "morro",
+   "nombre": "Morro de São Paulo",
+   "region": "Bahía",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 782
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 782,
+     "total": 1563,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 947,
+      "bus": 0,
+      "alojamiento": 264,
+      "comidas": 266,
+      "local": 14,
+      "traslados": 72,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ajuda",
+   "nombre": "Arraial d’Ajuda",
+   "region": "Bahía",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 787
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 787,
+     "total": 1574,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 947,
+      "bus": 0,
+      "alojamiento": 214,
+      "comidas": 266,
+      "local": 56,
+      "traslados": 91,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "sao",
+   "nombre": "São Paulo",
+   "region": "São Paulo",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 788
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 788,
+     "total": 1576,
+     "dur": "unas 3 h de vuelo",
+     "parts": {
+      "pasajes": 809,
+      "bus": 0,
+      "alojamiento": 189,
+      "comidas": 490,
+      "local": 56,
+      "traslados": 32,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "ilhabela",
+   "nombre": "Ilhabela",
+   "region": "São Paulo",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 790
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 790,
+     "total": 1580,
+     "dur": "unas 7 h con escala",
+     "parts": {
+      "pasajes": 809,
+      "bus": 0,
+      "alojamiento": 225,
+      "comidas": 336,
+      "local": 112,
+      "traslados": 98,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "nat",
+   "nombre": "Natal",
+   "region": "Río Grande do Norte",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 817
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 817,
+     "total": 1633,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 1011,
+      "bus": 0,
+      "alojamiento": 179,
+      "comidas": 364,
+      "local": 56,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "forte",
+   "nombre": "Praia do Forte",
+   "region": "Bahía",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 837
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 837,
+     "total": 1674,
+     "dur": "unas 8 h con escala",
+     "parts": {
+      "pasajes": 947,
+      "bus": 0,
+      "alojamiento": 381,
+      "comidas": 266,
+      "local": 42,
+      "traslados": 38,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "jericoacoara",
+   "nombre": "Jericoacoara",
+   "region": "Ceará",
+   "dep": "2027-03-24",
+   "ret": "2027-03-31",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 852
+   },
+   "vuelo": "real",
+   "hotel": "estimado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 852,
+     "total": 1704,
+     "dur": "unas 10 h con escala",
+     "parts": {
+      "pasajes": 830,
+      "bus": 0,
+      "alojamiento": 220,
+      "comidas": 448,
+      "local": 56,
+      "traslados": 150,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "maragogi",
+   "nombre": "Maragogi",
+   "region": "Alagoas",
+   "dep": "2027-03-15",
+   "ret": "2027-03-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 896
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 896,
+     "total": 1792,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1099,
+      "bus": 0,
+      "alojamiento": 230,
+      "comidas": 336,
+      "local": 56,
+      "traslados": 71,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "joaopessoa",
+   "nombre": "João Pessoa",
+   "region": "Paraíba",
+   "dep": "2027-03-10",
+   "ret": "2027-03-17",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 900
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 900,
+     "total": 1799,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1155,
+      "bus": 0,
+      "alojamiento": 201,
+      "comidas": 364,
+      "local": 56,
+      "traslados": 23,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "mcz",
+   "nombre": "Maceió",
+   "region": "Alagoas",
+   "dep": "2027-03-15",
+   "ret": "2027-03-22",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 905
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 905,
+     "total": 1810,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 1099,
+      "bus": 0,
+      "alojamiento": 257,
+      "comidas": 350,
+      "local": 42,
+      "traslados": 62,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "portoseguro",
+   "nombre": "Porto Seguro",
+   "region": "Bahía",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 916
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 916,
+     "total": 1831,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 947,
+      "bus": 0,
+      "alojamiento": 181,
+      "comidas": 462,
+      "local": 56,
+      "traslados": 185,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "trancoso",
+   "nombre": "Trancoso",
+   "region": "Bahía",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 938
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 938,
+     "total": 1876,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 947,
+      "bus": 0,
+      "alojamiento": 240,
+      "comidas": 532,
+      "local": 70,
+      "traslados": 87,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "itacare",
+   "nombre": "Itacaré",
+   "region": "Bahía",
+   "dep": "2027-03-02",
+   "ret": "2027-03-09",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 979
+   },
+   "vuelo": "real",
+   "hotel": "calibrado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 979,
+     "total": 1958,
+     "dur": "unas 9 h con escala",
+     "parts": {
+      "pasajes": 947,
+      "bus": 0,
+      "alojamiento": 312,
+      "comidas": 448,
+      "local": 70,
+      "traslados": 181,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  },
+  {
+   "clave": "fernando",
+   "nombre": "Fernando de Noronha",
+   "region": "Pernambuco",
+   "dep": "2027-03-23",
+   "ret": "2027-03-30",
+   "masBarato": {
+    "modo": "avion_mvd",
+    "pp": 1425
+   },
+   "vuelo": "real",
+   "hotel": "estimado",
+   "porMedio": {
+    "avion_mvd": {
+     "pp": 1425,
+     "total": 2849,
+     "dur": "unas 11 h con escala",
+     "parts": {
+      "pasajes": 1471,
+      "bus": 0,
+      "alojamiento": 549,
+      "comidas": 700,
+      "local": 56,
+      "traslados": 73,
+      "auto": 0,
+      "tours": 0
+     },
+     "vueloReal": true
+    }
+   }
+  }
+ ]
+}

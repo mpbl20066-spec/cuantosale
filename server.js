@@ -34,6 +34,7 @@ const guiSecreta = require('./lib/guias');
 const playas = require('./lib/playas');
 const mareas = require('./lib/mareas');
 const destinosWeb = require('./lib/destinos-web');
+const blog = require('./lib/blog');
 // Vuelos reales. El agregador es el único que habla con SerpAPI: ahí viven el
 // cache, el dedupe de pedidos simultáneos y la pausa cuando se acaban los
 // créditos del mes. Si el server llamara al provider directo, cada endpoint
@@ -2922,7 +2923,10 @@ async function featuredPriceItemsSinCatch(req, res, url) {
          medio recomendado (public/web/recomendar.js) y no siempre el mas barato, que con varias personas era el auto
          aunque fueran 17 h de manejo. */
       const porMedio = {};
-      if (transport === 'all') propuestas.forEach(function (p) { if (!porMedio[p.mode]) porMedio[p.mode] = { mode: p.mode, pp: p.pp, total: p.total, dur: p.dur || '' }; });
+      /* desglose=1 suma el detalle por rubro (pasajes, alojamiento, comidas...) de cada medio: lo usa el generador de
+         las notas del blog (scripts/blog-datos.js) para escribir con los mismos numeros que las guias. */
+      const desglose = url.searchParams.get('desglose') === '1';
+      if (transport === 'all') propuestas.forEach(function (p) { if (!porMedio[p.mode]) porMedio[p.mode] = Object.assign({ mode: p.mode, pp: p.pp, total: p.total, dur: p.dur || '' }, desglose ? { parts: p.parts, vueloReal: p.mode === 'avion_mvd' && !!ppReal } : {}); });
       return Object.assign({
         // dep/ret de vuelta: la guia pide varios meses del mismo destino y elige el mas barato por fecha, no por posicion.
         key: key, dep: p.dep, ret: p.ret, total: cheapest.total, pp: cheapest.pp, nights: nights,
@@ -3788,13 +3792,33 @@ function handleRequest(req, res) {
     // Viaje guardado: /viaje/<codigo> (id de trips en base64url) redirige al planificador con lo elegido (lib/viajes-guardados.js).
     const mViaje = /^\/viaje\/([A-Za-z0-9_-]{22})\/?$/.exec(url.pathname);
     if (mViaje && req.method === 'GET') return viajesGuardados.redirigir(req, res, mViaje[1]);
-    if (url.pathname === '/sitemap.xml' && indexarGuias()) {
+    /* El sitemap fijo mas lo que cambia solo: /guias con INDEXAR_GUIAS=1 y el blog (cada nota de data/blog). */
+    if (url.pathname === '/sitemap.xml') {
       try {
         return serveStatic(req, res, '/sitemap.xml', function (data) {
-          const extra = '  <url>\n    <loc>https://cuantosale.uy/guias</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n';
+          const extra = (indexarGuias() ? '  <url>\n    <loc>https://cuantosale.uy/guias</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n' : '') + blog.urlsSitemap();
           return Buffer.from(data.toString('utf8').replace('</urlset>', extra + '</urlset>'), 'utf8');
         });
       } catch (e) { res.writeHead(400); return res.end(); }
+    }
+    // Blog (lib/blog.js): /blog y /blog/<slug>, HTML armado en el server como las guias de destino.
+    const mBlog = /^\/blog(?:\/([a-z0-9-]+))?\/?$/.exec(url.pathname);
+    if (mBlog && (req.method === 'GET' || req.method === 'HEAD')) {
+      let html = null;
+      try { html = mBlog[1] ? blog.pagina(mBlog[1]) : blog.indice(); } catch (e) { console.error('[blog]', e.message); res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('Error'); }
+      if (!html) return noEncontrado(req, res, url.pathname);
+      const cabeceras = {
+        'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': CSP,
+        'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
+        'Cache-Control': 'public, max-age=0, must-revalidate, s-maxage=3600, stale-while-revalidate=86400', 'Vary': 'Accept-Encoding'
+      };
+      const cuerpo = injectAnalytics(Buffer.from(versionarAssets(html), 'utf8'), '.html');
+      const ae = String(req.headers['accept-encoding'] || '');
+      const enc = /\bbr\b/.test(ae) ? 'br' : (ae.indexOf('gzip') >= 0 ? 'gzip' : null);
+      if (!enc || req.method === 'HEAD') { res.writeHead(200, cabeceras); return res.end(req.method === 'HEAD' ? undefined : cuerpo); }
+      return comprimido(enc, 'blog:' + (mBlog[1] || ''), 0, cuerpo, true).then(function (buf) {
+        cabeceras['Content-Encoding'] = enc; res.writeHead(200, cabeceras); res.end(buf);
+      }, function () { res.writeHead(200, cabeceras); res.end(cuerpo); });
     }
     // Paginas publicas por destino para Google (lib/destinos-web.js).
     const mDestino = /^\/destino\/([a-z0-9-]+)\/?$/.exec(url.pathname);
