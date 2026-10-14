@@ -3416,7 +3416,6 @@ var HOTEL_NOTA_MINIMA = 8;
     { id: 'transferencia', label: 'Transferencia bancaria', title: 'Transferencia bancaria', detail: 'Locales y cuentas habilitadas', icon: '<path d="M3 10 12 4l9 6M5 10v8m4-8v8m6-8v8m4-8v8M3 20h18"/>' },
     { id: 'prex', label: 'Prex', title: 'Prex', detail: 'Transferencia a nuestra cuenta Prex', icon: '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M7 12h10M13 9l3 3-3 3"/>' },
     { id: 'pix', label: 'Pix', title: 'Pix', detail: 'Pago inmediato', icon: '<path d="M13 3 5 13.5h6L10 21l9-11.5h-6z"/>' },
-    { id: 'abitab', label: 'Abitab / Redpagos', title: 'Abitab / Redpagos', detail: 'Depósito en efectivo', icon: '<path d="M4 9h16v10H4zM4 9l8-5 8 5"/><circle cx="12" cy="14" r="2"/>' },
     { id: 'tarjeta', label: 'Tarjeta de crédito (link de Mercado Pago, +5 %)', title: 'Tarjeta de crédito', detail: 'Te mandamos un link de Mercado Pago · 5 % de recargo', icon: '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/>' }
   ];
   /* Para reservar se pide una sena cuando el proveedor confirma, nunca antes: el 50 %

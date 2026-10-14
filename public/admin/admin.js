@@ -657,20 +657,19 @@
      datos para pagar. Lo usan el pedido de sena y el de saldo. */
   function lineasPago(monto, m) {
     var dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {}, conTarjeta = r2(monto * (1 + recargoTarjeta())), L = [];
-    var sinRecargo = ['Transferencia', dp.transferencia, 'Prex', dp.prex, 'Pix', dp.pix, 'Abitab', dp.abitab_redpagos].filter(function (x, i, a) { return i % 2 === 0 && a[i + 1]; });
+    var sinRecargo = ['Transferencia', dp.transferencia, 'Prex', dp.prex, 'Pix', dp.pix].filter(function (x, i, a) { return i % 2 === 0 && a[i + 1]; });
     if (sinRecargo.length) L.push('*' + plata(monto, m) + '* por ' + sinRecargo.join(', ').replace(/, ([^,]*)$/, ' o $1') + ' (sin recargo)');
     L.push('*' + plata(conTarjeta, m) + '* por Mercado Pago con tarjeta (' + Math.round(recargoTarjeta() * 100) + ' % de recargo)', '', '*Datos para pagar:*');
     if (dp.transferencia) L.push('- Transferencia bancaria: ' + dp.transferencia);
     if (dp.prex) L.push('- Prex: ' + dp.prex);
     if (dp.pix) L.push('- Pix: ' + dp.pix);
-    if (dp.abitab_redpagos) L.push('- Abitab: ' + dp.abitab_redpagos);
     L.push('- Mercado Pago: te mandamos el link de pago por ' + plata(conTarjeta, m) + '.');
     return L;
   }
   /* Lo mismo en una linea, para la variable de la plantilla (Meta no deja saltos de linea). */
   function formasLinea(monto, m) {
     var dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
-    return [dp.transferencia && 'transferencia ' + dp.transferencia, dp.prex && 'Prex ' + dp.prex, dp.pix && 'Pix ' + dp.pix, dp.abitab_redpagos && 'Abitab ' + dp.abitab_redpagos,
+    return [dp.transferencia && 'transferencia ' + dp.transferencia, dp.prex && 'Prex ' + dp.prex, dp.pix && 'Pix ' + dp.pix,
       'Mercado Pago con tarjeta por ' + plata(r2(monto * (1 + recargoTarjeta())), m) + ' (solo este medio tiene ' + Math.round(recargoTarjeta() * 100) + ' % de recargo)'].filter(Boolean).join('; ');
   }
   function mensajeSena(p) {
@@ -812,7 +811,7 @@
   }
   function mediosSinRecargo() {
     var dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
-    return ['Transferencia', dp.transferencia, 'Prex', dp.prex, 'Pix', dp.pix, 'Abitab', dp.abitab_redpagos].filter(function (x, i, a) { return i % 2 === 0 && a[i + 1]; }).join(', ').replace(/, ([^,]*)$/, ' o $1');
+    return ['Transferencia', dp.transferencia, 'Prex', dp.prex, 'Pix', dp.pix].filter(function (x, i, a) { return i % 2 === 0 && a[i + 1]; }).join(', ').replace(/, ([^,]*)$/, ' o $1');
   }
   /* El recuadro de "Proximo paso": la misma regla que el boton de la lista (proximoPaso). */
   function pasoHtml(p) {
@@ -831,7 +830,7 @@
           '<a href="#" class="btn btn--lg" data-wa-enviar="' + x.wa + '" data-wa-pedido="' + esc(p.id) + '">' + ICONO_WA + 'Reenviar</a>';
       }
       if (m !== 'USD' && enMoneda(1, m) === null) aviso = '<p class="sub">' + (S.tasas && S.tasas.error ? 'No se pudo traer la cotización: el monto queda en dólares.' : 'Cargando cotización…') + '</p>';
-      if (!medios) aviso += '<p class="aviso">Faltan tus datos para cobrar: cargá PAGO_PREX, PAGO_PIX y PAGO_ABITAB_REDPAGOS (Abitab) en las variables de Vercel. Mientras tanto el mensaje solo ofrece tarjeta.</p>';
+      if (!medios) aviso += '<p class="aviso">Faltan tus datos para cobrar: cargá PAGO_PREX y PAGO_PIX en las variables de Vercel. Mientras tanto el mensaje solo ofrece tarjeta.</p>';
     } else if (/^Asignar/.test(x.t)) {
       cuerpo = '<b class="paso__t">Asignar proveedor a cada servicio</b><span class="sub">Elegilo abajo, en cada servicio, y consultale la disponibilidad por WhatsApp.</span>';
     } else if (x.t === 'Confirmar con proveedor') {
@@ -890,7 +889,7 @@
     var f = function (campo, tipo, extra) { return 'data-p="' + i + '" data-f="' + campo + '"' + (tipo ? ' type="' + tipo + '"' : '') + (extra || ''); };
     return '<div class="pagoRow"><input ' + f('fecha', 'date') + ' value="' + esc(pg.fecha) + '" aria-label="Fecha">' +
       '<input ' + f('monto_usd', 'number', ' min="0" step="0.01" inputmode="decimal"' + (pg.reembolso ? ' style="color:var(--bad)" title="Reembolso: se resta de lo cobrado"' : '')) + ' value="' + (pg.monto_usd || '') + '" placeholder="' + (pg.reembolso ? 'Reembolso US$' : 'US$') + '" aria-label="' + (pg.reembolso ? 'Reembolso' : 'Monto') + ' en US$">' +
-      '<input ' + f('medio') + ' value="' + esc(pg.medio) + '" placeholder="Medio (Prex, Pix, Abitab…)" aria-label="Medio">' +
+      '<input ' + f('medio') + ' value="' + esc(pg.medio) + '" placeholder="Medio (Prex, Pix, Mercado Pago…)" aria-label="Medio">' +
       '<input ' + f('nota') + ' value="' + esc(pg.nota) + '" placeholder="Nota" aria-label="Nota">' +
       '<button type="button" class="btn btn--sm btn--danger btn--x" data-quitar-pago="' + i + '" aria-label="Quitar cobro">✕</button></div>';
   }
