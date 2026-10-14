@@ -246,10 +246,16 @@
      US$ 10), con las fechas del viaje tipo de esta guia (el mes mas barato, 7 noches, 2 personas). Se ofrece al
      guardar el destino: quien lo guarda esta mirando el precio. Sin sesion abre el login y se crea al entrar. */
   var AL = { estado: '', error: '', precio: 0, email: '', pendiente: false };
+  /* /guia?alerta=1 llega del bloque "¿Te avisamos si baja?" de la pagina publica /destino/<slug>: el aviso se muestra
+     sin tener que guardar el destino. Y quien toco "Avisame si baja" sin sesion sigue pendiente aunque el login de
+     Google recargue la pagina (sessionStorage): al volver con la sesion, la alerta se crea sola. */
+  var PIDE_ALERTA = qs.get('alerta') === '1';
+  try { if (sessionStorage.getItem('cs_alerta_pend') === K) AL.pendiente = true; } catch (e) { /* modo privado */ }
+  var pendienteAlerta = function (on) { AL.pendiente = on; try { if (on) sessionStorage.setItem('cs_alerta_pend', K); else sessionStorage.removeItem('cs_alerta_pend'); } catch (e) { /* modo privado */ } };
   var fcorta = function (d) { var q = String(d || '').split('-'); return q.length < 3 ? '' : +q[2] + '/' + +q[1]; };
   function alertaHtml() {
     var e = S.est;
-    if (!esFav() || !e || !e.dep || !e.ret || !(e.precio && e.precio.mode === 'avion_mvd')) return '';
+    if (!(esFav() || PIDE_ALERTA || AL.pendiente || AL.estado) || !e || !e.dep || !e.ret || !(e.precio && e.precio.mode === 'avion_mvd')) return '';
     var campana = '<svg class="cs-keep" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a1.9 1.9 0 0 0 3.4 0"/></svg>';
     var fechas = fcorta(e.dep) + ' al ' + fcorta(e.ret);
     if (AL.estado === 'ok') return campana + '<div><b>Te avisamos si baja</b><p>Seguimos el vuelo del ' + fechas + ' para 2 personas' + (AL.precio ? ' (hoy ' + usd(AL.precio) + ' en total)' : '') + '. Si baja, te escribimos' + (AL.email ? ' a ' + esc(AL.email) : '') + '.</p><button type="button" class="u-alerta__link" data-alerta-ver>Ver mis alertas</button></div>';
@@ -261,8 +267,8 @@
   function crearAlerta() {
     var u = window.CSCuenta && CSCuenta.usuario && CSCuenta.usuario(), e = S.est;
     if (!e) return;
-    if (!u) { AL.pendiente = true; track('guia_alerta_login'); if (window.CSCuenta) CSCuenta.abrir('login'); return; }
-    AL.pendiente = false; AL.estado = 'enviando'; AL.error = ''; pintarAlerta();
+    if (!u) { pendienteAlerta(true); track('guia_alerta_login'); if (window.CSCuenta) CSCuenta.abrir('login'); return; }
+    pendienteAlerta(false); AL.estado = 'enviando'; AL.error = ''; pintarAlerta();
     CSCuenta.token().then(function (tk) {
       return fetch('/api/alertas', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tk },
         body: JSON.stringify({ destino: K, fecha_ida: e.dep, fecha_vuelta: e.ret, pasajeros: 2 }) });
@@ -361,6 +367,7 @@
       var el = $('u-datos'); if (el) el.innerHTML = resumenPractico();
       var pr = $('u-precio'); if (pr) pr.innerHTML = precioPortada();
       pintarAlerta();
+      if (AL.pendiente && window.CSCuenta && CSCuenta.usuario && CSCuenta.usuario()) crearAlerta();
       /* Con el estimado ya se sabe el medio (avion, auto, bus): los links lo suman y la app no lo vuelve a preguntar. */
       document.querySelectorAll('a[href^="home-destino.html"]').forEach(function (a) { a.href = aPresupuesto(new URLSearchParams(a.getAttribute('href').split('?')[1]).get('fuente') || 'guia'); });
     });
@@ -623,5 +630,6 @@
 <script src="cuenta.js"></script>
 <script src="cabecera.js"></script>
 <script defer src="/creditos-fotos.generated.js"></script>
+<script src="wa-flotante.js" defer></script>
 </body>
 </html>
