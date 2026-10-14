@@ -1377,7 +1377,7 @@ window.CS_MKT = {
   "Respondé cada comentario y mensaje (Instagram y TikTok) en menos de 2 horas, aunque sea con una pregunta.",
   "Mirá Pedidos y WhatsApp en el panel: todo pedido nuevo se responde el mismo día.",
   "En cada conversación nueva de WhatsApp, /origen (\"¿cómo nos conociste?\") y anotalo.",
-  "10 minutos: comentá algo útil (con un dato) en 5 publicaciones de cuentas de viajes uruguayas.",
+  "10 minutos: comentá algo útil (con un dato) en 5 publicaciones de cuentas de viajes uruguayas (cuáles y cómo encontrarlas: Perfil y mensajes > Cuentas para mirar).",
   "Si alguien pregunta algo que se repite, anotalo en la nota de la semana."
  ],
  "colabs": {
@@ -1389,6 +1389,14 @@ window.CS_MKT = {
    "- **Enlace de la bio:** https://cuantosale.uy/?utm_source=instagram",
    "- **Enlace de TikTok:** https://cuantosale.uy/?utm_source=tiktok",
    "- **Destacadas:** Cómo funciona · Reservas (nueva) · Destinos · Preguntas · Nosotros. Sacá \"Ahorra\" si no tiene historias nuevas.",
+   "## Cuentas para mirar (los 10 minutos de comentarios)",
+   "- **Para empezar (encontradas el 14/10/2026; fijate que sigan publicando):** @uruguayosinfronteras (blog de viajes uruguayo, en Instagram y TikTok) y @viajero.conmochila (viajero uruguayo).",
+   "- **Las duplas de \"Viví el camino\":** Rio Grande do Sul elige en octubre 5 duplas de creadores uruguayos y argentinos que recorren el sur de Brasil en noviembre (vivaors.com.br). Cuando salgan los nombres, seguilas: van a publicar de Brasil todo el mes, y las uruguayas sirven también como creadoras para contactar.",
+   "- **Para sumar más:** buscá #uruguayosporelmundo, #viajerosuruguayos, #uruguayviaja o #mochilerosuruguayos, y \"viajes uruguay\" o el destino junto con \"uruguay\" (por ejemplo \"Florianópolis uruguay\"). Cuando seguís una, mirá las cuentas que te sugiere Instagram.",
+   "- **También sirven:** las secciones de viajes de los diarios uruguayos y las aerolíneas que vuelan desde Montevideo. En los comentarios hay gente planeando un viaje.",
+   "- **No:** agencias de viaje (son competencia) ni cuentas gigantes de más de 500.000 seguidores (tu comentario se pierde entre miles).",
+   "- **Armá la lista una sola vez:** 15 a 20 cuentas que publiquen seguido. Seguilas y agregalas a Favoritos en Instagram, así cada día ves sus publicaciones nuevas sin buscar.",
+   "- **El comentario:** un dato que sirva sobre lo que muestra la publicación, sacado de tus guías o del catálogo. Sin links, sin \"escribinos\" y sin promocionarte.",
    "## Creadores: a quién buscar",
    "- Cuentas uruguayas de viajes o de lifestyle que viajan a Brasil, entre 3.000 y 50.000 seguidores, que respondan comentarios y que hayan publicado de Brasil en el último año.",
    "- Búsquedas en Instagram y TikTok: \"viajes uruguay\", \"uruguaya viajando\", \"Florianópolis tips\", \"Nordeste brasileño\", \"viajar barato uruguay\".",
