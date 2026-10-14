@@ -3171,17 +3171,32 @@ const OCULTAR_DESARROLLO = !!process.env.VERCEL && process.env.DEV_FILES !== '1'
 function esArchivoDeDesarrollo(rel) {
   return rel.split('/').some(function (seg) { return seg.charAt(0) === '_'; });
 }
+// 404 con la marca para las paginas (sin extension o .html) y texto plano para lo demas: un CSS, una foto o un JS que
+// falta no tiene que bajar una pagina entera. public/404.html se lee una vez por instancia.
+let pagina404 = null;
+function noEncontrado(req, res, rel) {
+  const ext = path.extname(String(rel || '')).toLowerCase();
+  if (ext === '' || ext === '.html') {
+    if (pagina404 === null) { try { pagina404 = fs.readFileSync(path.join(PUBLIC_DIR, '404.html')); } catch (e) { pagina404 = false; } }
+    if (pagina404) {
+      res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': CSP, 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'Cache-Control': 'no-cache' });
+      return res.end(req.method === 'HEAD' ? undefined : pagina404);
+    }
+  }
+  res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+  return res.end('No encontrado');
+}
 function serveStatic(req, res, pathname, transform) {
   let rel = decodeURIComponent(pathname);
   if (rel === '/') rel = '/index.html';
-  if (OCULTAR_DESARROLLO && esArchivoDeDesarrollo(rel)) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
+  if (OCULTAR_DESARROLLO && esArchivoDeDesarrollo(rel)) { return noEncontrado(req, res, rel); }
   if (checkPrelaunchAccess(req, res, rel)) return;
   const file = path.normalize(path.join(PUBLIC_DIR, rel));
   if (file !== PUBLIC_DIR && file.indexOf(PUBLIC_DIR + path.sep) !== 0) { res.writeHead(403); return res.end('Prohibido'); }
   fs.stat(file, function (statErr, stat) {
-    if (statErr) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
+    if (statErr) { return noEncontrado(req, res, rel); }
     fs.readFile(file, function (err, data) {
-      if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
+      if (err) { return noEncontrado(req, res, rel); }
     const ext = path.extname(file);
     // Las vistas previas se nombran con _ y son de desarrollo: no entran al
     //Analytics, asi que no mandan datos de una pagina que no existe.
@@ -3771,7 +3786,7 @@ function handleRequest(req, res) {
     const mDestino = /^\/destino\/([a-z0-9-]+)\/?$/.exec(url.pathname);
     if (mDestino) {
       return destinosWeb.pagina(mDestino[1]).then(function (html) {
-      if (!html) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('No encontrado'); }
+      if (!html) { return noEncontrado(req, res, url.pathname); }
       const cabeceras = {
         'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': CSP,
         'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',

@@ -139,7 +139,7 @@ privado    = 12 + 0,62 * km      (por vehículo, con piso de 1,6x el compartido)
 
 El compartido casi no crece con la distancia, y los datos lo confirman: entre GIG→Río (18 km, US$ 22) y GIG→Búzios (174 km, US$ 29) hay 156 km de diferencia y 7 dólares de precio. Lo que se paga es el chofer y el vehículo, que se reparten entre los pasajeros. **El 94% de la tabla sigue siendo estimación y está marcado como tal**: `confianza: 'baja'` con la derivación escrita en la fila. Para mostrar un precio como real, tiene que haber un precio real.
 
-**Un bug de código de aeropuerto que salió en el camino.** `AIR_DESTINATIONS` en `server.js` dice que `fernando` llega por **NVT**. NVT es el aeropuerto de Navegantes, en Santa Catarina, a 2.900 km de la isla; el código de Fernando de Noronha es **FEN**. Es el mismo tipo de error que el README documenta para `RIO` y `SAO`. La tabla de transfer usa FEN y hay un test que lo fija, pero **el arreglo en `AIR_DESTINATIONS` está pendiente**: la búsqueda de vuelos a Fernando de Noronha sigue apuntando a Santa Catarina.
+**Un bug de código de aeropuerto que salió en el camino (ya corregido).** `AIR_DESTINATIONS` en `server.js` decía que `fernando` llegaba por **NVT**, el aeropuerto de Navegantes, en Santa Catarina, a 2.900 km de la isla. El código de Fernando de Noronha es **FEN**. Es el mismo tipo de error que el README documenta para `RIO` y `SAO`. Ya apunta a FEN, igual que la tabla de transfer, que tiene un test que lo fija.
 
 **Destinos sin carretera.** `ilha` (ferry desde Río o Angra) y `fernando` (vuelo desde REC) llevan un `modo` que no es `car`, y la UI no les ofrece una van. Antes se les ofrecía igual que a Río, que no existe. `soloPrivado` marca los que no tienen traslado compartido.
 
