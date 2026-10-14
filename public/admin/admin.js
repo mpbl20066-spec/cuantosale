@@ -562,8 +562,9 @@
     if (dp.transferencia) L.push('- Transferencia bancaria: ' + dp.transferencia);
     if (dp.prex) L.push('- Prex: ' + dp.prex);
     if (dp.pix) L.push('- Pix: ' + dp.pix);
-    if (dp.abitab_redpagos) L.push('- Abitab / Redpagos: ' + dp.abitab_redpagos);
-    L.push('- Tarjeta de crédito: te mandamos un link de Mercado Pago por ' + plata(conTarjeta, m) + ' (incluye ' + Math.round(recargoTarjeta() * 100) + ' % de recargo).');
+    if (dp.abitab_redpagos) L.push('- Abitab: ' + dp.abitab_redpagos);
+    var sinRecargo = dp.transferencia || dp.prex || dp.pix || dp.abitab_redpagos;
+    L.push('- Mercado Pago (tarjeta de crédito): te mandamos un link por ' + plata(conTarjeta, m) + '. Es el único medio con recargo: Mercado Pago cobra ' + Math.round(recargoTarjeta() * 100) + ' %' + (sinRecargo ? ', los demás son sin recargo.' : '.'));
     L.push('', 'Cuando pagues, mandanos el comprobante por acá. El resto se abona antes del viaje.', 'Ref: ' + (p.ref || ''));
     return L.join('\n');
   }
@@ -582,8 +583,8 @@
     if (tipo === 'confirmacion') return { texto: mensajeConfirmacion(p), params: [nombre, [p.destino, fechas, personas].filter(Boolean).join(' · '), items.map(function (x) { return x.nombre + (x.detalle ? ' (' + x.detalle + ')' : ''); }).join('; '), usd(calc(p).total), p.ref] };
     if (tipo === 'sena') {
       var c = calc(p), m = S.senaMoneda, dp = (S.datos && S.datos.pago && S.datos.pago.datos) || {};
-      var formas = [dp.transferencia && 'transferencia ' + dp.transferencia, dp.prex && 'Prex ' + dp.prex, dp.pix && 'Pix ' + dp.pix, dp.abitab_redpagos && 'Abitab/Redpagos ' + dp.abitab_redpagos,
-        'tarjeta de crédito con link de Mercado Pago por ' + plata(r2(c.senaPend * (1 + recargoTarjeta())), m)].filter(Boolean).join('; ');
+      var formas = [dp.transferencia && 'transferencia ' + dp.transferencia, dp.prex && 'Prex ' + dp.prex, dp.pix && 'Pix ' + dp.pix, dp.abitab_redpagos && 'Abitab ' + dp.abitab_redpagos,
+        'Mercado Pago con tarjeta por ' + plata(r2(c.senaPend * (1 + recargoTarjeta())), m) + ' (solo este medio tiene ' + Math.round(recargoTarjeta() * 100) + ' % de recargo)'].filter(Boolean).join('; ');
       return { texto: mensajeSena(p), params: [nombre, p.destino || 'Brasil', plata(c.senaPend, m), formas, p.ref] };
     }
     if (tipo === 'saludo') return { texto: 'Hola ' + nombre + '! Te escribimos de CuántoSale por tu pedido ' + p.ref + '.', params: [nombre, p.ref] };
@@ -617,7 +618,7 @@
         '<button type="button" class="btn btn--sm" data-act="registrar-sena">Registrar seña cobrada</button></div>' : '') +
       (c.senaPend && p.estado !== 'confirmado' ? '<p class="sub" style="margin-top:8px">Pedila cuando el proveedor confirme (estado "Confirmado").</p>' : '') +
       (sinTasa ? '<p class="sub">' + (S.tasas && S.tasas.error ? 'No se pudo traer la cotización: el monto queda en dólares.' : 'Cargando cotización…') + '</p>' : '') +
-      (faltan && c.senaPend ? '<p class="aviso">Faltan tus datos para cobrar: cargá PAGO_TRANSFERENCIA, PAGO_PREX, PAGO_PIX y PAGO_ABITAB_REDPAGOS en las variables de Vercel. Mientras tanto el mensaje solo ofrece tarjeta.</p>' : '');
+      (faltan && c.senaPend ? '<p class="aviso">Faltan tus datos para cobrar: cargá PAGO_PREX, PAGO_PIX y PAGO_ABITAB_REDPAGOS (Abitab) en las variables de Vercel. Mientras tanto el mensaje solo ofrece tarjeta.</p>' : '');
   }
   function itemHtml(it, i) {
     var pr = S.datos.proveedores.filter(function (x) { return x.id === it.proveedor_id; })[0];
