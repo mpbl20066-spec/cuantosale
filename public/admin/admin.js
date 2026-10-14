@@ -493,25 +493,29 @@
     cargarChats(); if (S.vista === 'mensajes' && S.chatTel) cargarConv(false);
   }
   setInterval(revisarChats, 15000);
-  /* Pedidos nuevos y cambios sin recargar: cada 30 s en la lista de pedidos. No se repinta mientras se escribe
+  /* Pedidos nuevos y cambios sin recargar: cada 20 s en la lista de pedidos. No se repinta mientras se escribe
      (perderia el foco) ni con cambios sin guardar; la ficha abierta no se toca. */
   function recargarPedidos() {
     if (!S.datos || document.hidden || S.vista !== 'pedidos' || S.dirty || S.cargandoDatos) return;
-    var a = document.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+    /* Solo se espera si se esta escribiendo (ultima tecla hace menos de 5 s): un filtro (select) se queda con el foco
+       despues de elegir y antes eso frenaba la actualizacion para siempre. El buscador recupera el foco al repintar. */
+    if (Date.now() - (S.ultTecla || 0) < 5000) return;
     S.cargandoDatos = true;
     api('datos').then(function (d) {
       S.cargandoDatos = false;
       if (S.dirty || S.vista !== 'pedidos') return;
       /* Los WhatsApp recien mandados que el server todavia no guardo en el historial siguen contando. */
       (d.pedidos || []).forEach(function (p) { var loc = S.waLocal && S.waLocal[p.id]; if (loc && !(p.historial || []).length) p.historial = loc.slice(); });
-      S.datos = d; pintarFondo();
+      var foco = document.activeElement && document.activeElement.id; S.datos = d; pintarFondo();
+      if (foco) { var el = document.getElementById(foco); if (el && el.focus) el.focus(); }   // el buscador o un filtro siguen con el foco
     }).catch(function () { S.cargandoDatos = false; });
   }
-  setInterval(recargarPedidos, 30000);
+  setInterval(recargarPedidos, 20000);
+  document.addEventListener('keydown', function () { S.ultTecla = Date.now(); }, true);
   /* Al volver al panel (otra pestaña, el celular bloqueado, la app en segundo plano) se revisa en el momento,
      sin esperar la proxima vuelta: en iPhone los timers de la app instalada se frenan en segundo plano. */
   document.addEventListener('visibilitychange', function () { if (!document.hidden) { revisarChats(); recargarPedidos(); } });
-  window.addEventListener('focus', function () { revisarChats(); });
+  window.addEventListener('focus', function () { revisarChats(); recargarPedidos(); });
 
   /* ---------- Notificaciones en este dispositivo (lib/push.js + /admin/sw.js) ----------
      En iPhone solo funcionan con el panel agregado a la pantalla de inicio (iOS 16.4 o mas nuevo). */
