@@ -421,7 +421,7 @@
   function cargarMkt() {
     S.mkt = { cargando: true };
     var datos = window.CS_MKT ? Promise.resolve() : new Promise(function (ok, mal) {
-      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=3'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
+      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=4'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
       document.head.appendChild(s);
     });
     Promise.all([datos, api('marketing'), api('uso?dias=90').catch(function () { return null; })]).then(function (r) {
@@ -434,14 +434,17 @@
     return api('marketing/guardar', cuerpo).then(function (r) { S.mkt.estado = r.estado; }).catch(function (e) { toast(e.message); });
   }
   function hechoMkt(id) { return !!(S.mkt && S.mkt.estado && S.mkt.estado.hechas[id]); }
-  /* Texto del plan: '## ' subtitulo, '- ' vinetas, '> ' recuadro, **negrita**. */
+  /* Texto del plan: '## ' subtitulo, '- ' vinetas ('- [id] ' con casilla de resuelto), '> ' recuadro, **negrita**. */
   function textoMkt(lineas) {
     var h = '', lista = false;
     var fmt = function (t) { return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); };
     (lineas || []).forEach(function (l) {
       var esLi = l.indexOf('- ') === 0;
       if (lista && !esLi) { h += '</ul>'; lista = false; }
-      if (esLi) { if (!lista) { h += '<ul class="mkt-ul">'; lista = true; } h += '<li>' + fmt(l.slice(2)) + '</li>'; }
+      var chk = esLi && /^- \[([a-z0-9-]+)\] /.exec(l);
+      if (esLi) { if (!lista) { h += '<ul class="mkt-ul">'; lista = true; } }
+      if (chk) h += '<li class="mkt-fix' + (hechoMkt(chk[1]) ? ' is-hecho' : '') + '"><label><input type="checkbox" data-mkt-hecho="' + chk[1] + '"' + (hechoMkt(chk[1]) ? ' checked' : '') + ' aria-label="Resuelto"><span>' + fmt(l.slice(chk[0].length)) + '</span></label></li>';
+      else if (esLi) h += '<li>' + fmt(l.slice(2)) + '</li>';
       else if (l.indexOf('## ') === 0) h += '<h4 class="mkt-h">' + fmt(l.slice(3)) + '</h4>';
       else if (l.indexOf('> ') === 0) h += '<p class="mkt-nota">' + fmt(l.slice(2)) + '</p>';
       else h += '<p>' + fmt(l) + '</p>';
