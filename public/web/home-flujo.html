@@ -3648,7 +3648,7 @@
     }
     else if (t.dataset.resumen) { S.resumenAbierto = !S.resumenAbierto; track('flujo_cs_ver_resumen', { abierto: S.resumenAbierto }); }
     else if (t.dataset.estado) { var ac = t.dataset.estado; if (ac === 'vuelo') { abrirVueloIr(); } else if (ac === 'aloj') { abrirAlojIr(); } else if (S.res[ac]) { S.confK = ac; ir(13, 'ver_confirmacion'); }
-    else if (S.sol && S.sol[ac]) { S.avisoCs = 'Tu asesor te va a confirmar por WhatsApp con un enlace. Cuando lo abras, vas a ver acá la reserva confirmada.'; render(false); }
+    else if (S.sol && S.sol[ac]) { S.avisoCs = 'Estamos confirmando la disponibilidad con el proveedor y te escribimos por WhatsApp. Cuando quede confirmada, la vas a ver acá.'; render(false); }
     else { reservar('cs:' + (ac === 'tras' ? 'traslado' : 'tours')); } return; }
     else if (t.dataset.booking) { abrirAlojIr(); return; }
     else if (t.dataset.seguro) { abrirSeguroIr(); return; }
