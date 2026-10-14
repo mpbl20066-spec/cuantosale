@@ -92,7 +92,7 @@
         kpi('A pagar a proveedores', usd(k.por_pagar_proveedores_usd), 'lo que les debemos', k.por_pagar_proveedores_usd ? 'kpi--warn' : '') +
         kpi('Margen', usd(k.margen_usd), k.sin_proveedor ? k.sin_proveedor + ' servicio(s) sin proveedor' : 'facturado − costo') + '</section>';
     }
-    html += S.vista.indexOf('mkt-') === 0 ? vistaMkt() : S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
+    html += S.vista.indexOf('mkt-') === 0 ? vistaMkt() : S.vista === 'usuarios' ? vistaUsuarios() : S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
       (S.vista === 'precarga' ? vistaPrecarga() : (S.vista === 'servicios' ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : (S.vista === 'importar' ? vistaImportar() : (S.vista === 'operaciones' ? vistaOperaciones() : vistaProveedores(d))))))))));
     html += '</div>';
     app.innerHTML = html;
@@ -105,9 +105,10 @@
      recuerda la ultima pantalla abierta. */
   var GRUPOS = [
     { t: 'Pedidos', vistas: [['pedidos', 'Pedidos']] },
+    { t: 'Clientes', vistas: [['usuarios', 'Usuarios'], ['viajes', 'Viajes guardados']] },
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
     { t: 'Catálogo', vistas: [['servicios', 'Servicios'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
-    { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso'], ['viajes', 'Viajes guardados']] },
+    { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso']] },
     { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-estrategia', 'Estrategia'], ['mkt-colabs', 'Perfil y mensajes']] }
   ];
   function grupoDe(v) { return GRUPOS.filter(function (g) { return g.vistas.some(function (x) { return x[0] === v; }); })[0] || GRUPOS[0]; }
@@ -324,6 +325,48 @@
 
   /* ---------- Viajes guardados ----------
      Lo que la gente guardo en su cuenta (tabla trips), con su correo. "Abrir" va al link corto /viaje/<codigo>. */
+  /* ---------- Clientes > Usuarios: las cuentas de la web con lo que hizo cada una (lib/usuarios-admin.js) ---------- */
+  function cargarUsuarios() {
+    S.usuarios = { cargando: true }; pintar();
+    api('usuarios').then(function (j) { S.usuarios = { lista: j.usuarios || [] }; if (S.vista === 'usuarios') pintar(); })
+      .catch(function (e) { S.usuarios = { error: e.message }; if (S.vista === 'usuarios') pintar(); });
+  }
+  function haceTxt(iso) {
+    if (!iso) return '—';
+    var d = Math.floor((Date.now() - Date.parse(iso)) / 864e5);
+    return d <= 0 ? 'hoy' : d === 1 ? 'ayer' : d < 30 ? 'hace ' + d + ' días' : fecha(String(iso).slice(0, 10));
+  }
+  function vistaUsuarios() {
+    var u = S.usuarios || {};
+    if (u.cargando) return '<div class="card"><p class="vacio">Cargando usuarios…</p></div>';
+    if (u.error) return '<p class="aviso">' + esc(u.error) + '</p>';
+    var todos = u.lista || [], semana = Date.now() - 7 * 864e5;
+    var nuevos = todos.filter(function (x) { return Date.parse(x.alta) > semana; }).length;
+    var activos = todos.filter(function (x) { return Date.parse(x.ultimo_ingreso) > semana; }).length;
+    var conViaje = todos.filter(function (x) { return x.viajes > 0; }).length, conPedido = todos.filter(function (x) { return x.pedidos > 0; }).length;
+    var q = String(S.qUsuarios || '').toLowerCase().trim();
+    var lista = todos.filter(function (x) { return !q || (x.email + ' ' + x.nombre + ' ' + x.ultimo_destino).toLowerCase().indexOf(q) >= 0; });
+    var h = '<section class="kpis" aria-label="Usuarios">' +
+      kpi('Usuarios', String(todos.length), nuevos ? nuevos + ' nuevo' + (nuevos > 1 ? 's' : '') + ' esta semana' : 'ninguno nuevo esta semana', '') +
+      kpi('Entraron esta semana', String(activos), 'iniciaron sesión en 7 días', '') +
+      kpi('Guardaron un viaje', String(conViaje), todos.length ? Math.round(conViaje * 100 / todos.length) + ' % de los usuarios' : '', '') +
+      kpi('Hicieron un pedido', String(conPedido), 'con el mismo correo', conPedido ? 'kpi--ok' : '') + '</section>';
+    h += '<div class="vhead"><div><h2>Usuarios</h2><p>Las cuentas creadas en la web, la más nueva primero.</p></div></div>';
+    h += '<div class="card"><div class="filtros"><input type="search" id="q-usuarios" placeholder="Buscar por correo, nombre o destino" value="' + esc(S.qUsuarios || '') + '" aria-label="Buscar usuarios"></div>';
+    if (!lista.length) return h + '<p class="vacio">' + (q ? 'Nada coincide con la búsqueda.' : 'Todavía nadie creó una cuenta.') + '</p></div>';
+    h += '<table><thead><tr><th>Usuario</th><th>Se registró</th><th>Último ingreso</th><th class="num">Viajes</th><th class="num">Alertas</th><th class="num">Pasaporte</th><th>Pedidos</th></tr></thead><tbody>';
+    lista.forEach(function (x) {
+      h += '<tr><td data-l="Usuario"><b>' + esc(x.nombre || '—') + '</b><span class="sub"><a class="lnk" href="mailto:' + esc(x.email) + '">' + esc(x.email) + '</a>' +
+          (x.proveedor ? ' · ' + esc(x.proveedor === 'google' ? 'Google' : x.proveedor === 'email' ? 'correo' : x.proveedor) : '') + (x.confirmado ? '' : ' · <span class="warn">sin confirmar</span>') + '</span></td>' +
+        '<td data-l="Se registró">' + esc(haceTxt(x.alta)) + '</td>' +
+        '<td data-l="Último ingreso">' + esc(haceTxt(x.ultimo_ingreso)) + '</td>' +
+        '<td class="num" data-l="Viajes">' + (x.viajes ? '<a href="#" class="lnk" data-viajes-de="' + esc(x.email) + '">' + x.viajes + '</a>' + (x.ultimo_destino ? '<span class="sub">' + esc(x.ultimo_destino) + '</span>' : '') : '<span class="sub">0</span>') + '</td>' +
+        '<td class="num" data-l="Alertas">' + (x.alertas || '<span class="sub">0</span>') + '</td>' +
+        '<td class="num" data-l="Pasaporte">' + (x.xp ? x.xp + ' XP' + (x.sellos ? '<span class="sub">' + x.sellos + ' sello' + (x.sellos > 1 ? 's' : '') + '</span>' : '') : '<span class="sub">—</span>') + '</td>' +
+        '<td data-l="Pedidos">' + (x.pedidos ? '<a href="#" class="lnk" data-ir-pedido="' + esc(x.ultimo_pedido.id) + '">' + x.pedidos + ' · ' + esc(ESTADOS[x.ultimo_pedido.estado] || x.ultimo_pedido.estado) + '</a>' : '<span class="sub">—</span>') + '</td></tr>';
+    });
+    return h + '</tbody></table></div>';
+  }
   function cargarViajes() {
     S.viajes = { cargando: true }; pintar();
     api('viajes').then(function (j) { S.viajes = { lista: j.viajes || [] }; if (S.vista === 'viajes') pintar(); })
@@ -2358,6 +2401,7 @@
     if (el.id === 'chat-txt') { S.borrador = el.value; return; }
     if (el.id === 'q') { S.q = el.value; var pos = el.selectionStart; pintar(); var q = document.getElementById('q'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (er) { /* sin rango */ } } return; }
     if (el.id === 'q-prov') { S.qProv = el.value; var pp = el.selectionStart; pintar(); var qp = document.getElementById('q-prov'); if (qp) { qp.focus(); try { qp.setSelectionRange(pp, pp); } catch (er) { /* sin rango */ } } return; }
+    if (el.id === 'q-usuarios') { S.qUsuarios = el.value; var pu = el.selectionStart; pintar(); var qu = document.getElementById('q-usuarios'); if (qu) { qu.focus(); try { qu.setSelectionRange(pu, pu); } catch (er) { /* sin rango */ } } return; }
     if (el.id === 'q-viajes') { S.qViajes = el.value; var pv = el.selectionStart; pintar(); var qv = document.getElementById('q-viajes'); if (qv) { qv.focus(); try { qv.setSelectionRange(pv, pv); } catch (er) { /* sin rango */ } } return; }
     if (el.hasAttribute && el.hasAttribute('data-fsel')) { if (e.type === 'change') { S[el.getAttribute('data-fsel')] = el.value; pintar(); } return; }
     if (el.id === 'q-srv') { S.qSrv = el.value; var ps = el.selectionStart; pintar(); var qs = document.getElementById('q-srv'); if (qs) { qs.focus(); try { qs.setSelectionRange(ps, ps); } catch (er) { /* sin rango */ } } return; }
@@ -2495,6 +2539,8 @@
     var mse = e.target.closest('[data-mkt-sec]'); if (mse) { S.mktSec = mse.getAttribute('data-mkt-sec'); pintar(); return; }
     if (e.target.closest('[data-mkt-recargar]')) { S.mkt = null; pintar(); return; }
     var ch = e.target.closest('[data-chat]'); if (ch) { abrirChat(ch.getAttribute('data-chat')); return; }
+    /* Desde Usuarios: sus viajes guardados (la lista de viajes filtrada por su correo). */
+    var vd = e.target.closest('[data-viajes-de]'); if (vd) { e.preventDefault(); S.qViajes = vd.getAttribute('data-viajes-de'); S.vista = 'viajes'; if (!S.viajes || S.viajes.error) cargarViajes(); else pintar(); return; }
     var ip = e.target.closest('[data-ir-pedido]'); if (ip) { S.vista = 'pedidos'; pintar(); abrir(ip.getAttribute('data-ir-pedido')); return; }
     var pv = e.target.closest('[data-precarga]'); if (pv) { var cual = pv.getAttribute('data-precarga'); S.verPre = S.verPre === cual ? '' : cual; pintarFondo(); return; }
     var ud = e.target.closest('[data-uso-dias]'); if (ud) { S.usoDias = +ud.getAttribute('data-uso-dias'); cargarUso(); return; }
@@ -2542,7 +2588,7 @@
     }
     var t = e.target.closest('[data-vista],[data-filtro],[data-abrir],[data-prov],[data-act],[data-quitar-item],[data-quitar-pago],[data-pagado-total]');
     if (!t) return;
-    if (t.hasAttribute('data-vista')) { S.vista = t.getAttribute('data-vista'); if (S.vista === 'viajes' && (!S.viajes || S.viajes.error)) cargarViajes(); else if (S.vista === 'uso') cargarUso(); else pintar(); return; }
+    if (t.hasAttribute('data-vista')) { S.vista = t.getAttribute('data-vista'); if (S.vista === 'viajes' && (!S.viajes || S.viajes.error)) cargarViajes(); else if (S.vista === 'usuarios' && (!S.usuarios || S.usuarios.error)) cargarUsuarios(); else if (S.vista === 'uso') cargarUso(); else pintar(); return; }
     if (t.hasAttribute('data-filtro')) { S.filtro = t.getAttribute('data-filtro'); pintar(); return; }
     if (t.hasAttribute('data-abrir')) { abrir(t.getAttribute('data-abrir')); return; }
     if (t.hasAttribute('data-prov')) { var id = t.getAttribute('data-prov'); S.prov = JSON.parse(JSON.stringify(S.datos.proveedores.filter(function (x) { return x.id === id; })[0])); S.dirty = false; abrirProv(); return; }
@@ -2550,7 +2596,7 @@
     if (t.hasAttribute('data-quitar-pago')) { S.draft.pagos.splice(+t.getAttribute('data-quitar-pago'), 1); S.dirty = true; refrescarPanel(); return; }
     if (t.hasAttribute('data-pagado-total')) { var it = S.draft.items[+t.getAttribute('data-pagado-total')]; it.pagado_proveedor_usd = it.costo_usd || 0; S.dirty = true; refrescarPanel(); return; }
     switch (t.getAttribute('data-act')) {
-      case 'recargar': cargar(); if (S.vista === 'viajes') cargarViajes(); break;
+      case 'recargar': cargar(); if (S.vista === 'viajes') cargarViajes(); if (S.vista === 'usuarios') cargarUsuarios(); break;
       case 'avisos-on': activarAvisos(); break;
       case 'avisos-off': desactivarAvisos(); break;
       case 'wa-recargar': cargarWa(); pintar(); break;
