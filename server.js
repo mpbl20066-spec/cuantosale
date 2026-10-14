@@ -1768,7 +1768,7 @@ function alertasApi() {
 }
 let reservasCache = null;
 function reservasApi() {
-  if (!reservasCache) reservasCache = require('./lib/reservas')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout, escapeHtml: escapeHtml, guardarPedido: guardarPedido, guardarMensaje: guardarMensaje, pasaporte: pasaporteApi() });
+  if (!reservasCache) reservasCache = require('./lib/reservas')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp, fetchWithTimeout: fetchWithTimeout, escapeHtml: escapeHtml, guardarPedido: guardarPedido, guardarMensaje: guardarMensaje, pasaporte: pasaporteApi(), tasas: getTasas });
   return reservasCache;
 }
 const waPorNumero = new Map();
@@ -3447,7 +3447,7 @@ const viajesGuardados = require('./lib/viajes-guardados');
 /* Contador de uso propio (lib/uso.js): POST /api/uso desde home-track.js y la pestana "Uso" del panel. */
 let usoCache = null;
 function usoApi() { if (!usoCache) usoCache = require('./lib/uso')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp }); return usoCache; }
-const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual, precarga: estadoPrecarga, uso: function (dias) { return usoApi().resumen(dias).then(function (r) { r.nombres = {}; Object.keys(model.DEST).forEach(function (k) { r.nombres[k] = model.DEST[k].name; }); return r; }); } });
+const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual, precarga: estadoPrecarga, tasas: getTasas, uso: function (dias) { return usoApi().resumen(dias).then(function (r) { r.nombres = {}; Object.keys(model.DEST).forEach(function (k) { r.nombres[k] = model.DEST[k].name; }); return r; }); } });
 /* Webhook de WhatsApp (Cloud API de Meta): mensajes de los clientes y estados de los nuestros, para la bandeja del
    panel (lib/mensajes.js). GET es la verificacion que hace Meta al configurarlo (WHATSAPP_VERIFY_TOKEN). En POST se
    comprueba la firma X-Hub-Signature-256 con WHATSAPP_APP_SECRET (la clave secreta de la app de Meta): sin ella
