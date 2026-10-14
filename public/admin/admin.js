@@ -45,16 +45,20 @@
 
   /* ---------- cuentas (misma logica que lib/pedidos.js) ---------- */
   function calc(p) {
-    var items = (p.items || []).filter(function (i) { return i.estado !== 'cancelado'; });
+    var canc = p.estado === 'cancelado', todos = p.items || [];
+    var fuera = function (i) { return canc || i.estado === 'cancelado'; };
+    var items = todos.filter(function (i) { return !fuera(i); });
     var sum = function (a, fn) { return r2(a.reduce(function (x, i) { return x + (Number(fn(i)) || 0); }, 0)); };
-    var total = sum(items, function (i) { return i.precio_usd; });
-    var costo = sum(items, function (i) { return i.costo_usd; });
-    var pagProv = sum(items, function (i) { return Math.min(i.pagado_proveedor_usd || 0, i.costo_usd || 0); });
-    var cobrado = sum(p.pagos || [], function (x) { return x.monto_usd; });
-    var canc = p.estado === 'cancelado';
+    /* Cancelado: vale lo que se cobra y se paga igual (cargo_cliente_usd / cargo_proveedor_usd, se definen al cancelar). */
+    var precio = function (i) { return fuera(i) ? i.cargo_cliente_usd : i.precio_usd; };
+    var costoDe = function (i) { return Number(fuera(i) ? i.cargo_proveedor_usd : i.costo_usd) || 0; };
+    var total = sum(todos, precio);
+    var costo = sum(todos, costoDe);
+    var pagProv = sum(todos, function (i) { return Math.min(i.pagado_proveedor_usd || 0, costoDe(i)); });
+    var cobrado = sum(p.pagos || [], function (x) { return (x.reembolso ? -1 : 1) * (x.monto_usd || 0); });
     var pct = (S.datos && S.datos.pago && S.datos.pago.sena_pct) || { traslado: 0.5, tour: 0.25 };
     var sena = sum(items, function (i) { return (i.precio_usd || 0) * (pct[i.tipo] || 0); });
-    return { sena: sena, senaPend: canc ? 0 : r2(Math.max(0, sena - cobrado)), total: total, cobrado: cobrado, saldo: canc ? 0 : r2(Math.max(0, total - cobrado)), costo: costo, aPagar: canc ? 0 : r2(Math.max(0, costo - pagProv)), margen: r2(total - costo) };
+    return { sena: sena, senaPend: canc ? 0 : r2(Math.max(0, sena - cobrado)), total: total, cobrado: cobrado, saldo: r2(Math.max(0, total - cobrado)), devolver: r2(Math.max(0, cobrado - total)), costo: costo, aPagar: r2(Math.max(0, costo - pagProv)), margen: r2(total - costo) };
   }
 
   /* ---------- pantallas ---------- */
@@ -83,7 +87,7 @@
     /* Los numeros del negocio van solo en Pedidos; los de la precarga (vuelos, hoteles, Ignav, Booking) en Sistema. */
     if (S.vista === 'pedidos') {
       html += '<section class="kpis kpis--4" aria-label="Resumen">' +
-        kpi('Por cobrar a clientes', usd(k.por_cobrar_usd), 'clientes que nos deben', k.por_cobrar_usd ? 'kpi--warn' : '') +
+        kpi('Por cobrar a clientes', usd(k.por_cobrar_usd), k.a_devolver_usd ? 'a devolver: ' + usd(k.a_devolver_usd) : 'clientes que nos deben', k.por_cobrar_usd || k.a_devolver_usd ? 'kpi--warn' : '') +
         kpi('Cobrado', usd(k.cobrado_usd), 'de ' + usd(k.facturado_usd) + ' facturado', 'kpi--ok') +
         kpi('A pagar a proveedores', usd(k.por_pagar_proveedores_usd), 'lo que les debemos', k.por_pagar_proveedores_usd ? 'kpi--warn' : '') +
         kpi('Margen', usd(k.margen_usd), k.sin_proveedor ? k.sin_proveedor + ' servicio(s) sin proveedor' : 'facturado − costo') + '</section>';
@@ -583,8 +587,8 @@
   }
   function cuentasHtml(p) {
     var c = calc(p);
-    return [['Total del cliente', c.total], ['Cobrado', c.cobrado], ['Saldo del cliente', c.saldo], ['Costo proveedores', c.costo], ['A pagar a proveedores', c.aPagar], ['Margen', c.margen]]
-      .map(function (x) { return '<div><small>' + x[0] + '</small><b' + ((x[0] === 'Saldo del cliente' || x[0] === 'A pagar a proveedores') && x[1] ? ' class="deuda"' : '') + '>' + usd(x[1]) + '</b></div>'; }).join('');
+    return [['Total del cliente', c.total], ['Cobrado', c.cobrado], c.devolver ? ['A devolver al cliente', c.devolver] : ['Saldo del cliente', c.saldo], ['Costo proveedores', c.costo], ['A pagar a proveedores', c.aPagar], ['Margen', c.margen]]
+      .map(function (x) { return '<div><small>' + x[0] + '</small><b' + ((x[0] === 'Saldo del cliente' || x[0] === 'A pagar a proveedores' || x[0] === 'A devolver al cliente') && x[1] ? ' class="deuda"' : '') + '>' + usd(x[1]) + '</b></div>'; }).join('');
   }
   /* ---------- sena (misma regla que lib/pedidos.js) ----------
      Se pide cuando el proveedor ya confirmo. El monto sale en USD (la moneda del modelo) y se puede mandar en la
@@ -794,6 +798,8 @@
       '<div class="item__ctrl"><label class="f">Proveedor<select ' + f('proveedor_id') + '>' + provOpts(it.proveedor_id) + '</select></label>' +
       '<label class="f">Estado del servicio<select ' + f('estado') + '>' + opts(ESTADOS_ITEM, it.estado) + '</select></label></div>' +
       politicaHtml(it) +
+      (it.estado === 'cancelado' || S.draft.estado === 'cancelado' ? '<div class="grid"><label class="f">Se le cobra igual al cliente (US$)<input ' + f('cargo_cliente_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (it.cargo_cliente_usd || '') + '" placeholder="0 = se le devuelve"></label>' +
+        '<label class="f">Se le paga igual al proveedor (US$)<input ' + f('cargo_proveedor_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (it.cargo_proveedor_usd || '') + '" placeholder="0 = no se le paga"></label></div>' : '') +
       '<div class="item__acc">' +
       (pr && (pr.whatsapp || pr.telefono) && S.draft.id ? '<a class="btn btn--sm btn--wa-borde" href="#" data-wa-enviar="proveedor" data-wa-pedido="' + esc(S.draft.id) + '" data-wa-item="' + i + '">' + ICONO_WA + 'WhatsApp a ' + esc(pr.nombre) + '</a>' : '') +
       (pr && pr.email ? '<a class="btn btn--sm" href="mailto:' + esc(pr.email) + '?subject=' + encodeURIComponent('Reserva ' + S.draft.ref) + '&body=' + encodeURIComponent(msgProv) + '">Email</a>' : '') +
@@ -813,7 +819,7 @@
   function pagoHtml(pg, i) {
     var f = function (campo, tipo, extra) { return 'data-p="' + i + '" data-f="' + campo + '"' + (tipo ? ' type="' + tipo + '"' : '') + (extra || ''); };
     return '<div class="pagoRow"><input ' + f('fecha', 'date') + ' value="' + esc(pg.fecha) + '" aria-label="Fecha">' +
-      '<input ' + f('monto_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (pg.monto_usd || '') + '" placeholder="US$" aria-label="Monto en US$">' +
+      '<input ' + f('monto_usd', 'number', ' min="0" step="0.01" inputmode="decimal"' + (pg.reembolso ? ' style="color:var(--bad)" title="Reembolso: se resta de lo cobrado"' : '')) + ' value="' + (pg.monto_usd || '') + '" placeholder="' + (pg.reembolso ? 'Reembolso US$' : 'US$') + '" aria-label="' + (pg.reembolso ? 'Reembolso' : 'Monto') + ' en US$">' +
       '<input ' + f('medio') + ' value="' + esc(pg.medio) + '" placeholder="Medio (Prex, Pix, Abitab…)" aria-label="Medio">' +
       '<input ' + f('nota') + ' value="' + esc(pg.nota) + '" placeholder="Nota" aria-label="Nota">' +
       '<button type="button" class="btn btn--sm btn--danger btn--x" data-quitar-pago="' + i + '" aria-label="Quitar cobro">✕</button></div>';
@@ -839,7 +845,8 @@
       '<div class="panel__body">' +
       (esNuevo ? '' : '<div id="etapas-box">' + etapasHtml(p) + '</div><div id="paso-box">' + pasoHtml(p) + '</div>') +
       '<section class="sec"><div class="sec__cab"><h3>Servicios</h3><button type="button" class="btn btn--sm" data-act="add-item">+ Agregar servicio</button></div><div id="items-box">' + (p.items.length ? p.items.map(itemHtml).join('') : '<p class="sub">Sin servicios todavía.</p>') + '</div></section>' +
-      (esNuevo ? '' : '<section class="sec"><div class="sec__cab"><h3>Pagos del cliente</h3><div class="item__acc"><button type="button" class="btn btn--sm" data-act="add-pago">+ Registrar cobro</button><button type="button" class="btn btn--sm" data-act="cobrar-saldo">Cobró todo</button></div></div>' +
+      (esNuevo ? '' : '<section class="sec"><div class="sec__cab"><h3>Pagos del cliente</h3><div class="item__acc"><button type="button" class="btn btn--sm" data-act="add-pago">+ Registrar cobro</button><button type="button" class="btn btn--sm" data-act="cobrar-saldo">Cobró todo</button>' +
+        (c.devolver > 0 ? '<button type="button" class="btn btn--sm btn--danger" data-act="registrar-reembolso">Registrar reembolso de ' + usd(c.devolver) + '</button>' : '') + '</div></div>' +
         '<div id="sena-box">' + pagosResumenHtml(p) + '</div><div id="pagos-box">' + (p.pagos.length ? p.pagos.map(pagoHtml).join('') : '<p class="sub">Todavía no registraste cobros.</p>') + '</div></section>') +
       '<section class="sec sec--franja" aria-label="Cuentas"><div class="cuentas cuentas--franja" id="cuentas-box">' + cuentasHtml(p) + '</div></section>' +
       '<details class="sec datos" data-datos' + (esNuevo || S.datosAbiertos ? ' open' : '') + '><summary><h3>Datos del cliente y del viaje</h3></summary><div class="grid">' +
@@ -1889,9 +1896,6 @@
 
   function guardar() {
     var p = S.draft;
-    var cuerpo = { estado: p.estado, cliente_nombre: p.cliente_nombre, cliente_telefono: p.cliente_telefono, cliente_email: p.cliente_email, destino: p.destino,
-      fecha_ida: p.fecha_ida || null, fecha_vuelta: p.fecha_vuelta || null, personas: p.personas, medio_pago: p.medio_pago, notas: p.notas, items: p.items, pagos: p.pagos };
-    var llamada = p.id ? api('pedido/actualizar', { id: p.id, cambios: cuerpo }) : api('pedido/crear', cuerpo);
     var antes = p.id && (S.datos.pedidos || []).filter(function (x) { return x.id === p.id; })[0];
     var recienCancelado = antes && antes.estado !== 'cancelado' && p.estado === 'cancelado';
     /* Servicios que pasan a Cancelado con el pedido sigue en pie: se ofrece avisarle cuales (servicio_cancelado). */
@@ -1899,6 +1903,11 @@
     ((antes && antes.items) || []).forEach(function (x) { if (x.id) estabaCanc[x.id] = x.estado === 'cancelado'; });
     var serviciosCancelados = antes && p.estado !== 'cancelado' ? (p.items || []).filter(function (x) { return x.id && x.estado === 'cancelado' && estabaCanc[x.id] === false; }) : [];
     var activosAntes = (p.items || []).filter(function (x) { return x.nombre && !estabaCanc[x.id]; });
+    /* Lo que se cobra y se paga igual por lo que se cancela se define ahora, antes de guardar. */
+    if (!definirCancelacion(p, recienCancelado ? activosAntes : serviciosCancelados)) { mensaje('No se guardó: falta definir la cancelación.', true); return Promise.resolve(); }
+    var cuerpo = { estado: p.estado, cliente_nombre: p.cliente_nombre, cliente_telefono: p.cliente_telefono, cliente_email: p.cliente_email, destino: p.destino,
+      fecha_ida: p.fecha_ida || null, fecha_vuelta: p.fecha_vuelta || null, personas: p.personas, medio_pago: p.medio_pago, notas: p.notas, items: p.items, pagos: p.pagos };
+    var llamada = p.id ? api('pedido/actualizar', { id: p.id, cambios: cuerpo }) : api('pedido/crear', cuerpo);
     mensaje('Guardando…');
     return llamada.then(function (r) {
       S.draft = JSON.parse(JSON.stringify(r.pedido)); S.dirty = false;
@@ -1908,17 +1917,15 @@
       var yaPregunto = S.avisarCancelacion; S.avisarCancelacion = false;
       if (serviciosCancelados.length && !S.dirty && S.draft && S.draft.cliente_telefono) {
         var nombres = serviciosCancelados.map(function (x) { return x.nombre + (x.detalle ? ' (' + x.detalle + ')' : ''); }).join('; ');
-        decidirSinPolitica(S.draft, serviciosCancelados);
         var reemb = lineaReembolso(S.draft, serviciosCancelados);
         if (confirm('Cancelaste:\n' + resumenPoliticas(serviciosCancelados) + '\n\nLe va a decir: "' + reemb + '"\n\n¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp?'))
           enviarWa('servicio_cancelado', S.draft.id, undefined, { servicios: nombres, reembolso: reemb, total: usd(calc(S.draft).total) });
         return;
       }
       if (!recienCancelado || S.dirty || !S.draft || !S.draft.cliente_telefono) return;
-      if (!yaPregunto) decidirSinPolitica(S.draft, activosAntes);
       var rc = lineaReembolso(S.draft, activosAntes);
       if (yaPregunto || confirm('Pedido cancelado.\n' + resumenPoliticas(activosAntes) + '\n\nLe va a decir: "' + rc + '"\n\n¿Le avisás a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp que se canceló?')) enviarWa('cancelado', S.draft.id, undefined, { reembolso: rc });
-    }).catch(function (e) { mensaje(e.message, true); });
+    }).then(function () { S.cargoDef = {}; }).catch(function (e) { mensaje(e.message, true); });
   }
   function borrarPedido() {
     var p = S.draft;
@@ -1963,16 +1970,41 @@
     var est = x.estado === 'reembolso' ? '<b class="ok">hoy tiene reembolso</b>' : x.estado === 'sin_reembolso' ? '<b class="deuda">ya no tiene reembolso</b>' : '<b style="color:var(--warn)">sin política cargada: revisalo con el proveedor</b>';
     return '<p class="sub" style="margin:6px 0 0">Cancelación: ' + (x.politica ? esc(x.politica) + ' · ' : '') + est + (dias != null && dias >= 0 ? ' (faltan ' + dias + ' días para la ida)' : '') + '</p>';
   }
-  /* Los servicios sin politica cargada (o que no se entiende) no se le pasan al cliente como "te confirmamos": se le
-     pregunta al que cancela si se devuelve, y eso queda para el mensaje. Sin cobros no hace falta preguntar. */
-  function decidirSinPolitica(p, items) {
-    if (!(calc(p).cobrado > 0) || !S.politicas || S.politicas.id !== p.id) return;
-    items.forEach(function (it) {
-      var x = politicaDe(it);
-      if (x && x.estado !== 'sin_dato') return;
-      var si = confirm(it.nombre + ' no tiene política de cancelación cargada' + (x && x.politica ? ' (dice: ' + x.politica + ')' : '') + '.\n\n¿Le devolvés lo que pagó por este servicio?\n\nAceptar = sí, se le devuelve\nCancelar = no tiene reembolso');
-      S.politicas.items[it.id] = Object.assign({}, x || {}, { id: it.id, estado: si ? 'reembolso' : 'sin_reembolso', manual: true });
-    });
+  /* Al cancelar se define, servicio por servicio, cuanto se le cobra igual al cliente y cuanto se le paga igual al
+     proveedor (cargo_cliente_usd / cargo_proveedor_usd). La politica del tour solo propone el numero: lo decide el que
+     cancela. Eso queda en las cuentas y en el mensaje al cliente. Devuelve false si se corta alguna pregunta. */
+  function definirCancelacion(p, items) {
+    S.cargoDef = S.cargoDef || {};
+    var cobrado = calc(p).cobrado, pct = (S.datos && S.datos.pago && S.datos.pago.sena_pct) || { traslado: 0.5, tour: 0.25 };
+    var leer = function (t, def) {
+      var r = prompt(t, String(def));
+      if (r === null) return null;
+      var n = Number(String(r).replace(',', '.').replace(/[^\d.]/g, ''));
+      return isFinite(n) && n >= 0 ? r2(n) : def;
+    };
+    for (var k = 0; k < items.length; k++) {
+      var it = items[k];
+      if (!it.nombre || S.cargoDef[it.id]) continue;
+      var x = politicaDe(it) || { estado: 'sin_dato', politica: '' };
+      var pol = 'Política: ' + (x.politica || 'sin política cargada') + (x.estado === 'reembolso' ? ' → corresponde reembolso' : x.estado === 'sin_reembolso' ? ' → no corresponde reembolso' : '');
+      var cli = 0;
+      if (cobrado > 0) {
+        var propCli = x.estado === 'reembolso' ? 0 : r2(Math.min((it.precio_usd || 0) * (pct[it.tipo] || 1), cobrado));
+        cli = leer('Cancelás ' + it.nombre + ' (' + usd(it.precio_usd) + ').\n' + pol + '\n\n¿Cuánto se le cobra igual al cliente? (US$)\n0 = se le devuelve lo de este servicio', propCli);
+        if (cli === null) return false;
+      }
+      var prov = 0;
+      if (it.costo_usd > 0 || it.pagado_proveedor_usd > 0 || it.proveedor_id) {
+        var propProv = x.estado === 'reembolso' ? 0 : (it.pagado_proveedor_usd || 0);
+        prov = leer(it.nombre + (it.proveedor_nombre ? ' — ' + it.proveedor_nombre : '') + '\nCosto ' + usd(it.costo_usd || 0) + ', ya pagado ' + usd(it.pagado_proveedor_usd || 0) + '.\n\n¿Cuánto le pagás igual al proveedor? (US$)\n0 = nada', propProv);
+        if (prov === null) return false;
+      }
+      it.cargo_cliente_usd = cli; it.cargo_proveedor_usd = prov; S.cargoDef[it.id] = true;
+      /* El mensaje sigue lo decidido; si no coincide con la politica, no se la cita. */
+      var decidido = cli > 0 ? 'sin_reembolso' : 'reembolso';
+      if (S.politicas && S.politicas.id === p.id) S.politicas.items[it.id] = Object.assign({}, x, { id: it.id, estado: decidido, manual: x.estado !== decidido });
+    }
+    return true;
   }
   /* Por que no tiene reembolso, sin citar una politica que diga "gratuita" al lado de "sin reembolso". */
   function motivoSinReembolso(x) {
@@ -1998,7 +2030,8 @@
   function resumenPoliticas(items) {
     return items.map(function (it) {
       var x = politicaDe(it) || { estado: 'sin_dato' };
-      return '• ' + it.nombre + ': ' + (x.estado === 'reembolso' ? 'CON reembolso' : x.estado === 'sin_reembolso' ? 'SIN reembolso' : 'sin política') + (x.politica ? ' — ' + x.politica : '');
+      return '• ' + it.nombre + ': ' + (x.estado === 'reembolso' ? 'CON reembolso' : x.estado === 'sin_reembolso' ? 'SIN reembolso' : 'sin política') + (x.politica ? ' — ' + x.politica : '') +
+        (S.cargoDef && S.cargoDef[it.id] ? ' (se le cobra igual ' + usd(it.cargo_cliente_usd || 0) + ', al proveedor ' + usd(it.cargo_proveedor_usd || 0) + ')' : '');
     }).join('\n');
   }
   function nuevoProveedor() { return { id: null, nombre: '', contacto: '', telefono: '', email: '', servicios: '', datos_pago: '', notas: '', activo: true }; }
@@ -2196,6 +2229,13 @@
       case 'nuevo-prov': S.prov = nuevoProveedor(); S.dirty = false; abrirProv(); break;
       case 'cerrar': cerrarPanel(false); break;
       case 'add-item': S.draft.items.push(itemVacio()); S.dirty = true; refrescarPanel(); break;
+      case 'registrar-reembolso':
+        var dev = calc(S.draft).devolver;
+        if (dev > 0 && confirm('¿Registrar que le devolviste ' + usd(dev) + ' a ' + (S.draft.cliente_nombre || 'el cliente') + '?')) {
+          S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: dev, reembolso: true, medio: S.draft.medio_pago || '', nota: 'Reembolso' });
+          S.dirty = true; refrescarPanel(); guardar();
+        }
+        break;
       case 'add-pago': S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: 0, medio: S.draft.medio_pago || '', nota: '' }); S.dirty = true; refrescarPanel(); break;
       case 'cobrar-saldo': var c = calc(S.draft); if (c.saldo > 0) { S.draft.pagos.push({ id: 'n' + Date.now(), fecha: new Date().toISOString().slice(0, 10), monto_usd: c.saldo, medio: S.draft.medio_pago || '', nota: 'Saldo' }); S.dirty = true; refrescarPanel(); } break;
       case 'registrar-sena': registrarSena(); break;
@@ -2208,8 +2248,8 @@
         S.draft.estado = t.getAttribute('data-estado'); S.dirty = true; guardar(); break;
       case 'cancelar-avisar':
         var act = (S.draft && S.draft.items || []).filter(function (x) { return x.nombre && x.estado !== 'cancelado'; });
-        if (S.draft) decidirSinPolitica(S.draft, act);
-        if (!S.draft || !confirm('¿Cancelar el pedido ' + S.draft.ref + ' y avisarle a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp?\n\n' + resumenPoliticas(act) + '\n\nLe va a decir: "' + lineaReembolso(S.draft, act) + '"')) break;
+        if (!S.draft || !definirCancelacion(S.draft, act)) { S.cargoDef = {}; break; }
+        if (!confirm('¿Cancelar el pedido ' + S.draft.ref + ' y avisarle a ' + (S.draft.cliente_nombre || 'el cliente') + ' por WhatsApp?\n\n' + resumenPoliticas(act) + '\n\nLe va a decir: "' + lineaReembolso(S.draft, act) + '"')) { S.cargoDef = {}; break; }
         S.draft.estado = 'cancelado'; S.dirty = true; S.avisarCancelacion = true;
         guardar().then(function () { S.avisarCancelacion = false; });   // si el guardado falla, que no quede armado para otro
         break;
