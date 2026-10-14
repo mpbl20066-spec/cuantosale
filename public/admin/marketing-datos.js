@@ -14,7 +14,7 @@ window.CS_MKT = {
     "- **De qué vivimos:** traslados y paseos. Todo el contenido termina ahí; los vuelos son solo el gancho.",
     "- **A quién le hablamos primero:** a los que ya tienen pasaje para el verano y les falta resolver lo de allá.",
     "- **Qué cambiar ya:** la bio de Instagram y TikTok, el link de la bio y una destacada \"Reservas\" (día 1).",
-    "- **Plata:** anuncios recién desde el 25/10 y como máximo US$ 50, solo si un reel ya funcionó solo.",
+    "- **Plata:** US$ 21 para promocionar el reel de Búzios del 25 al 31/10; US$ 28 más desde el 5/11 solo si eso trajo algún pedido. Máximo US$ 50.",
     "- **Cada miércoles:** 30 minutos en Tablero semanal para decidir qué repetir, qué cambiar y qué dejar.",
     "## Qué hay en cada botón",
     "- **Qué está mal:** lo que hoy frena las ventas (bio, web, confianza, medición).",
@@ -25,7 +25,7 @@ window.CS_MKT = {
     "- **Los 3 reels fijados:** guion, escenas y textos de cada uno.",
     "- **Del reel a la venta:** los pasos desde que alguien ve un reel hasta que paga la seña.",
     "- **Crecer gratis:** grupos, creadores, alianzas y recomendaciones.",
-    "- **Anuncios:** cómo gastar los US$ 50 y cuándo cortar.",
+    "- **Anuncios:** qué reel promocionar, qué día, el paso a paso en Instagram y cuándo cortar.",
     "- **Qué medir:** los números que importan y los objetivos del mes.",
     "- **Revisión del miércoles:** cómo hacerla paso a paso."
    ]
@@ -223,29 +223,31 @@ window.CS_MKT = {
    "id": "publicidad",
    "t": "Anuncios",
    "txt": [
-    "> No pongas plata en anuncios hasta que un reel orgánico muestre buena retención. Un anuncio no arregla un reel que la gente pasa de largo.",
-    "## Fase 0 · días 1 a 10: nada de plata",
-    "- Publicá, medí y elegí el reel con mejor retención y más compartidos.",
-    "## Fase 1 · desde el día 11 (25/10): prueba chica",
-    "- **Campaña:** Meta, objetivo **Tráfico**, optimizado a \"visitas a la página de destino\". Sin píxel no podés optimizar a conversiones: no lo intentes todavía.",
-    "- **Creatividad:** el reel ganador, tal cual. Link: cuantosale.uy/?utm_source=meta_ads (o a la guía del destino del reel, con el mismo utm).",
-    "- **Público:** Uruguay, 25 a 45 años, Montevideo, Canelones y Maldonado. Sin intereses al principio (Meta encuentra mejor solo con poca plata).",
-    "- **Ubicación:** Reels de Instagram y Facebook.",
-    "- **Plata:** US$ 3 por día, 7 días (US$ 21). Tope del mes: US$ 50.",
-    "## Qué medir antes de seguir",
-    "- Costo por visita a la página (Administrador de anuncios).",
-    "- Llegadas con meta_ads en Tablero > Web (las que cuenta tu web, no Meta).",
-    "- De esas llegadas, cuántas llegan a \"Tu presupuesto\".",
-    "- Pedidos con traslado o paseo en la semana.",
-    "## Cuándo cortar un anuncio",
-    "- Gastaste US$ 7 y la tasa de clics es menor que la del mismo reel en orgánico (en orgánico: clics en el enlace / alcance).",
-    "- Llegaron 50 visitas de meta_ads y ninguna llegó a \"Tu presupuesto\": el problema es la página, no el anuncio. Pausá y arreglá la página.",
-    "## Cuándo poner más",
-    "- Solo si con la Fase 1 hubo al menos un pedido con traslado o paseo que puedas atribuir (preguntá \"¿cómo nos conociste?\").",
-    "- **Techo:** lo que gastás para conseguir un pedido confirmado no puede pasar el margen promedio de un pedido (el Tablero lo calcula con tus pedidos reales).",
-    "## Fase 2 (si la 1 funcionó)",
-    "- Público de quienes interactuaron con tu Instagram en los últimos 30 días (no necesita píxel), con un creativo de confianza o de traslados. US$ 2 por día, 14 días (US$ 28): con la Fase 1 suma US$ 49, dentro del tope de US$ 50.",
-    "- TikTok Ads: no por ahora. Exige presupuestos diarios mínimos más altos que Meta."
+    "> Tope: US$ 50 en el mes. Se promociona desde el botón \"Promocionar\" de Instagram, sin Administrador de anuncios. TikTok, no.",
+    "## Qué promocionar y cuándo",
+    "- [ads-f1] **Fase 1 · del 25/10 al 31/10 · US$ 21:** el reel **\"Una semana en Búzios por US$ 873\"** (se publica el 17/10). Por qué ese: tiene un número en el gancho, habla de un destino concreto, incluye el traslado y para el 25/10 ya tiene 8 días de datos orgánicos.",
+    "- **Única excepción:** si el 25/10 otro reel publicado (Jeri o Río) tiene claramente más tiempo medio de reproducción y más compartidos que el de Búzios, promocioná ese.",
+    "- [ads-f2] **Fase 2 · del 5/11 al 18/11 · US$ 28 · solo si la Fase 1 trajo al menos un pedido o una consulta de traslado:** el carrusel **\"Traslado: ¿compartido o privado?\"** (se publica el 20/10), con el objetivo \"Más mensajes\": la gente te escribe por Instagram para pedir el precio de su traslado.",
+    "- **No promociones:** los 3 fijados (son para quien ya entró al perfil), el conversor ni el de ahorro: no llevan a una reserva.",
+    "## Paso a paso · Fase 1 (desde el celular)",
+    "- 1. Abrí el reel de Búzios en tu perfil y tocá **Promocionar**.",
+    "- 2. **Objetivo:** \"Más visitas al sitio web\". Enlace: **https://cuantosale.uy/?utm_source=meta_ads**. Botón: \"Más información\".",
+    "- 3. **Público:** \"Crear el tuyo\". Nombre: Uruguay 25-45. Ubicaciones: Montevideo, Canelones y Maldonado. Intereses: ninguno. Edad: 25 a 45. Sexo: todos.",
+    "- 4. **Presupuesto y duración:** US$ 3 por día, 7 días. Meta puede sumar impuestos al cobro.",
+    "- 5. Agregá la tarjeta y tocá **Promocionar**. Instagram lo revisa y puede tardar unas horas en arrancar.",
+    "- El enlace va a la home y no a la guía de Búzios a propósito: la home cuenta las visitas que llegan del anuncio (Tablero > Web > Llegadas por fuente: meta_ads).",
+    "## Paso a paso · Fase 2",
+    "- Carrusel \"Traslado: ¿compartido o privado?\" > **Promocionar** > Objetivo **\"Más mensajes\"** > el mismo público \"Uruguay 25-45\" > US$ 2 por día, 14 días.",
+    "- Cada mensaje que entre: respondé con el precio del traslado de su destino (Catálogo > Servicios), el link a cuantosale.uy y preguntá cómo los conoció.",
+    "## Cómo leer el resultado",
+    "- En Instagram: el reel > Ver estadísticas de la promoción: alcance, clics en el enlace y costo por clic.",
+    "- En el panel: Tablero > Web > Llegadas por fuente (meta_ads) y Tablero > Pedidos de esa semana. Anotá el gasto y los clics en \"Cargá a mano > Anuncios\".",
+    "## Cuándo cortar (pausar la promoción)",
+    "- **Al 3er día (27/10):** si los clics en el enlace por cada 100 personas alcanzadas son menos que en el mismo reel sin promocionar (en orgánico: clics en el enlace de la bio / cuentas alcanzadas de esa semana).",
+    "- **Si llegaron 50 visitas de meta_ads** y ninguna llegó a \"Tu presupuesto\": el problema es la página, no el anuncio. Pausá y avisame.",
+    "## Cuándo seguir",
+    "- Solo pasás a la Fase 2 si en la Fase 1 hubo al menos un pedido o una consulta de traslado que diga que te vio en Instagram.",
+    "- **Techo:** lo que gastás para conseguir un pedido confirmado no puede pasar el margen promedio de un pedido (el Tablero lo calcula con tus pedidos reales)."
    ]
   },
   {
@@ -810,7 +812,8 @@ window.CS_MKT = {
     "Historia: \"Lo que nadie te dice de Jeri: del aeropuerto son 5 h 30 de viaje 🚐\" + sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
    ],
    "acc": [
-    "**Anuncios, Fase 1** (si decidiste invertir): elegí el reel con mejor tiempo medio de reproducción de los publicados y armá la prueba de US$ 3 por día (ver Estrategia > Anuncios)."
+    "**Promocioná el reel de Búzios (Fase 1):** botón Promocionar > \"Más visitas al sitio web\" > https://cuantosale.uy/?utm_source=meta_ads > público Montevideo, Canelones y Maldonado, 25 a 45 años > US$ 3 por día, 7 días. Paso a paso en Estrategia > Anuncios.",
+    "Antes, mirá las estadísticas: si Jeri o Río ya tienen claramente más tiempo medio y más compartidos que Búzios, promocioná ese."
    ],
    "n": 11
   },
@@ -839,7 +842,7 @@ window.CS_MKT = {
     "Resultado de la encuesta del sábado + \"Los paseos de tu destino están en la app 👇\" con enlace."
    ],
    "acc": [
-    "Revisá el anuncio (si lo prendiste): costo por visita y llegadas meta_ads en el Tablero.",
+    "Mirá la promoción: alcance, clics en el enlace y costo por clic. Si ya corresponde cortar, pausala (reglas en Estrategia > Anuncios).",
     "Respondé 3 preguntas en grupos."
    ],
    "n": 12
@@ -993,7 +996,7 @@ window.CS_MKT = {
     "Historia: \"Del aeropuerto de Natal a Pipa: media hora, US$ 6 por persona en compartido (catálogo al 1/10)\" + enlace."
    ],
    "acc": [
-    "Revisá el anuncio: si se cumple una regla de corte, pausalo (ver Estrategia > Anuncios)."
+    "Hoy termina la promoción del reel de Búzios. Anotá en el Tablero (semana 3, Anuncios) el gasto y los clics, y fijate si entró algún pedido o consulta que diga que te vio en Instagram."
    ],
    "n": 17
   },
@@ -1153,7 +1156,8 @@ window.CS_MKT = {
     "Historia: \"Si ya tenés pasaje, escribinos TRASLADO y te pasamos el precio para tu destino 🚐\"."
    ],
    "acc": [
-    "Respondé cada \"TRASLADO\" con el precio del catálogo y el link al destino. Anotá cuántos llegan en el Tablero (consultas por WhatsApp)."
+    "Respondé cada \"TRASLADO\" con el precio del catálogo y el link al destino. Anotá cuántos llegan en el Tablero (consultas por WhatsApp).",
+    "**Fase 2 de anuncios (solo si la Fase 1 trajo algún pedido o consulta):** promocioná el carrusel \"Traslado: ¿compartido o privado?\" con el objetivo \"Más mensajes\", mismo público, US$ 2 por día, 14 días. Si no trajo nada, no gastes más y lo vemos juntos."
    ],
    "n": 22
   },
