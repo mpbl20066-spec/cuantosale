@@ -512,7 +512,7 @@
   function cargarMkt() {
     S.mkt = { cargando: true };
     var datos = window.CS_MKT ? Promise.resolve() : new Promise(function (ok, mal) {
-      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=16'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
+      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=17'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
       document.head.appendChild(s);
     });
     Promise.all([datos, api('marketing'), api('uso?dias=90').catch(function () { return null; })]).then(function (r) {
@@ -594,7 +594,8 @@
     h += '<section class="sec"><div class="sec__cab"><h3>Instagram</h3>' + checkMkt(n + '-ig') + '</div>' + bloqueMkt(d.ig) + '</section>';
     h += '<section class="sec"><div class="sec__cab"><h3>TikTok</h3>' + checkMkt(n + '-tt') + '</div>' + bloqueMkt(d.tt) + '</section>';
     h += '<section class="sec"><div class="sec__cab"><h3>Historias</h3>' + checkMkt(n + '-hist') + '</div><ol class="mkt-ol">' + (d.hist || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol></section>';
-    h += '<section class="sec"><div class="sec__cab"><h3>Acción comercial</h3>' + checkMkt(n + '-acc') + '</div>' + textoMkt((d.acc || []).map(function (x) { return '- ' + x; })) + '</section>';
+    h += '<section class="sec"><div class="sec__cab"><h3>Acción comercial</h3>' + checkMkt(n + '-acc') + '</div>' + textoMkt((d.acc || []).map(function (x) { return '- ' + x; })) +
+      (d.ctRonda ? '<p style="margin-top:10px"><button class="btn btn--sm" data-mkt-ct-ronda="' + d.ctRonda + '">Abrir los creadores de la ronda ' + d.ctRonda + '</button></p>' : '') + '</section>';
     h += '<section class="sec"><div class="sec__cab"><h3>Todos los días · 15 min</h3>' + checkMkt(n + '-rut') + '</div>' + textoMkt(M.rutina.map(function (x) { return '- ' + x; })) + '</section>';
     return h + '</div>';
   }
@@ -741,6 +742,18 @@
     if (c.canal === 'tel') return 'tel:' + d.replace(/[^\d+]/g, '');
     return /^https?:\/\//.test(d) ? d : '';
   }
+  /* El chat directo de Instagram (ig.me/m/usuario). Instagram no deja precargar el texto: por eso el boton lo copia. */
+  function dmInstagram(c) {
+    var d = String(c.dato || '').trim(), m = /instagram\.com\/([\w.]+)/i.exec(d);
+    var u = m ? m[1] : /^@?[\w.]+$/.test(d) ? d.replace(/^@/, '') : '';
+    return u ? 'https://ig.me/m/' + u : '';
+  }
+  /* Mandado (Instagram o WhatsApp): pendiente pasa a "Le escribi" y escrito a "Mande el seguimiento", con la fecha de hoy. */
+  function marcarEnviadoCt(id) {
+    var c = contactosMkt().filter(function (x) { return x.id === id; })[0];
+    if (!c || (c.estado !== 'pendiente' && c.estado !== 'escrito')) return;
+    guardarMkt({ contacto: { id: id, campos: { estado: c.estado === 'pendiente' ? 'escrito' : 'seguimiento', fecha: hoyUY() } } }).then(function () { pintar(); });
+  }
   /* Le escribiste hace una semana o mas y no respondio: toca el seguimiento (una sola vez). */
   function tocaSeguimiento(c) { return c.estado === 'escrito' && c.fecha && difDias(c.fecha, hoyUY()) >= 7; }
   /* El mensaje de la tarjeta, con las plantillas del plan (CS_MKT.plantillasContacto). A una persona se la tutea; a
@@ -761,8 +774,12 @@
     return { texto: poner(seguir ? P.seguimiento : P.primero), etapa: seguir ? 'Mensaje de seguimiento' : 'Primer mensaje' };
   }
   function vistaMktContactos() {
-    var todos = contactosMkt(), tipo = S.mktCtTipo || 'todos';
-    var l = todos.filter(function (c) { return tipo === 'todos' || c.tipo === tipo; });
+    S.mktCtMsj = {};   // el mensaje de cada tarjeta, para el boton "Mandar por Instagram"
+    var todos = contactosMkt(), tipo = S.mktCtTipo || 'todos', ronda = S.mktCtRonda || 0;
+    var l = todos.filter(function (c) { return (tipo === 'todos' || c.tipo === tipo) && (!ronda || c.ronda === ronda); });
+    /* Los creadores van en rondas de 5 (CS_MKT.contactos, ronda): primero los de la ronda mas baja. */
+    l.sort(function (x, y) { return (x.ronda || 99) - (y.ronda || 99); });
+    var rondas = todos.map(function (c) { return c.ronda; }).filter(function (r, i, a) { return r && a.indexOf(r) === i; }).sort();
     var cuenta = function (f) { return l.filter(f).length; };
     var opts = function (obj, v) { return Object.keys(obj).map(function (k) { return '<option value="' + k + '"' + (k === v ? ' selected' : '') + '>' + esc(obj[k]) + '</option>'; }).join(''); };
     var h = '<div class="vhead"><div><h2>Contactos</h2><p>A quién le escribiste, por dónde y qué respondió. Se guarda solo al cambiar cada campo. Los mensajes para mandar están en Perfil y mensajes.</p></div>' +
@@ -773,14 +790,17 @@
       kpi('Respondieron', cuenta(function (c) { return c.estado === 'respondio' || c.estado === 'publico'; }), 'o ya publicaron', cuenta(function (c) { return c.estado === 'respondio' || c.estado === 'publico'; }) ? 'kpi--ok' : '') + '</section>';
     h += '<div class="bar"><div class="chips">' + [['todos', 'Todos']].concat(Object.keys(TIPOS_CT).map(function (k) { return [k, TIPOS_CT[k]]; })).map(function (x) {
       return '<button class="chip" data-mkt-ct-tipo="' + x[0] + '" aria-pressed="' + (x[0] === tipo) + '">' + esc(x[1]) + ' (' + (x[0] === 'todos' ? todos.length : todos.filter(function (c) { return c.tipo === x[0]; }).length) + ')</button>';
-    }).join('') + '</div></div>';
+    }).join('') + (rondas.length ? [0].concat(rondas).map(function (r) {
+      var pend = todos.filter(function (c) { return c.ronda === r && c.estado === 'pendiente'; }).length;
+      return '<button class="chip" data-mkt-ct-ronda="' + r + '" aria-pressed="' + (r === ronda) + '">' + (r ? 'Ronda ' + r + (pend ? ' · ' + pend + ' por mandar' : ' ✓') : 'Todas las rondas') + '</button>';
+    }).join('') : '') + '</div></div>';
     if (!l.length) return h + '<div class="card"><p class="vacio">No hay contactos de este tipo. Agregá uno con el botón de arriba.</p></div>';
     h += '<div class="mkt-grid">';
     l.forEach(function (c) {
       var a = function (campo) { return ' data-mkt-ct="' + esc(c.id) + '" data-mkt-ct-campo="' + campo + '"'; };
       var url = linkContacto(c);
       h += '<section class="sec mkt-ct"><div class="sec__cab"><h3>' + esc(c.medio || 'Contacto nuevo') + '</h3><span class="tags">' +
-        (tocaSeguimiento(c) ? '<span class="tag deuda">Toca seguimiento</span>' : '') + '<span class="tag">' + esc(ESTADOS_CT[c.estado] || c.estado) + '</span></span></div>' +
+        (c.ronda ? '<span class="tag">Ronda ' + c.ronda + '</span>' : '') + (tocaSeguimiento(c) ? '<span class="tag deuda">Toca seguimiento</span>' : '') + '<span class="tag">' + esc(ESTADOS_CT[c.estado] || c.estado) + '</span></span></div>' +
         '<div class="grid">' +
         '<label class="f">Medio o cuenta<input' + a('medio') + ' value="' + esc(c.medio || '') + '" placeholder="Ej.: El Observador"></label>' +
         '<label class="f">Persona<input' + a('persona') + ' value="' + esc(c.persona || '') + '" placeholder="Nombre del periodista o la sección"></label>' +
@@ -795,7 +815,10 @@
       if (msj) h += copiable(msj.texto, msj.etapa + (c.canal === 'instagram' ? ' · copialo y pegalo en Instagram' : c.canal === 'form' ? ' · copialo y pegalo en el formulario' : ''));
       /* WhatsApp con el mensaje ya escrito: wa.me acepta el texto; Instagram no, por eso ahi es copiar y pegar. */
       var waTxt = msj && c.canal === 'whatsapp' && url ? url + '?text=' + encodeURIComponent(msj.texto) : '';
-      h += '<div class="mkt-ct__acc">' + (waTxt ? '<a class="btn btn--sm btn--wa" href="' + esc(waTxt) + '" target="_blank" rel="noopener">Mandar por WhatsApp</a>' : '') +
+      var igMsj = msj && c.canal === 'instagram' && dmInstagram(c);
+      if (igMsj) S.mktCtMsj[c.id] = msj.texto;
+      h += '<div class="mkt-ct__acc">' + (waTxt ? '<a class="btn btn--sm btn--wa" href="' + esc(waTxt) + '" target="_blank" rel="noopener" data-mkt-ct-enviado="' + esc(c.id) + '">Mandar por WhatsApp</a>' : '') +
+        (igMsj ? '<button class="btn btn--sm btn--wa" data-mkt-ct-ig="' + esc(c.id) + '" title="Copia el mensaje, abre el chat de Instagram y la marca como escrita. Pegalo (Ctrl+V) y mandalo.">Mandar por Instagram</button>' : '') +
         (url ? '<a class="btn btn--sm" href="' + esc(url) + '" target="_blank" rel="noopener">Abrir ' + esc(CANALES_CT[c.canal] || 'link') + '</a>' : '') +
         '<button class="btn btn--sm" data-mkt-ct-quitar="' + esc(c.id) + '">Quitar</button></div></section>';
     });
@@ -3226,6 +3249,18 @@
       if (prv) marcarTarifa(prv.id, 'enviado');
       return;
     }
+    /* Contactos: Instagram no acepta el texto en el link; se copia, se abre el chat y se marca como escrito. */
+    var mig = e.target.closest('[data-mkt-ct-ig]');
+    if (mig) {
+      var igId = mig.getAttribute('data-mkt-ct-ig'), igC = contactosMkt().filter(function (x) { return x.id === igId; })[0];
+      if (!igC) return;
+      copiarViejo((S.mktCtMsj || {})[igId] || '');   // antes de abrir la pestana: despues la pagina pierde el foco y no deja copiar
+      window.open(dmInstagram(igC), '_blank', 'noopener');
+      toast('Mensaje copiado: pegalo en el chat (Ctrl+V) y mandalo');
+      marcarEnviadoCt(igId);
+      return;
+    }
+    var men = e.target.closest('[data-mkt-ct-enviado]'); if (men) { marcarEnviadoCt(men.getAttribute('data-mkt-ct-enviado')); return; }
     if (e.target.closest('a[href]:not([href="#"])')) return;   // los enlaces (WhatsApp, email) se abren solos, sin abrir el detalle
     var mc = e.target.closest('[data-mkt-copiar]'); if (mc) { copiarTexto((S.mktCopias || [])[+mc.getAttribute('data-mkt-copiar')] || ''); return; }
     var md = e.target.closest('[data-mkt-dia]'); if (md) { S.mktDia = +md.getAttribute('data-mkt-dia'); pintar(); window.scrollTo(0, 0); return; }
@@ -3234,6 +3269,9 @@
     var mse = e.target.closest('[data-mkt-sec]'); if (mse) { S.mktSec = mse.getAttribute('data-mkt-sec'); pintar(); return; }
     if (e.target.closest('[data-mkt-recargar]')) { S.mkt = null; pintar(); return; }
     var mct = e.target.closest('[data-mkt-ct-tipo]'); if (mct) { S.mktCtTipo = mct.getAttribute('data-mkt-ct-tipo'); pintar(); return; }
+    /* Ronda de creadores: desde la tarea del dia (Hoy) abre Contactos ya filtrado; en Contactos, cambia el filtro. */
+    var mcr = e.target.closest('[data-mkt-ct-ronda]');
+    if (mcr) { S.mktCtRonda = +mcr.getAttribute('data-mkt-ct-ronda'); if (S.mktCtRonda) S.mktCtTipo = 'creador'; S.vista = 'mkt-contactos'; pintar(); window.scrollTo(0, 0); return; }
     if (e.target.closest('[data-mkt-ct-nuevo]')) {
       var tipoNuevo = S.mktCtTipo && S.mktCtTipo !== 'todos' ? S.mktCtTipo : 'prensa';
       guardarMkt({ contacto: { id: 'c-' + Date.now().toString(36), campos: { tipo: tipoNuevo, canal: 'instagram', estado: 'pendiente' } } }).then(function () { pintar(); });

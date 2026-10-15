@@ -648,9 +648,11 @@ window.CS_MKT = {
     "A los \"ya tengo pasaje\": mensaje privado (Mensaje \"Ya tengo pasaje\")."
    ],
    "acc": [
-    "Armá la lista de 15 creadores de viajes (criterios en Colaboraciones) y mandá el Mensaje A a los primeros 5. Propuesta: comisión solo por reservas concretadas con su código, sin anticipos."
+    "Armá la lista de 15 creadores de viajes (criterios en Colaboraciones) y mandá el Mensaje A a los primeros 5. Propuesta: comisión solo por reservas concretadas con su código, sin anticipos.",
+    "La lista ya está en Contactos, en 3 rondas de 5. En cada tarjeta de la ronda 1: \"Mandar por Instagram\" copia el mensaje, abre el chat y la marca como escrita; pegalo y mandalo."
    ],
-   "n": 2
+   "n": 2,
+   "ctRonda": 1
   },
   {
    "f": "2026-10-16",
@@ -756,9 +758,10 @@ window.CS_MKT = {
     "Historia: foto del tour + \"Isla Campeche · 6 h · US$ [precio]\" + sticker de enlace a la página de Florianópolis en la app."
    ],
    "acc": [
-    "Mandá el Mensaje A a 5 creadores más (del sur de Brasil, si encontrás)."
+    "Mandá el Mensaje A a 5 creadores más (del sur de Brasil, si encontrás): la ronda 2 de Contactos."
    ],
-   "n": 5
+   "n": 5,
+   "ctRonda": 2
   },
   {
    "f": "2026-10-19",
@@ -1129,9 +1132,10 @@ window.CS_MKT = {
     "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
    ],
    "acc": [
-    "Mandá el Mensaje A a 5 creadores nuevos."
+    "Mandá el Mensaje A a 5 creadores nuevos: la ronda 3 de Contactos."
    ],
-   "n": 15
+   "n": 15,
+   "ctRonda": 3
   },
   {
    "f": "2026-10-29",
@@ -1816,6 +1820,156 @@ window.CS_MKT = {
    "persona": "",
    "canal": "instagram",
    "dato": "@viajero.conmochila"
+  },
+  {
+   "id": "cr-elimodernel",
+   "ronda": 1,
+   "tipo": "creador",
+   "medio": "Eliana Modernel",
+   "persona": "Eliana",
+   "canal": "instagram",
+   "dato": "@elimodernel",
+   "nota": "Viajes, ~11.500 seguidores (HypeAuditor). Antes de mandar: fijate que haya publicado de Brasil en el último año y, si sí, anotalo en \"Qué publicación viste\"."
+  },
+  {
+   "id": "cr-deaculla",
+   "ronda": 1,
+   "tipo": "creador",
+   "medio": "De acá pa' allá (Mauge y Seba)",
+   "persona": "",
+   "canal": "instagram",
+   "dato": "@deaculla",
+   "nota": "Pareja viajera, ~40.000 seguidores (HypeAuditor). Antes de mandar: fijate que hayan publicado de Brasil en el último año."
+  },
+  {
+   "id": "cr-ceciliagp8",
+   "ronda": 1,
+   "tipo": "creador",
+   "medio": "Cecilia García",
+   "persona": "Cecilia",
+   "canal": "instagram",
+   "dato": "@ceciliagp8",
+   "nota": "Viajes y carreras, ~41.000 seguidores (HypeAuditor). Antes de mandar: fijate que haya publicado de Brasil en el último año."
+  },
+  {
+   "id": "cr-lorenaromaso",
+   "ronda": 1,
+   "tipo": "creador",
+   "medio": "Lorena Romaso · De viaje",
+   "persona": "Lorena",
+   "canal": "instagram",
+   "dato": "@lorenaromaso.deviaje",
+   "nota": "Viajera y profesora de Geografía, ~47.000 seguidores (HypeAuditor). Antes de mandar: fijate que haya publicado de Brasil en el último año."
+  },
+  {
+   "id": "cr-dgexpediciones",
+   "ronda": 1,
+   "tipo": "creador",
+   "medio": "Diego González · Expediciones",
+   "persona": "Diego",
+   "canal": "instagram",
+   "dato": "@dgexpediciones",
+   "nota": "Viajes y naturaleza, ~50.000 seguidores (HypeAuditor). Antes de mandar: fijate que haya publicado de Brasil en el último año."
+  },
+  {
+   "id": "cr-viajesconlucas",
+   "ronda": 2,
+   "tipo": "creador",
+   "medio": "Viajes con Lucas",
+   "persona": "Lucas",
+   "canal": "instagram",
+   "dato": "@viajesconlucas",
+   "nota": "Lucas Garmendia, creador de viajes, ~50.600 seguidores (HypeAuditor)."
+  },
+  {
+   "id": "cr-xaturna",
+   "ronda": 2,
+   "tipo": "creador",
+   "medio": "Martina Ramos (TikTok)",
+   "persona": "Martina",
+   "canal": "otro",
+   "dato": "https://www.tiktok.com/@xaturna",
+   "nota": "Uruguaya en TikTok, publicó el viaje en auto de Montevideo a Florianópolis. Seguidores sin dato: fijate que tenga más de 3.000. TikTok no deja escribir sin seguirse mutuamente: si no se puede, buscá su Instagram y cambiá \"Por dónde\"."
+  },
+  {
+   "id": "cr-matiabou",
+   "ronda": 2,
+   "tipo": "creador",
+   "medio": "Matías Abou",
+   "persona": "Matías",
+   "canal": "instagram",
+   "dato": "@matiabou",
+   "nota": "Viajes, menos de 25.000 seguidores (Modash). Antes de mandar: fijate que haya publicado de Brasil en el último año."
+  },
+  {
+   "id": "cr-daiapanizza",
+   "ronda": 2,
+   "tipo": "creador",
+   "medio": "Daiana Panizza",
+   "persona": "Daiana",
+   "canal": "instagram",
+   "dato": "@daia_panizza",
+   "nota": "Lifestyle y viajes, menos de 25.000 seguidores (Modash). Antes de mandar: fijate que haya publicado de Brasil en el último año."
+  },
+  {
+   "id": "cr-jorgemartinezuy",
+   "ronda": 2,
+   "tipo": "creador",
+   "medio": "Jorge Martínez",
+   "persona": "Jorge",
+   "canal": "instagram",
+   "dato": "@jorgemartinezuy",
+   "nota": "Viajes, ~55.000 seguidores (HypeAuditor)."
+  },
+  {
+   "id": "cr-nomadessobreruedas",
+   "ronda": 3,
+   "tipo": "creador",
+   "medio": "Nómades sobre ruedas (La Turka y el Vikingo)",
+   "persona": "",
+   "canal": "instagram",
+   "dato": "@nomadessobreruedas",
+   "nota": "Viajes en motorhome, ~65.000 seguidores (HypeAuditor)."
+  },
+  {
+   "id": "cr-alamarchanta",
+   "ronda": 3,
+   "tipo": "creador",
+   "medio": "Viajando a la marchanta (Mauri y Tati)",
+   "persona": "",
+   "canal": "instagram",
+   "dato": "@viajando_a_la_marchanta",
+   "nota": "Pareja uruguaya, viajes en minicamper, ~67.000 seguidores (HypeAuditor)."
+  },
+  {
+   "id": "cr-tepartislaboca",
+   "ronda": 3,
+   "tipo": "creador",
+   "medio": "Re/comiendo · Te partís la boca",
+   "persona": "",
+   "canal": "instagram",
+   "dato": "@tepartislaboca",
+   "nota": "Viajes y gastronomía, ~59.000 seguidores (HypeAuditor). Fijate que sea una persona y no un negocio."
+  },
+  {
+   "id": "cr-aventurerosxelmundo",
+   "ronda": 3,
+   "tipo": "creador",
+   "medio": "Aventureros x el mundo",
+   "persona": "Sergio",
+   "canal": "instagram",
+   "dato": "@aventureros_x_el_mundo",
+   "nota": "Sergio Vallejo, naturaleza y viajes, ~87.000 seguidores (HypeAuditor)."
+  },
+  {
+   "id": "cr-mochiviaja",
+   "ronda": 3,
+   "tipo": "creador",
+   "medio": "Maximiliano Forte · Mochiviaja",
+   "persona": "Maximiliano",
+   "canal": "instagram",
+   "dato": "@mochiviaja",
+   "nota": "~95.000 seguidores (HypeAuditor). Puede ser la misma persona que \"Viajero con mochila\": si es así, quitá una de las dos tarjetas."
   }
  ],
  "plantillasContacto": {
