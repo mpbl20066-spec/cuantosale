@@ -2055,14 +2055,16 @@
     var pend = pendPorTour();
     return S.ops.datos.servicios.filter(function (x) { return x.proveedor_id === prId && !x.eliminado_at && pend[x.id]; });
   }
+  function mailValido(pr) { var m = String(pr && pr.email || '').trim(); return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m) ? m : ''; }
   function consultaHtml(s) {
     var pr = provDe(s.proveedor_id);
     if (!pr) return '<span class="sub">sin agencia</span>';
     var c = agenciaConsulta(pr.id), est = estConsulta(c), n = paseosPendAgencia(pr.id).length;
     var marcar = function (estado, t) { return '<button type="button" class="btn btn--sm" data-cons-marca="' + esc(pr.id) + '|' + estado + '" style="min-height:24px;padding:1px 8px;font-size:12px">' + t + '</button>'; };
     var escribir = function (t) {
-      if (!telWa(pr) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(pr.email || '').trim())) return '<span class="sub">la agencia no tiene WhatsApp ni email</span>';
-      return '<button type="button" class="btn btn--sm" data-cons-escribir="' + esc(s.id) + '" style="min-height:24px;padding:1px 8px;font-size:12px" title="Un solo mensaje con sus ' + n + ' paseo(s) pendientes">' + t + (n > 1 ? ' por sus ' + n : '') + (telWa(pr) ? ' (WhatsApp)' : ' (email)') + '</button>';
+      var mail = mailValido(pr);
+      if (!telWa(pr) && !mail) return '<span class="sub">la agencia no tiene email ni WhatsApp</span>';
+      return '<button type="button" class="btn btn--sm" data-cons-escribir="' + esc(s.id) + '" style="min-height:24px;padding:1px 8px;font-size:12px" title="Un solo ' + (mail ? 'email' : 'WhatsApp') + ' con sus ' + n + ' paseo(s) pendientes">' + t + (n > 1 ? ' por sus ' + n : '') + (mail ? ' (email)' : ' (WhatsApp, no tiene email)') + '</button>';
     };
     if (est === 'nada') return escribir('Escribirle');
     // Esperando -> respondio (o se marca solo si escribe por WhatsApp) -> tarifa acordada / no trabaja con agencias.
@@ -2141,6 +2143,14 @@
     var c = agenciaConsulta(pr.id);
     var ya = c ? '\n\nOJO: ya le escribiste el ' + fechaHora(c.at) + ' (' + CONS_TXT[estConsulta(c)] + ').' : '';
     var txt = '¿Mandarle a ' + pr.nombre + ' UN mensaje pidiendo tarifa por sus ' + todos.length + ' paseo(s)?\n\n• ' + lista.join('\n• ') + ya;
+    // Por email si tiene (sale desde el server, con un clic); si no, WhatsApp.
+    if (mailValido(pr)) {
+      if (!confirm(txt.replace('UN mensaje', 'UN email (a ' + mailValido(pr) + ')'))) return;
+      toast('Enviando email…');
+      return api('proveedor/pedir-tarifa-mail', { id: pr.id, paseos: todos.map(nombre) })
+        .then(function (r) { toast('Email enviado a ' + r.email + '. La respuesta llega al mail de reservas.'); marcarTarifa(pr.id, 'enviado'); return marcarConsulta(ids, 'enviado'); })
+        .catch(function (er) { alert(er.message); });
+    }
     if (telWa(pr)) {
       if (!confirm(txt)) return;
       toast('Enviando…');
@@ -2148,10 +2158,7 @@
         .then(function () { toast('Enviado a ' + pr.nombre + '. La respuesta llega a WhatsApp en el panel.'); marcarTarifa(pr.id, 'enviado'); return marcarConsulta(ids, 'enviado'); })
         .catch(function (er) { alert(er.message); });
     }
-    if (!confirm(txt.replace('UN mensaje', 'UN email'))) return;
-    location.href = 'mailto:' + String(pr.email).trim() + '?subject=' + encodeURIComponent('Tarifas para agência - CuántoSale') + '&body=' + encodeURIComponent(msgTarifa(pr, todos));
-    marcarTarifa(pr.id, 'enviado');
-    marcarConsulta(ids, 'enviado');
+    toast('La agencia no tiene email ni WhatsApp');
   }
   /* Respondio / no respondio / borrar: para toda la agencia (sus pendientes y los que ya tenian marca). */
   function marcarAgencia(prId, estado) {
