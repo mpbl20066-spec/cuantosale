@@ -99,7 +99,7 @@ window.CS_MKT = {
     "- [urg-bio] Bio y link con utm en Instagram y TikTok (día 1).",
     "- [urg-fijados] Fijados: \"¿Qué es?\" el 15/10, \"¿Cómo funciona?\" el 17/10 y \"Cómo reservar un tour\" el 20/10 (hay que grabarlo antes del 18/10).",
     "- [urg-campana] Elegir los 3 a 5 tours o traslados de la primera campaña. Propuesta: piscinas de Galés (Maragogi), jangada (Porto de Galinhas), Cristo + Pan de Azúcar (Río), traslado a Jericoacoara y traslado a Ilha Grande. Revisar en Catálogo que tengan precio, fotos e inclusiones.",
-    "- [urg-medicion] Poder medir del clic del reel a la reserva confirmada: hoy la web cuenta la llegada con utm pero el pedido no guarda de dónde vino. Pedile a Claude que lo agregue.",
+    "- [urg-medicion] Poder medir del clic del reel a la reserva confirmada: hecho el 14/10: la web recuerda 30 días el link con el que llegó la persona y el pedido lo guarda (Tablero > Pedidos por fuente). Solo falta usar siempre los links con utm.",
     "- [urg-destacada] Destacada nueva \"Reservas\": cómo se reserva, seña, cancelación, número oficial (15/10, y se suma la historia del 20/10).",
     "- [urg-origen] Respuesta rápida en WhatsApp con \"¿Cómo nos conociste?\" (día 1).",
     "- [urg-creadores] Primeros 15 creadores identificados y 10 contactados (días 2 a 9).",
