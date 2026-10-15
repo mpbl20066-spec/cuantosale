@@ -454,7 +454,7 @@
   }
 
   /* ---------- Marketing: el plan (public/admin/marketing-datos.js, generado) y lo que se va marcando (lib/marketing.js) ----------
-     Hoy = lo que toca hacer hoy del calendario de 30 dias. Tablero = una semana (de jueves a miercoles, desde el inicio
+     Hoy = lo que toca hacer hoy del calendario de 30 dias. Tablero = una semana (de miercoles a martes, desde el inicio
      del plan): lo de la web y los pedidos sale solo; lo de Instagram, TikTok y anuncios se carga a mano. */
   var OBJ_MKT = { atraer: 'Atraer', demostrar: 'Demostrar la app', resolver: 'Resolver una necesidad', convertir: 'Convertir (reserva)' };
   var DIAS_SEM = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
@@ -466,7 +466,7 @@
   function cargarMkt() {
     S.mkt = { cargando: true };
     var datos = window.CS_MKT ? Promise.resolve() : new Promise(function (ok, mal) {
-      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=15'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
+      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=16'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
       document.head.appendChild(s);
     });
     Promise.all([datos, api('marketing'), api('uso?dias=90').catch(function () { return null; })]).then(function (r) {
@@ -607,7 +607,7 @@
     var desde = sumarDias(M.inicio, S.mktSem * 7), hasta = sumarDias(desde, 6), id = 'sem-' + desde;
     var x = numerosSemana(desde, hasta), ant = S.mktSem ? numerosSemana(sumarDias(desde, -7), sumarDias(desde, -1)) : null;
     var man = (S.mkt.estado.semanas[id]) || {}, manAnt = ant ? (S.mkt.estado.semanas['sem-' + sumarDias(desde, -7)] || {}) : {};
-    var h = '<div class="vhead"><div><h2>Tablero semanal</h2><p>Semana ' + (S.mktSem + 1) + ': del ' + esc(fechaLarga(desde)) + ' al ' + esc(fechaLarga(hasta)) + '. La revisión es el miércoles.</p></div></div>';
+    var h = '<div class="vhead"><div><h2>Tablero semanal</h2><p>Semana ' + (S.mktSem + 1) + ': del ' + esc(fechaLarga(desde)) + ' al ' + esc(fechaLarga(hasta)) + '. La revisión es el martes.</p></div></div>';
     h += '<div class="bar"><div class="chips">' + Array.apply(null, Array(nSem)).map(function (_, k) { return '<button class="chip" data-mkt-sem="' + k + '" aria-pressed="' + (k === S.mktSem) + '">Semana ' + (k + 1) + '</button>'; }).join('') + '</div></div>';
     var delta = function (v, a) { if (a == null) return ''; var dd = v - a; return dd ? ' <span class="' + (dd > 0 ? 'ok' : 'deuda') + '">' + (dd > 0 ? '+' : '') + r2(dd) + '</span>' : ' <span class="sub" style="display:inline">=</span>'; };
     var fila = function (t, v, a, nota) { return '<tr><td>' + esc(t) + (nota ? '<span class="sub">' + esc(nota) + '</span>' : '') + '</td><td class="num">' + esc(v) + delta(v, a) + '</td></tr>'; };
@@ -649,7 +649,7 @@
     }).join('') + '<p class="sub">Se guarda solo al salir de cada casillero.</p></section>';
     h += '<section class="sec"><h3>Revisión de la semana</h3><p class="sub">1 cosa que repito, 1 que cambio, 1 que dejo. Y las preguntas que se repitieron.</p>' +
       '<textarea rows="6" data-mkt-nota="' + id + '" placeholder="Repito: …&#10;Cambio: …&#10;Dejo: …&#10;Preguntas que llegaron: …">' + esc(S.mkt.estado.notas[id] || '') + '</textarea>' +
-      '<p class="sub">Cómo hacer la revisión: Estrategia > Revisión del miércoles.</p></section>';
+      '<p class="sub">Cómo hacer la revisión: Estrategia > Revisión del martes.</p></section>';
     return h + '</div>';
   }
   function vistaMktEstrategia() {
