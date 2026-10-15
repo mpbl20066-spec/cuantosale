@@ -2036,18 +2036,33 @@
     });
     return grupos;
   }
-  function consultaHtml(s, c) {
-    var pr = provDe(s.proveedor_id), est = estConsulta(c);
-    var marcar = function (estado, t) { return '<button type="button" class="btn btn--sm" data-cons-marca="' + esc(s.id) + '|' + estado + '" style="min-height:24px;padding:1px 8px;font-size:12px">' + t + '</button>'; };
+  /* La consulta es por agencia: un mensaje con todos sus paseos pendientes, no uno por paseo (es spam). El estado de la
+     agencia es lo ultimo que se anoto: en cualquiera de sus paseos (Por publicar) o en su ficha (Pedir tarifa neta). */
+  function agenciaConsulta(prId) {
+    var d = S.ops.datos, cons = d.consultas || {}, ult = null, pr = provDe(prId);
+    d.servicios.forEach(function (x) { var c = cons[x.id]; if (x.proveedor_id === prId && c && CONS_TXT[c.estado] && (!ult || String(c.resp_at || c.at) > String(ult.resp_at || ult.at))) ult = c; });
+    if (pr && pr.tarifa_pedida_at && pr.tarifa_estado && (!ult || String(pr.tarifa_respondio_at || pr.tarifa_pedida_at) > String(ult.resp_at || ult.at)))
+      ult = { estado: pr.tarifa_estado === 'respondio' ? 'respondio' : (pr.tarifa_estado === 'sin_respuesta' ? 'sin_respuesta' : 'esperando'), at: pr.tarifa_pedida_at, resp_at: pr.tarifa_respondio_at };
+    return ult;
+  }
+  /* Sus paseos que esperan en "Por publicar" (los de la consulta). */
+  function paseosPendAgencia(prId) {
+    var pend = pendPorTour();
+    return S.ops.datos.servicios.filter(function (x) { return x.proveedor_id === prId && !x.eliminado_at && pend[x.id]; });
+  }
+  function consultaHtml(s) {
+    var pr = provDe(s.proveedor_id);
+    if (!pr) return '<span class="sub">sin agencia</span>';
+    var c = agenciaConsulta(pr.id), est = estConsulta(c), n = paseosPendAgencia(pr.id).length;
+    var marcar = function (estado, t) { return '<button type="button" class="btn btn--sm" data-cons-marca="' + esc(pr.id) + '|' + estado + '" style="min-height:24px;padding:1px 8px;font-size:12px">' + t + '</button>'; };
     var escribir = function (t) {
-      if (!pr) return '<span class="sub">sin agencia</span>';
       if (!telWa(pr) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(pr.email || '').trim())) return '<span class="sub">la agencia no tiene WhatsApp ni email</span>';
-      return '<button type="button" class="btn btn--sm" data-cons-escribir="' + esc(s.id) + '" style="min-height:24px;padding:1px 8px;font-size:12px">' + t + (telWa(pr) ? ' (WhatsApp)' : ' (email)') + '</button>';
+      return '<button type="button" class="btn btn--sm" data-cons-escribir="' + esc(s.id) + '" style="min-height:24px;padding:1px 8px;font-size:12px" title="Un solo mensaje con sus ' + n + ' paseo(s) pendientes">' + t + (n > 1 ? ' por sus ' + n : '') + (telWa(pr) ? ' (WhatsApp)' : ' (email)') + '</button>';
     };
     if (est === 'nada') return escribir('Escribirle');
     var cls = est === 'respondio' ? 'p-confirmado' : (est === 'sin_respuesta' ? 'p-cancelado' : 'p-pendiente');
     var cuando = est === 'esperando' ? c.at : (c.resp_at || c.at);
-    return '<span class="pill ' + cls + '" title="Le escribiste el ' + esc(fechaHora(c.at)) + '">' + esc(est === 'esperando' ? 'Escrito' : CONS_TXT[est]) + ' · ' + esc(fecha(cuando)) + '</span> ' +
+    return '<span class="pill ' + cls + '" title="Le escribiste a ' + esc(pr.nombre) + ' el ' + esc(fechaHora(c.at)) + '">Agencia: ' + esc(est === 'esperando' ? 'escrita' : CONS_TXT[est].toLowerCase()) + ' · ' + esc(fecha(cuando)) + '</span> ' +
       (est === 'esperando' ? marcar('respondio', 'Respondió') + ' ' + marcar('sin_respuesta', 'No respondió') : '') +
       (est === 'sin_respuesta' ? escribir('Volver a escribir') : '') +
       (est !== 'esperando' ? ' ' + marcar('borrar', 'Borrar') : '');
@@ -2092,7 +2107,7 @@
             return '<tr' + (S.sel[c.id] ? ' style="background:var(--bg)"' : '') + '><td style="width:28px"><input type="checkbox" data-sel="' + esc(c.id) + '" aria-label="Elegir"' + (S.sel[c.id] ? ' checked' : '') + ' style="width:18px;height:18px;min-height:0;accent-color:var(--ink)"></td>' +
               '<td><a class="lnk" href="#" data-srv="' + esc(s.id) + '">' + esc(s.titulo) + '</a>' + faltaHtml(s) + '<span class="sub">' + esc(pr ? pr.nombre : 'sin agencia') + (s.link_web ? ' · ' + verProv(s.link_web) : '') + '</span></td>' +
               '<td class="num" data-l="Precio en la web">' + (c.publicado_despues != null ? '<b>' + pub(c.publicado_despues) + '</b><span class="sub">' + usd(c.publicado_despues) + '</span>' : '<span class="deuda">sin precio</span>') + '</td>' +
-              '<td data-l="Consulta">' + consultaHtml(s, cons[s.id]) + '</td>' +
+              '<td data-l="Consulta">' + consultaHtml(s) + '</td>' +
               '<td style="white-space:nowrap"><button class="btn btn--sm btn--txt-danger" data-desc-uno="' + esc(c.id) + '">Descartar</button> <button class="btn btn--sm btn--main" data-pub-uno="' + esc(c.id) + '">Publicar</button></td></tr>';
           }).join('') + '</tbody></table></div></article>';
       });
@@ -2100,24 +2115,41 @@
     });
     return '<p class="sub" style="margin:0 0 4px">' + d.pendientes.length + ' por publicar en ' + nGrupos + ' experiencias · ' + nYa + ' ya tienen uno parecido en la web. Se juntan por el nombre: revisá antes de descartar.</p>' + h;
   }
-  /* Se le escribe a la agencia por este paseo solo. Si ya se le escribio por otro paseo, avisa (no es un error). */
+  /* Un mensaje a la agencia con sus paseos pendientes (este primero, despues los del mismo destino; la plantilla entra
+     hasta 8). Quedan anotados todos sus pendientes, y la agencia en su ficha (Proveedores). */
   function escribirConsulta(tourId) {
     var d = S.ops && S.ops.datos, s = d && d.servicios.filter(function (x) { return x.id === tourId; })[0];
     var pr = s && provDe(s.proveedor_id);
     if (!pr) return toast('Este servicio no tiene agencia');
-    var cons = d.consultas || {}, otros = d.servicios.filter(function (x) { return x.id !== s.id && x.proveedor_id === pr.id && cons[x.id]; });
-    var aviso = otros.length ? '\nYa le escribiste por ' + otros.length + ' paseo(s) más (' + otros.slice(0, 3).map(function (x) { return x.titulo; }).join(', ') + ').' : '';
-    var paseo = String(s.titulo).replace(/ · [^·]*$/, '') + ' (' + destNombre(s.destino) + ')';
+    var todos = paseosPendAgencia(pr.id).filter(function (x) { return x.id !== s.id; })
+      .sort(function (a, b) { return (b.destino === s.destino) - (a.destino === s.destino) || a.titulo.localeCompare(b.titulo, 'es'); });
+    todos.unshift(s);
+    var nombre = function (x) { return String(x.titulo).replace(/ · [^·]*$/, '') + ' (' + destNombre(x.destino) + ')'; };
+    var lista = todos.slice(0, 8).map(nombre);
+    if (todos.length > 8) lista[7] = lista[7] + ' e mais ' + (todos.length - 8) + ' passeios';
+    var ids = todos.map(function (x) { return x.id; });
+    var c = agenciaConsulta(pr.id);
+    var ya = c ? '\n\nOJO: ya le escribiste el ' + fechaHora(c.at) + ' (' + CONS_TXT[estConsulta(c)] + ').' : '';
+    var txt = '¿Mandarle a ' + pr.nombre + ' UN mensaje pidiendo tarifa por sus ' + todos.length + ' paseo(s)?\n\n• ' + lista.join('\n• ') + ya;
     if (telWa(pr)) {
-      if (!confirm('¿Mandarle a ' + pr.nombre + ' por WhatsApp el pedido de tarifa por "' + paseo + '"?' + aviso)) return;
+      if (!confirm(txt)) return;
       toast('Enviando…');
-      return api('proveedor/pedir-tarifa', { id: pr.id, paseos: [paseo] })
-        .then(function () { toast('Enviado a ' + pr.nombre + '. La respuesta llega a WhatsApp en el panel.'); return marcarConsulta([s.id], 'enviado'); })
+      return api('proveedor/pedir-tarifa', { id: pr.id, paseos: lista })
+        .then(function () { toast('Enviado a ' + pr.nombre + '. La respuesta llega a WhatsApp en el panel.'); marcarTarifa(pr.id, 'enviado'); return marcarConsulta(ids, 'enviado'); })
         .catch(function (er) { alert(er.message); });
     }
-    if (aviso && !confirm(aviso.trim() + ' ¿Escribirle igual?')) return;
-    location.href = 'mailto:' + String(pr.email).trim() + '?subject=' + encodeURIComponent('Tarifas para agência - CuántoSale') + '&body=' + encodeURIComponent(msgTarifa(pr, [s]));
-    marcarConsulta([s.id], 'enviado');
+    if (!confirm(txt.replace('UN mensaje', 'UN email'))) return;
+    location.href = 'mailto:' + String(pr.email).trim() + '?subject=' + encodeURIComponent('Tarifas para agência - CuántoSale') + '&body=' + encodeURIComponent(msgTarifa(pr, todos));
+    marcarTarifa(pr.id, 'enviado');
+    marcarConsulta(ids, 'enviado');
+  }
+  /* Respondio / no respondio / borrar: para toda la agencia (sus pendientes y los que ya tenian marca). */
+  function marcarAgencia(prId, estado) {
+    var cons = S.ops.datos.consultas || {}, pend = pendPorTour();
+    var ids = S.ops.datos.servicios.filter(function (x) { return x.proveedor_id === prId && (pend[x.id] || cons[x.id]); }).map(function (x) { return x.id; });
+    var pr = provDe(prId);
+    if (pr && pr.tarifa_pedida_at) marcarTarifa(prId, estado === 'borrar' ? 'borrar' : estado);
+    return ids.length ? marcarConsulta(ids, estado) : pintar();
   }
   function marcarConsulta(ids, estado) {
     return api('ops/consulta', { ids: ids, estado: estado }).then(function (r) {
@@ -3328,7 +3360,7 @@
     var pt = e.target.closest('[data-ptipo]'); if (pt) { S.pubTipo = pt.getAttribute('data-ptipo'); pintar(); return; }
     var pm = e.target.closest('[data-pmodo]'); if (pm) { S.pubModo = pm.getAttribute('data-pmodo'); try { localStorage.setItem('cs_pub_modo', S.pubModo); } catch (er) {} pintar(); return; }
     var ce = e.target.closest('[data-cons-escribir]'); if (ce) { e.preventDefault(); escribirConsulta(ce.getAttribute('data-cons-escribir')); return; }
-    var cm = e.target.closest('[data-cons-marca]'); if (cm) { var cz = cm.getAttribute('data-cons-marca').split('|'); marcarConsulta([cz[0]], cz[1]); return; }
+    var cm = e.target.closest('[data-cons-marca]'); if (cm) { var cz = cm.getAttribute('data-cons-marca').split('|'); marcarAgencia(cz[0], cz[1]); return; }
     var cg = e.target.closest('[data-grupo-sel]'); if (cg) { var gids = cg.getAttribute('data-grupo-sel').split(','), todosG = gids.every(function (x) { return S.sel[x]; }); gids.forEach(function (x) { if (todosG) delete S.sel[x]; else S.sel[x] = 1; }); pintar(); return; }
     var pu = e.target.closest('[data-pub-uno]'); if (pu) { if (S.dirty && !confirm('Lo que editaste y no guardaste se pierde. ¿Publicar igual?')) return; S.dirty = false; publicarCambios([pu.getAttribute('data-pub-uno')]); return; }
     var du = e.target.closest('[data-desc-uno]'); if (du) { S.dirty = false; descartarCambios([du.getAttribute('data-desc-uno')]); return; }
