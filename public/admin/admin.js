@@ -332,16 +332,22 @@
     var tags = function (ds, max) { return ds.length ? '<span class="tags">' + ds.slice(0, max).map(function (x) { return '<span class="tag">' + esc(x) + '</span>'; }).join('') + (ds.length > max ? '<span class="tag">+' + (ds.length - max) + '</span>' : '') + '</span>' : '<span class="sub">sin destino</span>'; };
     var catLnk = function (pr) { return enCatalogo[pr.id] ? '<a class="lnk" href="#" data-ver-srv-prov="' + esc(pr.id) + '">' + enCatalogo[pr.id] + '</a>' : '—'; };
     var debe = function (pr) { return deuda[pr.id].aPagar ? '<span class="deuda">' + usd(deuda[pr.id].aPagar) + '</span>' : '<span class="ok">al día</span>'; };
+    /* Tacho en cada proveedor: lo manda a la papelera sin abrir la ficha. En la papelera, la flecha lo saca. */
+    var tacho = function (pr) {
+      return S.provPapelera
+        ? '<button type="button" class="btn btn--sm btn--icono prov-tacho" data-prov-tacho="' + esc(pr.id) + '|0" title="Sacar de la papelera" aria-label="Sacar de la papelera a ' + esc(pr.nombre) + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>'
+        : '<button type="button" class="btn btn--sm btn--icono prov-tacho" data-prov-tacho="' + esc(pr.id) + '|1" title="Mandar a la papelera" aria-label="Mandar a la papelera a ' + esc(pr.nombre) + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>';
+    };
     if (vista === 'tarjetas') return h + '</div><div class="pcs">' + lista.map(function (pr) {
       var pp = partesProv(pr), dp = deuda[pr.id];
-      return '<article class="pc" data-prov="' + esc(pr.id) + '"><div class="pc__cab"><b class="pc__n">' + esc(pr.nombre) + '</b>' + (pr.activo === false ? '<span class="pill p-cancelado">inactivo</span>' : tarifa(pr)) + '</div>' +
+      return '<article class="pc" data-prov="' + esc(pr.id) + '"><div class="pc__cab"><b class="pc__n">' + esc(pr.nombre) + '</b><span class="pc__der">' + (pr.activo === false ? '<span class="pill p-cancelado">inactivo</span>' : tarifa(pr)) + tacho(pr) + '</span></div>' +
         tags(pp.destinos, 4) +
         (pp.hace ? '<span class="sub pc__hace">' + esc(pp.hace) + '</span>' : '') +
         '<span class="sub">' + esc(pr.contacto || '') + (pr.contacto && pr.telefono ? ' · ' : '') + esc(pr.telefono || '') + (pr.email ? '<br>' + esc(pr.email) : '') + '</span>' +
         '<div class="sc__precios pc__nums"><div><small>Catálogo</small><b>' + catLnk(pr) + '</b></div><div><small>Pedidos</small><b>' + dp.servicios + '</b></div><div><small>Le debemos</small><b>' + debe(pr) + '</b></div></div>' +
         '<div class="pc__pie">' + (escribir(pr) ? '<span class="sub">Pedir tarifa:</span>' + escribir(pr) : '<span class="sub">Sin email ni WhatsApp</span>') + (pr.tarifa_pedida_at ? '<span class="sub pc__fecha">pedida ' + esc(fecha(pr.tarifa_pedida_at)) + '</span>' : '') + '</div></article>';
     }).join('') + '</div>';
-    h += '<div style="overflow-x:auto"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Tarifa neta</th><th class="num">Transfers y tours</th><th class="num">En pedidos</th><th class="num">Le debemos</th></tr></thead><tbody>';
+    h += '<div style="overflow-x:auto"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Tarifa neta</th><th class="num">Transfers y tours</th><th class="num">En pedidos</th><th class="num">Le debemos</th><th></th></tr></thead><tbody>';
     lista.forEach(function (pr) {
       var dp = deuda[pr.id];
       h += '<tr class="row" data-prov="' + esc(pr.id) + '"><td data-l="Proveedor"><b>' + esc(pr.nombre) + '</b>' + (pr.activo === false ? ' <span class="pill p-cancelado">inactivo</span>' : '') + '<span class="sub">' + esc(pr.contacto || '') + (pr.contacto && pr.telefono ? ' · ' : '') + esc(pr.telefono || '') + '</span></td>' +
@@ -349,7 +355,7 @@
         '<td data-l="Tarifa neta">' + tarifa(pr) + (pr.tarifa_pedida_at ? '<span class="sub">pedida ' + esc(fecha(pr.tarifa_pedida_at)) + '</span>' : '') + '<span class="prov-esc">' + escribir(pr) + '</span></td>' +
         '<td class="num" data-l="Transfers y tours">' + catLnk(pr) + '</td>' +
         '<td class="num" data-l="En pedidos">' + dp.servicios + '<span class="sub">en ' + dp.pedidos + ' pedido(s)</span></td>' +
-        '<td class="num" data-l="Le debemos">' + debe(pr) + '</td></tr>';
+        '<td class="num" data-l="Le debemos">' + debe(pr) + '</td><td class="num prov-tacho-td">' + tacho(pr) + '</td></tr>';
     });
     return h + '</tbody></table></div></div>';
   }
@@ -3229,6 +3235,16 @@
     var cm = e.target.closest('[data-cmp]'); if (cm) { elegirCmp(cm.getAttribute('data-cmp'), cm.getAttribute('data-cmp-id')); return; }
     var mo = e.target.closest('[data-modo]');
     if (mo) { var moz = mo.getAttribute('data-modo').split('|'); S.modos = S.modos || {}; S.modos[moz[0]] = moz[1]; try { localStorage.setItem('cs_' + moz[0] + '_vista', moz[1]); } catch (er) { /* sin storage */ } pintar(); return; }
+    var pta = e.target.closest('[data-prov-tacho]');
+    if (pta) {
+      e.preventDefault(); e.stopPropagation();
+      var ptz = pta.getAttribute('data-prov-tacho').split('|'), tirarP = ptz[1] === '1';
+      pta.disabled = true;
+      api('proveedor/papelera', { id: ptz[0], eliminar: tirarP })
+        .then(function () { toast(tirarP ? 'En la papelera' : 'Fuera de la papelera (sigue inactivo hasta que lo actives)'); return cargar(); })
+        .catch(function (er) { pta.disabled = false; toast(er.message); });
+      return;
+    }
     var pfi = e.target.closest('[data-pfil]');
     if (pfi) { var pfk = pfi.getAttribute('data-pfil'); if (pfk === 'limpiar') { S.provFil = ''; S.provDest = 'todos'; S.qProv = ''; } else S.provFil = S.provFil === pfk ? '' : pfk; pintar(); return; }
     var sf = e.target.closest('[data-sfil]');
