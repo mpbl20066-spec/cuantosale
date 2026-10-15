@@ -1412,6 +1412,24 @@
   function actualizarBadgePub() { var b = document.getElementById('tab-pub'); if (b) { b.textContent = nPend() || ''; b.hidden = !nPend(); } }
   function nPend() { return S.ops && S.ops.datos ? S.ops.datos.pendientes.length : 0; }
 
+  /* "Full day Arraial do Cabo (desde Rio)": el titulo dice de donde sale. Si es otro destino de la web, se ofrece
+     pasarlo ahi (el cliente lo busca en Rio, no en Arraial). Los traslados no: van de un lugar a otro. */
+  function saleDesde(s, dst) {
+    if (s.tipo === 'traslado') return null;
+    var m = String(s.titulo || '').match(/\b(?:desde|saindo de|saliendo de|partindo de|from)\s+(?:o |a |el |la |os |as )?([A-Za-zÀ-ÿ' .]{3,30}?)\s*(?:\)|,|\/|–|-|\+|$)/i);
+    if (!m) return null;
+    var t = sinTildes(m[1].trim()), lista = (S.ops.datos.destinos || []), hit = null;
+    if (/^(los |dos )?hote/.test(t)) return null;
+    lista.forEach(function (x) { var n = sinTildes(x.nombre); if (!hit && (n === t || n.indexOf(t + ' ') === 0 || n.indexOf(t + ',') === 0 || t.indexOf(n) === 0)) hit = x.key; });
+    if (hit === dst) return null;
+    return { texto: m[1].trim(), key: hit };
+  }
+  function moverDestino(ids, key) {
+    var n = ids.length, hechos = 0, fallas = [];
+    toast('Moviendo ' + n + '…');
+    return ids.reduce(function (pr, id) { return pr.then(function () { return api('ops/proponer', { id: id, cambios: { destino: key }, publicar: false }).then(function () { hechos++; }, function (e) { fallas.push(e.message); }); }); }, Promise.resolve())
+      .then(function () { S.srvSel = {}; toast(hechos + ' pasado(s) a ' + destNombre(key) + ' · queda en "Por publicar"' + (fallas.length ? ' · ' + fallas.length + ' no: ' + fallas[0] : '')); return cargarOps(); });
+  }
   function vistaServicios() {
     var o = S.ops;
     if (!o || o.cargando) return '<p class="vacio">Cargando servicios…</p>';
@@ -1426,9 +1444,12 @@
     var cuenta = {}; Object.keys(nombres).forEach(function (k) { cuenta[k] = 0; });
     d.servicios.forEach(function (s) { var c = clase(s); Object.keys(c).forEach(function (k) { if (c[k]) cuenta[k]++; }); });
     var f = S.srvFiltro || 'todos', q = sinTildes(S.qSrv || '');
+    var esTraslado = function (s) { return s.tipo === 'traslado'; }, nTipo = { tour: 0, traslado: 0 };
+    d.servicios.forEach(function (s) { if (clase(s)[f]) nTipo[esTraslado(s) ? 'traslado' : 'tour']++; });
     var lista = d.servicios.filter(function (s) {
       if (!clase(s)[f]) return false;
-      if (S.srvDest && s.destino !== S.srvDest) return false;
+      if (S.srvTipo && (S.srvTipo === 'traslado') !== esTraslado(s)) return false;
+      if (S.srvDest && conPendiente(s).destino !== S.srvDest) return false;
       if (S.srvProv && (S.srvProv === '-' ? s.proveedor_id : s.proveedor_id !== S.srvProv)) return false;
       if (q) { var pr = provDe(s.proveedor_id); if (sinTildes(s.titulo + ' ' + destNombre(s.destino) + ' ' + (pr ? pr.nombre : '')).indexOf(q) < 0) return false; }
       return true;
@@ -1450,7 +1471,11 @@
       '<select class="fsel" data-sprov aria-label="Proveedor"><option value="">Proveedor: todos</option><option value="-"' + (S.srvProv === '-' ? ' selected' : '') + '>Sin proveedor</option>' +
         S.datos.proveedores.filter(function (p) { return provUsados[p.id]; }).map(function (p) { return '<option value="' + esc(p.id) + '"' + (S.srvProv === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>' +
       '<select class="fsel" data-sorden aria-label="Orden"><option value="">Orden: por destino</option><option value="reciente"' + (S.srvOrden === 'reciente' ? ' selected' : '') + '>Último cambio primero</option><option value="precio"' + (S.srvOrden === 'precio' ? ' selected' : '') + '>Precio del proveedor</option><option value="margen"' + (S.srvOrden === 'margen' ? ' selected' : '') + '>Margen, de menor a mayor</option></select>' +
-      '</div><input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '" aria-label="Buscar servicio"></div>';
+      '</div><input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '" aria-label="Buscar servicio"></div>' +
+      '<div class="chips" style="padding:0 14px 10px"><button class="chip" data-sfil="tipo|" aria-pressed="' + !S.srvTipo + '">Todo<span>' + (nTipo.tour + nTipo.traslado) + '</span></button>' +
+        '<button class="chip" data-sfil="tipo|tour" aria-pressed="' + (S.srvTipo === 'tour') + '">Tours y paseos<span>' + nTipo.tour + '</span></button>' +
+        '<button class="chip" data-sfil="tipo|traslado" aria-pressed="' + (S.srvTipo === 'traslado') + '">Traslados<span>' + nTipo.traslado + '</span></button>' +
+        (S.srvDest || S.srvProv || f !== 'todos' ? '<button class="chip" data-sfil="limpiar|">✕ Quitar filtros</button>' : '') + '</div>';
     if (f === 'comparar') return h + '<div class="card">' + barra + '</div>' + vistaComparar(lista);
     if (!lista.length) return h + '<div class="card">' + barra + '<p class="vacio">' + (f === 'papelera' ? 'La papelera está vacía.' : 'No hay servicios con ese filtro.') + '</p></div>';
     if (f === 'papelera') h += '<p class="sub" style="margin:-4px 0 12px">Lo que está en la papelera no se ve en la web. "Recuperar" lo deja como estaba; "Borrar" lo elimina para siempre (su historial de precios queda).</p>';
@@ -1460,25 +1485,32 @@
     if (f !== 'papelera') {
       h += '<div class="bar"><span class="sub" style="flex:1">' + (nSel ? '<b>' + nSel + ' elegido(s)</b>' : 'Elegí servicios con la casilla para ajustarles el precio todos juntos.') + '</span>' +
         '<button class="btn btn--sm" data-act="sel-filtro">Elegir los ' + lista.length + ' de este filtro</button>' +
-        (nSel ? '<button class="btn btn--sm" data-act="sel-limpiar">Quitar selección</button><button class="btn btn--sm" data-act="fotos-auto">Traer fotos del proveedor</button><button class="btn btn--main btn--sm" data-act="aj-abrir">Ajustar precio %</button>' : '') + '</div>';
+        (nSel ? '<button class="btn btn--sm" data-act="sel-limpiar">Quitar selección</button><button class="btn btn--sm" data-act="fotos-auto">Traer fotos del proveedor</button><button class="btn btn--sm" data-act="aj-abrir">Ajustar precio %</button>' +
+          '<select class="fsel" data-smover aria-label="Mover a otro destino"><option value="">Mover a…</option>' + d.destinos.map(function (x) { return '<option value="' + esc(x.key) + '">' + esc(x.nombre) + '</option>'; }).join('') + '</select>' +
+          '<button class="btn btn--sm btn--txt-danger" data-act="sel-papelera">🗑 Papelera (' + nSel + ')</button><button class="btn btn--main btn--sm" data-act="sel-publicar">Publicar (' + nSel + ')</button>' : '') + '</div>';
     }
-    h += '<div class="card">' + barra + '<div style="overflow-x:auto"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Precio del proveedor</th><th>Margen</th><th class="num">Publicado</th><th class="num">Sin publicar</th><th>Estado</th><th>Verificado</th><th>Último cambio</th><th></th></tr></thead><tbody>';
+    h += '<div class="card">' + barra + '<div class="srvtabla"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Destino</th><th>Precio del proveedor y margen</th><th class="num">En la web</th><th>Estado</th><th>Verificado</th><th></th></tr></thead><tbody>';
     lista.forEach(function (s) {
       var pr = provDe(s.proveedor_id), p = pend[s.id], c = clase(s);
-      var estado = s.eliminado_at ? '<span class="pill p-cancelado">en la papelera</span>' : (!s.publicado_at ? '<span class="pill p-nuevo">Nuevo</span>' : (s.activo ? '<span class="pill p-confirmado">Activo</span>' : '<span class="pill p-cancelado">Apagado</span>'));
-      estado += faltaHtml(s);
+      // Cada etiqueta filtra por lo suyo al tocarla.
+      var fil = function (k) { return ' data-sfil="filtro|' + k + '" role="button" style="cursor:pointer"'; };
+      var estado = s.eliminado_at ? '<span class="pill p-cancelado">en la papelera</span>' : (!s.publicado_at ? '<span class="pill p-nuevo"' + fil('nuevos') + '>Nuevo</span>' : (s.activo ? '<span class="pill p-confirmado"' + fil('publicados') + '>Activo</span>' : '<span class="pill p-cancelado"' + fil('inactivos') + '>Apagado</span>'));
+      estado += faltaHtml(s).replace('class="pill p-cancelado">sin foto', 'class="pill p-cancelado"' + fil('sinfoto') + '>sin foto');
       if (s.tipo === 'traslado' && !s.eliminado_at) estado += ' <span class="pill p-consultado" title="La web calcula los traslados aparte">no va a la web</span>';
-      if (s.revision === 'pendiente') estado += ' <span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '">revisar</span>';
-      h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub">' + esc(destNombre(s.destino)) + ' · ' + esc(TIPOS_SRV[s.tipo] || s.tipo) + ' · ' + (pr ? esc(pr.nombre) : '<i>sin proveedor</i>') + '</span></td>' +
+      if (s.revision === 'pendiente') estado += ' <span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '"' + fil('revision') + '>revisar</span>';
+      var dst = conPendiente(s).destino, sale = saleDesde(s, dst);
+      h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub"><a class="lnk" href="#" data-sfil="tipo|' + (s.tipo === 'traslado' ? 'traslado' : 'tour') + '">' + esc(TIPOS_SRV[s.tipo] || s.tipo) + '</a> · ' + (pr ? '<a class="lnk" href="#" data-sfil="prov|' + esc(pr.id) + '">' + esc(pr.nombre) + '</a>' : '<i>sin proveedor</i>') + '</span></td>' +
+        '<td data-l="Destino"><a class="lnk" href="#" data-sfil="dest|' + esc(dst) + '">' + esc(destNombre(dst)) + '</a>' + (dst !== s.destino ? '<span class="sub">antes ' + esc(destNombre(s.destino)) + ' (sin publicar)</span>' : '') +
+          (sale ? '<span class="sub">sale desde ' + esc(sale.texto) + (sale.key ? ' · <a class="lnk" href="#" data-smover-uno="' + esc(s.id) + '|' + esc(sale.key) + '">pasar a ' + esc(destNombre(sale.key)) + '</a>' : '') + '</span>' : '') + '</td>' +
         // Un nuevo tiene su precio en el cambio sin publicar: se muestra ese.
         '<td data-l="Proveedor cobra">' + origenTxt(conPendiente(s)) + (verProv(p && p.despues.link_web || s.link_web) ? '<span class="sub">' + verProv(p && p.despues.link_web || s.link_web) + '</span>' : '') +
-          (pr && !s.eliminado_at && tarifaHtml(pr, [s]) ? '<span class="sub">' + tarifaHtml(pr, [s]) + '</span>' : '') + '</td>' +
-        '<td data-l="Margen">' + margenHtml(s) + '</td>' +
-        '<td class="num" data-l="Publicado">' + (s.precio_publicado != null ? '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + ' por persona</span>' : '—') + '</td>' +
-        '<td class="num" data-l="Sin publicar">' + (p ? (p.publicado_despues != null ? pub(p.publicado_despues) : 'cambio') + '<span class="sub">' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) + '</span>' : '') + '</td>' +
+          (pr && !s.eliminado_at && tarifaHtml(pr, [s]) ? '<span class="sub">' + tarifaHtml(pr, [s]) + '</span>' : '') +
+          '<div style="margin-top:6px">' + margenHtml(s) + '</div></td>' +
+        '<td class="num" data-l="En la web">' + (s.precio_publicado != null ? '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + ' por persona</span>' : '—') +
+          (p ? '<span class="sub">sin publicar: ' + (p.publicado_despues != null ? pub(p.publicado_despues) + ' ' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) : 'cambio') + '</span>' : '') + '</td>' +
         '<td data-l="Estado">' + estado + '</td>' +
-        '<td data-l="Verificado"' + (c.viejos ? ' class="deuda"' : '') + '>' + (conPendiente(s).verificado ? esc(fecha(conPendiente(s).verificado)) + ' ' + esc(conPendiente(s).verificado.slice(0, 4)) : 'nunca') + '</td>' +
-        '<td data-l="Último cambio">' + (ultimo(s) ? esc(fechaHora(ultimo(s))) + (p ? '<span class="sub">sin publicar</span>' : '') : '—') + '</td>' +
+        '<td data-l="Verificado"' + (c.viejos ? ' class="deuda"' : '') + '>' + (conPendiente(s).verificado ? esc(fecha(conPendiente(s).verificado)) + ' ' + esc(conPendiente(s).verificado.slice(0, 4)) : 'nunca') +
+          (ultimo(s) ? '<span class="sub">cambió ' + esc(fechaHora(ultimo(s))) + '</span>' : '') + '</td>' +
         '<td data-l="" style="white-space:nowrap">' + (s.eliminado_at
           ? '<button class="btn btn--sm" data-recuperar="' + esc(s.id) + '">Recuperar</button> <button class="btn btn--sm btn--danger" data-borrar="' + esc(s.id) + '">Borrar</button>'
           : '<button class="btn btn--sm btn--x" data-papelera="' + esc(s.id) + '" title="Mandar a la papelera" aria-label="Mandar a la papelera">🗑</button>') + '</td></tr>';
@@ -1553,6 +1585,142 @@
     }).join('');
   }
 
+  /* ---------- Por publicar, parecidos juntos ----------
+     Con cientos de importados, de a uno no se ve que es lo mismo: los servicios de un destino se juntan por "la
+     misma experiencia" (comparten una palabra propia del titulo: Genipabu, Mamangua, Frades) y cada grupo muestra
+     si ya hay uno parecido en la web. Es por el nombre: puede juntar de mas o de menos, no decide nada solo.
+     En cada servicio, la consulta a su agencia (se le escribe por paseo): sin escribir, esperando, respondio. */
+  try { S.pubModo = localStorage.getItem('cs_pub_modo') || ''; } catch (e) {}
+  var CONS_TXT = { nada: 'Sin escribir', esperando: 'Esperando respuesta', respondio: 'Respondió', sin_respuesta: 'No respondió' };
+  function estConsulta(c) { return c && CONS_TXT[c.estado] ? c.estado : 'nada'; }
+  var PAL_GENERICAS = {};
+  ('passeio paseo passeios paseos tour tours city regular coletivo coletiva colectivo compartido compartida compartilhado compartilhada privado privada privativo privativa ' +
+    'saindo saliendo desde para por com con sem sin dos das del los las uma una um uno ida volta vuelta hotel hoteis hoteles ' +
+    'traslado traslados transfer transfers aeropuerto aeroporto llegada salida chegada saida centro praia praias playa playas ilha ilhas isla islas ' +
+    'barco lancha escuna goleta catamaran catamara buggy jeep trilha trilhas caminata trekking completo full half medio meio ' +
+    'tarde manana noche noite nocturno atardecer incluye inclui incluido incluso almuerzo almoco entrada entradas ingresso ingressos ' +
+    'bate perto especial premium opcional with boat walk trip visita visitas nueva nuevo ' +
+    'cascadas cachoeiras cachoeira cascata cascada rota ruta roteiro circuito hasta personas pessoas sedan auto carro ' +
+    'bahia litoral norte sul historica historico panoramica panoramico combo day mata atlantica atlantic forest').split(' ').forEach(function (w) { PAL_GENERICAS[w] = 1; });
+    function palabrasTitulo(titulo, excluir) {
+    var vistas = {};
+    return sinTildes(titulo).replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(function (w) {
+      if (w.length < 4 || PAL_GENERICAS[w] || excluir[w] || vistas[w] || /^\d/.test(w)) return false;
+      vistas[w] = 1; return true;
+    });
+  }
+  /* Cada grupo se arma alrededor del primero (los publicados van primero) y solo entra quien comparte una palabra con
+     ese primero: asi no se encadenan cosas distintas (Praia do Forte con Morro de Sao Paulo por "Salvador"). Una
+     palabra que esta en casi todo el destino no cuenta. Traslados y paseos no se mezclan. */
+  function agruparParecidos(lista, nombreDest) {
+    var excluir = {}; sinTildes(nombreDest).split(/[^a-z]+/).forEach(function (w) { if (w) excluir[w] = 1; });
+    var pal = lista.map(function (s) { return palabrasTitulo(s.titulo, excluir); });
+    var frec = {}; pal.forEach(function (ws) { ws.forEach(function (w) { frec[w] = (frec[w] || 0) + 1; }); });
+    var tope = Math.max(6, lista.length * 0.4);
+    pal = pal.map(function (ws) { return ws.filter(function (w) { return frec[w] > 1 && frec[w] <= tope; }); });
+    var orden = lista.map(function (_, i) { return i; }).sort(function (a, b) { return (lista[b].activo ? 1 : 0) - (lista[a].activo ? 1 : 0) || pal[b].length - pal[a].length; });
+    var grupos = [], usado = {};
+    orden.forEach(function (i) {
+      if (usado[i]) return;
+      var g = [lista[i]]; usado[i] = 1;
+      if (pal[i].length) orden.forEach(function (j) {
+        if (usado[j] || (lista[j].tipo === 'traslado') !== (lista[i].tipo === 'traslado')) return;
+        if (pal[j].some(function (w) { return pal[i].indexOf(w) >= 0; })) { g.push(lista[j]); usado[j] = 1; }
+      });
+      grupos.push(g);
+    });
+    return grupos;
+  }
+  function consultaHtml(s, c) {
+    var pr = provDe(s.proveedor_id), est = estConsulta(c);
+    var marcar = function (estado, t) { return '<button type="button" class="btn btn--sm" data-cons-marca="' + esc(s.id) + '|' + estado + '" style="min-height:24px;padding:1px 8px;font-size:12px">' + t + '</button>'; };
+    var escribir = function (t) {
+      if (!pr) return '<span class="sub">sin agencia</span>';
+      if (!telWa(pr) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(pr.email || '').trim())) return '<span class="sub">la agencia no tiene WhatsApp ni email</span>';
+      return '<button type="button" class="btn btn--sm" data-cons-escribir="' + esc(s.id) + '" style="min-height:24px;padding:1px 8px;font-size:12px">' + t + (telWa(pr) ? ' (WhatsApp)' : ' (email)') + '</button>';
+    };
+    if (est === 'nada') return escribir('Escribirle');
+    var cls = est === 'respondio' ? 'p-confirmado' : (est === 'sin_respuesta' ? 'p-cancelado' : 'p-pendiente');
+    var cuando = est === 'esperando' ? c.at : (c.resp_at || c.at);
+    return '<span class="pill ' + cls + '" title="Le escribiste el ' + esc(fechaHora(c.at)) + '">' + esc(est === 'esperando' ? 'Escrito' : CONS_TXT[est]) + ' · ' + esc(fecha(cuando)) + '</span> ' +
+      (est === 'esperando' ? marcar('respondio', 'Respondió') + ' ' + marcar('sin_respuesta', 'No respondió') : '') +
+      (est === 'sin_respuesta' ? escribir('Volver a escribir') : '') +
+      (est !== 'esperando' ? ' ' + marcar('borrar', 'Borrar') : '');
+  }
+  function vistaPubGrupos(d, porId) {
+    var cons = d.consultas || {}, pendDe = {};
+    d.pendientes.forEach(function (c) { if (c.tour_id) pendDe[c.tour_id] = c; });
+    var porDest = {};
+    d.servicios.forEach(function (s) {
+      if (s.eliminado_at) return;
+      if (!pendDe[s.id] && !s.activo) return;
+      if (!pendDe[s.id] && !d.pendientes.some(function (c) { var x = porId[c.tour_id]; return x && x.destino === s.destino; })) return;
+      (porDest[s.destino] = porDest[s.destino] || []).push(s);
+    });
+    var dests = Object.keys(porDest).sort(function (a, b) { return destNombre(a).localeCompare(destNombre(b), 'es'); });
+    var nGrupos = 0, nYa = 0, h = '';
+    dests.forEach(function (k) {
+      var grupos = agruparParecidos(porDest[k], destNombre(k)).filter(function (g) { return g.some(function (s) { return pendDe[s.id]; }); });
+      // Primero los grupos con mas agencias: ahi es donde hay que elegir.
+      grupos.sort(function (a, b) { return b.length - a.length; });
+      var nP = 0; grupos.forEach(function (g) { g.forEach(function (s) { if (pendDe[s.id]) nP++; }); });
+      h += '<h3 class="uso-h" style="margin:18px 0 8px">' + esc(destNombre(k)) + ' <span class="sub">' + nP + ' por publicar · ' + grupos.length + (grupos.length === 1 ? ' experiencia' : ' experiencias') + '</span></h3><div class="pubs">';
+      grupos.forEach(function (g) {
+        nGrupos++;
+        var web = g.filter(function (s) { return s.activo && !pendDe[s.id]; }), pend = g.filter(function (s) { return pendDe[s.id]; });
+        if (web.length) nYa += pend.length;
+        var agencias = {}; pend.forEach(function (s) { agencias[s.proveedor_id || '-'] = 1; });
+        var ids = pend.map(function (s) { return pendDe[s.id].id; }), todos = ids.every(function (x) { return S.sel[x]; });
+        h += '<article class="pub' + (todos ? ' pub--sel' : '') + '" style="gap:8px"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">' +
+          '<b style="font-size:15px">' + esc((web[0] || pend[0]).titulo) + '</b>' +
+          (web.length ? '<span class="pill p-confirmado">Ya tenés ' + web.length + ' en la web</span>' : '<span class="pill p-pendiente">No tenés uno parecido en la web</span>') +
+          '<span class="sub">' + pend.length + ' por publicar' + (pend.length > 1 ? ' de ' + Object.keys(agencias).length + (Object.keys(agencias).length === 1 ? ' agencia' : ' agencias') : '') + '</span>' +
+          '<span class="pubbar__esp"></span>' + (pend.length > 1 ? '<button class="btn btn--sm" data-grupo-sel="' + esc(ids.join(',')) + '">' + (todos ? 'Soltar los ' : 'Elegir los ') + pend.length + '</button>' : '') + '</div>' +
+          '<div style="overflow-x:auto"><table><tbody>' +
+          web.map(function (s) {
+            var pr = provDe(s.proveedor_id);
+            return '<tr><td></td><td><a class="lnk" href="#" data-srv="' + esc(s.id) + '">' + esc(s.titulo) + '</a> <span class="tag">en la web</span><span class="sub">' + esc(pr ? pr.nombre : 'sin agencia') + '</span></td>' +
+              '<td class="num">' + (s.precio_publicado != null ? pub(s.precio_publicado) : '') + '</td><td></td><td></td></tr>';
+          }).join('') +
+          pend.map(function (s) {
+            var c = pendDe[s.id], pr = provDe(s.proveedor_id);
+            return '<tr' + (S.sel[c.id] ? ' style="background:var(--bg)"' : '') + '><td style="width:28px"><input type="checkbox" data-sel="' + esc(c.id) + '" aria-label="Elegir"' + (S.sel[c.id] ? ' checked' : '') + ' style="width:18px;height:18px;min-height:0;accent-color:var(--ink)"></td>' +
+              '<td><a class="lnk" href="#" data-srv="' + esc(s.id) + '">' + esc(s.titulo) + '</a>' + faltaHtml(s) + '<span class="sub">' + esc(pr ? pr.nombre : 'sin agencia') + (s.link_web ? ' · ' + verProv(s.link_web) : '') + '</span></td>' +
+              '<td class="num" data-l="Precio en la web">' + (c.publicado_despues != null ? '<b>' + pub(c.publicado_despues) + '</b><span class="sub">' + usd(c.publicado_despues) + '</span>' : '<span class="deuda">sin precio</span>') + '</td>' +
+              '<td data-l="Consulta">' + consultaHtml(s, cons[s.id]) + '</td>' +
+              '<td style="white-space:nowrap"><button class="btn btn--sm btn--txt-danger" data-desc-uno="' + esc(c.id) + '">Descartar</button> <button class="btn btn--sm btn--main" data-pub-uno="' + esc(c.id) + '">Publicar</button></td></tr>';
+          }).join('') + '</tbody></table></div></article>';
+      });
+      h += '</div>';
+    });
+    return '<p class="sub" style="margin:0 0 4px">' + d.pendientes.length + ' por publicar en ' + nGrupos + ' experiencias · ' + nYa + ' ya tienen uno parecido en la web. Se juntan por el nombre: revisá antes de descartar.</p>' + h;
+  }
+  /* Se le escribe a la agencia por este paseo solo. Si ya se le escribio por otro paseo, avisa (no es un error). */
+  function escribirConsulta(tourId) {
+    var d = S.ops && S.ops.datos, s = d && d.servicios.filter(function (x) { return x.id === tourId; })[0];
+    var pr = s && provDe(s.proveedor_id);
+    if (!pr) return toast('Este servicio no tiene agencia');
+    var cons = d.consultas || {}, otros = d.servicios.filter(function (x) { return x.id !== s.id && x.proveedor_id === pr.id && cons[x.id]; });
+    var aviso = otros.length ? '\nYa le escribiste por ' + otros.length + ' paseo(s) más (' + otros.slice(0, 3).map(function (x) { return x.titulo; }).join(', ') + ').' : '';
+    var paseo = String(s.titulo).replace(/ · [^·]*$/, '') + ' (' + destNombre(s.destino) + ')';
+    if (telWa(pr)) {
+      if (!confirm('¿Mandarle a ' + pr.nombre + ' por WhatsApp el pedido de tarifa por "' + paseo + '"?' + aviso)) return;
+      toast('Enviando…');
+      return api('proveedor/pedir-tarifa', { id: pr.id, paseos: [paseo] })
+        .then(function () { toast('Enviado a ' + pr.nombre + '. La respuesta llega a WhatsApp en el panel.'); return marcarConsulta([s.id], 'enviado'); })
+        .catch(function (er) { alert(er.message); });
+    }
+    if (aviso && !confirm(aviso.trim() + ' ¿Escribirle igual?')) return;
+    location.href = 'mailto:' + String(pr.email).trim() + '?subject=' + encodeURIComponent('Tarifas para agência - CuántoSale') + '&body=' + encodeURIComponent(msgTarifa(pr, [s]));
+    marcarConsulta([s.id], 'enviado');
+  }
+  function marcarConsulta(ids, estado) {
+    return api('ops/consulta', { ids: ids, estado: estado }).then(function (r) {
+      if (S.ops && S.ops.datos) S.ops.datos.consultas = r.consultas;
+      pintar();
+    }).catch(function (e) { toast(e.message); });
+  }
+
   function vistaPublicar() {
     var o = S.ops;
     if (!o || o.cargando) return '<p class="vacio">Cargando…</p>';
@@ -1563,6 +1731,10 @@
     var destPend = {}; d0.pendientes.forEach(function (c) { var s = porId[c.tour_id]; var k = s ? s.destino : String(c.tour_clave).split('#')[0]; destPend[k] = (destPend[k] || 0) + 1; });
     if (S.pubDest && !destPend[S.pubDest]) S.pubDest = '';
     var d = Object.assign({}, d0, { pendientes: d0.pendientes.filter(function (c) { if (!S.pubDest) return true; var s = porId[c.tour_id]; return (s ? s.destino : String(c.tour_clave).split('#')[0]) === S.pubDest; }) });
+    var cons = d0.consultas || {}, nCons = {};
+    d.pendientes.forEach(function (c) { var k = estConsulta(cons[c.tour_id]); nCons[k] = (nCons[k] || 0) + 1; });
+    if (S.pubCons) d.pendientes = d.pendientes.filter(function (c) { return estConsulta(cons[c.tour_id]) === S.pubCons; });
+    var agrupado = S.pubModo !== 'lista';
     S.pubVisibles = d.pendientes.map(function (c) { return c.id; });
     S.sel = S.sel || {};
     Object.keys(S.sel).forEach(function (k) { if (!d.pendientes.some(function (c) { return c.id === k; })) delete S.sel[k]; });
@@ -1573,9 +1745,13 @@
     /* Barra de acciones: queda a la vista mientras se baja por la lista. */
     h += '<div class="pubbar"><label class="pubbar__todos"><input type="checkbox" data-act="sel-todos"' + (nSel && nSel === d.pendientes.length ? ' checked' : '') + '> ' + (nSel ? nSel + ' elegido' + (nSel > 1 ? 's' : '') : 'Elegir todos') + '</label>' +
       (dests.length > 1 ? '<select class="fsel" data-pdes aria-label="Destino"><option value="">Todos los destinos (' + d0.pendientes.length + ')</option>' + dests.map(function (k) { return '<option value="' + esc(k) + '"' + (S.pubDest === k ? ' selected' : '') + '>' + esc(destNombre(k)) + ' (' + destPend[k] + ')</option>'; }).join('') + '</select>' : '') +
+      '<select class="fsel" data-pcons aria-label="Consulta a la agencia"><option value="">Consulta: todas</option>' + Object.keys(CONS_TXT).map(function (k) { return '<option value="' + k + '"' + (S.pubCons === k ? ' selected' : '') + '>' + esc(CONS_TXT[k]) + ' (' + (nCons[k] || 0) + ')</option>'; }).join('') + '</select>' +
+      '<span class="chips" style="flex:0 0 auto"><button class="chip" data-pmodo="grupos" aria-pressed="' + agrupado + '">Parecidos juntos</button><button class="chip" data-pmodo="lista" aria-pressed="' + !agrupado + '">Lista</button></span>' +
       '<span class="pubbar__esp"></span>' +
       '<button class="btn btn--txt-danger" data-act="desc-sel"' + (nSel ? '' : ' disabled') + '>Descartar (' + nSel + ')</button>' +
       '<button class="btn btn--main" data-act="pub-sel"' + (nSel ? '' : ' disabled') + '>Publicar (' + nSel + ')</button></div>';
+    if (!d.pendientes.length) return h + '<div class="card"><p class="vacio">No hay ninguno con ese filtro.</p></div>';
+    if (agrupado) return h + vistaPubGrupos(d, porId);
     h += '<div class="pubs">';
     d.pendientes.forEach(function (c) {
       var s = porId[c.tour_id] || {}, p = pctTxt(c.publicado_antes, c.publicado_despues);
@@ -1842,6 +2018,17 @@
       toast(r.errores.length ? r.publicados + ' publicado(s). No se pudo: ' + r.errores.map(function (x) { return x.servicio + ' (' + x.error + ')'; }).join('; ') : r.publicados + ' publicado(s). En la web en hasta 1 minuto.');
       return cargarOps();
     }).catch(function (e) { toast(e.message); });
+  }
+  /* Papelera de varios: de a 20 por pedido para no pasar el tiempo maximo del server. */
+  function papeleraVarios(ids) {
+    if (!ids.length) return;
+    var web = ids.filter(function (id) { var x = S.ops.datos.servicios.filter(function (y) { return y.id === id; })[0]; return x && x.activo; }).length;
+    if (!confirm('¿Mandar ' + ids.length + ' servicio(s) a la papelera?' + (web ? '\n' + web + ' están en la web y salen ahora.' : '') + '\nLos podés recuperar desde Papelera.')) return;
+    var tandas = []; for (var i = 0; i < ids.length; i += 20) tandas.push(ids.slice(i, i + 20));
+    var hechos = 0;
+    return tandas.reduce(function (pr, t) { return pr.then(function () { toast('A la papelera… ' + hechos + ' de ' + ids.length); return api('ops/papelera/varios', { ids: t }).then(function (r) { hechos += r.hechos; }); }); }, Promise.resolve())
+      .then(function () { toast(hechos + ' en la papelera'); }, function (e) { toast(e.message); })
+      .then(function () { S.srvSel = {}; S.sel = {}; return cargarOps(); });
   }
   function descartarCambios(ids) {
     if (!ids.length || !confirm('¿Descartar ' + ids.length + ' cambio(s)? La web sigue como está.')) return;
@@ -2489,6 +2676,7 @@
     if (el.id === 'q-srv') { S.qSrv = el.value; var ps = el.selectionStart; pintar(); var qs = document.getElementById('q-srv'); if (qs) { qs.focus(); try { qs.setSelectionRange(ps, ps); } catch (er) { /* sin rango */ } } return; }
     if (el.hasAttribute('data-cmp-unidad')) { S.cmpUnidad = S.cmpUnidad || {}; S.cmpUnidad[el.getAttribute('data-cmp-unidad')] = el.value; return; }
     if (el.hasAttribute('data-pdes')) { if (e.type === 'change') { S.pubDest = el.value; pintar(); } return; }
+    if (el.hasAttribute('data-pcons')) { if (e.type === 'change') { S.pubCons = el.value; pintar(); } return; }
     if (el.hasAttribute('data-ssel')) { if (e.type === 'change') { if (el.checked) S.srvSel[el.getAttribute('data-ssel')] = 1; else delete S.srvSel[el.getAttribute('data-ssel')]; pintar(); } return; }
     if (el.hasAttribute('data-cfg') && S.modal) { S.modal[el.getAttribute('data-cfg')] = el.value; if (el.getAttribute('data-cfg') === 'cotizacion') S.modal.fuente = ''; S.modal.st = null; return; }
     if (el.hasAttribute('data-aj') && S.modal) {
@@ -2503,6 +2691,7 @@
     if (el.hasAttribute('data-mg-tipo') || el.hasAttribute('data-mg-valor')) { if (e.type === 'change') guardarMargen(el.closest('[data-mg]')); return; }
     if (el.hasAttribute('data-sorden')) { if (e.type === 'change') { S.srvOrden = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sdest')) { if (e.type === 'change') { S.srvDest = el.value; pintar(); } return; }
+    if (el.hasAttribute('data-smover')) { if (e.type === 'change' && el.value) { var mk = el.value, mids = Object.keys(S.srvSel || {}); el.value = ''; if (mids.length && confirm('¿Pasar ' + mids.length + ' servicio(s) a ' + destNombre(mk) + '? Queda en "Por publicar" hasta que lo publiques.')) moverDestino(mids, mk); } return; }
     if (el.hasAttribute('data-sprov')) { if (e.type === 'change') { S.srvProv = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sel')) { if (e.type === 'change') { if (el.checked) S.sel[el.getAttribute('data-sel')] = 1; else delete S.sel[el.getAttribute('data-sel')]; pintar(); } return; }
     if (el.hasAttribute('data-sf') && S.srv) {
@@ -2662,6 +2851,24 @@
     var fq = e.target.closest('[data-foto-quitar]'); if (fq && S.srv) { S.srv.f.galeria.splice(+fq.getAttribute('data-foto-quitar'), 1); sincFotos(); return; }
     var fpo = e.target.closest('[data-foto-portada]'); if (fpo && S.srv) { var gi = +fpo.getAttribute('data-foto-portada'), gu = S.srv.f.galeria.splice(gi, 1)[0]; S.srv.f.galeria.unshift(gu); sincFotos(); return; }
     var cm = e.target.closest('[data-cmp]'); if (cm) { elegirCmp(cm.getAttribute('data-cmp'), cm.getAttribute('data-cmp-id')); return; }
+    var sf = e.target.closest('[data-sfil]');
+    if (sf) {
+      e.preventDefault(); e.stopPropagation();
+      var sfz = sf.getAttribute('data-sfil').split('|'), sfv = sfz[1];
+      if (sfz[0] === 'tipo') S.srvTipo = sfv;
+      else if (sfz[0] === 'dest') S.srvDest = S.srvDest === sfv ? '' : sfv;
+      else if (sfz[0] === 'prov') S.srvProv = S.srvProv === sfv ? '' : sfv;
+      else if (sfz[0] === 'filtro') S.srvFiltro = S.srvFiltro === sfv ? 'todos' : sfv;
+      else if (sfz[0] === 'limpiar') { S.srvDest = ''; S.srvProv = ''; S.srvFiltro = 'todos'; S.srvTipo = ''; S.qSrv = ''; }
+      pintar(); return;
+    }
+    var smu = e.target.closest('[data-smover-uno]');
+    if (smu) {
+      e.preventDefault(); e.stopPropagation();
+      var smz = smu.getAttribute('data-smover-uno').split('|');
+      if (confirm('¿Pasar este servicio a ' + destNombre(smz[1]) + '? Queda en "Por publicar" hasta que lo publiques.')) moverDestino([smz[0]], smz[1]);
+      return;
+    }
     var pp = e.target.closest('[data-papelera],[data-recuperar],[data-borrar]');
     if (pp) {
       var pid = pp.getAttribute('data-papelera') || pp.getAttribute('data-recuperar') || pp.getAttribute('data-borrar');
@@ -2684,6 +2891,10 @@
       return;
     }
     var sv = e.target.closest('[data-srv]'); if (sv && !e.target.closest('input') && !e.target.closest('.mg')) { e.preventDefault(); if (S.dirty && document.getElementById('drawer') && !confirm('Tenés cambios sin guardar. ¿Seguir?')) return; abrirServicio(sv.getAttribute('data-srv')); return; }
+    var pm = e.target.closest('[data-pmodo]'); if (pm) { S.pubModo = pm.getAttribute('data-pmodo'); try { localStorage.setItem('cs_pub_modo', S.pubModo); } catch (er) {} pintar(); return; }
+    var ce = e.target.closest('[data-cons-escribir]'); if (ce) { e.preventDefault(); escribirConsulta(ce.getAttribute('data-cons-escribir')); return; }
+    var cm = e.target.closest('[data-cons-marca]'); if (cm) { var cz = cm.getAttribute('data-cons-marca').split('|'); marcarConsulta([cz[0]], cz[1]); return; }
+    var cg = e.target.closest('[data-grupo-sel]'); if (cg) { var gids = cg.getAttribute('data-grupo-sel').split(','), todosG = gids.every(function (x) { return S.sel[x]; }); gids.forEach(function (x) { if (todosG) delete S.sel[x]; else S.sel[x] = 1; }); pintar(); return; }
     var pu = e.target.closest('[data-pub-uno]'); if (pu) { if (S.dirty && !confirm('Lo que editaste y no guardaste se pierde. ¿Publicar igual?')) return; S.dirty = false; publicarCambios([pu.getAttribute('data-pub-uno')]); return; }
     var du = e.target.closest('[data-desc-uno]'); if (du) { S.dirty = false; descartarCambios([du.getAttribute('data-desc-uno')]); return; }
     var rv = e.target.closest('[data-revertir]'); if (rv) {
@@ -2759,6 +2970,12 @@
         break;
       case 'sel-filtro': (S.srvVisibles || []).forEach(function (id) { var sv = S.ops.datos.servicios.filter(function (x) { return x.id === id; })[0]; if (sv && !sv.eliminado_at) S.srvSel[id] = 1; }); pintar(); break;
       case 'sel-limpiar': S.srvSel = {}; pintar(); break;
+      case 'sel-papelera': papeleraVarios(Object.keys(S.srvSel || {})); break;
+      case 'sel-publicar':
+        var pids = Object.keys(S.srvSel || {}).map(function (id) { var pc = pendPorTour()[id]; return pc && pc.id; }).filter(Boolean);
+        if (!pids.length) { toast('Los elegidos no tienen nada sin publicar'); break; }
+        if (confirm('¿Publicar ' + pids.length + ' servicio(s)?' + (pids.length < Object.keys(S.srvSel).length ? ' (' + (Object.keys(S.srvSel).length - pids.length) + ' no tienen cambios)' : '') + ' Se ven en la web en hasta 1 minuto.')) publicarCambios(pids).then(function () { S.srvSel = {}; });
+        break;
       case 'aj-abrir': S.modal = { tipo: 'ajuste', ids: Object.keys(S.srvSel), pct: '', entero: false }; abrirModal(); break;
       case 'aj-guardar': guardarAjuste(); break;
       case 'fotos-buscar': buscarFotos(); break;
