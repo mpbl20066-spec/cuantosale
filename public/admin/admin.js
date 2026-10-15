@@ -2299,10 +2299,13 @@
     var d = Object.assign({}, d0, { pendientes: d0.pendientes.filter(function (c) { if (!S.pubDest) return true; var s = porId[c.tour_id]; return (s ? s.destino : String(c.tour_clave).split('#')[0]) === S.pubDest; }) });
     var cons = d0.consultas || {}, nCons = {};
     d.pendientes.forEach(function (c) { var k = estConsulta(cons[c.tour_id]); nCons[k] = (nCons[k] || 0) + 1; });
+    // Un filtro que se quedo sin ninguno (por ejemplo, despues de publicar) se suelta solo: si no, la lista queda vacia.
+    if (S.pubCons && !nCons[S.pubCons]) S.pubCons = '';
     if (S.pubCons) d.pendientes = d.pendientes.filter(function (c) { return estConsulta(cons[c.tour_id]) === S.pubCons; });
     // Tours y traslados por separado: se revisan distinto (los traslados no van a la web como paseo).
     var esTr = function (c) { var s = porId[c.tour_id]; return !!s && s.tipo === 'traslado'; }, nTr = { tour: 0, traslado: 0 };
     d.pendientes.forEach(function (c) { nTr[esTr(c) ? 'traslado' : 'tour']++; });
+    if (S.pubTipo && !nTr[S.pubTipo]) S.pubTipo = '';
     if (S.pubTipo) d.pendientes = d.pendientes.filter(function (c) { return esTr(c) === (S.pubTipo === 'traslado'); });
     // Listos y lo que falta, sobre lo filtrado arriba (destino, consulta, tipo).
     var falta = {}, nFalta = { listo: 0 }, listos = [];
@@ -2319,7 +2322,7 @@
     var nUni = d0.servicios.filter(function (s) { return esperaUnidad(s) && !s.eliminado_at; }).length;
     var h = '<div class="vhead"><div><h2>Por publicar</h2><p>' + (d0.pendientes.length ? d0.pendientes.length + (d0.pendientes.length === 1 ? ' cambio esperando' : ' cambios esperando') + ' tu revisión. ' : '') + 'Nada de esto se ve en la web hasta que lo publicás; los cambios de precio de más de 20 % aparecen en rojo.</p></div>' +
       (nUni ? '<div class="top__acc"><button class="btn btn--main" data-uni="abrir">Confirmar por persona o por vehículo (' + nUni + ')</button></div>' : '') + '</div>';
-    if (d0.pendientes.length) {
+    if (d0.pendientes.length && (listos.length || Object.keys(PUB_FALTA).some(function (k) { return nFalta[k]; }))) {
       var chF = function (k, t) { return nFalta[k] ? '<button class="chip" data-pfalta="' + k + '" aria-pressed="' + (S.pubFalta === k) + '">' + esc(t) + '<span>' + nFalta[k] + '</span></button>' : ''; };
       var hayFalta = Object.keys(PUB_FALTA).some(function (k) { return nFalta[k]; });
       h += '<div class="card" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:12px">' +
@@ -2341,7 +2344,7 @@
       '<span class="pubbar__esp"></span>' +
       '<button class="btn btn--txt-danger" data-act="desc-sel"' + (nSel ? '' : ' disabled') + '>Descartar (' + nSel + ')</button>' +
       '<button class="btn btn--main" data-act="pub-sel"' + (nSel ? '' : ' disabled') + '>Publicar (' + nSel + ')</button></div>';
-    if (!d.pendientes.length) return h + '<div class="card"><p class="vacio">No hay ninguno con ese filtro.</p></div>';
+    if (!d.pendientes.length) return h + '<div class="card"><p class="vacio">No hay ninguno con ese filtro. <button class="btn btn--sm" data-pquitar>Quitar filtros</button></p></div>';
     if (agrupado) return h + vistaPubGrupos(d, porId);
     h += '<div class="pubs">';
     d.pendientes.forEach(function (c) {
@@ -3522,6 +3525,7 @@
     }
     var sv = e.target.closest('[data-srv]'); if (sv && !e.target.closest('input') && !e.target.closest('select') && !e.target.closest('.mg')) { e.preventDefault(); if (S.dirty && document.getElementById('drawer') && !confirm('Tenés cambios sin guardar. ¿Seguir?')) return; abrirServicio(sv.getAttribute('data-srv')); return; }
     var pf = e.target.closest('[data-pfalta]'); if (pf) { S.pubFalta = pf.getAttribute('data-pfalta'); S.sel = {}; pintar(); return; }
+    if (e.target.closest('[data-pquitar]')) { S.pubCons = ''; S.pubTipo = ''; S.pubFalta = ''; S.pubDest = ''; pintar(); return; }
     var pt = e.target.closest('[data-ptipo]'); if (pt) { S.pubTipo = pt.getAttribute('data-ptipo'); pintar(); return; }
     var pm = e.target.closest('[data-pmodo]'); if (pm) { S.pubModo = pm.getAttribute('data-pmodo'); try { localStorage.setItem('cs_pub_modo', S.pubModo); } catch (er) {} pintar(); return; }
     var ce = e.target.closest('[data-cons-escribir]'); if (ce) { e.preventDefault(); escribirConsulta(ce.getAttribute('data-cons-escribir')); return; }
