@@ -64,5 +64,14 @@
     var yaContada = false;
     try { yaContada = !!sessionStorage.getItem('cs_llegada'); sessionStorage.setItem('cs_llegada', origen); } catch (e) { /* modo privado */ }
     if (origen && !yaContada) window.mockTrack('llegada', { origen: origen });
+    /* Ademas se recuerda 30 dias (la ultima red de la que vino), para que el pedido diga de donde salio aunque reserve
+       otro dia: ve el reel hoy, reserva el fin de semana. Solo el nombre de la fuente, nada de la persona. */
+    if (origen) try { localStorage.setItem('cs_fuente', JSON.stringify({ f: origen, t: Date.now() })); } catch (e) { /* modo privado */ }
   }
+  window.CS_FUENTE = function () {
+    try {
+      var x = JSON.parse(localStorage.getItem('cs_fuente') || 'null');
+      return x && x.f && Date.now() - x.t < 30 * 864e5 ? String(x.f) : '';
+    } catch (e) { return ''; }
+  };
 })();

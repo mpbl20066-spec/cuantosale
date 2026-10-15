@@ -1299,7 +1299,7 @@
       '<label class="f">Vuelta<input ' + f('fecha_vuelta') + ' type="date" value="' + esc(p.fecha_vuelta || '') + '"></label>' +
       '<label class="f">Personas<input ' + f('personas') + ' type="number" min="1" max="60" value="' + esc(p.personas) + '"></label>' +
       '<label class="f">Medio de pago preferido<input ' + f('medio_pago') + ' value="' + esc(p.medio_pago) + '"></label></div>' +
-      (p.created_at ? '<p class="sub" style="margin-top:10px">Recibido ' + esc(fechaHora(p.created_at)) + ' · origen: ' + esc(p.origen || 'web') + '</p>' : '') + '</details>' +
+      (p.created_at ? '<p class="sub" style="margin-top:10px">Recibido ' + esc(fechaHora(p.created_at)) + ' · ' + esc(/^web:/.test(p.origen || '') ? 'web, llegó desde ' + p.origen.slice(4) : 'origen: ' + (p.origen || 'web')) + '</p>' : '') + '</details>' +
       '<section class="sec"><h3>Notas internas</h3><textarea ' + f('notas') + '>' + esc(p.notas) + '</textarea></section></div>' +
       '<div class="foot">' + (esNuevo ? '' : '<button class="btn btn--txt-danger" data-act="borrar-pedido">Borrar</button>' +
         (p.estado !== 'cancelado' ? '<button class="btn btn--danger" data-act="' + (wa ? 'cancelar-avisar' : 'estado-a') + '" data-estado="cancelado">Cancelar pedido</button>' : '')) +

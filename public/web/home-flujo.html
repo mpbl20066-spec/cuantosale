@@ -2943,7 +2943,8 @@
     var cuerpo = { nombre: dt.nombre, telefono: dt.pais + dt.tel, email: dt.mail, destino: DEST, fechas: fdc(IDA) + ' → ' + fdc(VUELTA), personas: personasTxt(),
       fecha_ida: IDA, fecha_vuelta: VUELTA, personas_n: pax,   /* para el panel /admin: fechas, personas y montos exactos en USD */
       servicios: lista.map(function (x) { return { tipo: x.ico === 'palm' ? 'tour' : 'traslado', nombre: x.nom, detalle: x.det, precio: f(x.precio), precio_usd: Math.round(x.precio * 100) / 100 }; }), total: f(sum(lista, function (x) { return x.precio; })),
-      totalUsd: Math.round(sum(lista, function (x) { return x.precio; })), cupon: dt.cupon || '', codigo: String(window.CS_VIAJE_ID || ''), mayor_edad: dt.mayor === true };
+      totalUsd: Math.round(sum(lista, function (x) { return x.precio; })), cupon: dt.cupon || '', codigo: String(window.CS_VIAJE_ID || ''), mayor_edad: dt.mayor === true,
+      fuente: window.CS_FUENTE ? window.CS_FUENTE() : '' };   /* de que red vino (home-track.js): Marketing > Tablero */
     /* Si ya se habia pedido, es un cambio: el panel avisa a que pedido reemplaza. */
     var kAnt = S.csK || (lista[0].ico === 'palm' ? 'tours' : 'tras'), ant = S.sol && S.sol[kAnt] ? pedidosGuardados().filter(function (x) { return x.viaje === CLAVE_VIAJE && x.k === kAnt; })[0] : null;
     if (ant) cuerpo.reemplaza = ant.id;
