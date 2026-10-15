@@ -29,9 +29,9 @@
   rio: { name: "Río de Janeiro", iata: "GIG", modo: "car", km: 18, compartido: 30, privado: 21.15, compartido_brl: 156, privado_brl: 110, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":110}] },
   angra: { name: "Angra dos Reis", iata: "GIG", modo: "car", km: 139, compartido: 57.69, privado: 105.77, compartido_brl: 300, privado_brl: 550, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":550}] },
   sao: { name: "São Paulo", iata: "GRU", modo: "car", km: 26, compartido: 7.88, privado: 41, compartido_brl: 41, escalones: [] },
-  porto: { name: "Porto de Galinhas", iata: "REC", modo: "car", km: 53, compartido: 8.65, privado: 41.54, compartido_brl: 45, privado_brl: 216, escalones: [] },
+  porto: { name: "Porto de Galinhas", iata: "REC", modo: "car", km: 53, compartido: 8.65, privado: 44.42, compartido_brl: 45, privado_brl: 231, escalones: [{"min":1,"max":2,"vehiculo":"Auto","brl":231},{"min":3,"max":4,"vehiculo":"Auto","brl":279},{"min":5,"max":8,"vehiculo":"Van","brl":583},{"min":9,"max":16,"vehiculo":"Van","brl":659},{"min":17,"max":26,"vehiculo":"Micro","brl":1521}] },
   mcz: { name: "Maceió", iata: "MCZ", modo: "car", km: 21, compartido: 15.38, privado: 51.92, compartido_brl: 80, privado_brl: 270, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":270}] },
-  maragogi: { name: "Maragogi", iata: "MCZ", modo: "car", km: 129, compartido: 17.69, privado: 78.46, compartido_brl: 92, privado_brl: 408, escalones: [] },
+  maragogi: { name: "Maragogi", iata: "MCZ", modo: "car", km: 129, compartido: 17.69, privado: 121.92, compartido_brl: 92, privado_brl: 634, escalones: [{"min":1,"max":2,"vehiculo":"Auto","brl":634},{"min":3,"max":4,"vehiculo":"Auto","brl":1268},{"min":5,"max":8,"vehiculo":"Van","brl":1521},{"min":9,"max":16,"vehiculo":"Van","brl":3043}] },
   nat: { name: "Natal", iata: "NAT", modo: "car", km: 25, compartido: 5.77, privado: 30, compartido_brl: 30, escalones: [] },
   pip: { name: "Pipa", iata: "NAT", modo: "car", km: 30, compartido: 5.96, privado: 57.69, compartido_brl: 31, privado_brl: 300, escalones: [] },
   ajuda: { name: "Arraial d’Ajuda", iata: "SSA", modo: "car", km: 170, compartido: 22.69, privado: 69.23, compartido_brl: 118, privado_brl: 360, escalones: [] },
@@ -56,7 +56,7 @@
   canela: { name: "Canela", iata: "POA", modo: "car", km: 115, compartido: 15.96, privado: 96.92, compartido_brl: 83, privado_brl: 504, escalones: [] },
   torres: { name: "Torres", iata: "POA", modo: "car", km: 184, compartido: 24.23, privado: 92.31, compartido_brl: 126, privado_brl: 480, escalones: [] },
   canoa: { name: "Capão da Canoa", iata: "POA", modo: "car", km: 135, compartido: 18.46, privado: 103.85, compartido_brl: 96, privado_brl: 540, escalones: [] },
-  rec: { name: "Recife", iata: "REC", modo: "car", km: 13, compartido: 5.77, privado: 30, compartido_brl: 30, escalones: [] },
+  rec: { name: "Recife", iata: "REC", modo: "car", km: 13, compartido: 5.77, privado: 19.42, compartido_brl: 30, privado_brl: 101, escalones: [{"min":1,"max":2,"vehiculo":"Auto","brl":101},{"min":3,"max":4,"vehiculo":"Auto","brl":126},{"min":5,"max":8,"vehiculo":"Van","brl":316},{"min":9,"max":16,"vehiculo":"Van","brl":444},{"min":17,"max":26,"vehiculo":"Micro","brl":761}] },
   joaopessoa: { name: "João Pessoa", iata: "JPA", modo: "car", km: 13, compartido: 5.77, privado: 25.38, compartido_brl: 30, privado_brl: 132, escalones: [] },
   poa: { name: "Porto Alegre", iata: "POA", modo: "car", km: 9, compartido: 5.77, privado: 30, compartido_brl: 30, appRideUsd: 7, escalones: [] }
 }, {
@@ -185,13 +185,13 @@
       "horas": 0.5
     },
   porto: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Porto de Galinhas. Compartido por persona: R$ 45 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 53 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Porto de Galinhas. Privado por vehiculo de Água Verde Viagens & Receptivos (su tabla + 5 %, cancelación gratis hasta 72 h; la vuelta vale lo mismo) (base R$ 201 + 15% y R$ 243 + 15% y R$ 507 + 15% y R$ 573 + 15% y R$ 1323 + 15%): 1 a 2 personas, Auto, R$ 231; 3 a 4 personas, Auto, R$ 279; 5 a 8 personas, Van, R$ 583; 9 a 16 personas, Van, R$ 659; 17 a 26 personas, Micro, R$ 1521. Compartido por persona: R$ 45 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 53 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
-      "verificado": "2026-10-01",
+      "verificado": "2026-10-15",
       "real": [
+        "privado",
         "compartido"
       ],
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 53,
       "horas": 0.8
     },
@@ -207,13 +207,13 @@
       "horas": 0.5
     },
   maragogi: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila MCZ a Maragogi. Compartido por persona: R$ 92 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 129 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila MCZ a Maragogi. Privado por vehiculo de Água Verde Viagens & Receptivos (su tabla + 5 %, cancelación gratis hasta 72 h; la vuelta vale lo mismo) (base R$ 551 + 15% y R$ 1103 + 15% y R$ 1323 + 15% y R$ 2646 + 15%): 1 a 2 personas, Auto, R$ 634; 3 a 4 personas, Auto, R$ 1268; 5 a 8 personas, Van, R$ 1521; 9 a 16 personas, Van, R$ 3043. Compartido por persona: R$ 92 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 129 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
-      "verificado": "2026-10-01",
+      "verificado": "2026-10-15",
       "real": [
+        "privado",
         "compartido"
       ],
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 129,
       "horas": 2.1
     },
@@ -483,13 +483,13 @@
       "horas": 1.8
     },
   rec: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Recife. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 13 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Recife. Privado por vehiculo de Água Verde Viagens & Receptivos (su tabla + 5 %, cancelación gratis hasta 72 h; la vuelta vale lo mismo) (base R$ 88 + 15% y R$ 110 + 15% y R$ 275 + 15% y R$ 386 + 15% y R$ 662 + 15%): 1 a 2 personas, Auto, R$ 101; 3 a 4 personas, Auto, R$ 126; 5 a 8 personas, Van, R$ 316; 9 a 16 personas, Van, R$ 444; 17 a 26 personas, Micro, R$ 761. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 13 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
-      "verificado": "2026-10-01",
+      "verificado": "2026-10-15",
       "real": [
+        "privado",
         "compartido"
       ],
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 13,
       "horas": 0.3
     },

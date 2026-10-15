@@ -20,10 +20,24 @@ GRU	Ubatuba	206	3.4	Privado	Auto	1	5			800	Por vehiculo
 CNF	Belo Horizonte	40	0.6	Compartido	Auto	1	4			37	Por persona
 CWB	Curitiba	17	0.4	Compartido	Auto	1	4			30	Por persona
 REC	Recife	13	0.3	Compartido	Auto	1	4			30	Por persona
+REC	Recife	13	0.3	Privado	Auto	1	2	88	15%	101	Por vehiculo
+REC	Recife	13	0.3	Privado	Auto	3	4	110	15%	126	Por vehiculo
+REC	Recife	13	0.3	Privado	Van	5	8	275	15%	316	Por vehiculo
+REC	Recife	13	0.3	Privado	Van	9	16	386	15%	444	Por vehiculo
+REC	Recife	13	0.3	Privado	Micro	17	26	662	15%	761	Por vehiculo
 REC	Porto de Galinhas	53	0.8	Compartido	Auto	1	4			45	Por persona
+REC	Porto de Galinhas	53	0.8	Privado	Auto	1	2	201	15%	231	Por vehiculo
+REC	Porto de Galinhas	53	0.8	Privado	Auto	3	4	243	15%	279	Por vehiculo
+REC	Porto de Galinhas	53	0.8	Privado	Van	5	8	507	15%	583	Por vehiculo
+REC	Porto de Galinhas	53	0.8	Privado	Van	9	16	573	15%	659	Por vehiculo
+REC	Porto de Galinhas	53	0.8	Privado	Micro	17	26	1323	15%	1521	Por vehiculo
 MCZ	Maceió	21	0.5	Compartido	Auto	1	4			80	Por persona
 MCZ	Maceió	21	0.5	Privado	Auto	1	4			270	Por vehiculo
 MCZ	Maragogi	129	2.1	Compartido	Auto	1	4			92	Por persona
+MCZ	Maragogi	129	2.1	Privado	Auto	1	2	551	15%	634	Por vehiculo
+MCZ	Maragogi	129	2.1	Privado	Auto	3	4	1103	15%	1268	Por vehiculo
+MCZ	Maragogi	129	2.1	Privado	Van	5	8	1323	15%	1521	Por vehiculo
+MCZ	Maragogi	129	2.1	Privado	Van	9	16	2646	15%	3043	Por vehiculo
 NAT	Natal	25	0.4	Compartido	Auto	1	4			30	Por persona
 NAT	Pipa	30	0.5	Compartido	Auto	1	4			31	Por persona
 SSA	Salvador de Bahía	24	0.5	Compartido	Auto	1	4			30	Por persona

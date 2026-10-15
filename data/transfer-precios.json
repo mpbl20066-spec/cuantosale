@@ -348,17 +348,48 @@
       "km": 53,
       "horas": 0.8,
       "compartido": 8.65,
-      "privado": 41.54,
+      "privado": 44.42,
       "real": [
+        "privado",
         "compartido"
       ],
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Porto de Galinhas. Compartido por persona: R$ 45 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 53 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
-      "verificado": "2026-10-01",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Porto de Galinhas. Privado por vehiculo de Água Verde Viagens & Receptivos (su tabla + 5 %, cancelación gratis hasta 72 h; la vuelta vale lo mismo) (base R$ 201 + 15% y R$ 243 + 15% y R$ 507 + 15% y R$ 573 + 15% y R$ 1323 + 15%): 1 a 2 personas, Auto, R$ 231; 3 a 4 personas, Auto, R$ 279; 5 a 8 personas, Van, R$ 583; 9 a 16 personas, Van, R$ 659; 17 a 26 personas, Micro, R$ 1521. Compartido por persona: R$ 45 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 53 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-15",
       "confianza": "alta",
-      "privado_escalones": [],
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 2,
+          "vehiculo": "Auto",
+          "brl": 231
+        },
+        {
+          "min": 3,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 279
+        },
+        {
+          "min": 5,
+          "max": 8,
+          "vehiculo": "Van",
+          "brl": 583
+        },
+        {
+          "min": 9,
+          "max": 16,
+          "vehiculo": "Van",
+          "brl": 659
+        },
+        {
+          "min": 17,
+          "max": 26,
+          "vehiculo": "Micro",
+          "brl": 1521
+        }
+      ],
       "compartido_brl": 45,
-      "privado_brl": 216,
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real."
+      "privado_brl": 231
     },
     "mcz": {
       "nombre": "Maceió",
@@ -394,17 +425,42 @@
       "km": 129,
       "horas": 2.1,
       "compartido": 17.69,
-      "privado": 78.46,
+      "privado": 121.92,
       "real": [
+        "privado",
         "compartido"
       ],
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila MCZ a Maragogi. Compartido por persona: R$ 92 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 129 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
-      "verificado": "2026-10-01",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila MCZ a Maragogi. Privado por vehiculo de Água Verde Viagens & Receptivos (su tabla + 5 %, cancelación gratis hasta 72 h; la vuelta vale lo mismo) (base R$ 551 + 15% y R$ 1103 + 15% y R$ 1323 + 15% y R$ 2646 + 15%): 1 a 2 personas, Auto, R$ 634; 3 a 4 personas, Auto, R$ 1268; 5 a 8 personas, Van, R$ 1521; 9 a 16 personas, Van, R$ 3043. Compartido por persona: R$ 92 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 129 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-15",
       "confianza": "alta",
-      "privado_escalones": [],
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 2,
+          "vehiculo": "Auto",
+          "brl": 634
+        },
+        {
+          "min": 3,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 1268
+        },
+        {
+          "min": 5,
+          "max": 8,
+          "vehiculo": "Van",
+          "brl": 1521
+        },
+        {
+          "min": 9,
+          "max": 16,
+          "vehiculo": "Van",
+          "brl": 3043
+        }
+      ],
       "compartido_brl": 92,
-      "privado_brl": 408,
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real."
+      "privado_brl": 634
     },
     "nat": {
       "nombre": "Natal",
@@ -867,16 +923,48 @@
       "km": 13,
       "horas": 0.3,
       "compartido": 5.77,
-      "privado": 30,
+      "privado": 19.42,
       "real": [
+        "privado",
         "compartido"
       ],
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Recife. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 13 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
-      "verificado": "2026-10-01",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila REC a Recife. Privado por vehiculo de Água Verde Viagens & Receptivos (su tabla + 5 %, cancelación gratis hasta 72 h; la vuelta vale lo mismo) (base R$ 88 + 15% y R$ 110 + 15% y R$ 275 + 15% y R$ 386 + 15% y R$ 662 + 15%): 1 a 2 personas, Auto, R$ 101; 3 a 4 personas, Auto, R$ 126; 5 a 8 personas, Van, R$ 316; 9 a 16 personas, Van, R$ 444; 17 a 26 personas, Micro, R$ 761. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 13 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-15",
       "confianza": "alta",
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
-      "privado_escalones": [],
-      "compartido_brl": 30
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 2,
+          "vehiculo": "Auto",
+          "brl": 101
+        },
+        {
+          "min": 3,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 126
+        },
+        {
+          "min": 5,
+          "max": 8,
+          "vehiculo": "Van",
+          "brl": 316
+        },
+        {
+          "min": 9,
+          "max": 16,
+          "vehiculo": "Van",
+          "brl": 444
+        },
+        {
+          "min": 17,
+          "max": 26,
+          "vehiculo": "Micro",
+          "brl": 761
+        }
+      ],
+      "compartido_brl": 30,
+      "privado_brl": 101
     },
     "joaopessoa": {
       "nombre": "João Pessoa",
