@@ -2531,12 +2531,13 @@
   function linkTarifa(pr, servicios, texto) {
     if (!pr) return '';
     var m = msgTarifa(pr, servicios), tel = telWa(pr), mail = String(pr.email || '').trim();
-    /* Por WhatsApp sale por la Cloud API con la plantilla pedido_tarifa (el numero de CuantoSale ya no esta en la app
-       del celular, asi que un wa.me no sirve). La respuesta del proveedor llega a la bandeja del panel. */
-    if (tel) {
+    /* Con email, sale por mail desde el server (proveedor/pedir-tarifa-mail): Meta bloquea el WhatsApp a Brasil (130497).
+       Sin email, por WhatsApp con la Cloud API y la plantilla pedido_tarifa (el numero de CuantoSale ya no esta en la app
+       del celular, asi que un wa.me no sirve). La respuesta llega al mail de reservas o a la bandeja del panel. */
+    if (mailValido(pr) || tel) {
       S.tarifaPaseos = S.tarifaPaseos || {};
-      S.tarifaPaseos[pr.id] = (servicios || []).filter(Boolean).slice(0, 8).map(function (x) { return String(x.titulo).replace(/ · [^·]*$/, '') + ' (' + destNombre(x.destino) + ')'; });
-      return '<a class="lnk" href="#" data-tarifa-api="' + esc(pr.id) + '">' + esc(texto || 'Pedir tarifa neta') + ' (WhatsApp)</a>';
+      S.tarifaPaseos[pr.id] = (servicios || []).filter(Boolean).slice(0, mailValido(pr) ? 30 : 8).map(function (x) { return String(x.titulo).replace(/ · [^·]*$/, '') + ' (' + destNombre(x.destino) + ')'; });
+      return '<a class="lnk" href="#" data-tarifa-api="' + esc(pr.id) + '">' + esc(texto || 'Pedir tarifa neta') + (mailValido(pr) ? ' (email)' : ' (WhatsApp)') + '</a>';
     }
     var href = (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail) ? 'mailto:' + mail + '?subject=' + encodeURIComponent('Tarifas para agência - CuántoSale') + '&body=' + encodeURIComponent(m) : '');
     return href ? '<a class="lnk" target="_blank" rel="noopener noreferrer" data-tarifa-prov="' + esc(pr.id) + '" href="' + esc(href) + '">' + esc(texto || 'Pedir tarifa neta') + (tel ? ' (WhatsApp)' : ' (email)') + ' ↗</a>' : '';
@@ -3280,8 +3281,15 @@
       var pv = provDe(ta.getAttribute('data-tarifa-api'));
       if (!pv) return;
       if (pv.tarifa_pedida_at && !confirm('Ya le escribiste a ' + pv.nombre + ' el ' + fechaHora(pv.tarifa_pedida_at) + ' (' + (TARIFA_TXT[pv.tarifa_estado] || 'sin estado') + '). ¿Escribirle otra vez?')) return;
-      if (!pv.tarifa_pedida_at && !confirm('¿Mandarle a ' + pv.nombre + ' el pedido de tarifa neta por WhatsApp?')) return;
-      toast('Enviando…');
+      var porMail = mailValido(pv);
+      if (!pv.tarifa_pedida_at && !confirm('¿Mandarle a ' + pv.nombre + ' el pedido de tarifa neta por ' + (porMail ? 'email (a ' + porMail + ')' : 'WhatsApp') + '?')) return;
+      toast(porMail ? 'Enviando email…' : 'Enviando…');
+      if (porMail) {
+        api('proveedor/pedir-tarifa-mail', { id: pv.id, paseos: (S.tarifaPaseos || {})[pv.id] || [] })
+          .then(function (r) { toast('Email enviado a ' + r.email + '. La respuesta llega al mail de reservas.'); marcarTarifa(pv.id, 'enviado'); })
+          .catch(function (er) { alert(er.message); });
+        return;
+      }
       api('proveedor/pedir-tarifa', { id: pv.id, paseos: (S.tarifaPaseos || {})[pv.id] || [] })
         .then(function () { toast('Enviado a ' + pv.nombre + '. La respuesta llega a WhatsApp en el panel.'); marcarTarifa(pv.id, 'enviado'); })
         .catch(function (er) { alert(er.message); });
