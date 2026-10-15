@@ -3636,6 +3636,26 @@
   document.addEventListener('keydown', function (e) {
     if (e.target && e.target.id === 'chat-txt' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); var f = document.getElementById('chat-form'); if (f) f.requestSubmit(); return; } if (e.key === 'Escape' && document.getElementById('drawer')) cerrarPanel(false); });
 
+  /* ---------- version nueva ----------
+     El panel es una sola pagina: una pestana abierta sigue con el admin.js viejo despues de un deploy. Cada 5 minutos
+     (y al volver a la pestana) se mira el ?v= de /admin/; si cambio, aparece un aviso para recargar. */
+  var VERSION = ((document.querySelector('script[src*="admin.js?v="]') || {}).src || '').replace(/^.*[?&]v=/, '');
+  function revisarVersion() {
+    if (!VERSION || document.getElementById('aviso-version')) return;
+    fetch('/admin/?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).then(function (t) {
+      var m = /admin\.js\?v=([^"'&]+)/.exec(t || '');
+      if (!m || m[1] === VERSION || document.getElementById('aviso-version')) return;
+      var d = document.createElement('div');
+      d.id = 'aviso-version';
+      d.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:99;background:var(--ink);color:var(--card);padding:10px 14px;border-radius:12px;display:flex;gap:10px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25);font-size:14px;max-width:calc(100% - 32px)';
+      d.innerHTML = '<span>Hay una versión nueva del panel.</span><button class="btn btn--sm btn--main" type="button">Recargar</button>';
+      d.querySelector('button').onclick = function () { if (S.dirty && !confirm('Tenés cambios sin guardar. ¿Recargar igual?')) return; location.reload(); };
+      document.body.appendChild(d);
+    }).catch(function () {});
+  }
+  setInterval(revisarVersion, 5 * 60 * 1000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) revisarVersion(); });
+
   /* ---------- arranque ---------- */
   var vq = /[?&]vista=(operaciones|pasos|servicios|publicar|proveedores|importar|mkt-hoy|mkt-calendario|mkt-tablero|mkt-estrategia|mkt-colabs|mkt-contactos)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
   api('sesion').then(function (s) {
