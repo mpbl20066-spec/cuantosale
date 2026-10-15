@@ -96,6 +96,7 @@
         kpi('A pagar a proveedores', usd(k.por_pagar_proveedores_usd), 'lo que les debemos', k.por_pagar_proveedores_usd ? 'kpi--warn' : '') +
         kpi('Margen', usd(k.margen_usd), k.sin_proveedor ? k.sin_proveedor + ' servicio(s) sin proveedor' : 'facturado − costo') + '</section>';
     }
+    if (S.vista.indexOf('fin-') === 0) html += vistaFin(); else
     html += S.vista.indexOf('mkt-') === 0 ? vistaMkt() : S.vista === 'usuarios' ? vistaUsuarios() : S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
       (S.vista === 'precarga' ? vistaPrecarga() : (esVistaSrv() ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : (S.vista === 'importar' ? vistaImportar() : (S.vista === 'operaciones' ? vistaOperaciones() : vistaProveedores(d))))))))));
     html += '</div>';
@@ -109,6 +110,7 @@
      recuerda la ultima pantalla abierta. */
   var GRUPOS = [
     { t: 'Pedidos', vistas: [['pedidos', 'Pedidos']] },
+    { t: 'Finanzas', vistas: [['fin-resumen', 'Resumen'], ['fin-cobros', 'Cobros'], ['fin-pagos', 'Pagos a proveedores'], ['fin-movs', 'Transferencias'], ['fin-audit', 'Auditoría']] },
     { t: 'Clientes', vistas: [['usuarios', 'Usuarios'], ['viajes', 'Viajes guardados']] },
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
     { t: 'Catálogo', vistas: [['tours', 'Tours'], ['transfers', 'Transfers'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
@@ -117,6 +119,21 @@
   ];
   function esVistaSrv() { return S.vista === 'tours' || S.vista === 'transfers'; }
   function grupoDe(v) { return GRUPOS.filter(function (g) { return g.vistas.some(function (x) { return x[0] === v; }); })[0] || GRUPOS[0]; }
+  /* ---------- Finanzas: cobros, pagos a proveedores, transferencias y auditoria (lib/finanzas.js). La pantalla vive en
+     /admin/finanzas.js y se carga la primera vez que se abre la pestana. ---------- */
+  var finPanel = null;
+  function vistaFin() {
+    if (finPanel) return finPanel.vista();
+    if (window.CSFinanzasPanel) { finPanel = CSFinanzasPanel({ S: S, api: api, esc: esc, kpi: kpi, pintar: pintar, toast: toast, usd: usd, fecha: fecha, fechaHora: fechaHora }); return finPanel.vista(); }
+    if (!S.finCargando) {
+      S.finCargando = true;
+      var sc = document.createElement('script'); sc.src = '/admin/finanzas.js?v=1';
+      sc.onload = function () { if (S.vista.indexOf('fin-') === 0) pintar(); };
+      sc.onerror = function () { S.finCargando = false; toast('No se pudo abrir Finanzas. Recargá la página.'); };
+      document.head.appendChild(sc);
+    }
+    return '<div class="card"><p class="vacio">Cargando…</p></div>';
+  }
   function vistaPrecarga() {
     var pc = S.precarga;
     if (!pc || !pc.vuelos) return '<div class="card"><p class="vacio">Cargando la precarga…</p></div>';

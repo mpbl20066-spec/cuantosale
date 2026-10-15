@@ -48,7 +48,8 @@
     "reels": "node outputs/reels/_build/capture.js && node outputs/reels/_build/vo.js && node outputs/reels/_build/build.js",
     "historias": "node outputs/historias/_build/build.js",
     "historias:limpio": "node outputs/historias/_build/build.js limpio",
-    "test:ops": "node test-operaciones.js"
+    "test:ops": "node test-operaciones.js",
+    "test:fin": "node test-finanzas.js"
   },
   "engines": {
     "node": ">=18"

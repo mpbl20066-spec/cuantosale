@@ -55,3 +55,6 @@ data/_trabajo/
 
 # Carpeta de trabajo de reels: capturas y videos de stock (pesados), no van al repo.
 reels hoy/
+
+# Respaldos de la base (scripts/respaldo-base.js): tienen datos de clientes y proveedores.
+data/respaldos/
