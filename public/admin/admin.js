@@ -315,7 +315,7 @@
         '<td data-l="Destinos">' + (pp.destinos.length ? '<span class="tags">' + pp.destinos.map(function (x) { return '<span class="tag">' + esc(x) + '</span>'; }).join('') + '</span>' : '<span class="sub">sin destino</span>') + '</td>' +
         '<td data-l="Contacto">' + esc(pr.contacto) + '<span class="sub">' + esc(pr.telefono) + (pr.email ? ' · ' + esc(pr.email) : '') + '</span></td>' +
         '<td data-l="Hace">' + esc(pp.hace) + '</td><td data-l="Datos de pago">' + esc(pr.datos_pago) + '</td>' +
-        '<td data-l="Tarifa neta">' + (pr.tarifa_estado ? '<span class="pill ' + (pr.tarifa_estado === 'respondio' ? 'p-confirmado' : (pr.tarifa_estado === 'sin_respuesta' ? 'p-cancelado' : 'p-pendiente')) + '">' + esc(TARIFA_TXT[pr.tarifa_estado] || pr.tarifa_estado) + '</span><span class="sub">pedida ' + esc(fecha(pr.tarifa_pedida_at)) + '</span>' : '<span class="sub">no se pidió</span>') + '</td>' +
+        '<td data-l="Tarifa neta">' + (pr.tarifa_estado ? '<span class="pill ' + (pr.tarifa_estado === 'respondio' || pr.tarifa_estado === 'acordada' ? 'p-confirmado' : (pr.tarifa_estado === 'sin_respuesta' || pr.tarifa_estado === 'no_trabaja' ? 'p-cancelado' : 'p-pendiente')) + '">' + esc(TARIFA_TXT[pr.tarifa_estado] || pr.tarifa_estado) + '</span><span class="sub">pedida ' + esc(fecha(pr.tarifa_pedida_at)) + '</span>' : '<span class="sub">no se pidió</span>') + '</td>' +
         '<td class="num" data-l="En catálogo">' + (enCatalogo[pr.id] ? '<a class="lnk" href="#" data-ver-srv-prov="' + esc(pr.id) + '">' + enCatalogo[pr.id] + '</a>' : '—') + '</td>' +
         '<td class="num" data-l="En pedidos">' + dp.servicios + '<span class="sub">en ' + dp.pedidos + ' pedido(s)</span></td>' +
         '<td class="num" data-l="Le debemos">' + (dp.aPagar ? '<span class="deuda">' + usd(dp.aPagar) + '</span>' : '<span class="ok">al día</span>') + '</td></tr>';
@@ -1738,7 +1738,7 @@
       var precio = pc && pc.publicado_despues != null ? pc.publicado_despues : s.precio_publicado;
       return '<label class="pp-tour' + (p.sel[s.id] ? ' pp-tour--sel' : '') + '"><input type="checkbox" data-pp-sel="' + esc(s.id) + '"' + (p.sel[s.id] ? ' checked' : '') + '>' +
         (f ? '<img src="' + esc(urlSegura(f)) + '" alt="" loading="lazy">' : '<span class="pp-sinfoto">Sin foto</span>') +
-        '<span class="pp-tour__txt"><b>' + esc(x.titulo) + '</b><span class="sub">' + esc(pr ? pr.nombre : 'sin agencia') + (precio != null ? ' · ' + pub(precio) : '') + '</span><span class="pill ' + e.c + '">' + e.t + '</span></span></label>';
+        '<span class="pp-tour__txt"><b>' + esc(x.titulo) + '</b><span class="sub">' + esc(pr ? pr.nombre : 'sin agencia') + (precio != null ? ' · ' + pub(precio) : '') + '</span><span class="pill ' + e.c + '">' + e.t + '</span>' + (pr ? consultaPill(pr, agenciaConsulta(pr.id)) : '') + '</span></label>';
     }).join('') + (lista.length ? '' : '<p class="vacio">No hay ' + (p.tipo === 'traslado' ? 'traslados' : 'tours') + ' con ese estado.</p>') + '</div>';
     return h + ppNav(2, '<button class="btn btn--main btn--lg" data-pp="ir|4"' + (elegidos.length ? '' : ' disabled') + '>Siguiente: fotos (' + elegidos.length + ') →</button>',
       elegidos.length ? '<button class="btn btn--lg btn--txt-danger" data-pp="borrar">🗑 Borrar elegidos (' + elegidos.length + ')</button>' : '');
@@ -1811,8 +1811,9 @@
       return '<section class="card pp-rev' + (listo || !falta.length ? '' : ' pp-rev--mal') + '"><div class="pp-rev__cab">' + ppPrevia(s) +
         '<div class="pp-rev__est"><span class="sub">Ahora</span><span class="pill ' + e.c + '">' + e.t + '</span><span class="sub">Después</span>' + despues + '</div></div>' +
         (g.length > 1 ? '<div class="pp-mini">' + g.map(function (u) { return '<img src="' + esc(urlSegura(u)) + '" alt="">'; }).join('') + '</div>' : '') +
+        (provDe(s.proveedor_id) ? '<div class="pp-cons"><span class="sub">' + esc(provDe(s.proveedor_id).nombre) + ':</span> ' + consultaHtml(s) + '</div>' : '') +
         (falta.length ? '<p class="err" style="margin:8px 0 0">Falta: ' + esc(falta.join(', ')) + '</p>' : '<p class="sub" style="color:var(--ok);margin:8px 0 0">Tiene todo.</p>') +
-        (falta.indexOf('foto') >= 0 || falta.some(function (f) { return /vehículo|precio/.test(f); }) ? '<p class="sub">' + (falta.indexOf('foto') >= 0 ? '<a class="lnk" href="#" data-pp="ir|4">Volver a fotos</a> ' : '') + (falta.some(function (f) { return /vehículo|precio/.test(f); }) ? '<a class="lnk" href="#" data-srv="' + esc(s.id) + '">Abrir el editor para el precio</a>' : '') + '</p>' : '') +
+        (falta.indexOf('foto') >= 0 || falta.some(function (f) { return /vehículo|precio/.test(f); }) ? '<p class="sub">' + (falta.indexOf('foto') >= 0 ? '<a class="lnk" href="#" data-pp="ir|4">Volver a fotos</a> · ' : '') + (falta.some(function (f) { return /vehículo|precio/.test(f); }) ? '<a class="lnk" href="#" data-srv="' + esc(s.id) + '">Abrir el editor para el precio</a>' : '') + '</p>' : '') +
         (cp ? '<label class="pp-check"><input type="checkbox" data-pp-precio="' + esc(s.id) + '"' + (p.precioOk[s.id] ? ' checked' : '') + '> También cambia el precio en la web: ' + pub(cp.antes) + ' → <b>' + pub(cp.despues) + '</b>. Tildalo para publicarlo; si no, este tour no se publica.</label>' : '') +
         (faltaCampos.length ? '<div class="pp-campos">' + faltaCampos.map(function (c) {
           var v = t[c[0]] != null ? t[c[0]] : '';
@@ -1996,7 +1997,8 @@
      si ya hay uno parecido en la web. Es por el nombre: puede juntar de mas o de menos, no decide nada solo.
      En cada servicio, la consulta a su agencia (se le escribe por paseo): sin escribir, esperando, respondio. */
   try { S.pubModo = localStorage.getItem('cs_pub_modo') || ''; } catch (e) {}
-  var CONS_TXT = { nada: 'Sin escribir', esperando: 'Esperando respuesta', respondio: 'Respondió', sin_respuesta: 'No respondió' };
+  var CONS_TXT = { nada: 'Sin escribir', esperando: 'Esperando respuesta', respondio: 'Respondió', acordada: 'Tarifa acordada', no_trabaja: 'No trabaja con agencias', sin_respuesta: 'No respondió' };
+  var CONS_CLS = { esperando: 'p-pendiente', respondio: 'p-consultado', acordada: 'p-confirmado', no_trabaja: 'p-cancelado', sin_respuesta: 'p-cancelado' };
   function estConsulta(c) { return c && CONS_TXT[c.estado] ? c.estado : 'nada'; }
   var PAL_GENERICAS = {};
   ('passeio paseo passeios paseos tour tours city regular coletivo coletiva colectivo compartido compartida compartilhado compartilhada privado privada privativo privativa ' +
@@ -2042,7 +2044,7 @@
     var d = S.ops.datos, cons = d.consultas || {}, ult = null, pr = provDe(prId);
     d.servicios.forEach(function (x) { var c = cons[x.id]; if (x.proveedor_id === prId && c && CONS_TXT[c.estado] && (!ult || String(c.resp_at || c.at) > String(ult.resp_at || ult.at))) ult = c; });
     if (pr && pr.tarifa_pedida_at && pr.tarifa_estado && (!ult || String(pr.tarifa_respondio_at || pr.tarifa_pedida_at) > String(ult.resp_at || ult.at)))
-      ult = { estado: pr.tarifa_estado === 'respondio' ? 'respondio' : (pr.tarifa_estado === 'sin_respuesta' ? 'sin_respuesta' : 'esperando'), at: pr.tarifa_pedida_at, resp_at: pr.tarifa_respondio_at };
+      ult = { estado: CONS_CLS[pr.tarifa_estado] ? pr.tarifa_estado : 'esperando', at: pr.tarifa_pedida_at, resp_at: pr.tarifa_respondio_at };
     return ult;
   }
   /* Sus paseos que esperan en "Por publicar" (los de la consulta). */
@@ -2060,12 +2062,17 @@
       return '<button type="button" class="btn btn--sm" data-cons-escribir="' + esc(s.id) + '" style="min-height:24px;padding:1px 8px;font-size:12px" title="Un solo mensaje con sus ' + n + ' paseo(s) pendientes">' + t + (n > 1 ? ' por sus ' + n : '') + (telWa(pr) ? ' (WhatsApp)' : ' (email)') + '</button>';
     };
     if (est === 'nada') return escribir('Escribirle');
-    var cls = est === 'respondio' ? 'p-confirmado' : (est === 'sin_respuesta' ? 'p-cancelado' : 'p-pendiente');
-    var cuando = est === 'esperando' ? c.at : (c.resp_at || c.at);
-    return '<span class="pill ' + cls + '" title="Le escribiste a ' + esc(pr.nombre) + ' el ' + esc(fechaHora(c.at)) + '">Agencia: ' + esc(est === 'esperando' ? 'escrita' : CONS_TXT[est].toLowerCase()) + ' · ' + esc(fecha(cuando)) + '</span> ' +
-      (est === 'esperando' ? marcar('respondio', 'Respondió') + ' ' + marcar('sin_respuesta', 'No respondió') : '') +
+    // Esperando -> respondio (o se marca solo si escribe por WhatsApp) -> tarifa acordada / no trabaja con agencias.
+    return consultaPill(pr, c) + ' ' +
+      (est === 'esperando' ? marcar('respondio', 'Respondió') + ' ' : '') +
+      (est === 'esperando' || est === 'respondio' ? marcar('acordada', 'Tarifa acordada') + ' ' + marcar('no_trabaja', 'No trabaja') + ' ' : '') +
+      (est === 'esperando' ? marcar('sin_respuesta', 'No respondió') : '') +
       (est === 'sin_respuesta' ? escribir('Volver a escribir') : '') +
       (est !== 'esperando' ? ' ' + marcar('borrar', 'Borrar') : '');
+  }
+  function consultaPill(pr, c) {
+    var est = estConsulta(c); if (est === 'nada') return '<span class="pill p-consultado" style="opacity:.75">Agencia: sin escribir</span>';
+    return '<span class="pill ' + CONS_CLS[est] + '" title="Le escribiste a ' + esc(pr.nombre) + ' el ' + esc(fechaHora(c.at)) + '">' + (est === 'acordada' ? '✓ ' : '') + 'Agencia: ' + esc(est === 'esperando' ? 'escrita' : CONS_TXT[est].toLowerCase()) + ' · ' + esc(fecha(est === 'esperando' ? c.at : (c.resp_at || c.at))) + '</span>';
   }
   function vistaPubGrupos(d, porId) {
     var cons = d.consultas || {}, pendDe = {};
@@ -2526,16 +2533,17 @@
   }
   /* Donde estaba el link: si ya se le escribio, el estado (y los botones para marcar si respondio). El link para
      volver a escribir queda, pero avisa antes (ver el clic en data-tarifa-prov). */
-  var TARIFA_TXT = { esperando: 'esperando respuesta', respondio: 'respondió', sin_respuesta: 'no respondió' };
+  var TARIFA_TXT = { esperando: 'esperando respuesta', respondio: 'respondió', acordada: 'tarifa acordada', no_trabaja: 'no trabaja con agencias', sin_respuesta: 'no respondió' };
   function tarifaHtml(pr, servicios, texto, completo) {
     if (!pr) return '';
     var l = linkTarifa(pr, servicios, texto);
     if (!pr.tarifa_estado) return l;
-    var cls = pr.tarifa_estado === 'respondio' ? 'p-confirmado' : (pr.tarifa_estado === 'sin_respuesta' ? 'p-cancelado' : 'p-pendiente');
-    var cuando = pr.tarifa_estado === 'respondio' && pr.tarifa_respondio_at ? pr.tarifa_respondio_at : pr.tarifa_pedida_at;
+    var cls = pr.tarifa_estado === 'respondio' || pr.tarifa_estado === 'acordada' ? 'p-confirmado' : (pr.tarifa_estado === 'sin_respuesta' || pr.tarifa_estado === 'no_trabaja' ? 'p-cancelado' : 'p-pendiente');
+    var cuando = /respondio|acordada|no_trabaja/.test(pr.tarifa_estado) && pr.tarifa_respondio_at ? pr.tarifa_respondio_at : pr.tarifa_pedida_at;
     var marcar = function (estado, t) { return '<button type="button" class="btn btn--sm" data-tarifa-marca="' + esc(pr.id) + '|' + estado + '" style="min-height:24px;padding:1px 8px;font-size:12px">' + t + '</button>'; };
     return '<span class="pill ' + cls + '" title="Tarifa neta pedida el ' + esc(fechaHora(pr.tarifa_pedida_at)) + '">Tarifa: ' + esc(TARIFA_TXT[pr.tarifa_estado] || pr.tarifa_estado) + (cuando ? ' · ' + esc(fecha(cuando)) : '') + '</span> ' +
       (pr.tarifa_estado === 'esperando' ? marcar('respondio', 'Respondió') + ' ' + marcar('sin_respuesta', 'No respondió') + ' ' : '') +
+      (pr.tarifa_estado === 'esperando' || pr.tarifa_estado === 'respondio' ? marcar('acordada', 'Tarifa acordada') + ' ' + marcar('no_trabaja', 'No trabaja') + ' ' : '') +
       (completo && pr.tarifa_estado !== 'esperando' ? marcar('esperando', 'Volver a esperando') + ' ' : '') +
       (completo ? marcar('borrar', 'Borrar marca') + ' ' : '') +
       (l ? l.replace('>' + esc(texto || 'Pedir tarifa neta'), '>Volver a escribir') : '');
