@@ -1525,7 +1525,7 @@
         '<button class="btn btn--sm" data-act="sel-filtro">Elegir los ' + lista.length + ' de este filtro</button>' +
         (nSel ? '<button class="btn btn--sm" data-act="sel-limpiar">Quitar selección</button><button class="btn btn--sm" data-act="fotos-auto">Traer fotos del proveedor</button><button class="btn btn--sm" data-act="aj-abrir">Ajustar precio %</button>' +
           '<select class="fsel" data-smover aria-label="Mover a otro destino"><option value="">Mover a…</option>' + d.destinos.map(function (x) { return '<option value="' + esc(x.key) + '">' + esc(x.nombre) + '</option>'; }).join('') + '</select>' +
-          '<button class="btn btn--sm" data-act="sel-apagar">Apagar</button><button class="btn btn--sm" data-act="sel-activar">Activar (' + nSel + ')</button>' +
+          '<button class="btn btn--sm" data-act="sel-apagar">Despublicar</button><button class="btn btn--sm" data-act="sel-activar">Volver a publicar (' + nSel + ')</button>' +
           '<button class="btn btn--sm btn--txt-danger" data-act="sel-papelera">🗑 Papelera (' + nSel + ')</button><button class="btn btn--main btn--sm" data-act="sel-publicar">Publicar (' + nSel + ')</button>' : '') + '</div>';
     }
     h += '<div class="card">' + barra + '<div class="srvtabla"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Destino</th><th>Precio del proveedor y margen</th><th class="num">En la web</th><th>Estado</th><th>Verificado</th><th></th></tr></thead><tbody>';
@@ -1537,7 +1537,7 @@
       estado += faltaHtml(s).replace('class="pill p-cancelado">sin foto', 'class="pill p-cancelado"' + fil('sinfoto') + '>sin foto');
       if (s.tipo === 'traslado' && !s.eliminado_at) estado += ' <span class="pill p-consultado" title="La web calcula los traslados aparte">no va a la web</span>';
       if (s.revision === 'pendiente') estado += ' <span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '"' + fil('revision') + '>revisar</span>';
-      if (!s.eliminado_at && s.publicado_at) estado += '<span class="sub"><a class="lnk" href="#" data-sactivo="' + esc(s.id) + '|' + (s.activo ? '0' : '1') + '">' + (s.activo ? 'Apagar' : 'Activar') + '</a></span>';
+      if (!s.eliminado_at && s.publicado_at) estado += '<span class="sub"><a class="lnk" href="#" data-sactivo="' + esc(s.id) + '|' + (s.activo ? '0' : '1') + '">' + (s.activo ? 'Despublicar' : 'Volver a publicar') + '</a></span>';
       var dst = conPendiente(s).destino, sale = saleDesde(s, dst);
       h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub"><a class="lnk" href="#" data-sfil="tipo|' + (s.tipo === 'traslado' ? 'traslado' : 'tour') + '">' + esc(TIPOS_SRV[s.tipo] || s.tipo) + '</a> · ' + (pr ? '<a class="lnk" href="#" data-sfil="prov|' + esc(pr.id) + '">' + esc(pr.nombre) + '</a>' : '<i>sin proveedor</i>') + '</span></td>' +
         '<td data-l="Destino">' + (s.eliminado_at ? esc(destNombre(dst)) : '<select class="dsel" data-sdest-uno="' + esc(s.id) + '" aria-label="Destino del servicio" title="Cambiar el destino">' +
@@ -1741,7 +1741,8 @@
         '<span class="pp-tour__txt"><b>' + esc(x.titulo) + '</b><span class="sub">' + esc(pr ? pr.nombre : 'sin agencia') + (precio != null ? ' · ' + pub(precio) : '') + '</span><span class="pill ' + e.c + '">' + e.t + '</span>' + (pr ? consultaPill(pr, agenciaConsulta(pr.id)) : '') + '</span></label>';
     }).join('') + (lista.length ? '' : '<p class="vacio">No hay ' + (p.tipo === 'traslado' ? 'traslados' : 'tours') + ' con ese estado.</p>') + '</div>';
     return h + ppNav(2, '<button class="btn btn--main btn--lg" data-pp="ir|4"' + (elegidos.length ? '' : ' disabled') + '>Siguiente: fotos (' + elegidos.length + ') →</button>',
-      elegidos.length ? '<button class="btn btn--lg btn--txt-danger" data-pp="borrar">🗑 Borrar elegidos (' + elegidos.length + ')</button>' : '');
+      (elegidos.some(function (x) { return x.activo; }) ? '<button class="btn btn--lg" data-pp="despublicar">Despublicar (' + elegidos.filter(function (x) { return x.activo; }).length + ')</button>' : '') +
+      (elegidos.length ? '<button class="btn btn--lg btn--txt-danger" data-pp="borrar">🗑 Borrar elegidos (' + elegidos.length + ')</button>' : ''));
   }
 
   function ppPaso4(p) {
@@ -1766,7 +1767,7 @@
       }
       return '<section class="card pp-fotos"><div class="pp-fotos__cab"><div><b>' + esc(x.titulo) + '</b>' + (cambio ? ' <span class="pill p-pendiente">fotos cambiadas</span>' : '') + '<span class="sub">' + esc((provDe(s.proveedor_id) || {}).nombre || 'sin agencia') + '</span></div>' +
         ppPrevia(s) + '</div>' +
-        (s.foto_wiki ? '<p class="sub">Tiene foto de Wikimedia: en la web es la portada de la tarjeta. Las de acá van a la galería del detalle.</p>' : '') +
+        (s.foto_wiki ? '<p class="sub">Tiene una foto con autor y licencia (Wikimedia o Unsplash): en la web es la portada de la tarjeta. Las de acá van a la galería del detalle.</p>' : '') +
         '<div class="pp-slots">' + slots + '</div>' +
         '<div class="pp-fotos__bot"><span class="sub">Agregar de:</span>' +
           (s.link_web ? '<button type="button" class="btn btn--sm' + (lib && lib.fuente === 'prov' ? ' btn--main' : '') + '" data-pp="bib|' + esc(s.id) + '|prov">Página del proveedor</button>' : '') +
@@ -1977,6 +1978,8 @@
         var bids = ppElegidos().map(function (x) { return x.id; }), pr = papeleraVarios(bids);
         if (pr) pr.then(function () { bids.forEach(function (id) { delete p.sel[id]; }); ppGuardar(); pintar(); });
         break;
+      // Sale de la web pero no se borra: queda Desactivado y se vuelve a publicar desde aca o desde Servicios.
+      case 'despublicar': var dp = activarVarios(ppElegidos().filter(function (x) { return x.activo; }).map(function (x) { return x.id; }), false); if (dp) dp.then(function () { pintar(); }); break;
       case 'borrador': p.res = { publicados: 0, errores: [], borrador: true }; ppIr(7); break;
     }
     return true;
@@ -2314,7 +2317,7 @@
   function fotoSecHtml() {
     var s = S.srv, f = s.f, wiki = s.orig && s.orig.foto_wiki, gal = f.galeria || [], fo = s.fotos || {}, origen = s.origenFoto || {};
     var elegidas = {}; gal.forEach(function (u) { if (origen[u]) elegidas[origen[u]] = u; });
-    var h = (wiki ? '<p class="sub" style="margin:0 0 8px">Tiene foto de Wikimedia (con autor y licencia): es la portada de la tarjeta en la web. Las de acá se usan para la galería del detalle.</p>' : '') +
+    var h = (wiki ? '<p class="sub" style="margin:0 0 8px">Tiene una foto con autor y licencia (Wikimedia o Unsplash): es la portada de la tarjeta en la web. Las de acá se usan para la galería del detalle.</p>' : '') +
       '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:600px">' + [0, 1, 2].map(function (i) {
         var u = urlSegura(gal[i]);
         if (!u) return '<div class="vacio" style="height:110px;border:1px dashed var(--line);border-radius:10px;padding:42px 6px;font-size:13px">' + (i === 0 ? 'Portada' : 'Foto ' + (i + 1)) + '</div>';
@@ -2475,11 +2478,11 @@
       .filter(function (x) { return x && !x.eliminado_at && !!x.activo !== activo && (activo ? x.publicado_at : true); });
     var nuevos = activo ? ids.length - lista.length : 0;
     if (!lista.length) { toast(activo ? 'Ninguno para activar' + (nuevos ? ' (los nuevos se activan con Publicar)' : '') : 'Ninguno para apagar'); return; }
-    if (!confirm('¿' + (activo ? 'Activar' : 'Apagar') + ' ' + lista.length + ' servicio(s)? ' + (activo ? 'Se ven en la web' : 'Salen de la web') + ' en hasta 1 minuto.' + (nuevos ? '\n(' + nuevos + ' elegidos no cuentan: son nuevos o ya estaban así; los nuevos se activan con Publicar.)' : ''))) return;
+    if (!confirm('¿' + (activo ? 'Volver a publicar' : 'Despublicar') + ' ' + lista.length + ' servicio(s)? ' + (activo ? 'Se ven en la web' : 'Salen de la web') + ' en hasta 1 minuto.' + (nuevos ? '\n(' + nuevos + ' elegidos no cuentan: son nuevos o ya estaban así; los nuevos se activan con Publicar.)' : ''))) return;
     var hechos = 0, fallas = [];
     toast((activo ? 'Activando' : 'Apagando') + '…');
     return lista.reduce(function (pr, x) { return pr.then(function () { return api('ops/proponer', { id: x.id, cambios: { activo: activo }, publicar: true }).then(function (r) { if (r.publicacion && r.publicacion.errores && r.publicacion.errores.length) fallas.push(x.titulo + ': ' + r.publicacion.errores[0].error); else hechos++; }, function (e) { fallas.push(x.titulo + ': ' + e.message); }); }); }, Promise.resolve())
-      .then(function () { S.srvSel = {}; if (fallas.length) alert(hechos + ' listo(s). No se pudo:\n' + fallas.slice(0, 8).join('\n')); else toast(hechos + (activo ? ' activado(s)' : ' apagado(s)')); return cargarOps(); });
+      .then(function () { S.srvSel = {}; if (fallas.length) alert(hechos + ' listo(s). No se pudo:\n' + fallas.slice(0, 8).join('\n')); else toast(hechos + (activo ? ' publicado(s) de nuevo' : ' despublicado(s): ya no se ven en la web')); return cargarOps(); });
   }
   /* Papelera de varios: de a 20 por pedido para no pasar el tiempo maximo del server. */
   function papeleraVarios(ids) {
