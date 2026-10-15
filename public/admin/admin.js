@@ -2197,7 +2197,13 @@
      Por vehiculo necesita capacidad: si el nombre dice "hasta 4" se toma, si no hay que escribirla. Confirmar guarda la
      unidad como cambio sin publicar (eso es lo que la confirma: lib/operaciones.js proponer). */
   var UNI_VEH = /buggy|quadri|cuatri|lancha priv|privativ|privad|hasta \d|até \d|ate \d|veh[ií]cul|ve[ií]cul|\bvan\b|\bauto\b|\bcarro\b|exclusiv/i;
-  function esperaUnidad(s) { return !s.eliminado_at && s.revision === 'pendiente' && /persona o por/.test(s.revision_motivo || ''); }
+  /* La marca del tour se borra recien al publicar: confirmado = su cambio pendiente ya no es de la importacion
+     (lib/operaciones.js proponer le cambia el origen cuando trae la unidad). */
+  function esperaUnidad(s) {
+    if (s.eliminado_at || s.revision !== 'pendiente' || !/persona o por/.test(s.revision_motivo || '')) return false;
+    var pc = pendPorTour()[s.id];
+    return !pc || pc.origen === 'importacion';
+  }
   function uniSugerida(s) {
     var t = s.titulo || '', m = t.match(/(?:hasta|até|ate)\s*0?(\d{1,2})|\((\d{1,2})\s*(?:pax|personas|pessoas|plazas|lugares)\)/i);
     return UNI_VEH.test(t) ? { unidad: 'vehiculo', capacidad: m ? Number(m[1] || m[2]) : '' } : { unidad: 'persona', capacidad: '' };
@@ -2245,6 +2251,39 @@
       return cargarOps();
     });
   }
+  /* Por que no se puede publicar un cambio todavia: lo mismo que revisa lib/operaciones.js publicar(). Vacio = listo. */
+  var PUB_FALTA = { unidad: 'Confirmar por persona o vehículo', foto: 'Sin foto', ficha: 'Falta descripción, detalle, duración o qué incluye', precio: 'Sin precio' };
+  function pubFalta(c, s) {
+    if (!s || !s.id) return [];
+    var x = Object.assign({}, s, c.despues), f = [];
+    if (!x.activo) return f;
+    if (c.origen === 'importacion' && esperaUnidad(s)) f.push('unidad');
+    if (calcPub(x, provDe(x.proveedor_id), S.ops.datos.config).error) f.push('precio');
+    if (x.tipo !== 'traslado') {
+      var fl = faltantes(s);
+      if (fl.indexOf('foto') >= 0) f.push('foto');
+      if (!s.activo && fl.some(function (k) { return k !== 'foto'; })) f.push('ficha');
+    }
+    return f;
+  }
+  /* Publica de a 20 (cada uno son varias consultas: cientos juntos no entran en el tiempo del server). */
+  function publicarListos(ids) {
+    if (!ids.length || !confirm('¿Publicar ' + ids.length + ' cambio(s) listos? Se ven en la web en hasta 1 minuto.')) return;
+    var hechos = 0, errores = [], lotes = [];
+    for (var i = 0; i < ids.length; i += 20) lotes.push(ids.slice(i, i + 20));
+    S.pubGuardando = '0/' + ids.length; pintar();
+    return lotes.reduce(function (pr, l) {
+      return pr.then(function () {
+        return api('ops/publicar', { ids: l }).then(function (r) { hechos += r.publicados; errores = errores.concat(r.errores); }, function (er) { errores.push({ servicio: l.length + ' cambios', error: er.message }); })
+          .then(function () { S.pubGuardando = (hechos + errores.length) + '/' + ids.length; var b = document.querySelector('[data-act="pub-listos"]'); if (b) b.textContent = 'Publicando… ' + S.pubGuardando; });
+      });
+    }, Promise.resolve()).then(function () {
+      S.pubGuardando = null; S.sel = {};
+      if (errores.length) alert(hechos + ' publicado(s). No se pudo:\n' + errores.slice(0, 8).map(function (x) { return String(x.servicio || '').replace('#', ' · ') + ': ' + x.error; }).join('\n'));
+      else toast(hechos + ' publicado(s). En la web en hasta 1 minuto.');
+      return cargarOps();
+    });
+  }
   function vistaPublicar() {
     var o = S.ops;
     if (!o || o.cargando) return '<p class="vacio">Cargando…</p>';
@@ -2263,6 +2302,12 @@
     var esTr = function (c) { var s = porId[c.tour_id]; return !!s && s.tipo === 'traslado'; }, nTr = { tour: 0, traslado: 0 };
     d.pendientes.forEach(function (c) { nTr[esTr(c) ? 'traslado' : 'tour']++; });
     if (S.pubTipo) d.pendientes = d.pendientes.filter(function (c) { return esTr(c) === (S.pubTipo === 'traslado'); });
+    // Listos y lo que falta, sobre lo filtrado arriba (destino, consulta, tipo).
+    var falta = {}, nFalta = { listo: 0 }, listos = [];
+    d.pendientes.forEach(function (c) { var f = falta[c.id] = pubFalta(c, porId[c.tour_id]); if (!f.length) { nFalta.listo++; listos.push(c.id); } f.forEach(function (k) { nFalta[k] = (nFalta[k] || 0) + 1; }); });
+    if (S.pubFalta && !(nFalta[S.pubFalta] > 0)) S.pubFalta = '';
+    if (S.pubFalta) d.pendientes = d.pendientes.filter(function (c) { return S.pubFalta === 'listo' ? !falta[c.id].length : falta[c.id].indexOf(S.pubFalta) >= 0; });
+    S.pubListos = listos;
     var agrupado = S.pubModo !== 'lista';
     S.pubVisibles = d.pendientes.map(function (c) { return c.id; });
     S.sel = S.sel || {};
@@ -2272,6 +2317,18 @@
     var nUni = d0.servicios.filter(function (s) { return esperaUnidad(s) && !s.eliminado_at; }).length;
     var h = '<div class="vhead"><div><h2>Por publicar</h2><p>' + (d0.pendientes.length ? d0.pendientes.length + (d0.pendientes.length === 1 ? ' cambio esperando' : ' cambios esperando') + ' tu revisión. ' : '') + 'Nada de esto se ve en la web hasta que lo publicás; los cambios de precio de más de 20 % aparecen en rojo.</p></div>' +
       (nUni ? '<div class="top__acc"><button class="btn btn--main" data-uni="abrir">Confirmar por persona o por vehículo (' + nUni + ')</button></div>' : '') + '</div>';
+    if (d0.pendientes.length) {
+      var chF = function (k, t) { return nFalta[k] ? '<button class="chip" data-pfalta="' + k + '" aria-pressed="' + (S.pubFalta === k) + '">' + esc(t) + '<span>' + nFalta[k] + '</span></button>' : ''; };
+      var hayFalta = Object.keys(PUB_FALTA).some(function (k) { return nFalta[k]; });
+      h += '<div class="card" style="display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:12px">' +
+        '<div style="flex:1 1 260px"><b style="font-size:1.1em">' + (listos.length ? '✓ ' + listos.length + ' listo' + (listos.length > 1 ? 's' : '') + ' para publicar' : 'Ninguno listo para publicar todavía') + '</b>' +
+        (hayFalta ? '<span class="sub">Los demás no se pueden publicar hasta completar lo que les falta. Tocá un motivo para ver cuáles son.</span>' : '<span class="sub">No le falta nada a ninguno.</span>') + '</div>' +
+        (listos.length ? '<button class="btn btn--main" data-act="pub-listos"' + (S.pubGuardando ? ' disabled' : '') + '>' + (S.pubGuardando ? 'Publicando… ' + S.pubGuardando : 'Publicar los ' + listos.length + ' listos') + '</button>' : '') +
+        (hayFalta ? '<div class="chips" style="flex:1 1 100%">' + (S.pubFalta ? '<button class="chip" data-pfalta="" aria-pressed="false">Ver todos</button>' : '') + chF('listo', '✓ Listos') + chF('unidad', PUB_FALTA.unidad) + chF('foto', PUB_FALTA.foto) + chF('ficha', 'Falta texto') + chF('precio', PUB_FALTA.precio) + '</div>' : '') +
+        (S.pubFalta === 'unidad' ? '<p class="sub" style="flex:1 1 100%;margin:0"><a class="lnk" href="#" data-uni="abrir">Confirmarlos todos juntos →</a></p>' : '') +
+        (S.pubFalta === 'foto' || S.pubFalta === 'ficha' ? '<p class="sub" style="flex:1 1 100%;margin:0">Completalos de a uno tocando el nombre, o por destino en <a class="lnk" href="#" data-ir="v:pasos">Paso a paso →</a></p>' : '') +
+        '</div>';
+    }
     if (!d0.pendientes.length) return h + '<div class="card"><p class="vacio">Cuando edites un precio o importes un archivo, los cambios quedan acá para que los revises antes de publicarlos.</p></div>';
     /* Barra de acciones: queda a la vista mientras se baja por la lista. */
     h += '<div class="pubbar"><label class="pubbar__todos"><input type="checkbox" data-act="sel-todos"' + (nSel && nSel === d.pendientes.length ? ' checked' : '') + '> ' + (nSel ? nSel + ' elegido' + (nSel > 1 ? 's' : '') : 'Elegir todos') + '</label>' +
@@ -3462,6 +3519,7 @@
       return;
     }
     var sv = e.target.closest('[data-srv]'); if (sv && !e.target.closest('input') && !e.target.closest('select') && !e.target.closest('.mg')) { e.preventDefault(); if (S.dirty && document.getElementById('drawer') && !confirm('Tenés cambios sin guardar. ¿Seguir?')) return; abrirServicio(sv.getAttribute('data-srv')); return; }
+    var pf = e.target.closest('[data-pfalta]'); if (pf) { S.pubFalta = pf.getAttribute('data-pfalta'); S.sel = {}; pintar(); return; }
     var pt = e.target.closest('[data-ptipo]'); if (pt) { S.pubTipo = pt.getAttribute('data-ptipo'); pintar(); return; }
     var pm = e.target.closest('[data-pmodo]'); if (pm) { S.pubModo = pm.getAttribute('data-pmodo'); try { localStorage.setItem('cs_pub_modo', S.pubModo); } catch (er) {} pintar(); return; }
     var ce = e.target.closest('[data-cons-escribir]'); if (ce) { e.preventDefault(); escribirConsulta(ce.getAttribute('data-cons-escribir')); return; }
@@ -3564,6 +3622,7 @@
       case 'srv-guardar': guardarSrv(false); break;
       case 'srv-publicar': guardarSrv(true); break;
       case 'pub-sel': if (confirm('¿Publicar ' + Object.keys(S.sel).length + ' cambio(s)? Se ven en la web en hasta 1 minuto.')) publicarCambios(Object.keys(S.sel)); break;
+      case 'pub-listos': publicarListos(S.pubListos || []); break;
       case 'desc-sel': descartarCambios(Object.keys(S.sel)); break;
       case 'sel-todos': var todos = S.pubVisibles || [], ya = Object.keys(S.sel).length === todos.length; S.sel = {}; if (!ya) todos.forEach(function (id) { S.sel[id] = 1; }); pintar(); break;
     }
