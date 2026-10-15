@@ -1461,6 +1461,7 @@
     return ids.reduce(function (pr, id) { return pr.then(function () { return api('ops/proponer', { id: id, cambios: { destino: key }, publicar: false }).then(function () { hechos++; }, function (e) { fallas.push(e.message); }); }); }, Promise.resolve())
       .then(function () { S.srvSel = {}; toast(hechos + ' pasado(s) a ' + destNombre(key) + ' · queda en "Por publicar"' + (fallas.length ? ' · ' + fallas.length + ' no: ' + fallas[0] : '')); return cargarOps(); });
   }
+  function sinPrecio(x) { return (x.precio == null || x.precio === '') && (x.precio_brl == null || x.precio_brl === ''); }
   function vistaServicios() {
     var o = S.ops;
     if (!o || o.cargando) return '<p class="vacio">Cargando servicios…</p>';
@@ -1469,9 +1470,9 @@
     var clase = function (s) {
       if (s.eliminado_at) return { papelera: true };
       if (s.alternativa_de) return { comparar: true };
-      return { todos: true, sinfoto: s.tipo !== 'traslado' && faltantes(s).indexOf('foto') >= 0, publicados: s.activo && s.revision === 'ok', nuevos: !s.publicado_at, pendientes: !!pend[s.id], revision: s.revision === 'pendiente', inactivos: !s.activo && !!s.publicado_at, viejos: s.activo && viejo(s, dias) };
+      return { todos: true, sinfoto: s.tipo !== 'traslado' && faltantes(s).indexOf('foto') >= 0, sinprecio: sinPrecio(conPendiente(s)), publicados: s.activo && s.revision === 'ok', nuevos: !s.publicado_at, pendientes: !!pend[s.id], revision: s.revision === 'pendiente', inactivos: !s.activo && !!s.publicado_at, viejos: s.activo && viejo(s, dias) };
     };
-    var nombres = { todos: 'Todos', publicados: 'Activos', nuevos: 'Nuevos', comparar: 'Para comparar', sinfoto: 'Sin foto', pendientes: 'Con cambios sin publicar', revision: 'Para revisar', viejos: 'Precio viejo (+' + dias + ' días)', inactivos: 'Apagados', papelera: 'Papelera' };
+    var nombres = { todos: 'Todos', publicados: 'Activos', nuevos: 'Nuevos', comparar: 'Para comparar', sinfoto: 'Sin foto', sinprecio: 'Sin precio', pendientes: 'Con cambios sin publicar', revision: 'Para revisar', viejos: 'Precio viejo (+' + dias + ' días)', inactivos: 'Apagados', papelera: 'Papelera' };
     var cuenta = {}; Object.keys(nombres).forEach(function (k) { cuenta[k] = 0; });
     d.servicios.forEach(function (s) { var c = clase(s); Object.keys(c).forEach(function (k) { if (c[k]) cuenta[k]++; }); });
     var f = S.srvFiltro || 'todos', q = sinTildes(S.qSrv || '');
@@ -2258,7 +2259,8 @@
   function pubFalta(c, s) {
     if (!s || !s.id) return [];
     var x = Object.assign({}, s, c.despues), f = [];
-    if (!x.activo) return f;
+    // Sin precio cuenta aunque este apagado: publicarlo asi no lo pone en la web.
+    if (!x.activo) return sinPrecio(x) ? ['precio'] : f;
     if (c.origen === 'importacion' && esperaUnidad(s)) f.push('unidad');
     if (calcPub(x, provDe(x.proveedor_id), S.ops.datos.config).error) f.push('precio');
     if (x.tipo !== 'traslado') {
