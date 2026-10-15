@@ -1575,7 +1575,7 @@
           '<button class="btn btn--sm btn--txt-danger" data-act="sel-papelera">🗑 Papelera (' + nSel + ')</button><button class="btn btn--main btn--sm" data-act="sel-publicar">Publicar (' + nSel + ')</button>' : '') + '</div>';
     }
     if (vista === 'tarjetas') return h + '<div class="card">' + barra + '</div><div class="scs">' + lista.map(function (s) { return tarjetaSrv(s, pend[s.id], ultimo(s)); }).join('') + '</div>';
-    h += '<div class="card">' + barra + '<div class="srvtabla"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Destino</th><th>Precio del proveedor y margen</th><th class="num">En la web</th><th>Estado</th><th>Verificado</th><th></th></tr></thead><tbody>';
+    h += '<div class="card">' + barra + '<div class="srvtabla"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Destino</th><th class="num" title="Lo que cobra el proveedor, por persona">Neto</th><th class="num" title="Lo que nos queda, por persona">Comisión</th><th class="num" title="Lo que paga el cliente en la web, por persona">Publicado</th><th>Estado</th><th>Verificado</th><th></th></tr></thead><tbody>';
     lista.forEach(function (s) {
       var pr = provDe(s.proveedor_id), p = pend[s.id], c = clase(s);
       // Cada etiqueta filtra por lo suyo al tocarla.
@@ -1586,16 +1586,15 @@
       if (s.revision === 'pendiente') estado += ' <span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '"' + fil('revision') + '>revisar</span>';
       if (!s.eliminado_at && s.publicado_at) estado += '<span class="sub"><a class="lnk" href="#" data-sactivo="' + esc(s.id) + '|' + (s.activo ? '0' : '1') + '">' + (s.activo ? 'Despublicar' : 'Volver a publicar') + '</a></span>';
       var dst = conPendiente(s).destino, sale = saleDesde(s, dst);
-      h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><div class="srv-cel">' + miniSrv(s) + '<div><b>' + esc(s.titulo) + '</b><span class="sub"><a class="lnk" href="#" data-sfil="tipo|' + (s.tipo === 'traslado' ? 'traslado' : 'tour') + '">' + esc(TIPOS_SRV[s.tipo] || s.tipo) + '</a> · ' + (pr ? '<a class="lnk" href="#" data-sfil="prov|' + esc(pr.id) + '">' + esc(pr.nombre) + '</a>' : '<i>sin proveedor</i>') + '</span></div></div></td>' +
+      h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><div class="srv-cel">' + miniSrv(s) + '<div><b>' + esc(s.titulo) + '</b><span class="sub"><a class="lnk" href="#" data-sfil="tipo|' + (s.tipo === 'traslado' ? 'traslado' : 'tour') + '">' + esc(TIPOS_SRV[s.tipo] || s.tipo) + '</a> · ' + (pr ? '<a class="lnk" href="#" data-sfil="prov|' + esc(pr.id) + '">' + esc(pr.nombre) + '</a>' : '<i>sin proveedor</i>') + '</span>' + (verProv(p && p.despues.link_web || s.link_web) ? '<span class="sub">' + verProv(p && p.despues.link_web || s.link_web) + '</span>' : '') +
+          (pr && !s.eliminado_at && tarifaHtml(pr, [s]) ? '<span class="sub">' + tarifaHtml(pr, [s]) + '</span>' : '') + '</div></div></td>' +
         '<td data-l="Destino">' + (s.eliminado_at ? esc(destNombre(dst)) : '<select class="dsel" data-sdest-uno="' + esc(s.id) + '" aria-label="Destino del servicio" title="Cambiar el destino">' +
             d.destinos.map(function (x) { return '<option value="' + esc(x.key) + '"' + (x.key === dst ? ' selected' : '') + '>' + esc(x.nombre) + '</option>'; }).join('') + (d.destinos.some(function (x) { return x.key === dst; }) ? '' : '<option value="' + esc(dst) + '" selected>' + esc(dst) + '</option>') + '</select>') +
           ' <a class="lnk" href="#" data-sfil="dest|' + esc(dst) + '" title="Ver solo ' + esc(destNombre(dst)) + '">' + (S.srvDest === dst ? 'ver todos' : 'ver solo este') + '</a>' + (dst !== s.destino ? '<span class="sub">antes ' + esc(destNombre(s.destino)) + ' (sin publicar)</span>' : '') +
           (sale ? '<span class="sub">sale desde ' + esc(sale.texto) + (sale.key ? ' · <a class="lnk" href="#" data-smover-uno="' + esc(s.id) + '|' + esc(sale.key) + '">pasar a ' + esc(destNombre(sale.key)) + '</a>' : '') + '</span>' : '') + '</td>' +
         // Un nuevo tiene su precio en el cambio sin publicar: se muestra ese.
-        '<td data-l="Proveedor cobra">' + origenTxt(conPendiente(s)) + (verProv(p && p.despues.link_web || s.link_web) ? '<span class="sub">' + verProv(p && p.despues.link_web || s.link_web) + '</span>' : '') +
-          (pr && !s.eliminado_at && tarifaHtml(pr, [s]) ? '<span class="sub">' + tarifaHtml(pr, [s]) + '</span>' : '') +
-          '<div style="margin-top:6px">' + margenHtml(s) + '</div></td>' +
-        '<td class="num" data-l="En la web">' + (s.precio_publicado != null ? '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + ' por persona</span>' : '—') +
+        '<td class="num" data-l="Neto">' + netoHtml(s) + '</td><td class="num" data-l="Comisión">' + comisionHtml(s) + '<div class="mg-caja">' + margenHtml(s) + '</div></td>' +
+        '<td class="num" data-l="Publicado">' + publicadoHtml(s) +
           (p ? '<span class="sub">sin publicar: ' + (p.publicado_despues != null ? pub(p.publicado_despues) + ' ' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) : 'cambio') + '</span>' : '') + '</td>' +
         '<td data-l="Estado">' + estado + '</td>' +
         '<td data-l="Verificado"' + (c.viejos ? ' class="deuda"' : '') + '>' + (conPendiente(s).verificado ? esc(fecha(conPendiente(s).verificado)) + ' ' + esc(conPendiente(s).verificado.slice(0, 4)) : 'nunca') +
@@ -1612,7 +1611,7 @@
     return u ? '<img class="srv-mini" src="' + esc(u) + '" alt="" loading="lazy">' : '<span class="srv-mini srv-mini--no">' + (s.tipo === 'traslado' ? '🚐' : 'sin foto') + '</span>';
   }
   function tarjetaSrv(s, p, ult) {
-    var x = conPendiente(s), pr = provDe(s.proveedor_id), u = portadaSrv(s), c = margenDe(s), tras = s.tipo === 'traslado';
+    var x = conPendiente(s), pr = provDe(s.proveedor_id), u = portadaSrv(s), tras = s.tipo === 'traslado';
     var fil = function (k) { return ' data-sfil="filtro|' + k + '" role="button"'; };
     var estado = s.eliminado_at ? '<span class="pill p-cancelado">En la papelera</span>' : (!s.publicado_at ? '<span class="pill p-nuevo"' + fil('nuevos') + '>Nuevo</span>' : (s.activo ? '<span class="pill p-confirmado"' + fil('publicados') + '>En la web</span>' : '<span class="pill p-cancelado"' + fil('inactivos') + '>Apagado</span>'));
     var avisos = [];
@@ -1622,11 +1621,8 @@
     var et = !s.eliminado_at && ((S.ops.datos.etiquetas || {})[s.id]); if (et && ETIQUETAS_SRV[et]) avisos.push('<span class="pill p-confirmado">' + esc(ETIQUETAS_SRV[et]) + '</span>');
     if (p) avisos.push('<span class="pill p-consultado" data-sfil="filtro|pendientes" role="button" title="Tiene un cambio en Por publicar">Cambio sin publicar</span>');
     if (tras && !s.eliminado_at) avisos.push('<span class="pill p-consultado" title="La web calcula los traslados aparte">No va a la web</span>');
-    var web = s.precio_publicado != null ? '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + ' p/p</span>' : '<b class="sc__nada">—</b><span class="sub">sin publicar</span>';
+    var web = publicadoHtml(s);
     if (p && p.publicado_despues != null) web += '<span class="sub pend">pasa a ' + pub(p.publicado_despues) + ' ' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) + '</span>';
-    var costo = sinPrecio(x) ? '<b class="sc__nada">—</b><span class="sub">sin precio</span>'
-      : '<b>' + (x.precio_brl != null && x.precio_brl !== '' ? brl(x.precio_brl) : usd(x.precio)) + '</b><span class="sub">' + esc(UNIDADES[x.unidad] || 'por persona') + '</span>' +
-        (c.error ? '' : '<span class="sub ' + (c.margen ? 'sc__gan' : 'warn') + '">' + (c.margen ? '+' + usd(r2(c.valor - c.base)) + ' de margen' : 'sin margen') + '</span>');
     var acc = s.eliminado_at
       ? '<button class="btn btn--sm" data-recuperar="' + esc(s.id) + '">Recuperar</button><button class="btn btn--sm btn--danger" data-borrar="' + esc(s.id) + '">Borrar</button>'
       : (s.publicado_at ? '<a class="lnk" href="#" data-sactivo="' + esc(s.id) + '|' + (s.activo ? '0' : '1') + '">' + (s.activo ? 'Despublicar' : 'Volver a publicar') + '</a>' : '<span class="sub">' + (ult ? 'Cambió ' + esc(fechaHora(ult)) : '') + '</span>') +
@@ -1639,7 +1635,7 @@
       '<div class="sc__body"><b class="sc__t">' + esc(s.titulo) + '</b>' +
         '<span class="sub"><a class="lnk" href="#" data-sfil="dest|' + esc(x.destino) + '">' + esc(destNombre(x.destino)) + '</a> · <a class="lnk" href="#" data-sfil="tipo|' + (tras ? 'traslado' : 'tour') + '">' + esc(TIPOS_SRV[s.tipo] || s.tipo) + '</a></span>' +
         '<span class="sub">' + (pr ? '<a class="lnk" href="#" data-sfil="prov|' + esc(pr.id) + '">' + esc(pr.nombre) + '</a>' : '<i>sin proveedor</i>') + '</span>' +
-        '<div class="sc__precios"><div><small>En la web</small>' + web + '</div><div><small>Proveedor</small>' + costo + '</div></div>' +
+        '<div class="sc__precios sc__precios--3"><div><small>Neto</small>' + netoHtml(s) + '</div><div><small>Comisión</small>' + comisionHtml(s) + '</div><div><small>Publicado</small>' + web + '</div></div>' +
         (avisos.length ? '<div class="tags">' + avisos.join('') + '</div>' : '') + '</div>' +
       '<div class="sc__pie">' + acc + '</div></article>';
   }
@@ -1647,12 +1643,34 @@
   /* Margen de cada servicio, editable ahi mismo: el general, o uno propio en % o en US$ por persona. Guardar crea un
      cambio en "Por publicar" (ops/proponer, como el editor): la web no cambia hasta publicarlo. */
   function margenDe(s) { var x = conPendiente(s); return calcPub(x, provDe(x.proveedor_id), S.ops.datos.config); }
+  /* Las tres cifras de cada servicio: neto (lo que cobra el proveedor), comision (lo que nos queda) y publicado
+     (lo que paga el cliente). Todo por persona; el neto se muestra tambien en la moneda en que lo cobra. */
+  function netoHtml(s) {
+    var x = conPendiente(s), c = margenDe(s);
+    if (sinPrecio(x)) return '<b class="sc__nada">—</b><span class="sub">sin precio</span>';
+    var orig = x.precio_brl != null && x.precio_brl !== '' ? brl(x.precio_brl) : usd(x.precio);
+    var porVeh = x.unidad && x.unidad !== 'persona';
+    return '<b>' + (c.error ? orig : pub(r2(c.base))) + '</b><span class="sub">' + (c.error ? esc(UNIDADES[x.unidad] || 'por persona') : usd(r2(c.base))) + '</span>' +
+      (porVeh && !c.error ? '<span class="sub">' + orig + ' ' + esc(UNIDADES[x.unidad] || '') + (x.capacidad ? ' ÷ ' + x.capacidad : '') + '</span>' : '');
+  }
+  function comisionHtml(s) {
+    var c = margenDe(s);
+    if (c.error) return '<b class="sc__nada">—</b>';
+    if (!c.margen) return '<b class="warn">sin comisión</b>';
+    var g = r2(c.valor - c.base), pct = c.base > 0 ? Math.round(g / c.base * 1000) / 10 : 0;
+    return '<b class="sc__gan">+' + pub(g) + '</b><span class="sub" title="Margen ' + esc(c.margen.de) + '">' + usd(g) + ' · <span class="nw">' + String(pct).replace('.', ',') + ' %</span></span>';
+  }
+  function publicadoHtml(s) {
+    var c = margenDe(s);
+    if (s.precio_publicado != null) return '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + '</span>';
+    return c.error ? '<b class="sc__nada">—</b>' : '<b class="sc__nada">' + pub(c.valor) + '</b><span class="sub">quedaría así · sin publicar</span>';
+  }
   function gananciaDe(s) { var c = margenDe(s); return c.error ? -1 : r2(c.valor - c.base); }
   function margenHtml(s) {
     if (s.eliminado_at) return '';
     var x = conPendiente(s), c = margenDe(s), propio = !!(x.margen_tipo && x.margen_valor != null && x.margen_valor !== '');
     var tipo = propio ? x.margen_tipo : '';
-    var ganTxt = c.error ? '<span class="sub">sin precio</span>' : '<span class="sub">' + (c.margen ? '+' + usd(r2(c.valor - c.base)) + ' por persona' + (c.margen.de !== 'propio' ? ' · ' + esc(c.margen.de) : '') : 'sin margen') + '</span>';
+    var ganTxt = '';   // la ganancia ya se ve arriba (comisionHtml)
     return '<div class="mg" data-mg="' + esc(s.id) + '"><select class="mg__t" data-mg-tipo aria-label="Tipo de margen"><option value=""' + (!tipo ? ' selected' : '') + '>General</option><option value="pct"' + (tipo === 'pct' ? ' selected' : '') + '>%</option><option value="usd"' + (tipo === 'usd' ? ' selected' : '') + '>US$</option></select>' +
       '<input class="mg__v" data-mg-valor type="number" step="0.5" min="0" inputmode="decimal" aria-label="Valor del margen" value="' + (propio ? esc(x.margen_valor) : '') + '" placeholder="' + (c.margen && c.margen.de !== 'propio' ? esc(c.margen.tipo === 'pct' ? c.margen.valor : c.margen.valor) : '') + '"' + (tipo ? '' : ' disabled') + '></div>' + ganTxt;
   }
