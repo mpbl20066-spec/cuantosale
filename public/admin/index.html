@@ -227,6 +227,34 @@ tr.mc>td:first-child{box-shadow:inset 4px 0 0 var(--mc)}
 .mg__v:disabled{background:var(--bg);color:var(--muted)}
 td .mg + .sub{margin-top:4px;white-space:nowrap}
 td[data-l=Servicio]{min-width:210px}
+/* Servicios: indicadores, tarjetas y miniatura en la tabla */
+.kpis--srv{grid-template-columns:repeat(auto-fit,minmax(135px,1fr));margin:0 0 16px}
+.kpis--srv .kpi{padding:12px 14px}.kpis--srv .kpi b{font-size:22px}
+.kpi--on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.filtros #q-srv{flex:1 1 260px;width:auto;max-width:none}
+.srv-cel{display:flex;gap:10px;align-items:flex-start}
+.srv-mini{flex:0 0 56px;width:56px;height:42px;object-fit:cover;border-radius:7px;background:var(--bg)}
+.srv-mini--no{display:grid;place-items:center;font-size:10px;color:var(--muted);border:1px dashed var(--line)}
+.scs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:14px}
+.sc{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.sc:hover{border-color:var(--muted);box-shadow:0 6px 18px rgba(0,0,0,.06)}
+.sc--sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.sc__foto{position:relative;aspect-ratio:16/10;background:var(--bg)}
+.sc__foto img{width:100%;height:100%;object-fit:cover;display:block}
+.sc__sinfoto{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:13px;font-weight:600;border-bottom:1px dashed var(--line)}
+.sc__chk{position:absolute;left:10px;top:10px;width:20px;height:20px;min-height:0;margin:0;accent-color:var(--ink);cursor:pointer}
+.sc__estado{position:absolute;right:10px;top:10px}.sc__estado .pill{box-shadow:0 1px 3px rgba(0,0,0,.18);cursor:pointer}
+.sc__body{padding:12px 14px;display:grid;gap:3px;flex:1;align-content:start}
+.sc__t{font-size:15px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sc__precios{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;background:var(--bg);border-radius:10px;padding:8px 10px}
+.sc__precios small{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.sc__precios b{display:block;font-size:15px;font-variant-numeric:tabular-nums}
+.sc__nada{color:var(--muted)}
+.sc__gan{color:var(--ok);font-weight:600}
+.sc__body .tags{margin-top:8px}.sc__body .tags .pill{cursor:pointer}
+.sc__pie{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 14px;border-top:1px solid var(--line);font-size:13px;min-height:46px}
+.sc__pie .btn--x{margin-left:auto}
+@media (max-width:760px){.scs{grid-template-columns:1fr}.kpis--srv{display:flex;overflow-x:auto;gap:8px;scrollbar-width:none;margin-right:-16px;padding-right:16px}.kpis--srv::-webkit-scrollbar{display:none}.kpis--srv .kpi{flex:0 0 112px;padding:10px 12px}.kpis--srv .kpi b{font-size:19px}.kpis--srv .kpi em{display:none}}
 /* Catalogo > Paso a paso */
 .pp-prog{list-style:none;display:flex;gap:6px;padding:0;margin:0 0 16px;overflow-x:auto}
 .pp-prog li{flex:1;min-width:0;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:13px;color:var(--muted)}
@@ -433,6 +461,6 @@ code{font-size:12.5px;background:var(--bg);padding:1px 5px;border-radius:5px;wor
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=86"></script>
+<script src="/admin/admin.js?v=87"></script>
 </body>
 </html>

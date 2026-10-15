@@ -1498,9 +1498,17 @@
       if (!s.eliminado_at && !s.alternativa_de && (!s.publicado_at || s.revision === 'pendiente') && (!S.srvTipo || (S.srvTipo === 'traslado') === esTraslado(s))) { var dk = conPendiente(s).destino; porRevisar[dk] = (porRevisar[dk] || 0) + 1; }
     });
     var mg = d.config.margen ? (d.config.margen.tipo === 'pct' ? d.config.margen.valor + ' %' : usd(d.config.margen.valor)) + ' por persona' : 'sin margen';
-    var h = '<div class="vhead"><div><h2>Servicios</h2><p>Tours, actividades y traslados · cotización ' + esc(String(d.config.cotizacion).replace('.', ',')) + (d.config.cotizacion_fuente ? ' (' + esc(d.config.cotizacion_fuente) + ')' : '') + ' · margen general ' + esc(mg) + '</p></div>' +
+    var vista = srvVista();
+    var h = '<div class="vhead"><div><h2>Catálogo turístico</h2><p>Tours, actividades y traslados · cotización ' + esc(String(d.config.cotizacion).replace('.', ',')) + (d.config.cotizacion_fuente ? ' (' + esc(d.config.cotizacion_fuente) + ')' : '') + '</p></div>' +
       '<div class="top__acc"><button class="btn" data-act="cfg-abrir">Cotización y margen</button><button class="btn btn--main btn--lg" data-act="nuevo-srv">+ Servicio</button></div></div>';
-    var barra = '<div class="filtros"><div class="filtros__der">' +
+    // Indicadores: cada uno filtra por lo suyo (otra vez lo saca).
+    var kpi = function (k, txt, nota) { return '<button type="button" class="kpi kpi--btn' + (f === k ? ' kpi--on' : '') + '" data-sfil="filtro|' + k + '"><small>' + esc(txt) + '</small><b>' + cuenta[k] + '</b><em>' + esc(nota) + '</em></button>'; };
+    h += '<div class="kpis kpis--srv">' + kpi('todos', 'Servicios', 'en el catálogo') + kpi('publicados', 'En la web', 'activos') + kpi('nuevos', 'Nuevos', 'sin publicar nunca') +
+      kpi('revision', 'Para revisar', 'marcados') + kpi('sinprecio', 'Sin precio', 'no se pueden vender') + kpi('sinfoto', 'Sin foto', 'tours y paseos') +
+      '<button type="button" class="kpi kpi--btn" data-act="cfg-abrir"><small>Margen general</small><b>' + esc(d.config.margen ? (d.config.margen.tipo === 'pct' ? d.config.margen.valor + ' %' : usd(d.config.margen.valor)) : '—') + '</b><em>' + (d.config.margen ? 'por persona · cambiar' : 'configurar') + '</em></button></div>';
+    var barra = '<div class="filtros"><input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '" aria-label="Buscar servicio">' +
+      '<div class="seg" role="group" aria-label="Cómo ver"><button type="button" class="seg__b" data-svista="tarjetas" aria-pressed="' + (vista === 'tarjetas') + '">▦ Tarjetas</button><button type="button" class="seg__b" data-svista="tabla" aria-pressed="' + (vista === 'tabla') + '">☰ Tabla</button></div>' +
+      '<div class="filtros__der">' +
       '<select class="fsel" data-sfiltro-sel aria-label="Ver">' + Object.keys(nombres).map(function (k) { return '<option value="' + k + '"' + (f === k ? ' selected' : '') + '>' + esc(k === 'todos' ? 'Ver: todos' : nombres[k]) + ' (' + cuenta[k] + ')</option>'; }).join('') + '</select>' +
       '<select class="fsel" data-sdest aria-label="Destino"><option value="">Destino: todos</option>' + (function () {
         var dl = Object.keys(destUsados).map(function (k) { return { k: k, n: destNombre(k), p: porRevisar[k] || 0 }; }).sort(function (a, b) { return a.n.localeCompare(b.n, 'es'); });
@@ -1512,7 +1520,7 @@
       '<select class="fsel" data-sprov aria-label="Proveedor"><option value="">Proveedor: todos</option><option value="-"' + (S.srvProv === '-' ? ' selected' : '') + '>Sin proveedor</option>' +
         S.datos.proveedores.filter(function (p) { return provUsados[p.id]; }).map(function (p) { return '<option value="' + esc(p.id) + '"' + (S.srvProv === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>' +
       '<select class="fsel" data-sorden aria-label="Orden"><option value="">Orden: por destino</option><option value="reciente"' + (S.srvOrden === 'reciente' ? ' selected' : '') + '>Último cambio primero</option><option value="precio"' + (S.srvOrden === 'precio' ? ' selected' : '') + '>Precio del proveedor</option><option value="margen"' + (S.srvOrden === 'margen' ? ' selected' : '') + '>Margen, de menor a mayor</option></select>' +
-      '</div><input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '" aria-label="Buscar servicio"></div>' +
+      '</div></div>' +
       '<div class="chips" style="padding:0 14px 10px"><button class="chip" data-sfil="tipo|" aria-pressed="' + !S.srvTipo + '">Todo<span>' + (nTipo.tour + nTipo.traslado) + '</span></button>' +
         '<button class="chip" data-sfil="tipo|tour" aria-pressed="' + (S.srvTipo === 'tour') + '">Tours y paseos<span>' + nTipo.tour + '</span></button>' +
         '<button class="chip" data-sfil="tipo|traslado" aria-pressed="' + (S.srvTipo === 'traslado') + '">Traslados<span>' + nTipo.traslado + '</span></button>' +
@@ -1531,6 +1539,7 @@
           '<button class="btn btn--sm" data-act="sel-apagar">Despublicar</button><button class="btn btn--sm" data-act="sel-activar">Volver a publicar (' + nSel + ')</button>' +
           '<button class="btn btn--sm btn--txt-danger" data-act="sel-papelera">🗑 Papelera (' + nSel + ')</button><button class="btn btn--main btn--sm" data-act="sel-publicar">Publicar (' + nSel + ')</button>' : '') + '</div>';
     }
+    if (vista === 'tarjetas') return h + '<div class="card">' + barra + '</div><div class="scs">' + lista.map(function (s) { return tarjetaSrv(s, pend[s.id], ultimo(s)); }).join('') + '</div>';
     h += '<div class="card">' + barra + '<div class="srvtabla"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Destino</th><th>Precio del proveedor y margen</th><th class="num">En la web</th><th>Estado</th><th>Verificado</th><th></th></tr></thead><tbody>';
     lista.forEach(function (s) {
       var pr = provDe(s.proveedor_id), p = pend[s.id], c = clase(s);
@@ -1542,7 +1551,7 @@
       if (s.revision === 'pendiente') estado += ' <span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '"' + fil('revision') + '>revisar</span>';
       if (!s.eliminado_at && s.publicado_at) estado += '<span class="sub"><a class="lnk" href="#" data-sactivo="' + esc(s.id) + '|' + (s.activo ? '0' : '1') + '">' + (s.activo ? 'Despublicar' : 'Volver a publicar') + '</a></span>';
       var dst = conPendiente(s).destino, sale = saleDesde(s, dst);
-      h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub"><a class="lnk" href="#" data-sfil="tipo|' + (s.tipo === 'traslado' ? 'traslado' : 'tour') + '">' + esc(TIPOS_SRV[s.tipo] || s.tipo) + '</a> · ' + (pr ? '<a class="lnk" href="#" data-sfil="prov|' + esc(pr.id) + '">' + esc(pr.nombre) + '</a>' : '<i>sin proveedor</i>') + '</span></td>' +
+      h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><div class="srv-cel">' + miniSrv(s) + '<div><b>' + esc(s.titulo) + '</b><span class="sub"><a class="lnk" href="#" data-sfil="tipo|' + (s.tipo === 'traslado' ? 'traslado' : 'tour') + '">' + esc(TIPOS_SRV[s.tipo] || s.tipo) + '</a> · ' + (pr ? '<a class="lnk" href="#" data-sfil="prov|' + esc(pr.id) + '">' + esc(pr.nombre) + '</a>' : '<i>sin proveedor</i>') + '</span></div></div></td>' +
         '<td data-l="Destino">' + (s.eliminado_at ? esc(destNombre(dst)) : '<select class="dsel" data-sdest-uno="' + esc(s.id) + '" aria-label="Destino del servicio" title="Cambiar el destino">' +
             d.destinos.map(function (x) { return '<option value="' + esc(x.key) + '"' + (x.key === dst ? ' selected' : '') + '>' + esc(x.nombre) + '</option>'; }).join('') + (d.destinos.some(function (x) { return x.key === dst; }) ? '' : '<option value="' + esc(dst) + '" selected>' + esc(dst) + '</option>') + '</select>') +
           ' <a class="lnk" href="#" data-sfil="dest|' + esc(dst) + '" title="Ver solo ' + esc(destNombre(dst)) + '">' + (S.srvDest === dst ? 'ver todos' : 'ver solo este') + '</a>' + (dst !== s.destino ? '<span class="sub">antes ' + esc(destNombre(s.destino)) + ' (sin publicar)</span>' : '') +
@@ -1561,6 +1570,47 @@
           : '<button class="btn btn--sm btn--x" data-papelera="' + esc(s.id) + '" title="Mandar a la papelera" aria-label="Mandar a la papelera">🗑</button>') + '</td></tr>';
     });
     return h + '</tbody></table></div></div>';
+  }
+  /* Servicios en tarjetas o en tabla: misma lista, mismos filtros y mismas acciones; se recuerda en este navegador. */
+  function srvVista() {
+    if (!S.srvVista) { try { S.srvVista = localStorage.getItem('cs_srv_vista'); } catch (e) { /* sin storage */ } }
+    return S.srvVista === 'tabla' ? 'tabla' : 'tarjetas';
+  }
+  function portadaSrv(s) { var x = conPendiente(s); return urlSegura(x.foto_wiki || (Array.isArray(x.galeria) && x.galeria[0]) || x.url_imagen); }
+  function miniSrv(s) {
+    var u = portadaSrv(s);
+    return u ? '<img class="srv-mini" src="' + esc(u) + '" alt="" loading="lazy">' : '<span class="srv-mini srv-mini--no">' + (s.tipo === 'traslado' ? '🚐' : 'sin foto') + '</span>';
+  }
+  function tarjetaSrv(s, p, ult) {
+    var x = conPendiente(s), pr = provDe(s.proveedor_id), u = portadaSrv(s), c = margenDe(s), tras = s.tipo === 'traslado';
+    var fil = function (k) { return ' data-sfil="filtro|' + k + '" role="button"'; };
+    var estado = s.eliminado_at ? '<span class="pill p-cancelado">En la papelera</span>' : (!s.publicado_at ? '<span class="pill p-nuevo"' + fil('nuevos') + '>Nuevo</span>' : (s.activo ? '<span class="pill p-confirmado"' + fil('publicados') + '>En la web</span>' : '<span class="pill p-cancelado"' + fil('inactivos') + '>Apagado</span>'));
+    var avisos = [];
+    if (s.revision === 'pendiente') avisos.push('<span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '"' + fil('revision') + '>Revisar</span>');
+    if (sinPrecio(x)) avisos.push('<span class="pill p-cancelado"' + fil('sinprecio') + '>Sin precio</span>');
+    if (!s.eliminado_at && !tras) { var fa = faltantes(s).filter(function (k) { return k !== 'foto'; }); if (fa.length) avisos.push('<span class="pill p-pendiente" title="Le falta: ' + esc(fa.join(', ')) + '">Ficha: faltan ' + fa.length + '</span>'); }
+    if (p) avisos.push('<span class="pill p-consultado" data-sfil="filtro|pendientes" role="button" title="Tiene un cambio en Por publicar">Cambio sin publicar</span>');
+    if (tras && !s.eliminado_at) avisos.push('<span class="pill p-consultado" title="La web calcula los traslados aparte">No va a la web</span>');
+    var web = s.precio_publicado != null ? '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + ' p/p</span>' : '<b class="sc__nada">—</b><span class="sub">sin publicar</span>';
+    if (p && p.publicado_despues != null) web += '<span class="sub pend">pasa a ' + pub(p.publicado_despues) + ' ' + esc(pctTxt(s.precio_publicado, p.publicado_despues)) + '</span>';
+    var costo = sinPrecio(x) ? '<b class="sc__nada">—</b><span class="sub">sin precio</span>'
+      : '<b>' + (x.precio_brl != null && x.precio_brl !== '' ? brl(x.precio_brl) : usd(x.precio)) + '</b><span class="sub">' + esc(UNIDADES[x.unidad] || 'por persona') + '</span>' +
+        (c.error ? '' : '<span class="sub ' + (c.margen ? 'sc__gan' : 'warn') + '">' + (c.margen ? '+' + usd(r2(c.valor - c.base)) + ' de margen' : 'sin margen') + '</span>');
+    var acc = s.eliminado_at
+      ? '<button class="btn btn--sm" data-recuperar="' + esc(s.id) + '">Recuperar</button><button class="btn btn--sm btn--danger" data-borrar="' + esc(s.id) + '">Borrar</button>'
+      : (s.publicado_at ? '<a class="lnk" href="#" data-sactivo="' + esc(s.id) + '|' + (s.activo ? '0' : '1') + '">' + (s.activo ? 'Despublicar' : 'Volver a publicar') + '</a>' : '<span class="sub">' + (ult ? 'Cambió ' + esc(fechaHora(ult)) : '') + '</span>') +
+        (verProv(p && p.despues.link_web || s.link_web) || '') +
+        '<button class="btn btn--sm btn--x" data-papelera="' + esc(s.id) + '" title="Mandar a la papelera" aria-label="Mandar a la papelera">🗑</button>';
+    return '<article class="sc' + (S.srvSel && S.srvSel[s.id] ? ' sc--sel' : '') + '" data-srv="' + esc(s.id) + '">' +
+      '<div class="sc__foto">' + (u ? '<img src="' + esc(u) + '" alt="" loading="lazy">' : '<span class="sc__sinfoto">' + (tras ? '🚐 Traslado' : 'Sin foto') + '</span>') +
+        (s.eliminado_at ? '' : '<input type="checkbox" class="sc__chk" data-ssel="' + esc(s.id) + '" aria-label="Elegir"' + (S.srvSel && S.srvSel[s.id] ? ' checked' : '') + '>') +
+        '<span class="sc__estado">' + estado + '</span></div>' +
+      '<div class="sc__body"><b class="sc__t">' + esc(s.titulo) + '</b>' +
+        '<span class="sub"><a class="lnk" href="#" data-sfil="dest|' + esc(x.destino) + '">' + esc(destNombre(x.destino)) + '</a> · <a class="lnk" href="#" data-sfil="tipo|' + (tras ? 'traslado' : 'tour') + '">' + esc(TIPOS_SRV[s.tipo] || s.tipo) + '</a></span>' +
+        '<span class="sub">' + (pr ? '<a class="lnk" href="#" data-sfil="prov|' + esc(pr.id) + '">' + esc(pr.nombre) + '</a>' : '<i>sin proveedor</i>') + '</span>' +
+        '<div class="sc__precios"><div><small>En la web</small>' + web + '</div><div><small>Proveedor</small>' + costo + '</div></div>' +
+        (avisos.length ? '<div class="tags">' + avisos.join('') + '</div>' : '') + '</div>' +
+      '<div class="sc__pie">' + acc + '</div></article>';
   }
 
   /* Margen de cada servicio, editable ahi mismo: el general, o uno propio en % o en US$ por persona. Guardar crea un
@@ -3484,6 +3534,8 @@
     var fq = e.target.closest('[data-foto-quitar]'); if (fq && S.srv) { S.srv.f.galeria.splice(+fq.getAttribute('data-foto-quitar'), 1); sincFotos(); return; }
     var fpo = e.target.closest('[data-foto-portada]'); if (fpo && S.srv) { var gi = +fpo.getAttribute('data-foto-portada'), gu = S.srv.f.galeria.splice(gi, 1)[0]; S.srv.f.galeria.unshift(gu); sincFotos(); return; }
     var cm = e.target.closest('[data-cmp]'); if (cm) { elegirCmp(cm.getAttribute('data-cmp'), cm.getAttribute('data-cmp-id')); return; }
+    var svi = e.target.closest('[data-svista]');
+    if (svi) { S.srvVista = svi.getAttribute('data-svista'); try { localStorage.setItem('cs_srv_vista', S.srvVista); } catch (er) { /* sin storage */ } pintar(); return; }
     var sf = e.target.closest('[data-sfil]');
     if (sf) {
       e.preventDefault(); e.stopPropagation();
