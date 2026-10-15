@@ -2119,7 +2119,9 @@
           web.map(function (s) {
             var pr = provDe(s.proveedor_id);
             return '<tr><td></td><td><a class="lnk" href="#" data-srv="' + esc(s.id) + '">' + esc(s.titulo) + '</a> <span class="tag">en la web</span><span class="sub">' + esc(pr ? pr.nombre : 'sin agencia') + '</span></td>' +
-              '<td class="num">' + (s.precio_publicado != null ? pub(s.precio_publicado) : '') + '</td><td></td><td></td></tr>';
+              '<td class="num">' + (s.precio_publicado != null ? pub(s.precio_publicado) : '') + '</td><td></td>' +
+              // Ya en la web: se puede sacar de ahi mismo (queda Desactivado; se vuelve a publicar desde Servicios).
+              '<td style="white-space:nowrap"><button class="btn btn--sm" data-sactivo="' + esc(s.id) + '|0">Despublicar</button></td></tr>';
           }).join('') +
           pend.map(function (s) {
             var c = pendDe[s.id], pr = provDe(s.proveedor_id);
