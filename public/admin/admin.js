@@ -1504,7 +1504,9 @@
       if (s.revision === 'pendiente') estado += ' <span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '"' + fil('revision') + '>revisar</span>';
       var dst = conPendiente(s).destino, sale = saleDesde(s, dst);
       h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub"><a class="lnk" href="#" data-sfil="tipo|' + (s.tipo === 'traslado' ? 'traslado' : 'tour') + '">' + esc(TIPOS_SRV[s.tipo] || s.tipo) + '</a> · ' + (pr ? '<a class="lnk" href="#" data-sfil="prov|' + esc(pr.id) + '">' + esc(pr.nombre) + '</a>' : '<i>sin proveedor</i>') + '</span></td>' +
-        '<td data-l="Destino"><a class="lnk" href="#" data-sfil="dest|' + esc(dst) + '">' + esc(destNombre(dst)) + '</a>' + (dst !== s.destino ? '<span class="sub">antes ' + esc(destNombre(s.destino)) + ' (sin publicar)</span>' : '') +
+        '<td data-l="Destino">' + (s.eliminado_at ? esc(destNombre(dst)) : '<select class="dsel" data-sdest-uno="' + esc(s.id) + '" aria-label="Destino del servicio" title="Cambiar el destino">' +
+            d.destinos.map(function (x) { return '<option value="' + esc(x.key) + '"' + (x.key === dst ? ' selected' : '') + '>' + esc(x.nombre) + '</option>'; }).join('') + (d.destinos.some(function (x) { return x.key === dst; }) ? '' : '<option value="' + esc(dst) + '" selected>' + esc(dst) + '</option>') + '</select>') +
+          ' <a class="lnk" href="#" data-sfil="dest|' + esc(dst) + '" title="Ver solo ' + esc(destNombre(dst)) + '">' + (S.srvDest === dst ? 'ver todos' : 'ver solo este') + '</a>' + (dst !== s.destino ? '<span class="sub">antes ' + esc(destNombre(s.destino)) + ' (sin publicar)</span>' : '') +
           (sale ? '<span class="sub">sale desde ' + esc(sale.texto) + (sale.key ? ' · <a class="lnk" href="#" data-smover-uno="' + esc(s.id) + '|' + esc(sale.key) + '">pasar a ' + esc(destNombre(sale.key)) + '</a>' : '') + '</span>' : '') + '</td>' +
         // Un nuevo tiene su precio en el cambio sin publicar: se muestra ese.
         '<td data-l="Proveedor cobra">' + origenTxt(conPendiente(s)) + (verProv(p && p.despues.link_web || s.link_web) ? '<span class="sub">' + verProv(p && p.despues.link_web || s.link_web) + '</span>' : '') +
@@ -2700,6 +2702,13 @@
     if (el.hasAttribute('data-mg-tipo') || el.hasAttribute('data-mg-valor')) { if (e.type === 'change') guardarMargen(el.closest('[data-mg]')); return; }
     if (el.hasAttribute('data-sorden')) { if (e.type === 'change') { S.srvOrden = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sdest')) { if (e.type === 'change') { S.srvDest = el.value; pintar(); } return; }
+    if (el.hasAttribute('data-sdest-uno')) {
+      if (e.type === 'change') {
+        var sid = el.getAttribute('data-sdest-uno'), sk = el.value, sx = S.ops.datos.servicios.filter(function (x) { return x.id === sid; })[0];
+        if (confirm('¿Pasar «' + (sx ? sx.titulo : '') + '» a ' + destNombre(sk) + '? Queda en "Por publicar" hasta que lo publiques.')) moverDestino([sid], sk); else pintar();
+      }
+      return;
+    }
     if (el.hasAttribute('data-smover')) { if (e.type === 'change' && el.value) { var mk = el.value, mids = Object.keys(S.srvSel || {}); el.value = ''; if (mids.length && confirm('¿Pasar ' + mids.length + ' servicio(s) a ' + destNombre(mk) + '? Queda en "Por publicar" hasta que lo publiques.')) moverDestino(mids, mk); } return; }
     if (el.hasAttribute('data-sprov')) { if (e.type === 'change') { S.srvProv = el.value; pintar(); } return; }
     if (el.hasAttribute('data-sel')) { if (e.type === 'change') { if (el.checked) S.sel[el.getAttribute('data-sel')] = 1; else delete S.sel[el.getAttribute('data-sel')]; pintar(); } return; }
@@ -2899,7 +2908,7 @@
       }).catch(function (er) { toast(er.message); });
       return;
     }
-    var sv = e.target.closest('[data-srv]'); if (sv && !e.target.closest('input') && !e.target.closest('.mg')) { e.preventDefault(); if (S.dirty && document.getElementById('drawer') && !confirm('Tenés cambios sin guardar. ¿Seguir?')) return; abrirServicio(sv.getAttribute('data-srv')); return; }
+    var sv = e.target.closest('[data-srv]'); if (sv && !e.target.closest('input') && !e.target.closest('select') && !e.target.closest('.mg')) { e.preventDefault(); if (S.dirty && document.getElementById('drawer') && !confirm('Tenés cambios sin guardar. ¿Seguir?')) return; abrirServicio(sv.getAttribute('data-srv')); return; }
     var pt = e.target.closest('[data-ptipo]'); if (pt) { S.pubTipo = pt.getAttribute('data-ptipo'); pintar(); return; }
     var pm = e.target.closest('[data-pmodo]'); if (pm) { S.pubModo = pm.getAttribute('data-pmodo'); try { localStorage.setItem('cs_pub_modo', S.pubModo); } catch (er) {} pintar(); return; }
     var ce = e.target.closest('[data-cons-escribir]'); if (ce) { e.preventDefault(); escribirConsulta(ce.getAttribute('data-cons-escribir')); return; }
