@@ -341,13 +341,13 @@
         '<div class="sc__precios pc__nums"><div><small>Catálogo</small><b>' + catLnk(pr) + '</b></div><div><small>Pedidos</small><b>' + dp.servicios + '</b></div><div><small>Le debemos</small><b>' + debe(pr) + '</b></div></div>' +
         '<div class="pc__pie">' + (escribir(pr) ? '<span class="sub">Pedir tarifa:</span>' + escribir(pr) : '<span class="sub">Sin email ni WhatsApp</span>') + (pr.tarifa_pedida_at ? '<span class="sub pc__fecha">pedida ' + esc(fecha(pr.tarifa_pedida_at)) + '</span>' : '') + '</div></article>';
     }).join('') + '</div>';
-    h += '<div style="overflow-x:auto"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Tarifa neta</th><th class="num">En catálogo</th><th class="num">En pedidos</th><th class="num">Le debemos</th></tr></thead><tbody>';
+    h += '<div style="overflow-x:auto"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Tarifa neta</th><th class="num">Transfers y tours</th><th class="num">En pedidos</th><th class="num">Le debemos</th></tr></thead><tbody>';
     lista.forEach(function (pr) {
       var dp = deuda[pr.id];
       h += '<tr class="row" data-prov="' + esc(pr.id) + '"><td data-l="Proveedor"><b>' + esc(pr.nombre) + '</b>' + (pr.activo === false ? ' <span class="pill p-cancelado">inactivo</span>' : '') + '<span class="sub">' + esc(pr.contacto || '') + (pr.contacto && pr.telefono ? ' · ' : '') + esc(pr.telefono || '') + '</span></td>' +
         '<td data-l="Destinos">' + tags(partesProv(pr).destinos, 3) + '</td>' +
         '<td data-l="Tarifa neta">' + tarifa(pr) + (pr.tarifa_pedida_at ? '<span class="sub">pedida ' + esc(fecha(pr.tarifa_pedida_at)) + '</span>' : '') + '<span class="prov-esc">' + escribir(pr) + '</span></td>' +
-        '<td class="num" data-l="En catálogo">' + catLnk(pr) + '</td>' +
+        '<td class="num" data-l="Transfers y tours">' + catLnk(pr) + '</td>' +
         '<td class="num" data-l="En pedidos">' + dp.servicios + '<span class="sub">en ' + dp.pedidos + ' pedido(s)</span></td>' +
         '<td class="num" data-l="Le debemos">' + debe(pr) + '</td></tr>';
     });
