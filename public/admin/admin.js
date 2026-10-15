@@ -115,7 +115,7 @@
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
     { t: 'Catálogo', vistas: [['tours', 'Tours'], ['transfers', 'Transfers'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
     { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso']] },
-    { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-estrategia', 'Estrategia'], ['mkt-colabs', 'Perfil y mensajes'], ['mkt-contactos', 'Contactos']] }
+    { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-estrategia', 'Estrategia'], ['mkt-colabs', 'Perfil y mensajes'], ['mkt-contactos', 'Contactos'], ['mkt-creadores', 'Creadores']] }
   ];
   function esVistaSrv() { return S.vista === 'tours' || S.vista === 'transfers'; }
   function grupoDe(v) { return GRUPOS.filter(function (g) { return g.vistas.some(function (x) { return x[0] === v; }); })[0] || GRUPOS[0]; }
@@ -579,6 +579,7 @@
     if (S.vista === 'mkt-tablero') return h + vistaMktTablero();
     if (S.vista === 'mkt-estrategia') return h + vistaMktEstrategia();
     if (S.vista === 'mkt-contactos') return h + vistaMktContactos();
+    if (S.vista === 'mkt-creadores') return h + vistaMktCreadores();
     return h + vistaMktColabs();
   }
   function bloqueMkt(p) {
@@ -738,11 +739,29 @@
       '<div class="mkt-grid"><section class="sec mkt-texto">' + textoMkt(M.colabs.txt) + '</section><section class="sec">' +
       M.mensajes.map(function (m) { return copiable(m.copy, m.t); }).join('') + '</section></div>';
   }
+  /* ---------- Creadores: los socios, su link, lo que trajeron y lo que se les debe. La pantalla vive en
+     /admin/creadores.js y se carga la primera vez que se abre la pestana. ---------- */
+  var crPanel = null;
+  function vistaMktCreadores() {
+    if (crPanel) return crPanel.vista();
+    if (window.CSCreadoresPanel) {
+      crPanel = CSCreadoresPanel({ S: S, esc: esc, kpi: kpi, usd: usd, pintar: pintar, toast: toast, hoy: hoyUY, guardarMkt: guardarMkt, contactos: contactosMkt, copiar: copiarTexto });
+      return crPanel.vista();
+    }
+    if (!S.crCargando) {
+      S.crCargando = true;
+      var sc = document.createElement('script'); sc.src = '/admin/creadores.js?v=1';
+      sc.onload = function () { if (S.vista === 'mkt-creadores') pintar(); };
+      sc.onerror = function () { S.crCargando = false; toast('No se pudo abrir Creadores. Recargá la página.'); };
+      document.head.appendChild(sc);
+    }
+    return '<div class="card"><p class="vacio">Cargando…</p></div>';
+  }
   /* Contactos: prensa, creadores y alianzas a los que se les escribe. Los que trae el plan (CS_MKT.contactos) se
      mezclan con lo guardado (lib/marketing.js, mismo id); los agregados a mano viven solo en lo guardado. */
   var TIPOS_CT = { prensa: 'Prensa', creador: 'Creador', alianza: 'Alianza' };
   var CANALES_CT = { whatsapp: 'WhatsApp', instagram: 'Instagram', mail: 'Mail', form: 'Formulario web', tel: 'Teléfono', otro: 'Otro' };
-  var ESTADOS_CT = { pendiente: 'Pendiente de escribir', escrito: 'Le escribí', seguimiento: 'Mandé el seguimiento', respondio: 'Respondió', publico: 'Publicó / salió', no: 'No le interesa' };
+  var ESTADOS_CT = { pendiente: 'Pendiente de escribir', escrito: 'Le escribí', seguimiento: 'Mandé el seguimiento', respondio: 'Respondió', acepto: 'Aceptó · socio', publico: 'Publicó / salió', no: 'No le interesa' };
   function contactosMkt() {
     var est = S.mkt.estado.contactos || {}, base = {};
     var l = (window.CS_MKT.contactos || []).map(function (c) { base[c.id] = 1; return Object.assign({ estado: 'pendiente' }, c, est[c.id] || {}); });
@@ -804,7 +823,7 @@
     h += '<section class="kpis kpis--4">' + kpi('Pendientes de escribir', cuenta(function (c) { return c.estado === 'pendiente'; }), 'todavía no les escribiste') +
       kpi('Esperando respuesta', cuenta(function (c) { return c.estado === 'escrito' || c.estado === 'seguimiento'; }), 'les escribiste') +
       kpi('Toca seguimiento', cuenta(tocaSeguimiento), 'escritos hace 7 días o más', cuenta(tocaSeguimiento) ? 'kpi--warn' : '') +
-      kpi('Respondieron', cuenta(function (c) { return c.estado === 'respondio' || c.estado === 'publico'; }), 'o ya publicaron', cuenta(function (c) { return c.estado === 'respondio' || c.estado === 'publico'; }) ? 'kpi--ok' : '') + '</section>';
+      kpi('Respondieron', cuenta(function (c) { return c.estado === 'respondio' || c.estado === 'acepto' || c.estado === 'publico'; }), 'aceptaron o ya publicaron', cuenta(function (c) { return c.estado === 'respondio' || c.estado === 'acepto' || c.estado === 'publico'; }) ? 'kpi--ok' : '') + '</section>';
     h += '<div class="bar"><div class="chips">' + [['todos', 'Todos']].concat(Object.keys(TIPOS_CT).map(function (k) { return [k, TIPOS_CT[k]]; })).map(function (x) {
       return '<button class="chip" data-mkt-ct-tipo="' + x[0] + '" aria-pressed="' + (x[0] === tipo) + '">' + esc(x[1]) + ' (' + (x[0] === 'todos' ? todos.length : todos.filter(function (c) { return c.tipo === x[0]; }).length) + ')</button>';
     }).join('') + (rondas.length ? [0].concat(rondas).map(function (r) {
@@ -837,6 +856,7 @@
       h += '<div class="mkt-ct__acc">' + (waTxt ? '<a class="btn btn--sm btn--wa" href="' + esc(waTxt) + '" target="_blank" rel="noopener" data-mkt-ct-enviado="' + esc(c.id) + '">Mandar por WhatsApp</a>' : '') +
         (igMsj ? '<button class="btn btn--sm btn--wa" data-mkt-ct-ig="' + esc(c.id) + '" title="Copia el mensaje, abre el chat de Instagram y la marca como escrita. Pegalo (Ctrl+V) y mandalo.">Mandar por Instagram</button>' : '') +
         (url ? '<a class="btn btn--sm" href="' + esc(url) + '" target="_blank" rel="noopener">Abrir ' + esc(CANALES_CT[c.canal] || 'link') + '</a>' : '') +
+        (c.tipo === 'creador' && (c.estado === 'respondio' || c.estado === 'acepto') ? '<button class="btn btn--sm" data-mkt-ir-creadores>' + (c.estado === 'acepto' ? 'Ver su link y comisión' : 'Aceptó → hacer socio') + '</button>' : '') +
         '<button class="btn btn--sm" data-mkt-ct-quitar="' + esc(c.id) + '">Quitar</button></div></section>';
     });
     return h + '</div>';
@@ -3285,6 +3305,7 @@
     var ms = e.target.closest('[data-mkt-sem]'); if (ms) { S.mktSem = +ms.getAttribute('data-mkt-sem'); pintar(); return; }
     var mse = e.target.closest('[data-mkt-sec]'); if (mse) { S.mktSec = mse.getAttribute('data-mkt-sec'); pintar(); return; }
     if (e.target.closest('[data-mkt-recargar]')) { S.mkt = null; pintar(); return; }
+    if (e.target.closest('[data-mkt-ir-creadores]')) { S.vista = 'mkt-creadores'; pintar(); window.scrollTo(0, 0); return; }
     var mct = e.target.closest('[data-mkt-ct-tipo]'); if (mct) { S.mktCtTipo = mct.getAttribute('data-mkt-ct-tipo'); pintar(); return; }
     /* Ronda de creadores: desde la tarea del dia (Hoy) abre Contactos ya filtrado; en Contactos, cambia el filtro. */
     var mcr = e.target.closest('[data-mkt-ct-ronda]');
