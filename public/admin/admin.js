@@ -1637,6 +1637,8 @@
   var PP_PASOS = ['Destino', '¿Tours?', 'Elegir tours', 'Fotos', 'Revisar', 'Publicar'];
   var PP_OBLIG = ['foto', 'descripción', 'detalle', 'duración', 'qué incluye'];
   var PP_CAMPOS = [['descripcion', 'Descripción', 'Dos o tres líneas: qué es y por qué vale la pena.'], ['detalle', 'Detalle', 'El recorrido, paso a paso.'], ['duracion', 'Duración', 'Ej.: 8 horas'], ['incluye', 'Qué incluye', 'Una cosa por línea']];
+  // Los textos que se ven y se editan en el paso de fotos (la ficha del tour en la web).
+  var PP_TEXTOS = PP_CAMPOS.concat([['no_incluye', 'No incluye', 'Una cosa por línea'], ['que_llevar', 'Qué llevar', 'Una cosa por línea'], ['punto_salida', 'Punto de salida', 'Ej.: hotel o puerto'], ['politica_cancelacion', 'Cancelación', 'Hasta cuándo se cancela sin cargo']]);
   function ppLeer() { try { return JSON.parse(localStorage.getItem('cs_pp') || 'null'); } catch (e) { return null; } }
   function ppGuardar() { try { var p = S.pp; localStorage.setItem('cs_pp', JSON.stringify({ paso: p.paso, dest: p.dest, sel: p.sel, tipo: p.tipo, filtro: p.filtro, precioOk: p.precioOk })); } catch (e) {} }
   function pp() {
@@ -1770,9 +1772,23 @@
           (s.link_web ? '<button type="button" class="btn btn--sm' + (lib && lib.fuente === 'prov' ? ' btn--main' : '') + '" data-pp="bib|' + esc(s.id) + '|prov">Página del proveedor</button>' : '') +
           '<button type="button" class="btn btn--sm' + (lib && lib.fuente === 'dest' ? ' btn--main' : '') + '" data-pp="bib|' + esc(s.id) + '|dest">Fotos de ' + esc(destNombre(p.dest)) + '</button>' +
           '<label class="btn btn--sm" style="cursor:pointer">Subir desde la compu o el celular<input type="file" accept="image/jpeg,image/png,image/webp" data-pp-subir="' + esc(s.id) + '" hidden></label>' +
-          (lib ? '<button type="button" class="btn btn--sm btn--txt-danger" data-pp="bibcerrar">Cerrar</button>' : '') + '</div>' + bib + '</section>';
+          (lib ? '<button type="button" class="btn btn--sm btn--txt-danger" data-pp="bibcerrar">Cerrar</button>' : '') + '</div>' + bib + ppTextos(s) + '</section>';
     }).join('');
     return h + ppNav(3, '<button class="btn btn--main btn--lg" data-pp="guardar-fotos">Guardar y revisar →</button>');
+  }
+  /* La ficha del tour (descripcion, que incluye, que no...) para verla y corregirla sin salir del paso. Se guarda con las fotos. */
+  function ppTextos(s) {
+    var p = pp(), x = conPendiente(s), t = p.txt[s.id] || {}, abierto = (p.verTxt || {})[s.id];
+    var vacios = PP_TEXTOS.filter(function (c) { return !String(t[c[0]] != null ? t[c[0]] : x[c[0]] || '').trim(); }).length;
+    var h = '<div class="pp-textos"><button type="button" class="btn btn--sm' + (abierto ? ' btn--main' : '') + '" data-pp="vertxt|' + esc(s.id) + '">' + (abierto ? 'Ocultar' : 'Ver y editar') + ' descripción, qué incluye y qué no</button>' +
+      (vacios ? ' <span class="sub" style="display:inline">' + vacios + ' campo(s) vacío(s)</span>' : '');
+    if (!abierto) return h + '</div>';
+    return h + '<div class="pp-campos">' + PP_TEXTOS.map(function (c) {
+      var v = t[c[0]] != null ? t[c[0]] : (x[c[0]] || '');
+      return '<label class="f">' + c[1] + (c[0] === 'duracion' || c[0] === 'punto_salida' ? '<input data-pp-txt="' + esc(s.id) + '|' + c[0] + '" value="' + esc(v) + '" placeholder="' + esc(c[2]) + '">'
+        : '<textarea rows="' + (c[0] === 'detalle' ? 5 : 3) + '" data-pp-txt="' + esc(s.id) + '|' + c[0] + '" placeholder="' + esc(c[2]) + '">' + esc(v) + '</textarea>') + '</label>';
+    }).join('') + '<span style="display:flex;gap:6px;flex-wrap:wrap">' + (x.link_web ? '<button type="button" class="btn btn--sm" data-pp="ficha|' + esc(s.id) + '">' + (p.trayendo === s.id ? 'Trayendo…' : 'Traer lo vacío de la página del proveedor') + '</button>' : '') +
+      '<button type="button" class="btn btn--sm" data-srv="' + esc(s.id) + '">Abrir el editor completo (precio, fotos por link…)</button></span></div></div>';
   }
   /* Vista previa aproximada de la tarjeta de la web: portada, titulo, duracion y precio por persona. */
   function ppPrevia(s) {
@@ -1881,13 +1897,18 @@
       .then(function () { return cargarOps(); }).then(function () { return fallas; });
   }
   function ppGuardarFotos() {
-    var p = pp(), trabajos = ppElegidos().filter(function (s) { return p.gal[s.id] && JSON.stringify(p.gal[s.id]) !== JSON.stringify(ppGalOrig(s)); })
-      .map(function (s) { return { id: s.id, cambios: { galeria: p.gal[s.id], url_imagen: p.gal[s.id][0] || '' } }; });
+    var p = pp(), trabajos = [];
+    ppElegidos().forEach(function (s) {
+      var c = {}, x = conPendiente(s), t = p.txt[s.id] || {};
+      if (p.gal[s.id] && JSON.stringify(p.gal[s.id]) !== JSON.stringify(ppGalOrig(s))) { c.galeria = p.gal[s.id]; c.url_imagen = p.gal[s.id][0] || ''; }
+      Object.keys(t).forEach(function (k) { var v = String(t[k] || '').trim(); if (v !== String(x[k] || '').trim()) c[k] = v; });
+      if (Object.keys(c).length) trabajos.push({ id: s.id, cambios: c });
+    });
     if (!trabajos.length) return ppIr(5);
-    toast('Guardando fotos…');
+    toast('Guardando…');
     ppGuardarEnSerie(trabajos).then(function (fallas) {
-      trabajos.forEach(function (t) { delete p.gal[t.id]; });
-      if (fallas.length) alert('No se pudo guardar:\n' + fallas.join('\n')); else toast('Fotos guardadas (sin publicar)');
+      trabajos.forEach(function (t) { delete p.gal[t.id]; delete p.txt[t.id]; });
+      if (fallas.length) alert('No se pudo guardar:\n' + fallas.join('\n')); else toast('Guardado (sin publicar)');
       ppIr(5);
     });
   }
@@ -1917,7 +1938,7 @@
     var p = pp(), s = ppServ(id); p.trayendo = id; pintar();
     api('ops/ficha/traer', { id: id, link: conPendiente(s).link_web }).then(function (r) {
       var t = p.txt[id] = p.txt[id] || {}, llen = [];
-      PP_CAMPOS.forEach(function (c) { var v = String(r.ficha[c[0]] || '').trim(); if (v && !String(t[c[0]] || '').trim() && !String(conPendiente(s)[c[0]] || '').trim()) { t[c[0]] = v; llen.push(c[1].toLowerCase()); } });
+      PP_TEXTOS.forEach(function (c) { var v = String(r.ficha[c[0]] || '').trim(); if (v && !String(t[c[0]] || '').trim() && !String(conPendiente(s)[c[0]] || '').trim()) { t[c[0]] = v; llen.push(c[1].toLowerCase()); } });
       toast(llen.length ? 'Completé: ' + llen.join(', ') + '. Revisalo (suele venir en portugués).' : 'La página no tenía esos datos');
     }).catch(function (e) { toast(e.message); }).then(function () { p.trayendo = null; pintar(); });
   }
@@ -1945,6 +1966,7 @@
         g3.splice(+z[2], 1); ppFotos(z[1], g3); break;
       case 'bib': ppBiblioteca(z[1], z[2]); break;
       case 'bibcerrar': p.lib = null; pintar(); break;
+      case 'vertxt': p.verTxt = p.verTxt || {}; p.verTxt[z[1]] = !p.verTxt[z[1]]; pintar(); break;
       case 'guardar-fotos': ppGuardarFotos(); break;
       case 'ficha': ppTraerFicha(z[1]); break;
       case 'confirmar': ppConfirmar(); break;
