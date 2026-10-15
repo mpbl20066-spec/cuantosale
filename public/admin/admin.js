@@ -464,7 +464,7 @@
   function cargarMkt() {
     S.mkt = { cargando: true };
     var datos = window.CS_MKT ? Promise.resolve() : new Promise(function (ok, mal) {
-      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=13'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
+      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=14'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
       document.head.appendChild(s);
     });
     Promise.all([datos, api('marketing'), api('uso?dias=90').catch(function () { return null; })]).then(function (r) {
@@ -538,7 +538,7 @@
       '<button class="btn" data-mkt-dia="' + (i + 1) + '"' + (i < M.dias.length - 1 ? '' : ' disabled') + ' aria-label="Día siguiente">›</button></div></div>';
     if (hoy < 0 && i === 0) h += '<p class="aviso">El plan arranca el ' + esc(fechaLarga(M.inicio)) + '. Esto es lo del primer día.</p>';
     h += '<section class="kpis kpis--4">' + kpi('Objetivo del día', OBJ_MKT[d.obj] || d.obj, d.com ? d.com.mide : 'lo que tiene que lograr la pieza') + kpi('Hecho hoy', hechos + ' de 4', 'Instagram, TikTok, historias, acción', hechos === 4 ? 'kpi--ok' : '') + '</section>';
-    if (d.com) h += '<section class="sec"><h3>Grilla comercial</h3><table><tbody>' +
+    if (d.com) h += '<section class="sec mkt-cat mc-' + esc(d.cat) + '"><div class="sec__cab"><h3>Grilla comercial</h3>' + tagCat(d.cat) + '</div><table><tbody>' +
       [['Producto que acompaña', d.com.prod], ['Después de verla (una sola acción)', d.com.cta], ['Cómo acerca a una reserva', d.com.reserva], ['Qué medir', d.com.mide]].map(function (r) {
         return '<tr><td><b>' + esc(r[0]) + '</b></td><td>' + esc(r[1]) + '</td></tr>';
       }).join('') + '</tbody></table></section>';
@@ -550,14 +550,28 @@
     h += '<section class="sec"><div class="sec__cab"><h3>Todos los días · 15 min</h3>' + checkMkt(n + '-rut') + '</div>' + textoMkt(M.rutina.map(function (x) { return '- ' + x; })) + '</section>';
     return h + '</div>';
   }
+  /* Categoria del dia (destinos, app, experiencias): cada una tiene su color en index.html (.mc-*) */
+  function tagCat(k) {
+    var c = (window.CS_MKT.cats || []).filter(function (x) { return x.k === k; })[0];
+    return c ? '<span class="tag mc mc-' + esc(k) + '">' + esc(c.t) + '</span>' : '';
+  }
+  /* Reparto real del calendario por categoria contra la meta (la rayita). */
+  function barrasCat() {
+    var M = window.CS_MKT;
+    return '<div class="mkt-barras">' + (M.cats || []).map(function (c) {
+      var n = M.dias.filter(function (d) { return d.cat === c.k; }).length, pct = Math.round(n * 100 / M.dias.length);
+      return '<div class="mc-' + esc(c.k) + '"><div class="mkt-barra__cab"><span>' + tagCat(c.k) + '</span><span><b>' + pct + ' %</b> <span class="sub" style="display:inline">(' + n + ' días · meta ' + c.meta + ' %)</span></span></div>' +
+        '<div class="mkt-barra__riel"><span style="width:' + pct + '%"></span><i class="mkt-barra__meta" style="left:' + c.meta + '%"></i></div></div>';
+    }).join('') + '</div>';
+  }
   function vistaMktCalendario() {
     var M = window.CS_MKT, hoy = hoyUY();
     var h = '<div class="vhead"><div><h2>Calendario de 30 días</h2><p>Del ' + esc(fechaLarga(M.inicio)) + ' al ' + esc(fechaLarga(M.dias[M.dias.length - 1].f)) + '. Tocá un día para ver todo lo que hay que hacer.</p></div></div>';
-    h += '<div class="card"><table><thead><tr><th>Día</th><th>Tema</th><th>Instagram</th><th>Después de verla</th><th>Objetivo</th><th class="num">Hecho</th></tr></thead><tbody>';
+    h += '<div class="card">' + barrasCat() + '</div><div class="card" style="margin-top:12px"><table><thead><tr><th>Día</th><th>Tema</th><th>Categoría</th><th>Después de verla</th><th>Objetivo</th><th class="num">Hecho</th></tr></thead><tbody>';
     M.dias.forEach(function (d, i) {
       var n = 'd' + d.n, k = ['ig', 'tt', 'hist', 'acc'].filter(function (x) { return hechoMkt(n + '-' + x); }).length;
-      h += '<tr class="row' + (d.f === hoy ? ' mkt-hoyfila' : '') + '" data-mkt-ir="' + i + '"><td data-l="Día"><b>' + d.n + '</b> <span class="sub">' + esc(fechaLarga(d.f)) + '</span></td>' +
-        '<td data-l="Tema">' + esc(d.tema) + '</td><td data-l="Instagram">' + esc(d.ig.tipo) + '</td><td data-l="Después de verla">' + esc(d.com ? d.com.cta : '') + '</td>' +
+      h += '<tr class="row mc mc-' + esc(d.cat) + (d.f === hoy ? ' mkt-hoyfila' : '') + '" data-mkt-ir="' + i + '"><td data-l="Día"><b>' + d.n + '</b> <span class="sub">' + esc(fechaLarga(d.f)) + '</span></td>' +
+        '<td data-l="Tema">' + esc(d.tema) + '<span class="sub">' + esc(d.ig.tipo) + '</span></td><td data-l="Categoría">' + tagCat(d.cat) + '</td><td data-l="Después de verla">' + esc(d.com ? d.com.cta : '') + '</td>' +
         '<td data-l="Objetivo"><span class="tag">' + esc(OBJ_MKT[d.obj] || d.obj) + '</span></td><td class="num" data-l="Hecho"><span class="' + (k === 4 ? 'ok' : '') + '">' + k + '/4</span></td></tr>';
     });
     return h + '</tbody></table></div>';
@@ -630,7 +644,7 @@
     var sel = S.mktSec || 'resumen', s = secs.filter(function (x) { return x.id === sel; })[0] || secs[0];
     var h = '<div class="vhead"><div><h2>Estrategia</h2><p>El porqué del plan. Para el día a día no hace falta: usá Hoy.</p></div></div>';
     h += '<div class="bar"><div class="chips">' + secs.map(function (x) { return '<button class="chip" data-mkt-sec="' + x.id + '" aria-pressed="' + (x === s) + '">' + esc(x.t) + '</button>'; }).join('') + '</div></div>';
-    if (s.id !== 'fijados') return h + '<section class="sec mkt-texto"><h3>' + esc(s.t) + '</h3>' + textoMkt(s.txt) + '</section>';
+    if (s.id !== 'fijados') return h + '<section class="sec mkt-texto"><h3>' + esc(s.t) + '</h3>' + (s.id === 'pilares' ? barrasCat() : '') + textoMkt(s.txt) + '</section>';
     h += '<section class="sec mkt-texto">' + textoMkt(M.fijados.intro) + '</section>';
     M.fijados.reels.forEach(function (r) {
       h += '<section class="sec mkt-texto" style="margin-top:12px"><div class="sec__cab"><h3>Fijado ' + r.n + ' · ' + esc(r.t) + ' · ' + esc(r.dur) + '</h3>' + checkMkt('fijado-' + r.n, 'Publicado y fijado') + '</div>' +
