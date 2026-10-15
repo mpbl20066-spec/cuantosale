@@ -454,7 +454,7 @@
   /* ---------- Marketing: el plan (public/admin/marketing-datos.js, generado) y lo que se va marcando (lib/marketing.js) ----------
      Hoy = lo que toca hacer hoy del calendario de 30 dias. Tablero = una semana (de jueves a miercoles, desde el inicio
      del plan): lo de la web y los pedidos sale solo; lo de Instagram, TikTok y anuncios se carga a mano. */
-  var OBJ_MKT = { alcance: 'Alcance', interaccion: 'Interacción', trafico: 'Tráfico a la web', uso: 'Uso de la app', reservas: 'Reservas' };
+  var OBJ_MKT = { atraer: 'Atraer', demostrar: 'Demostrar la app', resolver: 'Resolver una necesidad', convertir: 'Convertir (reserva)' };
   var DIAS_SEM = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
   function hoyUY() { return new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Montevideo' }); }
   function fechaUY(iso) { var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('sv-SE', { timeZone: 'America/Montevideo' }); }
@@ -464,7 +464,7 @@
   function cargarMkt() {
     S.mkt = { cargando: true };
     var datos = window.CS_MKT ? Promise.resolve() : new Promise(function (ok, mal) {
-      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=12'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
+      var s = document.createElement('script'); s.src = '/admin/marketing-datos.js?v=13'; s.onload = ok; s.onerror = function () { mal(new Error('No se pudo cargar el plan de marketing.')); };
       document.head.appendChild(s);
     });
     Promise.all([datos, api('marketing'), api('uso?dias=90').catch(function () { return null; })]).then(function (r) {
@@ -537,7 +537,11 @@
       (hoy >= 0 && hoy < M.dias.length && hoy !== i ? '<button class="btn" data-mkt-dia="' + hoy + '">Hoy</button>' : '') +
       '<button class="btn" data-mkt-dia="' + (i + 1) + '"' + (i < M.dias.length - 1 ? '' : ' disabled') + ' aria-label="Día siguiente">›</button></div></div>';
     if (hoy < 0 && i === 0) h += '<p class="aviso">El plan arranca el ' + esc(fechaLarga(M.inicio)) + '. Esto es lo del primer día.</p>';
-    h += '<section class="kpis kpis--4">' + kpi('Objetivo del día', OBJ_MKT[d.obj] || d.obj, 'lo que tiene que lograr la pieza') + kpi('Hecho hoy', hechos + ' de 4', 'Instagram, TikTok, historias, acción', hechos === 4 ? 'kpi--ok' : '') + '</section>';
+    h += '<section class="kpis kpis--4">' + kpi('Objetivo del día', OBJ_MKT[d.obj] || d.obj, d.com ? d.com.mide : 'lo que tiene que lograr la pieza') + kpi('Hecho hoy', hechos + ' de 4', 'Instagram, TikTok, historias, acción', hechos === 4 ? 'kpi--ok' : '') + '</section>';
+    if (d.com) h += '<section class="sec"><h3>Grilla comercial</h3><table><tbody>' +
+      [['Producto que acompaña', d.com.prod], ['Después de verla (una sola acción)', d.com.cta], ['Cómo acerca a una reserva', d.com.reserva], ['Qué medir', d.com.mide]].map(function (r) {
+        return '<tr><td><b>' + esc(r[0]) + '</b></td><td>' + esc(r[1]) + '</td></tr>';
+      }).join('') + '</tbody></table></section>';
     h += '<div class="mkt-grid">';
     h += '<section class="sec"><div class="sec__cab"><h3>Instagram</h3>' + checkMkt(n + '-ig') + '</div>' + bloqueMkt(d.ig) + '</section>';
     h += '<section class="sec"><div class="sec__cab"><h3>TikTok</h3>' + checkMkt(n + '-tt') + '</div>' + bloqueMkt(d.tt) + '</section>';
@@ -549,11 +553,11 @@
   function vistaMktCalendario() {
     var M = window.CS_MKT, hoy = hoyUY();
     var h = '<div class="vhead"><div><h2>Calendario de 30 días</h2><p>Del ' + esc(fechaLarga(M.inicio)) + ' al ' + esc(fechaLarga(M.dias[M.dias.length - 1].f)) + '. Tocá un día para ver todo lo que hay que hacer.</p></div></div>';
-    h += '<div class="card"><table><thead><tr><th>Día</th><th>Tema</th><th>Instagram</th><th>TikTok</th><th>Objetivo</th><th class="num">Hecho</th></tr></thead><tbody>';
+    h += '<div class="card"><table><thead><tr><th>Día</th><th>Tema</th><th>Instagram</th><th>Después de verla</th><th>Objetivo</th><th class="num">Hecho</th></tr></thead><tbody>';
     M.dias.forEach(function (d, i) {
       var n = 'd' + d.n, k = ['ig', 'tt', 'hist', 'acc'].filter(function (x) { return hechoMkt(n + '-' + x); }).length;
       h += '<tr class="row' + (d.f === hoy ? ' mkt-hoyfila' : '') + '" data-mkt-ir="' + i + '"><td data-l="Día"><b>' + d.n + '</b> <span class="sub">' + esc(fechaLarga(d.f)) + '</span></td>' +
-        '<td data-l="Tema">' + esc(d.tema) + '</td><td data-l="Instagram">' + esc(d.ig.tipo) + '</td><td data-l="TikTok">' + esc(d.tt.tipo || '') + '</td>' +
+        '<td data-l="Tema">' + esc(d.tema) + '</td><td data-l="Instagram">' + esc(d.ig.tipo) + '</td><td data-l="Después de verla">' + esc(d.com ? d.com.cta : '') + '</td>' +
         '<td data-l="Objetivo"><span class="tag">' + esc(OBJ_MKT[d.obj] || d.obj) + '</span></td><td class="num" data-l="Hecho"><span class="' + (k === 4 ? 'ok' : '') + '">' + k + '/4</span></td></tr>';
     });
     return h + '</tbody></table></div>';
@@ -622,7 +626,7 @@
     return h + '</div>';
   }
   function vistaMktEstrategia() {
-    var M = window.CS_MKT, secs = M.estrategia.slice(0, 6).concat([{ id: 'fijados', t: 'Los 3 reels fijados' }], M.estrategia.slice(6));
+    var M = window.CS_MKT, secs = M.estrategia.slice(0, 7).concat([{ id: 'fijados', t: 'Los 3 reels fijados' }], M.estrategia.slice(7));
     var sel = S.mktSec || 'resumen', s = secs.filter(function (x) { return x.id === sel; })[0] || secs[0];
     var h = '<div class="vhead"><div><h2>Estrategia</h2><p>El porqué del plan. Para el día a día no hace falta: usá Hoy.</p></div></div>';
     h += '<div class="bar"><div class="chips">' + secs.map(function (x) { return '<button class="chip" data-mkt-sec="' + x.id + '" aria-pressed="' + (x === s) + '">' + esc(x.t) + '</button>'; }).join('') + '</div></div>';

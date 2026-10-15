@@ -2,7 +2,7 @@
    Contenido de la pestaña Marketing del panel (admin.js). Lo que se marca y los números de cada semana se guardan aparte (lib/marketing.js). */
 window.CS_MKT = {
  "inicio": "2026-10-15",
- "generado": "2026-10-14",
+ "generado": "2026-10-15",
  "estrategia": [
   {
    "id": "resumen",
@@ -16,7 +16,9 @@ window.CS_MKT = {
     "- **Qué cambiar ya:** la bio de Instagram y TikTok, el link de la bio y una destacada \"Reservas\" (día 1).",
     "- **Plata:** US$ 21 para promocionar el reel de Búzios del 25 al 31/10; US$ 28 más desde el 5/11 solo si eso trajo algún pedido. Máximo US$ 50.",
     "- **Cada miércoles:** 30 minutos en Tablero semanal para decidir qué repetir, qué cambiar y qué dejar.",
+    "> **Criterio para aprobar cada pieza:** si alguien la ve, ¿qué queremos que haga después y cómo lo acercamos a una reserva? Si el día no lo responde, no se publica así. Cada día del calendario lo dice en \"Grilla comercial\".",
     "## Qué hay en cada botón",
+    "- **Grilla comercial:** los 4 objetivos, la secuencia que lleva del destino a la reserva y la distribución del contenido.",
     "- **Qué está mal:** lo que hoy frena las ventas (bio, web, confianza, medición).",
     "- **Qué somos:** el mensaje y en qué nos diferenciamos.",
     "- **Prioridades:** qué es urgente, qué puede esperar y lo que ya decidiste.",
@@ -81,6 +83,7 @@ window.CS_MKT = {
     "- [urg-fijados] Publicar y fijar los 3 reels (día 1).",
     "- [urg-destacada] Destacada nueva \"Reservas\": cómo se reserva, seña, cancelación, número oficial (día 1, con las historias del carrusel del día 8 cuando esté).",
     "- [urg-origen] Respuesta rápida en WhatsApp con \"¿Cómo nos conociste?\" (día 1).",
+    "- [urg-traslados] Pedir ya las dos piezas de traslados de la semana 1 y 2: \"Compartido o privado\" (20/10) y \"Te faltan 5 horas\" (26/10).",
     "- [urg-creadores] Primeros 15 creadores identificados y 10 contactados (días 2 a 9).",
     "- [urg-grupos] Responder en 3 grupos de viajeros, sin spam (desde el día 3).",
     "## Puede esperar",
@@ -132,32 +135,54 @@ window.CS_MKT = {
    ]
   },
   {
+   "id": "grilla",
+   "t": "Grilla comercial",
+   "txt": [
+    "> No alcanza con publicar destinos lindos: la gente disfruta un reel de una playa sin acordarse de quién lo publicó. Cada pieza tiene que mostrar qué problema resolvemos, por qué usar Cuánto Sale y qué hacer después de verla.",
+    "## Los 4 objetivos (cada día tiene uno)",
+    "- **1. Atraer (descubrimiento):** reels de destinos, playas y curiosidades que hagan frenar el dedo. Acción: comentar (\"¿Conocías esta playa?\"). Mide: alcance y reproducciones.",
+    "- **2. Demostrar (uso de la app):** grabaciones reales: cómo se calcula un viaje desde Montevideo, qué incluye el presupuesto, cómo comparar. Acción: \"Probá calcular tu próximo viaje en Cuánto Sale\". Mide: clics al sitio y \"Armá tu viaje\".",
+    "- **3. Resolver (consideración):** cuánto cuesta llegar, qué gastos sumar, qué paseos y traslados conviene organizar. Acción: \"Entrá a Cuánto Sale y armá tu presupuesto\". Mide: guardados, compartidos y \"Tu presupuesto\".",
+    "- **4. Convertir (reserva):** una experiencia concreta, qué incluye el paseo o el traslado, y llevar a consultar o reservar. Acción: \"Descubrí las opciones para tu destino\" o \"Escribinos TRASLADO\". Mide: consultas, pedidos y señas.",
+    "## Una sola acción por pieza",
+    "- Cada reel o carrusel pide UNA cosa: comentar, entrar a la app o consultar. Nunca las tres. En el calendario está en \"Después de verla\".",
+    "- Las historias sí pueden encadenar pasos (ver la secuencia), pero solo la última lleva enlace o pide escribir.",
+    "## La secuencia que lleva a la reserva",
+    "> Ganamos con traslados y paseos, no con vuelos ni hoteles. El presupuesto es la puerta de entrada; después, el traslado y el paseo de ese destino. Así la reserva no aparece como venta forzada.",
+    "- 1. **Reel:** \"¿Cuánto cuesta viajar a [destino] desde Montevideo?\" (atraer).",
+    "- 2. **Historia:** cómo Cuánto Sale calcula ese viaje: qué incluye el total (demostrar).",
+    "- 3. **Historia:** cómo se llega desde el aeropuerto y qué traslado hace falta, con horas y precio (resolver).",
+    "- 4. **Historia o publicación:** un paseo concreto de ese destino: qué incluye, precio y seña (convertir).",
+    "- 5. **Acción:** entrar a la app o escribir TRASLADO.",
+    "- Ya armada en el calendario para Búzios (17/10 → 23/10), Jeri (25/10 → 26/10), Porto y Maragogi (29/10 → 30/10) y Pipa (31/10 → 1/11). Ilha Grande sirve para el mes siguiente: lancha o traslado desde Río + paseo en barco.",
+    "## Tours y traslados desde la primera semana",
+    "- Son lo que genera ingresos: no quedan para el final. Primera semana: 17/10 (traslado de Búzios en historias), 20/10 (compartido o privado), 22/10 (cómo se reserva).",
+    "## Reglas para el resto de las piezas",
+    "- \"Preguntas que nos hacen\" solo si trae información nueva y verificada. La de la cédula es prioridad media: alcance, no reservas.",
+    "- Ninguna foto de destino sin un precio, un dato o el traslado de ese destino."
+   ]
+  },
+  {
    "id": "pilares",
    "t": "Qué publicar",
    "txt": [
-    "> Una regla: cada pieza tiene un solo trabajo. En el calendario cada día dice cuál.",
-    "## 1. Descubrimiento (alcance) · 30 %",
-    "- **Qué:** reels con número gancho (\"Una semana en Búzios por US$ 873\"), comparativas, \"lo que nadie te dice\".",
-    "- **Por qué:** es lo único que llega a gente que no te sigue.",
-    "- **Resultado esperado:** reproducciones de no seguidores y visitas al perfil.",
-    "## 2. Educación y consejos (guardados) · 20 %",
-    "- **Qué:** gastos que olvidás, marea baja, cédula, cómo pagar allá.",
-    "- **Resultado:** guardados y compartidos (le dicen a Instagram que la pieza sirve).",
-    "## 3. Demostración de la app (uso) · 15 %",
-    "- **Qué:** grabaciones reales de la app: \"así se arma Río\", \"cuánto ahorrar\".",
-    "- **Resultado:** clics en el link y presupuestos completos.",
-    "## 4. Comparaciones (guardados + tráfico) · 10 %",
-    "- **Qué:** Porto o Maragogi, Río o Floripa, compartido o privado.",
-    "- **Resultado:** comentarios (votan) y guardados.",
-    "## 5. Confianza (reservas) · 10 %",
-    "- **Qué:** cómo se reserva, quién hace el paseo, cancelación, número oficial, respuestas reales a seguidores.",
-    "- **Resultado:** que el que ya quiere reservar no tenga miedo. Mide: consultas por WhatsApp.",
-    "## 6. Inspiración · 5 %",
-    "- **Qué:** playas, piscinas, siempre con un precio o un dato.",
-    "- **Resultado:** alcance y seguidores. Nunca una foto linda sin número: eso lo hacen todos.",
-    "## 7. Conversión (reservas de traslados y paseos) · 10 %",
-    "- **Qué:** traslados por destino, paseos que hay que reservar antes, \"si ya tenés pasaje, escribinos TRASLADO\".",
-    "- **Resultado:** consultas y pedidos. Es el pilar que paga todo lo demás."
+    "> Distribución orientativa (no garantiza resultados): 30 % mostrar cómo funciona Cuánto Sale · 30 % destinos y presupuestos · 25 % tours y traslados · 15 % preguntas, encuestas e interacción. Cómo quedó el calendario, abajo.",
+    "## 1. Mostrar cómo funciona Cuánto Sale · 30 %",
+    "- **Qué:** grabaciones reales de la app: \"así se arma Río\", \"cuánto ahorrar\", la guía de un destino, el traslado en la app.",
+    "- **Por qué:** que recuerden que Cuánto Sale te dice cuánto gastar y te resuelve lo de allá, no solo que viste una playa.",
+    "- **Resultado:** clics en el enlace y presupuestos empezados.",
+    "## 2. Destinos y presupuestos · 30 %",
+    "- **Qué:** \"una semana en X por US$ Y\" desde Montevideo, comparativas, gastos que olvidás. Siempre con qué incluye el total y cómo se llega.",
+    "- **Resultado:** alcance, guardados y presupuestos completos.",
+    "## 3. Tours y traslados · 25 %",
+    "- **Qué:** compartido o privado, horas de traslado, cómo se reserva, paseos que hay que reservar antes, un paseo concreto con precio y seña.",
+    "- **Resultado:** consultas (\"TRASLADO\"), pedidos y señas. Es lo que paga todo lo demás.",
+    "## 4. Preguntas, encuestas e interacción · 15 %",
+    "- **Qué:** stickers de preguntas, encuestas, \"le armamos el viaje a un seguidor\", revisiones.",
+    "- **Resultado:** conversaciones reales. Con una cuenta chica importan más que las reproducciones.",
+    "## Cómo quedó el calendario",
+    "- **Primeros 15 días:** Cómo funciona Cuánto Sale 4 (27 %) · Destinos y presupuestos 5 (33 %) · Tours y traslados 4 (27 %) · Preguntas e interacción 2 (13 %)",
+    "- **Los 30 días:** Cómo funciona Cuánto Sale 8 (27 %) · Destinos y presupuestos 9 (30 %) · Tours y traslados 8 (27 %) · Preguntas e interacción 5 (17 %)"
    ]
   },
   {
@@ -257,6 +282,13 @@ window.CS_MKT = {
    "t": "Qué medir",
    "txt": [
     "> La primera semana es la línea de base. No te pongo tasas de conversión inventadas: el objetivo de cada semana se fija contra la anterior, con tus números.",
+    "## Qué mide cada objetivo (no solo seguidores ni me gusta)",
+    "- **Atraer:** alcance y reproducciones (a mano, de Instagram y TikTok).",
+    "- **Generar interés:** comentarios, compartidos y guardados (a mano).",
+    "- **Llevar gente a la app:** clics en el enlace (a mano) y llegadas por fuente + \"Armá tu viaje\" (Tablero > Web, solo).",
+    "- **Intención comercial:** pantalla \"Reservá tu viaje\" (Tablero > Web) y mensajes \"TRASLADO\" (a mano). La web todavía no cuenta clics sueltos en un paseo o traslado; si hace falta, se agrega.",
+    "- **Ingresos:** consultas por WhatsApp (a mano), pedidos con traslado o paseo, confirmados y señas (Tablero, solo).",
+    "- Mirando los cinco en fila se ve **dónde se pierde la gente**: mucho alcance y pocos clics = la pieza no lleva a la app; muchos presupuestos y ninguna consulta = falta el paso al traslado o al paseo.",
     "## Lo que el panel cuenta solo",
     "- Web: llegadas por fuente (utm), home, \"Armá tu viaje\", \"Tu presupuesto\", \"Reservá tu viaje\", guías.",
     "- Pedidos: nuevos, con traslado, con paseo, confirmados, seña cobrada y margen, por semana.",
@@ -283,6 +315,7 @@ window.CS_MKT = {
     "- **Mantener:** las 2 de arriba. Hacé una \"parte 2\" o el mismo formato con otro destino.",
     "- **Cambiar:** las que tuvieron alcance pero no guardados (gancho bueno, contenido flojo).",
     "- **Dejar de hacer:** un formato que quedó último dos semanas seguidas.",
+    "- **Por objetivo:** ¿las de \"Convertir\" trajeron consultas? ¿Las de \"Demostrar\" trajeron clics? Una pieza que no cumplió SU objetivo se cambia aunque haya tenido muchos me gusta.",
     "## Paso 3 · Seguir la plata (5 min)",
     "- ¿Cuántos pedidos con traslado o paseo? ¿De dónde vinieron? ¿Cuántos se cayeron antes de la seña y por qué?",
     "## Paso 4 · Decidir (5 min)",
@@ -474,8 +507,15 @@ window.CS_MKT = {
  "dias": [
   {
    "f": "2026-10-15",
-   "obj": "uso",
+   "obj": "demostrar",
+   "cat": "app",
    "tema": "Presentación del perfil: los 3 fijados",
+   "com": {
+    "prod": "La app entera: qué es, cómo se usa y que lo de allá (traslado y paseos) se reserva acá",
+    "cta": "Probá calcular tu próximo viaje en cuantosale.uy (link en la bio)",
+    "reserva": "El fijado 1 termina en \"lo de allá lo reservás acá\" y la destacada \"Reservas\" explica cómo.",
+    "mide": "Visitas al perfil → clics en el enlace (Tablero > Llegadas por fuente: instagram, tiktok)"
+   },
    "ig": {
     "tipo": "Reels fijados",
     "pieza": "Publicar los 3 fijados: 3 → 2 → 1 y fijarlos",
@@ -500,14 +540,22 @@ window.CS_MKT = {
    "acc": [
     "Cambiá la bio de Instagram y de TikTok (texto en Marketing > Perfil y mensajes) y poné el link con utm.",
     "En WhatsApp Business: Herramientas > Respuestas rápidas > nueva, atajo /origen, texto: \"¡Gracias por escribir! Una pregunta rápida: ¿cómo nos conociste? (Instagram, TikTok, un amigo, Google…)\".",
-    "Creá la destacada \"Reservas\" (por ahora con una historia de texto: \"No cobramos nada en la web. Reservás traslados y paseos con una seña. Único número oficial: +598 98 529 851\")."
+    "Creá la destacada \"Reservas\" (por ahora con una historia de texto: \"No cobramos nada en la web. Reservás traslados y paseos con una seña. Único número oficial: +598 98 529 851\").",
+    "Pedile a Claude el carrusel \"Traslado: ¿compartido o privado?\" (sale el 20/10) y el reel \"Llegás al aeropuerto y todavía te faltan 5 horas\" (sale el 26/10)."
    ],
    "n": 1
   },
   {
    "f": "2026-10-16",
-   "obj": "interaccion",
+   "obj": "demostrar",
+   "cat": "interaccion",
    "tema": "Respuestas: \"con tu plata llegás a…\"",
+   "com": {
+    "prod": "\"Tengo un presupuesto\"",
+    "cta": "Elegí uno de estos destinos y calculá cuánto te sale con tus fechas (enlace en la última historia)",
+    "reserva": "El que calcula ve el traslado de su destino ya sumado: es el primer contacto con lo que se reserva.",
+    "mide": "Llegadas ig_historia y \"Tengo un presupuesto\" (Tablero > Web)"
+   },
    "ig": {
     "tipo": "Solo historias",
     "pieza": "Sin publicación en el feed"
@@ -519,8 +567,8 @@ window.CS_MKT = {
     "copy": "¿Cuánto cuesta viajar a Brasil de verdad? 🇧🇷 Desliza 👉\n\nNo es solo el vuelo. Lo sumamos todo, con precios reales.\nArmá el tuyo: link en el perfil.\n\n#viajarabrasil #uruguay #brasil #cuantosale"
    },
    "hist": [
-    "Elegí 3 respuestas del sticker de ayer. Para cada una: abrí cuantosale.uy > \"Tengo un presupuesto\" con ese monto, sacá captura del resultado y subila con el texto \"Con US$ [monto] por persona llegás a… 👇\" + sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
-    "Última historia: \"¿Querés que te lo calculemos? Mandanos tu presupuesto por mensaje 📩\"."
+    "Elegí 3 respuestas del sticker de ayer. Para cada una: abrí cuantosale.uy > \"Tengo un presupuesto\" con ese monto, sacá captura del resultado y subila con el texto \"Con US$ [monto] por persona llegás a… 👇\".",
+    "Historia de cierre (la única con enlace, así hay una sola acción): \"¿Cuál te tienta? Elegilo y calculá cuánto te sale con tus fechas: el traslado del aeropuerto ya viene sumado 👇\" + sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
    ],
    "acc": [
     "Armá la lista de 15 creadores (criterios en Colaboraciones). Anotá: usuario, seguidores, destinos de los que habla, si responde comentarios.",
@@ -530,8 +578,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-10-17",
-   "obj": "alcance",
-   "tema": "7 días en Búzios",
+   "obj": "atraer",
+   "cat": "destinos",
+   "tema": "7 días en Búzios: cuánto sale desde Montevideo",
+   "com": {
+    "prod": "El total del viaje (vuelo desde Montevideo + traslado + posada + comida) y el traslado Río → Búzios",
+    "cta": "Comentá \"BÚZIOS\" y te mandamos la versión intermedia y cómoda",
+    "reserva": "Las historias siguen la secuencia: cuánto sale → qué incluye → cómo se llega (traslado de 2 h 42) → \"escribinos TRASLADO\".",
+    "mide": "Alcance y reproducciones del reel; comentarios \"BÚZIOS\""
+   },
    "ig": {
     "tipo": "Reel",
     "pieza": "Una semana en Búzios por US$ 873",
@@ -553,7 +608,9 @@ window.CS_MKT = {
    },
    "hist": [
     "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\").",
-    "Encuesta: \"Búzios en enero, ¿te da?\" Opciones: \"Me da 💛\" / \"Ni ahí 😅\"."
+    "Historia 2 · qué incluye: \"Esos US$ 873 por persona son desde Montevideo: vuelo, traslado del aeropuerto, posada, comida y moverte. De a 2, en enero (precios al 12/10)\".",
+    "Historia 3 · cómo se llega: \"Del aeropuerto de Río a Búzios son 2 h 42. Compartido US$ 31 por persona o privado US$ 87 el auto, solo ida (catálogo al 1/10)\". Verificalo en Catálogo > Servicios antes de subirla.",
+    "Historia 4 · la acción: \"¿Ya tenés pasaje? Escribinos TRASLADO y te pasamos el precio para tu fecha 🚐\"."
    ],
    "acc": [
     "Unite a 3 grupos de Facebook de viajeros a Brasil (búsquedas en Estrategia > Crecer gratis) y respondé 3 preguntas con datos, sin link.",
@@ -563,8 +620,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-10-18",
-   "obj": "alcance",
-   "tema": "Preguntas que nos hacen #1: ¿alcanza con la cédula?",
+   "obj": "atraer",
+   "cat": "interaccion",
+   "tema": "Preguntas que nos hacen #1: ¿alcanza con la cédula? (prioridad media)",
+   "com": {
+    "prod": "Contenido secundario: trae alcance, no reservas",
+    "cta": "Guardalo y mandáselo a quien viaja con vos",
+    "reserva": "Lejos de la reserva: por eso va solo en TikTok y el sticker junta preguntas para la serie.",
+    "mide": "Reproducciones y compartidos en TikTok"
+   },
    "ig": {
     "tipo": "Solo historias",
     "pieza": "Sin publicación en el feed"
@@ -572,7 +636,7 @@ window.CS_MKT = {
    "tt": {
     "tipo": "Video de texto (a producir)",
     "pieza": "Preguntas que nos hacen #1",
-    "estado": "Pedíselo a Claude: foto de playa + texto grande + voz sintética, 10–12 s",
+    "estado": "Antes de pedírselo a Claude, verificá el dato en la web oficial de Cancillería (gub.uy) o del consulado de Brasil: documentos para uruguayos y permiso de menores. Si algo no coincide, no se publica. Pieza: foto de playa + texto grande + voz sintética, 10–12 s.",
     "gancho": "¿Para ir a Brasil necesitás pasaporte?",
     "guion": [
      "0–2 s: \"¿Para ir a Brasil necesitás pasaporte?\"",
@@ -581,10 +645,10 @@ window.CS_MKT = {
      "9–12 s: \"¿Cuánto sale tu viaje? cuantosale.uy\""
     ],
     "pantalla": "¿Pasaporte para Brasil? · Con la cédula alcanza · Menores: permiso de viaje",
-    "copy": "¿Pasaporte para Brasil? 🇧🇷 Si sos uruguayo, alcanza con la cédula vigente y en buen estado (Mercosur).\nSi viaja un menor sin alguno de los padres, necesita permiso de viaje: consultalo antes en INAU.\n\nGuardalo y mandáselo a quien viaja con vos.\nCuánto sale tu viaje: link en el perfil.\n\n#viajarabrasil #uruguay #tipsdeviaje #cuantosale"
+    "copy": "¿Pasaporte para Brasil? 🇧🇷 Si sos uruguayo, alcanza con la cédula vigente y en buen estado (Mercosur).\nSi viaja un menor sin alguno de los padres, necesita permiso de viaje: consultalo antes en INAU.\n\nGuardalo y mandáselo a quien viaja con vos.\n\n#viajarabrasil #uruguay #tipsdeviaje #cuantosale"
    },
    "hist": [
-    "Sticker de Preguntas: \"¿Qué querés saber antes de ir a Brasil? 👇\". Lo que respondan alimenta la serie \"Preguntas que nos hacen\".",
+    "Sticker de Preguntas: \"¿Qué querés saber antes de ir a Brasil? 👇\". Lo que respondan alimenta la serie \"Preguntas que nos hacen\" (solo se hace otra si la pregunta trae información nueva).",
     "Si alguien de ayer pidió su cálculo, respondelo en historia (captura de la app, sin su nombre)."
    ],
    "acc": [
@@ -594,8 +658,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-10-19",
-   "obj": "interaccion",
+   "obj": "resolver",
+   "cat": "destinos",
    "tema": "5 gastos que olvidás al viajar a Brasil",
+   "com": {
+    "prod": "El presupuesto completo: traslado, transporte allá y paseos ya sumados",
+    "cta": "Guardalo para cuando armes tu viaje",
+    "reserva": "Las historias suman los 2 gastos que faltan (moverte allá y los paseos) y llevan a la app, donde se reservan.",
+    "mide": "Guardados y compartidos; presupuestos completos (Tablero > Web: Tu presupuesto)"
+   },
    "ig": {
     "tipo": "Carrusel",
     "pieza": "5 gastos que olvidás al viajar a Brasil",
@@ -615,6 +686,7 @@ window.CS_MKT = {
    },
    "hist": [
     "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\").",
+    "Historia 2: \"Y 2 más que casi nadie suma: moverte allá (taxi, buggy, barco) y los paseos. En Cuánto Sale van sumados antes de viajar 👇\" + sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
     "Quiz: \"¿Cuánto sale el traslado compartido del aeropuerto de Fortaleza a Jeri, solo ida?\" Opciones: US$ 10 / US$ 37 / US$ 120. Correcta: US$ 37 (catálogo al 1/10/2026). Al día siguiente: \"Y son 5 h 30 de viaje 😮\"."
    ],
    "acc": [
@@ -625,12 +697,19 @@ window.CS_MKT = {
   },
   {
    "f": "2026-10-20",
-   "obj": "reservas",
+   "obj": "convertir",
+   "cat": "tours",
    "tema": "Traslado: ¿compartido o privado? La cuenta que nadie hace",
+   "com": {
+    "prod": "Traslados (compartido por persona, privado por auto)",
+    "cta": "Escribinos TRASLADO y te pasamos el precio para tu destino",
+    "reserva": "Es la pieza con más valor comercial: cada mensaje es una consulta de traslado. También es la pieza de la Fase 2 de anuncios.",
+    "mide": "Mensajes \"TRASLADO\", consultas por WhatsApp y pedidos con traslado"
+   },
    "ig": {
-    "tipo": "Carrusel (a producir)",
+    "tipo": "Carrusel (a producir · prioridad)",
     "pieza": "Compartido o privado",
-    "estado": "Pedíselo a Claude con estos datos (catálogo al 1/10/2026). Antes de publicar, verificá los precios en Catálogo > Servicios.",
+    "estado": "Pedido el 15/10. Datos del catálogo al 1/10/2026: antes de publicar, verificá los precios en Catálogo > Servicios.",
     "gancho": "¿Traslado compartido o privado? Depende de cuántos son",
     "guion": [
      "1 · Portada: \"¿Traslado compartido o privado? 🚐 Depende de cuántos son\" (foto de ruta costera).",
@@ -639,16 +718,17 @@ window.CS_MKT = {
      "4 · Arraial do Cabo (2 h 36 desde el aeropuerto de Río): compartido US$ 44 por persona · privado US$ 87 el auto → de a 2 ya conviene el privado.",
      "5 · Búzios (2 h 42): compartido US$ 31 por persona · privado US$ 87 el auto → desde 3 personas, privado.",
      "6 · Maceió (aeropuerto → la ciudad): compartido US$ 15 por persona · privado US$ 52 el auto → desde 4 personas, privado.",
-     "7 · Cierre: \"En cuantosale.uy el traslado ya viene sumado a tu viaje y lo reservás con una seña del 50 %.\""
+     "7 · Cuándo conviene cada uno: compartido si viajás solo o de a 2 a un destino lejano y no te molesta esperar; privado si son 3 o más, llegás de noche o con niños.",
+     "8 · Cierre: \"¿A dónde vas? Escribinos TRASLADO y te pasamos el precio. Se reserva con una seña del 50 %.\""
     ],
     "pantalla": "Compartido = por persona · Privado = por auto (hasta 4) · Precios solo ida",
-    "copy": "¿Traslado compartido o privado? 🚐 La cuenta que casi nadie hace.\n\nEl compartido se paga por persona. El privado, por auto (hasta 4). Entonces, depende de cuántos son:\n\n📍 Río: el privado gana siempre (US$ 21 el auto contra US$ 30 por persona)\n📍 Arraial do Cabo: de a 2 ya conviene el privado\n📍 Búzios: desde 3 personas, privado\n📍 Maceió: desde 4 personas, privado\n\n📌 Guardalo y mandáselo a con quién viajás.\n\nEn cuantosale.uy el traslado del aeropuerto ya viene sumado a tu viaje y lo reservás con nosotros (link en la bio).\n\nPrecios solo ida, del catálogo de cuantosale.uy al 1/10/2026. Pueden cambiar.\n\n#viajarabrasil #riodejaneiro #buzios #arraialdocabo #maceio #uruguay #cuantosale",
-    "cta": "Guardalo · mandáselo a con quién viajás"
+    "copy": "¿Traslado compartido o privado? 🚐 La cuenta que casi nadie hace.\n\nEl compartido se paga por persona. El privado, por auto (hasta 4). Entonces, depende de cuántos son:\n\n📍 Río: el privado gana siempre (US$ 21 el auto contra US$ 30 por persona)\n📍 Arraial do Cabo: de a 2 ya conviene el privado\n📍 Búzios: desde 3 personas, privado\n📍 Maceió: desde 4 personas, privado\n\n¿A dónde vas y cuántos son? Escribinos TRASLADO y te pasamos el precio para tu destino 📩\nSe reserva con una seña del 50 % y no se cobra nada en la web.\n\nPrecios solo ida, del catálogo de cuantosale.uy al 1/10/2026. Pueden cambiar.\n\n#viajarabrasil #riodejaneiro #buzios #arraialdocabo #maceio #uruguay #cuantosale",
+    "cta": "Escribinos TRASLADO"
    },
    "tt": {
     "tipo": "Carrusel en modo foto",
     "pieza": "Las mismas imágenes",
-    "cambio": "Primer renglón del texto + \"Link en el perfil\".",
+    "cambio": "Primer renglón del texto + \"Escribinos TRASLADO por mensaje\".",
     "copy": "¿Traslado compartido o privado? 🚐 La cuenta que casi nadie hace.\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
@@ -656,28 +736,35 @@ window.CS_MKT = {
     "Encuesta: \"¿Ya tenés el pasaje para el verano?\" Sí / Todavía no. A los que digan Sí: mensaje privado (Mensaje \"Ya tengo pasaje\")."
    ],
    "acc": [
-    "Mandá el Mensaje \"Ya tengo pasaje\" a quienes votaron Sí.",
-    "Respondé 3 preguntas en los grupos."
+    "Respondé cada \"TRASLADO\" el mismo día con el precio del catálogo y el link al destino. Anotá cuántos llegan (Tablero > Consultas por WhatsApp).",
+    "Mandá el Mensaje \"Ya tengo pasaje\" a quienes votaron Sí."
    ],
    "n": 6
   },
   {
    "f": "2026-10-21",
-   "obj": "uso",
-   "tema": "Río de a 2, así se arma",
+   "obj": "demostrar",
+   "cat": "app",
+   "tema": "Río de a 2: así se arma en la app",
+   "com": {
+    "prod": "El armado del viaje paso a paso: vuelo, traslado, alojamiento, paseos, total",
+    "cta": "Probá calcular tu próximo viaje en cuantosale.uy (link en la bio)",
+    "reserva": "La grabación pasa por el traslado y los paseos: el que la ve sabe que ahí se reservan.",
+    "mide": "Clics en el enlace y \"Armá tu viaje\" (Tablero > Web)"
+   },
    "ig": {
-    "tipo": "Reel",
+    "tipo": "Reel (prioridad)",
     "pieza": "Una semana en Río de a 2: US$ 608 por persona",
     "carpeta": "reel-04-rio-armado → reel-rio-armado-CELULAR.mp4",
     "gancho": "Una semana en Río de a 2",
     "guion": [
-     "Ya armado con la grabación de la app."
+     "Ya armado con la grabación de la app. Es de los que más muestran el producto: que salga a la hora con más gente (19 a 21 h)."
     ],
-    "cta": "¿A dónde te vas vos? cuantosale.uy",
+    "cta": "Armalo con tus fechas en cuantosale.uy",
     "copy": "Una semana en Río de a 2: US$ 608 por persona ✈️\n\nAsí se arma en cuantosale.uy:\n✈️ Vuelo Gol directo: US$ 500 ida y vuelta, los 2\n📊 Te muestra si saliendo otro día te sale menos\n🚐 Traslado: privado US$ 42 o compartido US$ 120\n🏠 Alojamiento con opciones de Booking: desde US$ 174 las 7 noches\n🎟️ Paseos: sumás solo los que quieras\nY al final, todo desglosado para compartir o dividir con tu grupo.\n\n¿A dónde te vas vos? Armalo con tus fechas en cuantosale.uy (link en la bio).\n\nGrabado en la app el 12/10/2026, viaje del 25/10 al 1/11/2026, 2 personas. Los precios cambian todos los días.\n\n#riodejaneiro #viajarabrasil #brasil #uruguay #vacaciones #cuantosale"
    },
    "tt": {
-    "tipo": "Reel (el mismo video)",
+    "tipo": "Reel (prioridad) (el mismo video)",
     "pieza": "Una semana en Río de a 2: US$ 608 por persona",
     "carpeta": "reel-04-rio-armado → reel-rio-armado-CELULAR.mp4",
     "igual": true,
@@ -685,33 +772,41 @@ window.CS_MKT = {
    },
    "hist": [
     "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\").",
+    "Historia 2: captura del paso de traslado del reel: \"En Río, de a 2, el privado sale menos que el compartido. La app te lo muestra antes de elegir 🚐\".",
     "Slider (barra con emoji 😅): \"¿Cuánto gastarías por semana en Río?\"."
    ],
    "acc": [
-    "**Revisión semanal #1** (Tablero semanal, 30 min). Es la línea de base: no hay contra qué comparar todavía.",
+    "**Revisión semanal #1** (Tablero semanal, 30 min). Es la línea de base: cargá visitas al perfil, clics en el enlace, presupuestos, consultas y pedidos.",
     "Anotá en la nota de la semana las preguntas que llegaron por historias y grupos."
    ],
    "n": 7
   },
   {
    "f": "2026-10-22",
-   "obj": "reservas",
+   "obj": "convertir",
+   "cat": "tours",
    "tema": "Cómo se reserva un paseo con Cuánto Sale",
+   "com": {
+    "prod": "Reserva de paseos y traslados: el proceso real, de punta a punta",
+    "cta": "¿Dudas para reservar? Escribinos al +598 98 529 851",
+    "reserva": "Saca el miedo a pagar una seña a una marca nueva: muestra qué pasa después de reservar y con quién se habla.",
+    "mide": "Consultas por WhatsApp y pedidos nuevos (Tablero > Pedidos)"
+   },
    "ig": {
     "tipo": "Carrusel (a producir)",
     "pieza": "Cómo reservás un paseo o un traslado",
-    "estado": "Necesita capturas reales de \"Reservá tu viaje\" y del paso de paseos (sin datos personales). Pedíselo a Claude.",
-    "gancho": "¿Cómo se reserva? (y qué pasa si cancelás)",
+    "estado": "Necesita capturas reales de la pantalla de reserva (botón \"Confirmar reserva\") y del paso de paseos, sin datos personales. Pedíselo a Claude con esas capturas.",
+    "gancho": "¿Cómo se reserva? (y qué pasa después)",
     "guion": [
-     "1 · Portada: \"¿Cómo reservo un paseo con Cuánto Sale?\"",
-     "2 · Lo sumás a tu viaje en la app y tocás \"Pedir reserva\". No se cobra nada en la web.",
-     "3 · Confirmamos con el operador local y te escribimos por WhatsApp desde el único número oficial: +598 98 529 851.",
+     "1 · Portada: \"¿Cómo reservo un paseo con Cuánto Sale? Paso a paso\".",
+     "2 · Lo sumás a tu viaje en la app y tocás \"Confirmar reserva\". No se cobra nada en la web.",
+     "3 · Qué pasa después: confirmamos con el operador local (cupo, horario, marea) y te escribimos por WhatsApp desde el único número oficial: +598 98 529 851.",
      "4 · Ahí recién se paga una seña: 25 % en paseos, 50 % en traslados. Prex o Pix sin recargo; tarjeta con Mercado Pago (+5 %).",
      "5 · Cancelación: en la mayoría de los paseos y traslados, gratis hasta 72 h antes. Cada servicio muestra sus condiciones.",
-     "6 · El paseo lo hace el operador local. Nosotros somos tu contacto antes y durante el viaje.",
-     "7 · Cierre: \"Armá tu viaje y pedí tu reserva en cuantosale.uy\"."
+     "6 · Antes del viaje te mandamos el punto de encuentro y el contacto. El paseo lo hace el operador local; nosotros somos tu contacto antes y durante el viaje.",
+     "7 · Cierre: \"¿Dudas? Escribinos al +598 98 529 851\"."
     ],
-    "copy": "¿Cómo se reserva un paseo o un traslado con Cuánto Sale? 👇\n\n1️⃣ Lo sumás a tu viaje en la app y pedís la reserva. No se cobra nada en la web.\n2️⃣ Confirmamos con el operador local y te escribimos por WhatsApp.\n3️⃣ Recién ahí, una seña: 25 % en paseos, 50 % en traslados (Prex o Pix sin recargo).\n4️⃣ En la mayoría de los servicios cancelás gratis hasta 72 h antes.\n\n⚠️ Nuestro único número oficial es el +598 98 529 851. Si te escriben de otro número pidiéndote plata, no pagues.\n\n¿Dudas? Escribinos. Armá tu viaje en cuantosale.uy (link en la bio).\n\n#viajarabrasil #uruguay #tipsdeviaje #cuantosale",
+    "copy": "¿Cómo se reserva un paseo o un traslado con Cuánto Sale? 👇\n\n1️⃣ Lo sumás a tu viaje en la app y tocás \"Confirmar reserva\". No se cobra nada en la web.\n2️⃣ Confirmamos con el operador local y te escribimos por WhatsApp.\n3️⃣ Recién ahí, una seña: 25 % en paseos, 50 % en traslados (Prex o Pix sin recargo).\n4️⃣ Antes de viajar te mandamos el punto de encuentro y el contacto.\n5️⃣ En la mayoría de los servicios cancelás gratis hasta 72 h antes.\n\n⚠️ Nuestro único número oficial es el +598 98 529 851. Si te escriben de otro número pidiéndote plata, no pagues.\n\n¿Dudas para reservar? Escribinos 📩\n\n#viajarabrasil #uruguay #tipsdeviaje #cuantosale",
     "cta": "¿Dudas? Escribinos"
    },
    "tt": {
@@ -720,17 +815,25 @@ window.CS_MKT = {
     "copy": "¿Cómo se reserva un paseo o un traslado con Cuánto Sale? 👇\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
-    "Subí las 6 imágenes como historias y guardalas en la destacada \"Reservas\" (reemplazá la historia de texto del día 1)."
+    "Subí las imágenes como historias y guardalas en la destacada \"Reservas\" (reemplazá la historia de texto del día 1)."
    ],
    "acc": [
+    "Antes de pedir el carrusel, verificá en Catálogo y en la pantalla de reserva que la seña, los medios de pago y la cancelación sigan así.",
     "A los creadores que respondieron: mandales el Brief para creadores y su link con utm."
    ],
    "n": 8
   },
   {
    "f": "2026-10-23",
-   "obj": "trafico",
+   "obj": "resolver",
+   "cat": "destinos",
    "tema": "7 días en Búzios: el detalle",
+   "com": {
+    "prod": "El presupuesto desglosado de Búzios + un paseo concreto del catálogo",
+    "cta": "Entrá a Cuánto Sale y armá tu presupuesto con tus fechas",
+    "reserva": "Cierra la secuencia de Búzios: después del desglose, una historia presenta un paseo de Búzios con su precio y su seña.",
+    "mide": "Guardados, compartidos y \"Tu presupuesto\""
+   },
    "ig": {
     "tipo": "Carrusel",
     "pieza": "7 días en Búzios: ¿cuánto gastás?",
@@ -749,7 +852,8 @@ window.CS_MKT = {
    },
    "hist": [
     "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\").",
-    "Historia: \"Te lo prometimos 👉 Búzios en versión intermedia y cómoda\", con captura de la imagen del total."
+    "Historia: \"Te lo prometimos 👉 Búzios en versión intermedia y cómoda\", con captura de la imagen del total.",
+    "Historia: un paseo de Búzios del catálogo (Catálogo > Servicios): qué incluye, cuánto dura, precio por persona y \"se reserva con una seña del 25 %\". Si no hay paseo de Búzios cargado, usá el traslado. Sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
    ],
    "acc": [
     "Respondé a todos los que comentaron \"BÚZIOS\" en el reel del 17/10 (por comentario y por mensaje).",
@@ -759,8 +863,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-10-24",
-   "obj": "alcance",
+   "obj": "resolver",
+   "cat": "tours",
    "tema": "Preguntas que nos hacen #2: ¿los paseos se reservan antes?",
+   "com": {
+    "prod": "Paseos (los que tienen cupo o dependen de la marea)",
+    "cta": "Mirá los paseos de tu destino en cuantosale.uy",
+    "reserva": "Explica por qué conviene reservar antes: es el argumento de venta de los paseos.",
+    "mide": "Reproducciones y compartidos en TikTok; pedidos con paseo"
+   },
    "ig": {
     "tipo": "Solo historias",
     "pieza": "Sin publicación en el feed"
@@ -789,8 +900,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-10-25",
-   "obj": "interaccion",
+   "obj": "atraer",
+   "cat": "destinos",
    "tema": "¿Cuánto sale Jeri para 2?",
+   "com": {
+    "prod": "El total del viaje en pareja y el traslado Fortaleza → Jeri (5 h 30)",
+    "cta": "Etiquetá a con quién te irías",
+    "reserva": "Las historias muestran el traslado de 5 h 30 (el que todos olvidan) y llevan a \"escribinos TRASLADO\".",
+    "mide": "Alcance, reproducciones y etiquetas"
+   },
    "ig": {
     "tipo": "Reel",
     "pieza": "Una semana en Jeri en pareja: US$ 2.445",
@@ -811,7 +929,8 @@ window.CS_MKT = {
    },
    "hist": [
     "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\").",
-    "Historia: \"Lo que nadie te dice de Jeri: del aeropuerto son 5 h 30 de viaje 🚐\" + sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
+    "Historia: \"Lo que nadie te dice de Jeri: del aeropuerto de Fortaleza son 5 h 30 de viaje. Compartido US$ 37 por persona, solo ida (catálogo al 1/10)\".",
+    "Historia: \"¿Vas a Jeri? Escribinos TRASLADO y te pasamos el precio para tu fecha 🚐\"."
    ],
    "acc": [
     "**Promocioná el reel de Búzios (Fase 1):** botón Promocionar > \"Más visitas al sitio web\" > https://cuantosale.uy/?utm_source=meta_ads > público Montevideo, Canelones y Maldonado, 25 a 45 años > US$ 3 por día, 7 días. Paso a paso en Estrategia > Anuncios.",
@@ -821,38 +940,58 @@ window.CS_MKT = {
   },
   {
    "f": "2026-10-26",
-   "obj": "alcance",
-   "tema": "Preguntas que nos hacen #3: ¿cómo pago allá?",
+   "obj": "convertir",
+   "cat": "tours",
+   "tema": "Llegás al aeropuerto y todavía te faltan 5 horas",
+   "com": {
+    "prod": "Traslados del aeropuerto (horas reales de cada destino)",
+    "cta": "Escribinos TRASLADO y te pasamos el precio para tu destino",
+    "reserva": "Muestra el problema que el traslado resuelve; el que ya tiene pasaje consulta.",
+    "mide": "Mensajes \"TRASLADO\", consultas y pedidos con traslado"
+   },
    "ig": {
-    "tipo": "Solo historias",
-    "pieza": "Sin publicación en el feed"
+    "tipo": "Reel de texto (a producir)",
+    "pieza": "Las horas de traslado que nadie te cuenta",
+    "estado": "Pedido el 15/10. Fotos de cada destino + texto grande + voz. Datos del catálogo (1/10/2026): verificalos antes.",
+    "gancho": "Llegás al aeropuerto… y todavía te faltan 5 horas",
+    "guion": [
+     "0–2 s: \"Llegás al aeropuerto… y todavía te faltan 5 horas 😮\"",
+     "2–5 s: Jericoacoara: 5 h 36 desde Fortaleza",
+     "5–8 s: Búzios: 2 h 42 desde Río",
+     "8–11 s: Arraial do Cabo: 2 h 36 desde Río",
+     "11–14 s: Maragogi: 2 h desde Maceió",
+     "14–17 s: Porto de Galinhas: 48 min desde Recife",
+     "17–21 s: \"¿Ya tenés pasaje? Escribinos TRASLADO\""
+    ],
+    "copy": "Llegás al aeropuerto… y todavía te faltan 5 horas 😮🚐\n\n📍 Jericoacoara: 5 h 36 desde Fortaleza\n📍 Búzios: 2 h 42 desde Río\n📍 Arraial do Cabo: 2 h 36 desde Río\n📍 Maragogi: 2 h desde Maceió\n📍 Porto de Galinhas: 48 min desde Recife\n\n¿Ya tenés pasaje? Escribinos TRASLADO y te pasamos el precio para tu destino 📩 Se reserva con una seña y en la mayoría cancelás gratis hasta 72 h antes.\n\nTiempos aproximados en auto, del catálogo de traslados de cuantosale.uy (1/10/2026).\n\n#viajarabrasil #jericoacoara #buzios #maragogi #uruguay #cuantosale"
    },
    "tt": {
-    "tipo": "Video de texto (a producir)",
-    "pieza": "Preguntas que nos hacen #3",
-    "estado": "Pedíselo a Claude. Verificá antes las condiciones vigentes de Prex para pagar con Pix.",
-    "gancho": "¿Cómo pagás en Brasil sin que te maten con la comisión?",
-    "guion": [
-     "0–2 s: \"¿Cómo pagás en Brasil?\"",
-     "2–7 s: \"Allá casi todo se paga con Pix (el pago con QR de Brasil).\"",
-     "7–11 s: \"Desde Uruguay, con Prex podés pagar con Pix.\"",
-     "11–14 s: \"Antes de pagar, mirá la cotización del día en el conversor de cuantosale.uy\""
-    ],
-    "copy": "¿Cómo pagás en Brasil? 💸\nAllá casi todo se paga con Pix. Desde Uruguay podés usar Prex.\nAntes de pagar, mirá la cotización del día en el conversor de cuantosale.uy (link en el perfil).\n\n#viajarabrasil #pix #uruguay #tipsdeviaje #cuantosale"
+    "tipo": "Reel de texto (a producir) (el mismo video)",
+    "pieza": "Las horas de traslado que nadie te cuenta",
+    "igual": true,
+    "copy": "Llegás al aeropuerto… y todavía te faltan 5 horas 😮🚐\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
-    "Resultado de la encuesta del sábado + \"Los paseos de tu destino están en la app 👇\" con enlace."
+    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\").",
+    "Historia: \"Si ya tenés pasaje, escribinos TRASLADO y te pasamos el precio para tu destino 🚐\"."
    ],
    "acc": [
     "Mirá la promoción: alcance, clics en el enlace y costo por clic. Si ya corresponde cortar, pausala (reglas en Estrategia > Anuncios).",
-    "Respondé 3 preguntas en grupos."
+    "Respondé cada \"TRASLADO\" el mismo día y anotalo en el Tablero."
    ],
    "n": 12
   },
   {
    "f": "2026-10-27",
-   "obj": "uso",
+   "obj": "demostrar",
+   "cat": "app",
    "tema": "¿Quién le debe a quién?",
+   "com": {
+    "prod": "Dividir los gastos del viaje en grupo (dentro del presupuesto)",
+    "cta": "Mandáselo al grupo del viaje",
+    "reserva": "Los grupos de 4 son los que más ganan con el traslado privado: lo dice la historia.",
+    "mide": "Compartidos y clics en el enlace"
+   },
    "ig": {
     "tipo": "Reel",
     "pieza": "Dividir gastos del viaje en grupo",
@@ -882,8 +1021,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-10-28",
-   "obj": "interaccion",
+   "obj": "demostrar",
+   "cat": "app",
    "tema": "Le armamos el viaje a un seguidor",
+   "com": {
+    "prod": "\"Tengo un presupuesto\" con un caso real, hasta el traslado y un paseo",
+    "cta": "Mandanos cuánto tenés y a dónde querés ir",
+    "reserva": "El viaje armado termina con traslado y paseo sumados; el que manda su caso ya es una conversación.",
+    "mide": "Mensajes recibidos con presupuesto"
+   },
    "ig": {
     "tipo": "Reel (a producir)",
     "pieza": "Le armamos el viaje a quien nos escribió",
@@ -896,7 +1042,8 @@ window.CS_MKT = {
      "16–20 s: traslado y 1 paseo sumados.",
      "20–23 s: \"¿Querés que armemos el tuyo? Escribinos.\""
     ],
-    "copy": "\"Tengo US$ [monto] y quiero playa en enero\" 👀\n\nNos escribió un seguidor y se lo armamos con la app: [destino], [noches] noches, de a [personas]. Total: US$ [total] por persona, con traslado y [paseo].\n\n¿Querés que armemos el tuyo? Mandanos cuánto tenés y a dónde soñás ir 📩\nO armalo vos en cuantosale.uy (link en la bio).\n\n[Grabado en la app el __/__. Los precios cambian con las fechas.]\n\n#viajarabrasil #uruguay #vacaciones2027 #cuantosale"
+    "copy": "\"Tengo US$ [monto] y quiero playa en enero\" 👀\n\nNos escribió un seguidor y se lo armamos con la app: [destino], [noches] noches, de a [personas]. Total: US$ [total] por persona, con traslado y [paseo].\n\n¿Querés que armemos el tuyo? Mandanos cuánto tenés y a dónde soñás ir 📩\n\n[Grabado en la app el __/__. Los precios cambian con las fechas.]\n\n#viajarabrasil #uruguay #vacaciones2027 #cuantosale",
+    "cta": "Mandanos cuánto tenés y a dónde querés ir"
    },
    "tt": {
     "tipo": "Reel (a producir) (el mismo video)",
@@ -908,14 +1055,21 @@ window.CS_MKT = {
     "Sticker de Preguntas: \"Decinos cuánto tenés y a dónde soñás ir: elegimos uno por semana y lo armamos 👇\"."
    ],
    "acc": [
-    "**Revisión semanal #2.** Primera comparación contra la semana 1: decidí 1 cosa que repetís, 1 que cambiás y 1 que dejás."
+    "**Revisión semanal #2.** Primera comparación contra la semana 1 (visitas al perfil, clics, presupuestos, consultas, pedidos): decidí 1 cosa que repetís, 1 que cambiás y 1 que dejás."
    ],
    "n": 14
   },
   {
    "f": "2026-10-29",
-   "obj": "interaccion",
+   "obj": "atraer",
+   "cat": "destinos",
    "tema": "¿Porto de Galinhas o Maragogi?",
+   "com": {
+    "prod": "Comparación de destinos con el paseo a las piscinas naturales de cada uno",
+    "cta": "Comentá cuál elegís",
+    "reserva": "Las historias del día siguiente llevan al paseo de piscinas, que en enero se reserva antes.",
+    "mide": "Comentarios, guardados y votos de la encuesta"
+   },
    "ig": {
     "tipo": "Carrusel",
     "pieza": "Porto o Maragogi, con precios reales",
@@ -944,24 +1098,31 @@ window.CS_MKT = {
   },
   {
    "f": "2026-10-30",
-   "obj": "reservas",
-   "tema": "Preguntas que nos hacen #4: la marea baja",
+   "obj": "resolver",
+   "cat": "tours",
+   "tema": "Preguntas que nos hacen #3: la marea baja",
+   "com": {
+    "prod": "Paseos a las piscinas naturales (horario según la marea)",
+    "cta": "Mirá los paseos de tu destino en cuantosale.uy",
+    "reserva": "Une la encuesta de ayer con el paseo: \"si vas a cualquiera de los dos, se reserva antes\".",
+    "mide": "Pedidos con paseo y llegadas ig_historia"
+   },
    "ig": {
     "tipo": "Solo historias",
     "pieza": "Sin publicación en el feed"
    },
    "tt": {
     "tipo": "Video de texto (a producir)",
-    "pieza": "Preguntas que nos hacen #4",
+    "pieza": "Preguntas que nos hacen #3",
     "estado": "Pedíselo a Claude: fotos de piscinas naturales + texto + voz",
     "gancho": "Fuiste a las piscinas naturales y no había nada",
     "guion": [
      "0–2 s: \"Fuiste a las piscinas naturales y… no había nada.\"",
      "2–6 s: \"Solo se ven con marea baja.\"",
      "6–10 s: \"Por eso el paseo sale a una hora distinta cada día.\"",
-     "10–14 s: \"En las guías del Nordeste de cuantosale.uy está la tabla de mareas.\""
+     "10–14 s: \"Mirá los paseos de tu destino en cuantosale.uy\""
     ],
-    "copy": "Las piscinas naturales solo se ven con marea baja 🐠 Por eso el paseo sale a una hora distinta cada día.\nLa tabla de mareas está en las guías del Nordeste de cuantosale.uy (link en el perfil).\n\n#piscinasnaturales #maragogi #portodegalinhas #uruguay #cuantosale"
+    "copy": "Las piscinas naturales solo se ven con marea baja 🐠 Por eso el paseo sale a una hora distinta cada día.\nMirá los paseos de tu destino (y la tabla de mareas en las guías del Nordeste) en cuantosale.uy: link en el perfil.\n\n#piscinasnaturales #maragogi #portodegalinhas #uruguay #cuantosale"
    },
    "hist": [
     "Resultado de \"¿Porto o Maragogi?\" + \"Si vas a cualquiera de los dos, el paseo a las piscinas se reserva antes en enero 👇\" con enlace."
@@ -973,8 +1134,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-10-31",
-   "obj": "uso",
+   "obj": "demostrar",
+   "cat": "app",
    "tema": "¿Vas a Pipa? Mirá esto antes",
+   "com": {
+    "prod": "La guía del destino en la app (cuándo ir, cómo llegar, qué hacer)",
+    "cta": "Buscá tu destino en cuantosale.uy",
+    "reserva": "La historia muestra el traslado Natal → Pipa con su precio; mañana sigue con las playas.",
+    "mide": "Visitas a Guías y clics en el enlace"
+   },
    "ig": {
     "tipo": "Reel",
     "pieza": "La guía de Pipa",
@@ -1004,8 +1172,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-01",
-   "obj": "interaccion",
+   "obj": "atraer",
+   "cat": "destinos",
    "tema": "6 playas de Pipa",
+   "com": {
+    "prod": "Destino + un paseo de Pipa del catálogo",
+    "cta": "¿Conocías alguna de estas playas? (comentario)",
+    "reserva": "Historia con un paseo concreto de Pipa (o el traslado), con precio y seña.",
+    "mide": "Alcance, guardados y comentarios"
+   },
    "ig": {
     "tipo": "Carrusel",
     "pieza": "6 playas de Pipa que no te podés perder",
@@ -1023,17 +1198,25 @@ window.CS_MKT = {
     "copy": "6 playas de Pipa que no te podés perder 🌊🐬\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
-    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\")."
+    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\").",
+    "Historia: un paseo de Pipa del catálogo (Catálogo > Servicios) con qué incluye, precio por persona y seña del 25 %. Si no hay, el traslado desde Natal."
    ],
    "acc": [
-    "Pedile a Claude que actualice los precios de las piezas que se publican después del 4/11 (Río o Floripa, guía de Río) y la cotización del conversor."
+    "Pedile a Claude que actualice los precios de las piezas que se publican después del 4/11 (4 destinos donde el paseo es el viaje, Río o Floripa, guía de Río) y la cotización del conversor."
    ],
    "n": 18
   },
   {
    "f": "2026-11-02",
-   "obj": "uso",
+   "obj": "demostrar",
+   "cat": "app",
    "tema": "¿Cuánto ahorrar por mes?",
+   "com": {
+    "prod": "El plan de ahorro de la app",
+    "cta": "Probá calcular tu próximo viaje en cuantosale.uy",
+    "reserva": "Lejos de la reserva: trae usuarios que viajan en meses. Se los recupera con la alerta de precio.",
+    "mide": "Clics en el enlace y \"Armá tu viaje\""
+   },
    "ig": {
     "tipo": "Reel",
     "pieza": "¿Cuánto tenés que ahorrar por mes para irte a Brasil?",
@@ -1042,7 +1225,7 @@ window.CS_MKT = {
     "guion": [
      "Ya armado. Va a principio de mes a propósito: es cuando la gente cobra."
     ],
-    "cta": "¿Para qué viaje estás juntando?",
+    "cta": "Calculá el tuyo en cuantosale.uy",
     "copy": "¿Cuánto tenés que ahorrar por mes para irte a Brasil? 🐷\n\nEn cuantosale.uy elegís destino, fechas y cuántos viajan, y te dice cuánto cuesta el viaje entero y cuánto juntar por mes.\nEjemplo: Bombinhas, de a 2, en enero → US$ 1.916, o sea US$ 639 por mes.\n\nVas anotando lo que juntás y te avisa cuando cumpliste el mes.\nLa plata no pasa por la app: queda en tu banco, acá solo llevás la cuenta.\n\n💬 ¿Para qué viaje estás juntando? Contanos 👇\nArmá tu meta en cuantosale.uy (link en la bio).\n\nGrabado en la app el 12/10/2026. El costo del viaje cambia con las fechas y los precios del día.\n\n#ahorro #viajarabrasil #bombinhas #uruguay #vacaciones2027 #cuantosale"
    },
    "tt": {
@@ -1064,8 +1247,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-03",
-   "obj": "reservas",
+   "obj": "resolver",
+   "cat": "destinos",
    "tema": "Porto de Galinhas de a 2: el viaje entero",
+   "com": {
+    "prod": "El viaje completo con traslado y jangada a las piscinas",
+    "cta": "Entrá a Cuánto Sale y armá tu presupuesto",
+    "reserva": "El desglose termina en \"el traslado y la jangada los reservás con nosotros\".",
+    "mide": "\"Tu presupuesto\" y pedidos con traslado o paseo a Porto"
+   },
    "ig": {
     "tipo": "Reel (a producir)",
     "pieza": "Porto de Galinhas de a 2, en febrero",
@@ -1080,7 +1270,8 @@ window.CS_MKT = {
      "21–25 s: total por persona.",
      "25–28 s: \"Armá el tuyo · cuantosale.uy\""
     ],
-    "copy": "Porto de Galinhas de a 2 en febrero: ¿cuánto sale todo? 🐠\n\n✈️ Vuelo a Recife: US$ [ ]\n🚐 Traslado (unos 50 min): US$ [ ]\n🏠 Posada: US$ [ ]\n🛶 Jangada a las piscinas: US$ [ ]\n🍽️ Comer y moverte: US$ [ ]\n= US$ [ ] por persona\n\nEl traslado y la jangada los reservás con nosotros.\nArmá el tuyo en cuantosale.uy (link en la bio).\n\n[Grabado en la app el __/__. Los precios cambian con las fechas.]\n\n#portodegalinhas #nordeste #viajarabrasil #uruguay #cuantosale"
+    "copy": "Porto de Galinhas de a 2 en febrero: ¿cuánto sale todo? 🐠\n\n✈️ Vuelo a Recife: US$ [ ]\n🚐 Traslado (unos 50 min): US$ [ ]\n🏠 Posada: US$ [ ]\n🛶 Jangada a las piscinas: US$ [ ]\n🍽️ Comer y moverte: US$ [ ]\n= US$ [ ] por persona\n\nEl traslado y la jangada los reservás con nosotros.\nArmá el tuyo en cuantosale.uy (link en la bio).\n\n[Grabado en la app el __/__. Los precios cambian con las fechas.]\n\n#portodegalinhas #nordeste #viajarabrasil #uruguay #cuantosale",
+    "cta": "Armá el tuyo en cuantosale.uy"
    },
    "tt": {
     "tipo": "Reel (a producir) (el mismo video)",
@@ -1089,7 +1280,8 @@ window.CS_MKT = {
     "copy": "Porto de Galinhas de a 2 en febrero: ¿cuánto sale todo? 🐠\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
-    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\")."
+    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\").",
+    "Historia: la jangada a las piscinas: qué incluye, precio por persona (Catálogo > Servicios) y seña del 25 %."
    ],
    "acc": [
     "Seguimiento de creadores activos: pedí los números de su publicación (alcance, clics) para el Tablero."
@@ -1098,8 +1290,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-04",
-   "obj": "trafico",
+   "obj": "demostrar",
+   "cat": "app",
    "tema": "¿Cuánto son 100 dólares en Brasil?",
+   "com": {
+    "prod": "El conversor de la app",
+    "cta": "Guardalo para cuando estés allá",
+    "reserva": "Lejos de la reserva: sirve para que vuelvan a la app durante el viaje.",
+    "mide": "Guardados y clics en el enlace"
+   },
    "ig": {
     "tipo": "Reel",
     "pieza": "Conversor",
@@ -1129,29 +1328,35 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-05",
-   "obj": "reservas",
-   "tema": "Llegás al aeropuerto y todavía te faltan 5 horas",
+   "obj": "convertir",
+   "cat": "tours",
+   "tema": "4 destinos donde el paseo ES el viaje",
+   "com": {
+    "prod": "Paseos: piscinas de Galés, buggy en Jeri, barco en Arraial, jangada en Porto",
+    "cta": "Descubrí los paseos de tu destino en cuantosale.uy",
+    "reserva": "Presenta 4 experiencias concretas con precio y seña: es venta directa de paseos.",
+    "mide": "Pedidos con paseo y consultas"
+   },
    "ig": {
-    "tipo": "Reel de texto (a producir)",
-    "pieza": "Las horas de traslado que nadie te cuenta",
-    "estado": "Pedíselo a Claude: fotos de cada destino + texto grande + voz. Datos del catálogo (1/10/2026).",
-    "gancho": "Llegás al aeropuerto… y todavía te faltan 5 horas",
+    "tipo": "Carrusel (a producir)",
+    "pieza": "4 destinos donde el paseo es el viaje",
+    "estado": "Precios del catálogo el día que se arme (Catálogo > Servicios). Fotos del destino de cada slide.",
+    "gancho": "En estos 4 destinos, el paseo ES el viaje",
     "guion": [
-     "0–2 s: \"Llegás al aeropuerto… y todavía te faltan 5 horas 😮\"",
-     "2–5 s: Jericoacoara: 5 h 36 desde Fortaleza",
-     "5–8 s: Búzios: 2 h 42 desde Río",
-     "8–11 s: Arraial do Cabo: 2 h 36 desde Río",
-     "11–14 s: Maragogi: 2 h desde Maceió",
-     "14–17 s: Porto de Galinhas: 48 min desde Recife",
-     "17–21 s: \"El traslado ya viene sumado (y lo reservás) en cuantosale.uy\""
+     "1 · Portada: \"4 destinos de Brasil donde el paseo ES el viaje\".",
+     "2 · Maragogi: las piscinas de Galés (con marea baja). Qué incluye y cuánto dura.",
+     "3 · Jericoacoara: buggy a la Lagoa do Paraíso.",
+     "4 · Arraial do Cabo: el paseo en barco.",
+     "5 · Porto de Galinhas: jangada a las piscinas.",
+     "6 · Cierre: \"Reservá el paseo antes de llegar, con seña del 25 %, en cuantosale.uy\"."
     ],
-    "copy": "Llegás al aeropuerto… y todavía te faltan 5 horas 😮🚐\n\n📍 Jericoacoara: 5 h 36 desde Fortaleza\n📍 Búzios: 2 h 42 desde Río\n📍 Arraial do Cabo: 2 h 36 desde Río\n📍 Maragogi: 2 h desde Maceió\n📍 Porto de Galinhas: 48 min desde Recife\n\nSumalo al viaje (y a la plata) antes de comprar el pasaje.\nEn cuantosale.uy el traslado del aeropuerto ya viene sumado y lo reservás con nosotros (link en la bio).\n\nTiempos aproximados en auto, del catálogo de traslados de cuantosale.uy (1/10/2026).\n\n#viajarabrasil #jericoacoara #buzios #maragogi #uruguay #cuantosale"
+    "copy": "En estos 4 destinos, el paseo ES el viaje 🐠🏜️⛵\n\n📍 Maragogi: piscinas de Galés · US$ [ ]\n📍 Jericoacoara: buggy a la Lagoa do Paraíso · US$ [ ]\n📍 Arraial do Cabo: paseo en barco · US$ [ ]\n📍 Porto de Galinhas: jangada a las piscinas · US$ [ ]\n\nEn enero se llenan: reservalos antes, con una seña del 25 %. En la mayoría, cancelás gratis hasta 72 h antes.\nMirá los paseos de tu destino en cuantosale.uy (link en la bio).\n\nPrecios por persona del catálogo de cuantosale.uy al __/__. Pueden cambiar.\n\n#viajarabrasil #maragogi #jericoacoara #arraialdocabo #portodegalinhas #cuantosale",
+    "cta": "Mirá los paseos de tu destino"
    },
    "tt": {
-    "tipo": "Reel de texto (a producir) (el mismo video)",
-    "pieza": "Las horas de traslado que nadie te cuenta",
-    "igual": true,
-    "copy": "Llegás al aeropuerto… y todavía te faltan 5 horas 😮🚐\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
+    "tipo": "Carrusel en modo foto",
+    "pieza": "Las mismas imágenes",
+    "copy": "En estos 4 destinos, el paseo ES el viaje 🐠🏜️⛵\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
     "Encuesta: \"¿Ya tenés pasaje?\" Sí / No. A los Sí: Mensaje \"Ya tengo pasaje\".",
@@ -1165,8 +1370,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-06",
-   "obj": "reservas",
+   "obj": "convertir",
+   "cat": "tours",
    "tema": "Piscinas naturales, de la más barata a la más cara",
+   "com": {
+    "prod": "Paseos a piscinas naturales",
+    "cta": "Descubrí las opciones para tu destino en cuantosale.uy",
+    "reserva": "Comparar precios de paseos ya es elegir uno.",
+    "mide": "Guardados y pedidos con paseo"
+   },
    "ig": {
     "tipo": "Carrusel",
     "pieza": "Piscinas naturales de Brasil",
@@ -1195,15 +1407,22 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-07",
-   "obj": "interaccion",
+   "obj": "resolver",
+   "cat": "interaccion",
    "tema": "Historias: preguntas de la semana",
+   "com": {
+    "prod": "Respuestas con capturas de la app",
+    "cta": "Preguntanos lo que quieras saber de tu viaje",
+    "reserva": "Cada respuesta termina en el dato del traslado o el paseo cuando aplica.",
+    "mide": "Respuestas al sticker y mensajes"
+   },
    "ig": {
     "tipo": "Solo historias",
     "pieza": "Sin publicación en el feed"
    },
    "tt": {
-    "tipo": "Repetir formato ganador",
-    "pieza": "Otra \"Preguntas que nos hacen\" con la pregunta que más se repitió (ver nota de la semana)",
+    "tipo": "Solo si hay una pregunta nueva",
+    "pieza": "Otra \"Preguntas que nos hacen\" solo si la pregunta que más se repitió trae información nueva (ver nota de la semana). Si no, no se publica en TikTok.",
     "estado": "Pedíselo a Claude con la pregunta y la respuesta verificada"
    },
    "hist": [
@@ -1217,8 +1436,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-08",
-   "obj": "interaccion",
+   "obj": "atraer",
+   "cat": "destinos",
    "tema": "¿Río o Floripa?",
+   "com": {
+    "prod": "Comparación de destinos con el traslado de cada uno",
+    "cta": "Comentá RÍO o FLORIPA",
+    "reserva": "Al día siguiente, la historia del resultado lleva al traslado ya sumado.",
+    "mide": "Comentarios y votos"
+   },
    "ig": {
     "tipo": "Carrusel",
     "pieza": "Río o Floripa, con precios reales",
@@ -1247,8 +1473,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-09",
-   "obj": "reservas",
+   "obj": "convertir",
+   "cat": "interaccion",
    "tema": "Seguimiento comercial",
+   "com": {
+    "prod": "Pedidos abiertos (los que no pagaron la seña)",
+    "cta": "—",
+    "reserva": "Es el día de cerrar: cada pedido sin seña recibe un mensaje.",
+    "mide": "Señas cobradas y motivos de caída"
+   },
    "ig": {
     "tipo": "Solo historias",
     "pieza": "Sin publicación en el feed"
@@ -1268,8 +1501,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-10",
-   "obj": "uso",
+   "obj": "demostrar",
+   "cat": "app",
    "tema": "¿Vas a Río? Mirá esto antes",
+   "com": {
+    "prod": "La guía de Río en la app",
+    "cta": "Buscá tu destino en cuantosale.uy",
+    "reserva": "Historia con el traslado del aeropuerto de Río (privado US$ 21 el auto, catálogo al 1/10: verificalo).",
+    "mide": "Visitas a Guías y clics en el enlace"
+   },
    "ig": {
     "tipo": "Reel",
     "pieza": "La guía de Río",
@@ -1290,7 +1530,8 @@ window.CS_MKT = {
     "copy": "¿Vas a Río? Mirá esto antes 👀\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
-    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\")."
+    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\").",
+    "Historia: \"Del aeropuerto de Río a la ciudad, el privado sale US$ 21 el auto\" (verificá en Catálogo) + \"Escribinos TRASLADO\"."
    ],
    "acc": [
     "Respondé 3 preguntas en grupos."
@@ -1299,8 +1540,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-11",
-   "obj": "interaccion",
+   "obj": "resolver",
+   "cat": "interaccion",
    "tema": "Revisión y resultados",
+   "com": {
+    "prod": "—",
+    "cta": "—",
+    "reserva": "Revisión del mes: dónde se pierde la gente entre el reel y la seña.",
+    "mide": "El embudo completo del mes"
+   },
    "ig": {
     "tipo": "Solo historias",
     "pieza": "Sin publicación en el feed"
@@ -1320,8 +1568,15 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-12",
-   "obj": "alcance",
+   "obj": "atraer",
+   "cat": "destinos",
    "tema": "Parte 2 del ganador",
+   "com": {
+    "prod": "El mismo que el reel ganador",
+    "cta": "La misma acción del ganador",
+    "reserva": "Repetí también su secuencia de historias (cuánto sale → cómo se llega → traslado o paseo).",
+    "mide": "Alcance contra el original"
+   },
    "ig": {
     "tipo": "Reel (a producir)",
     "pieza": "Parte 2 del reel con más guardados y compartidos del mes",
@@ -1348,30 +1603,40 @@ window.CS_MKT = {
   },
   {
    "f": "2026-11-13",
-   "obj": "reservas",
-   "tema": "4 destinos donde el paseo ES el viaje",
+   "obj": "convertir",
+   "cat": "tours",
+   "tema": "Así reservás el traslado de tu destino",
+   "com": {
+    "prod": "Traslado en la app: compartido o privado, sumado al viaje, y \"Confirmar reserva\"",
+    "cta": "Descubrí el traslado para tu destino en cuantosale.uy",
+    "reserva": "Muestra el producto que se vende, dentro de la app, hasta el botón de reserva.",
+    "mide": "Pantalla \"Reservá tu viaje\" y pedidos con traslado"
+   },
    "ig": {
-    "tipo": "Carrusel (a producir)",
-    "pieza": "4 destinos donde el paseo es el viaje",
-    "estado": "Precios del catálogo el día que se arme (Catálogo > Servicios). Fotos del destino de cada slide.",
-    "gancho": "En estos 4 destinos, el paseo ES el viaje",
+    "tipo": "Reel (a grabar)",
+    "pieza": "El traslado de Jeri, en la app",
+    "estado": "Grabación nueva, sin tu cuenta ni datos personales a la vista: \"Ya sé a dónde voy\" > Jericoacoara > paso de traslado (compartido y privado) > total > pantalla de reserva sin completar. Mandala y Claude la edita.",
+    "gancho": "Del aeropuerto a Jeri son 5 h 30. Así lo resolvés antes de viajar",
     "guion": [
-     "1 · Portada: \"4 destinos de Brasil donde el paseo ES el viaje\".",
-     "2 · Maragogi: las piscinas de Galés (con marea baja).",
-     "3 · Jericoacoara: buggy a la Lagoa do Paraíso.",
-     "4 · Arraial do Cabo: el paseo en barco.",
-     "5 · Porto de Galinhas: jangada a las piscinas.",
-     "6 · Cierre: \"Reservá el paseo antes de llegar, con seña del 25 %, en cuantosale.uy\"."
+     "0–2 s: foto de Jeri + \"Del aeropuerto a Jeri son 5 h 30\".",
+     "2–8 s: grabación: elegís Jericoacoara y tus fechas.",
+     "8–14 s: el paso de traslado: compartido o privado, con precio.",
+     "14–18 s: el total del viaje con el traslado sumado.",
+     "18–22 s: la pantalla de reserva: \"No se cobra nada en la web; seña del 50 % cuando confirmamos\".",
+     "22–25 s: \"Descubrí el traslado para tu destino · cuantosale.uy\""
     ],
-    "copy": "En estos 4 destinos, el paseo ES el viaje 🐠🏜️⛵\n\n📍 Maragogi: piscinas de Galés · US$ [ ]\n📍 Jericoacoara: buggy a la Lagoa do Paraíso · US$ [ ]\n📍 Arraial do Cabo: paseo en barco · US$ [ ]\n📍 Porto de Galinhas: jangada a las piscinas · US$ [ ]\n\nEn enero se llenan: reservalos antes, con una seña del 25 %. En la mayoría, cancelás gratis hasta 72 h antes.\n📌 Guardalo para tu viaje.\ncuantosale.uy (link en la bio)\n\nPrecios por persona del catálogo de cuantosale.uy al __/__. Pueden cambiar.\n\n#viajarabrasil #maragogi #jericoacoara #arraialdocabo #portodegalinhas #cuantosale"
+    "copy": "Del aeropuerto de Fortaleza a Jeri son 5 h 30 🚐 Así lo resolvés antes de viajar:\n\n1️⃣ Elegís Jericoacoara y tus fechas en cuantosale.uy\n2️⃣ Ves el traslado compartido y el privado, con precio en dólares\n3️⃣ Queda sumado al total de tu viaje\n4️⃣ Pedís la reserva: no se cobra nada en la web. Cuando confirmamos con el operador, seña del 50 %.\n\nDescubrí el traslado para tu destino en cuantosale.uy (link en la bio).\n\n[Grabado en la app el __/__. Los precios cambian con las fechas.]\n\n#jericoacoara #viajarabrasil #uruguay #cuantosale",
+    "cta": "Descubrí el traslado para tu destino"
    },
    "tt": {
-    "tipo": "Carrusel en modo foto",
-    "pieza": "Las mismas imágenes",
-    "copy": "En estos 4 destinos, el paseo ES el viaje 🐠🏜️⛵\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
+    "tipo": "Reel (a grabar) (el mismo video)",
+    "pieza": "El traslado de Jeri, en la app",
+    "igual": true,
+    "copy": "Del aeropuerto de Fortaleza a Jeri son 5 h 30 🚐 Así lo resolvés antes de viajar:\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
-    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\")."
+    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia (texto del sticker: \"Calculá el tuyo\").",
+    "Historia: \"¿Ya tenés pasaje? Escribinos TRASLADO\" para el que prefiere preguntar antes de reservar."
    ],
    "acc": [
     "Cerrá el mes: completá el Tablero de la semana y anotá los 3 aprendizajes principales."
