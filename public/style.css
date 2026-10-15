@@ -1561,6 +1561,7 @@ button.voucher-item__cta.is-reserved:hover{border-color:var(--good)}
 .transfer-advice{display:flex;align-items:flex-start;gap:9px;margin:0 0 12px;padding:11px 13px;border-radius:12px;background:var(--cel-soft);color:var(--ink2);font-size:12.5px;line-height:1.5}
 .transfer-advice b{color:var(--ink);font-weight:700}
 .transfer-advice__ico{flex:0 0 auto;font-size:14px;line-height:1.35}
+.transfer-advice__link{color:var(--ink);font-weight:700;text-decoration:underline;white-space:nowrap}
 /* Elegido se marca igual que las otras cuatro card elegibles de la app
    (hoteles, tours, comidas, presupuesto diario), con los mismos tokens.
 

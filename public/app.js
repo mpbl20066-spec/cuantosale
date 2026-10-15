@@ -4436,6 +4436,19 @@ var HOTEL_NOTA_MINIMA = 8;
     REC: 'Aeroporto Internacional do Recife',
     SSA: 'Aeroporto Internacional de Salvador'
   };
+  /* Traslado privado desde OTRO aeropuerto que el del destino. No entra al
+     presupuesto ni al checkout (el viaje se arma con el vuelo al aeropuerto del
+     destino): es un aviso con precio y WhatsApp, para el que ya tiene pasaje a
+     ese otro aeropuerto. Precio final de venta en reales por vehiculo, como los
+     escalones de la tabla: Agua Verde (tabla del 15/10/2026) + 5 % + 15 % de
+     margen. Si cambia, cambiarlo aca (no esta en data/transfer-escalones.tsv). */
+  var TRANSFER_OTRO_AEROPUERTO = {
+    mcz: { iata: 'REC', km: 300, horas: 3, escalones: [
+      { min: 1, max: 2, vehiculo: 'Auto', brl: 1077 },
+      { min: 3, max: 4, vehiculo: 'Auto', brl: 1268 },
+      { min: 5, max: 8, vehiculo: 'Van', brl: 2282 }
+    ] }
+  };
   /* Escalon del transfer privado para `pax` personas: el mas barato cuyo rango
      [min, max] la incluye, o null si no hay (sin precio cargado, o mas gente que
      el ultimo escalon). Es la misma cuenta que model.transferPrivadoPara(). */
@@ -8231,6 +8244,24 @@ var HOTEL_NOTA_MINIMA = 8;
     return km <= UMBRAL_CERCANO_KM;
   }
 
+  /* "¿Volás a Recife?" en Maceió (ver TRANSFER_OTRO_AEROPUERTO): precio para los
+     viajeros de la pantalla y el pedido por WhatsApp. Mas gente que el ultimo
+     escalon: "Consultar", sin inventar el vehiculo. */
+  function otroAeropuertoAviso(meta, paxT) {
+    var key = String((meta && meta.dest && meta.dest.key) || '').toLowerCase();
+    var o = TRANSFER_OTRO_AEROPUERTO[key];
+    if (!o) return '';
+    var destino = (meta.dest && meta.dest.name) || key;
+    var aeropuerto = AIRPORT_NAMES[o.iata] || o.iata;
+    var e = privadoPorPax(o.escalones, paxT);
+    var personas = paxT + ' ' + (paxT === 1 ? 'persona' : 'personas');
+    var precio = e ? '<b>' + money(e.brl / (tasaDe('BRL') || 5.2)) + ' por vehículo</b> para ' + personas + ' (' + e.vehiculo.toLowerCase() + ')' : 'precio a consultar para ' + personas;
+    var msg = '¡Hola! Quiero el traslado privado desde el ' + aeropuerto + ' (' + o.iata + ') a ' + destino + ' para ' + personas +
+      (meta.dep ? ', llegando el ' + fechaCortaViaje(meta.dep) : '') + '. ¿Me confirman disponibilidad y precio?';
+    return '<p class="transfer-advice"><span class="transfer-advice__ico" aria-hidden="true">✈️</span><span class="transfer-advice__txt"><b>¿Volás a Recife?</b> También te llevamos del ' +
+      esc(aeropuerto) + ' (' + o.iata + ') a ' + esc(destino) + ' en traslado privado: ' + o.km + ' km, unas ' + o.horas + ' horas, ' + precio + '. ' +
+      '<a class="transfer-advice__link" href="' + esc(whatsappUrl(msg, WHATSAPP_RESERVAS)) + '" target="_blank" rel="noopener">Pedilo por WhatsApp</a></span></p>';
+  }
   function transferCard(meta) {
     var selected = detailState && detailState.transferType || '';
     // Los precios salen de la tabla por destino (public/transfer-precios.js, que
@@ -8413,6 +8444,7 @@ var HOTEL_NOTA_MINIMA = 8;
       '<section class="transport-options official-transfer" data-budget-anchor="traslados">' +
       modoNota +
       filasTramos +
+      otroAeropuertoAviso(meta, paxT) +
       (selected ? '<p class="transfer-hint">El horario de recogida lo coordinás con el operador al reservar.</p>' : '') +
       '</section></div>';
   }

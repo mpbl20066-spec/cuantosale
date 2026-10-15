@@ -3,7 +3,7 @@
 // Subir este número descarta el cache viejo: la estrategia de assets es
 // cache-first, así que sin cambiarlo los usuarios siguen viendo la versión
 // anterior de app.js y style.css para siempre.
-var CACHE_NAME = 'cuantosale-shell-v166';
+var CACHE_NAME = 'cuantosale-shell-v167';
 var APP_SHELL = [
   // '/' (la start_url de la PWA). '/app' ya no: ahora redirige a '/', y una
   // respuesta redirigida en el precache rompe la navegacion sin senal.
