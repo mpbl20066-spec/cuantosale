@@ -1738,7 +1738,8 @@
         (f ? '<img src="' + esc(urlSegura(f)) + '" alt="" loading="lazy">' : '<span class="pp-sinfoto">Sin foto</span>') +
         '<span class="pp-tour__txt"><b>' + esc(x.titulo) + '</b><span class="sub">' + esc(pr ? pr.nombre : 'sin agencia') + (precio != null ? ' · ' + pub(precio) : '') + '</span><span class="pill ' + e.c + '">' + e.t + '</span></span></label>';
     }).join('') + (lista.length ? '' : '<p class="vacio">No hay ' + (p.tipo === 'traslado' ? 'traslados' : 'tours') + ' con ese estado.</p>') + '</div>';
-    return h + ppNav(2, '<button class="btn btn--main btn--lg" data-pp="ir|4"' + (elegidos.length ? '' : ' disabled') + '>Siguiente: fotos (' + elegidos.length + ') →</button>');
+    return h + ppNav(2, '<button class="btn btn--main btn--lg" data-pp="ir|4"' + (elegidos.length ? '' : ' disabled') + '>Siguiente: fotos (' + elegidos.length + ') →</button>',
+      elegidos.length ? '<button class="btn btn--lg btn--txt-danger" data-pp="borrar">🗑 Borrar elegidos (' + elegidos.length + ')</button>' : '');
   }
 
   function ppPaso4(p) {
@@ -1948,6 +1949,11 @@
       case 'ficha': ppTraerFicha(z[1]); break;
       case 'confirmar': ppConfirmar(); break;
       case 'publicar': ppPublicar(); break;
+      // Los que no se quieren ofrecer van a la papelera (se recuperan desde Servicios > Papelera).
+      case 'borrar':
+        var bids = ppElegidos().map(function (x) { return x.id; }), pr = papeleraVarios(bids);
+        if (pr) pr.then(function () { bids.forEach(function (id) { delete p.sel[id]; }); ppGuardar(); pintar(); });
+        break;
       case 'borrador': p.res = { publicados: 0, errores: [], borrador: true }; ppIr(7); break;
     }
     return true;
