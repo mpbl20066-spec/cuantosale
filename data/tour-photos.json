@@ -1414,5 +1414,45 @@
   "autor": "Rodrigo Soldon from Rio de Janeiro, Brazil",
   "licencia": "CC BY 2.0",
   "archivo": "Estádio do Maracanã (3345360655).jpg"
+ },
+ "rio#Tour a pie por la Rocinha con guía local": {
+  "url": "https://images.unsplash.com/photo-1649887948658-5d0953303756?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMDk5NDQwfDB8MXxzZWFyY2h8NHx8cm9jaW5oYSUyMGZhdmVsYXxlbnwwfDB8fHwxNzkyMDk1MjkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+  "autor": "Desert Morocco Adventure en Unsplash",
+  "licencia": "Licencia Unsplash",
+  "fuente": "unsplash",
+  "id": "CxEqegC1K3c",
+  "perfil": "https://unsplash.com/@dmadventure",
+  "pagina": "https://unsplash.com/photos/a-view-of-a-city-with-mountains-in-the-background-CxEqegC1K3c",
+  "download": "https://api.unsplash.com/photos/CxEqegC1K3c/download?ixid=M3wxMDk5NDQwfDB8MXxzZWFyY2h8NHx8cm9jaW5oYSUyMGZhdmVsYXxlbnwwfDB8fHwxNzkyMDk1MjkzfDA"
+ },
+ "rio#Bahía de Guanabara en escuna con almuerzo": {
+  "url": "https://images.unsplash.com/photo-1714621263340-9ac7658e0dd5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMDk5NDQwfDB8MXxzZWFyY2h8NHx8Z3VhbmFiYXJhJTIwYmF5JTIwYm9hdHxlbnwwfDB8fHwxNzkyMDk1Mjk3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+  "autor": "Felipe Barradas en Unsplash",
+  "licencia": "Licencia Unsplash",
+  "fuente": "unsplash",
+  "id": "P-raHmujsN4",
+  "perfil": "https://unsplash.com/@feebarradas",
+  "pagina": "https://unsplash.com/photos/a-large-building-sitting-on-top-of-a-body-of-water-P-raHmujsN4",
+  "download": "https://api.unsplash.com/photos/P-raHmujsN4/download?ixid=M3wxMDk5NDQwfDB8MXxzZWFyY2h8NHx8Z3VhbmFiYXJhJTIwYmF5JTIwYm9hdHxlbnwwfDB8fHwxNzkyMDk1Mjk3fDA"
+ },
+ "rio#Trekking al Morro Dois Irmãos por Vidigal": {
+  "url": "https://images.unsplash.com/photo-1647030058344-1dac44c4d4a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMDk5NDQwfDB8MXxzZWFyY2h8Mnx8dmlkaWdhbCUyMHJpb3xlbnwwfHx8fDE3OTIwOTUzMzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+  "autor": "Maycon Mansur en Unsplash",
+  "licencia": "Licencia Unsplash",
+  "fuente": "unsplash",
+  "id": "QIgF2DLLlns",
+  "perfil": "https://unsplash.com/@mayconmansur",
+  "pagina": "https://unsplash.com/photos/a-view-of-a-beach-and-mountains-from-a-hill-QIgF2DLLlns",
+  "download": "https://api.unsplash.com/photos/QIgF2DLLlns/download?ixid=M3wxMDk5NDQwfDB8MXxzZWFyY2h8Mnx8dmlkaWdhbCUyMHJpb3xlbnwwfHx8fDE3OTIwOTUzMzd8MA"
+ },
+ "rio#Petrópolis imperial con almuerzo (desde Río)": {
+  "url": "https://images.unsplash.com/photo-1617367140853-95aacc56d56d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMDk5NDQwfDB8MXxzZWFyY2h8MXx8bXVzZXUlMjBpbXBlcmlhbCUyMHBldHJvcG9saXN8ZW58MHx8fHwxNzkyMDk1MzM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+  "autor": "Samuel Nascimento da Silva en Unsplash",
+  "licencia": "Licencia Unsplash",
+  "fuente": "unsplash",
+  "id": "JbUfkF7HPJI",
+  "perfil": "https://unsplash.com/@samuelfgt",
+  "pagina": "https://unsplash.com/photos/white-and-brown-concrete-church-under-white-clouds-and-blue-sky-during-daytime-JbUfkF7HPJI",
+  "download": "https://api.unsplash.com/photos/JbUfkF7HPJI/download?ixid=M3wxMDk5NDQwfDB8MXxzZWFyY2h8MXx8bXVzZXUlMjBpbXBlcmlhbCUyMHBldHJvcG9saXN8ZW58MHx8fHwxNzkyMDk1MzM5fDA"
  }
 }
