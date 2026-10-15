@@ -96,7 +96,7 @@
         kpi('A pagar a proveedores', usd(k.por_pagar_proveedores_usd), 'lo que les debemos', k.por_pagar_proveedores_usd ? 'kpi--warn' : '') +
         kpi('Margen', usd(k.margen_usd), k.sin_proveedor ? k.sin_proveedor + ' servicio(s) sin proveedor' : 'facturado − costo') + '</section>';
     }
-    html += S.vista.indexOf('mkt-') === 0 ? vistaMkt() : S.vista === 'usuarios' ? vistaUsuarios() : S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
+    html += S.vista.indexOf('mkt-') === 0 ? vistaMkt() : S.vista === 'usuarios' ? vistaUsuarios() : S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() : S.vista === 'demanda' ? vistaDemanda() :
       (S.vista === 'precarga' ? vistaPrecarga() : (esVistaSrv() ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : (S.vista === 'importar' ? vistaImportar() : (S.vista === 'operaciones' ? vistaOperaciones() : vistaProveedores(d))))))))));
     html += '</div>';
     app.innerHTML = html;
@@ -112,7 +112,7 @@
     { t: 'Clientes', vistas: [['usuarios', 'Usuarios'], ['viajes', 'Viajes guardados']] },
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
     { t: 'Catálogo', vistas: [['tours', 'Tours'], ['transfers', 'Transfers'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
-    { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso']] },
+    { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso'], ['demanda', 'Demanda']] },
     { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-estrategia', 'Estrategia'], ['mkt-colabs', 'Perfil y mensajes'], ['mkt-contactos', 'Contactos']] }
   ];
   function esVistaSrv() { return S.vista === 'tours' || S.vista === 'transfers'; }
@@ -334,6 +334,8 @@
     var debe = function (pr) { return deuda[pr.id].aPagar ? '<span class="deuda">' + usd(deuda[pr.id].aPagar) + '</span>' : '<span class="ok">al día</span>'; };
     /* Tacho en cada proveedor: lo manda a la papelera sin abrir la ficha. En la papelera, la flecha lo saca. */
     var tacho = function (pr) {
+      // Filtrando por un destino, el tacho lo saca solo de ese destino (ops/proveedor/quitar-destino).
+      if (!S.provPapelera && S.provDest !== 'todos') return '<button type="button" class="btn btn--sm btn--icono prov-tacho" data-prov-tacho="' + esc(pr.id) + '|d" title="Sacarlo de ' + esc(S.provDest) + '" aria-label="Sacar a ' + esc(pr.nombre) + ' de ' + esc(S.provDest) + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>';
       return S.provPapelera
         ? '<button type="button" class="btn btn--sm btn--icono prov-tacho" data-prov-tacho="' + esc(pr.id) + '|0" title="Sacar de la papelera" aria-label="Sacar de la papelera a ' + esc(pr.nombre) + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>'
         : '<button type="button" class="btn btn--sm btn--icono prov-tacho" data-prov-tacho="' + esc(pr.id) + '|1" title="Mandar a la papelera" aria-label="Mandar a la papelera a ' + esc(pr.nombre) + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>';
@@ -469,6 +471,21 @@
     var pg = porDetalle('vista_pagina'), pgs = Object.keys(pg).sort(function (a, b) { return pg[b] - pg[a]; });
     h += '<div class="card uso-card"><h3 class="uso-h">Páginas vistas</h3>' + (pgs.length ? '<table><tbody>' + pgs.map(function (k) { return '<tr><td>' + esc(k || '(sin nombre)') + '</td><td class="num">' + pg[k] + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="vacio">Todavía no hay datos.</p>') + '</div>';
     return h + '<p class="sub">Del ' + esc(fecha(u.desde)) + ' al ' + esc(fecha(u.hasta)) + '. Cuenta a todos, sin cookies ni datos de la persona (lib/uso.js); Google Analytics solo ve a quien aceptó las cookies.</p>';
+  }
+  /* ---------- Demanda: que buscan y no les vendemos (lib/demanda.js). La pantalla vive en /admin/demanda.js y se carga
+     la primera vez que se abre la pestana. ---------- */
+  var demPanel = null;
+  function vistaDemanda() {
+    if (demPanel) return demPanel.vista();
+    if (window.CSDemandaPanel) { demPanel = CSDemandaPanel({ S: S, api: api, esc: esc, kpi: kpi, pintar: pintar }); return demPanel.vista(); }
+    if (!S.demCargando) {
+      S.demCargando = true;
+      var sc = document.createElement('script'); sc.src = '/admin/demanda.js?v=1';
+      sc.onload = function () { if (S.vista === 'demanda') pintar(); };
+      sc.onerror = function () { S.demCargando = false; toast('No se pudo abrir Demanda. Recargá la página.'); };
+      document.head.appendChild(sc);
+    }
+    return '<div class="card"><p class="vacio">Cargando…</p></div>';
   }
   function vistaViajes() {
     var v = S.viajes || {};
@@ -2938,6 +2955,20 @@
       ? '\n\nTambién van a la papelera sus ' + sv.length + ' tours y transfers' + (enWeb ? ' (' + enWeb + ' en la web, salen ya)' : '') + ':\n' + det
       : '\n\nNo tiene tours ni transfers en el catálogo.') + '\n\nSe puede recuperar todo desde la Papelera.');
   }
+  /* Sacar un proveedor de un solo destino: sus tours y transfers de ahi van a la papelera y el destino sale de su lista,
+     asi deja de aparecer al filtrar por ese destino. En los demas destinos sigue igual. */
+  function quitarProvDestino(p, dest, boton) {
+    var mismo = function (k) { return sinTildes(destNombre(k)) === sinTildes(dest); };
+    var sv = ((S.ops && S.ops.datos && S.ops.datos.servicios) || []).filter(function (s) { return s.proveedor_id === p.id && !s.eliminado_at && mismo(s.destino); });
+    var enWeb = sv.filter(function (s) { return s.activo; }).length;
+    var otros = partesProv(p).destinos.filter(function (x) { return sinTildes(x) !== sinTildes(dest); });
+    if (!confirm('¿Sacar a ' + p.nombre + ' de ' + dest + '?' + (sv.length ? '\n\nVan a la papelera sus ' + sv.length + ' tours y transfers de ' + dest + (enWeb ? ' (' + enWeb + ' en la web, salen ya)' : '') + '.' : '\n\nNo tiene tours ni transfers en ' + dest + '.') +
+      (otros.length ? '\n\nEn ' + otros.join(', ') + ' sigue igual.' : '\n\nEra su único destino: queda sin destinos (podés mandarlo a la papelera desde "Destino: todos").'))) return;
+    if (boton) boton.disabled = true;
+    api('ops/proveedor/quitar-destino', { id: p.id, nombre: dest })
+      .then(function (j) { toast(p.nombre + ' fuera de ' + dest + (j.servicios ? ' · ' + j.servicios + ' tours y transfers a la papelera' : '')); cargarOps(); return cargar(); })
+      .catch(function (er) { if (boton) boton.disabled = false; toast(er.message); });
+  }
   function avisoPapeleraProv(j, eliminar) {
     var n = (j && j.servicios) || 0;
     return eliminar ? 'En la papelera' + (n ? ' con sus ' + n + ' tours y transfers' : '') : 'Fuera de la papelera' + (n ? ', con sus ' + n + ' tours y transfers' : '') + ' (sigue inactivo hasta que lo actives)';
@@ -3254,6 +3285,7 @@
     if (pta) {
       e.preventDefault(); e.stopPropagation();
       var ptz = pta.getAttribute('data-prov-tacho').split('|'), tirarP = ptz[1] === '1';
+      if (ptz[1] === 'd') { quitarProvDestino(provDe(ptz[0]) || { id: ptz[0], nombre: 'este proveedor' }, S.provDest, pta); return; }
       if (tirarP && !confirmarPapeleraProv(provDe(ptz[0]) || { id: ptz[0], nombre: 'este proveedor' })) return;
       pta.disabled = true;
       api('proveedor/papelera', { id: ptz[0], eliminar: tirarP })
