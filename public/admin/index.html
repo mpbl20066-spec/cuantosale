@@ -227,6 +227,55 @@ tr.mc>td:first-child{box-shadow:inset 4px 0 0 var(--mc)}
 .mg__v:disabled{background:var(--bg);color:var(--muted)}
 td .mg + .sub{margin-top:4px;white-space:nowrap}
 td[data-l=Servicio]{min-width:210px}
+/* Catalogo > Paso a paso */
+.pp-prog{list-style:none;display:flex;gap:6px;padding:0;margin:0 0 16px;overflow-x:auto}
+.pp-prog li{flex:1;min-width:0;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:13px;color:var(--muted)}
+.pp-prog li span{flex:0 0 22px;height:22px;border-radius:99px;display:grid;place-items:center;background:var(--bg);font-weight:700;font-size:12px}
+.pp-prog li b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.pp-prog li.ahora{border-color:var(--ink);color:var(--ink)}.pp-prog li.ahora span{background:var(--accent);color:#101828}
+.pp-prog li.hecho span{background:var(--okbg);color:var(--ok)}
+.pp-nav{display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:16px 0 30px}
+.pp-nav .btn[disabled]{opacity:.45;cursor:default}
+.pp-dests{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+.pp-dest{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:4px;cursor:pointer;font:inherit;color:var(--ink)}
+.pp-dest:hover{border-color:var(--ink)}.pp-dest b{font-size:15px}.pp-dest--pend{border-left:4px solid var(--accent)}
+.pp-preg{padding:22px;display:grid;gap:10px}.pp-preg h3{margin:0;font-size:19px}
+.pp-preg__bot{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}.pp-preg__bot .btn[disabled]{opacity:.45;cursor:default}
+.pp-barra{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.pp-tours{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.pp-tour{position:relative;display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 10px 10px 38px;cursor:pointer}
+.pp-tour input{position:absolute;left:12px;top:12px;width:18px;height:18px;min-height:0;accent-color:var(--ink)}
+.pp-tour--sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.pp-tour img,.pp-tour .pp-sinfoto{width:72px;height:56px;object-fit:cover;border-radius:8px}
+.pp-sinfoto{display:grid;place-items:center;background:var(--bg);color:var(--muted);font-size:11px;border:1px dashed var(--line)}
+.pp-tour__txt{display:grid;gap:3px;min-width:0}.pp-tour__txt b{font-size:14px;line-height:1.3}.pp-tour__txt .pill{justify-self:start}
+.pp-fotos{padding:14px;margin-bottom:12px;display:grid;gap:10px}
+.pp-fotos__cab{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.pp-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:620px}
+.pp-slot{position:relative;height:120px}.pp-slot img{width:100%;height:120px;object-fit:cover;border-radius:10px;display:block}
+.pp-slot .pill{position:absolute;left:6px;top:6px}
+.pp-slot__acc{position:absolute;right:6px;bottom:6px;display:flex;gap:4px}.pp-slot__acc .btn{min-height:28px;padding:2px 8px}
+.pp-slot--vacio{display:grid;place-items:center;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:13px}
+.pp-fotos__bot{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pp-bib{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.pp-bib__f{position:relative;padding:3px;border:1px solid var(--line);border-radius:9px;background:var(--card);cursor:pointer}
+.pp-bib__f img{width:100%;height:86px;object-fit:cover;border-radius:7px;display:block}.pp-bib__f .pill{position:absolute;left:6px;top:6px}
+.pp-bib__f--ya{border:3px solid var(--accent)}
+.pp-previa{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;background:var(--bg);border-radius:12px;padding:8px;max-width:340px;align-items:center}
+.pp-previa img,.pp-previa .pp-sinfoto{width:96px;height:72px;object-fit:cover;border-radius:8px}
+.pp-previa div{display:grid;gap:2px}.pp-previa b{font-size:13.5px;line-height:1.3}.pp-previa__p{font-weight:700;font-size:13px}.pp-previa__p small{font-weight:500;color:var(--muted)}
+.pp-res{padding:12px 14px;margin-bottom:12px}
+.pp-rev{padding:14px;margin-bottom:12px;display:grid;gap:6px}.pp-rev--mal{border-left:4px solid var(--bad)}
+.pp-rev__cab{display:flex;gap:14px;justify-content:space-between;flex-wrap:wrap}
+.pp-rev__est{display:grid;grid-template-columns:auto auto;gap:4px 8px;align-items:center;align-content:start}.pp-rev__est .pill{justify-self:start}
+.pp-mini{display:flex;gap:6px}.pp-mini img{width:64px;height:48px;object-fit:cover;border-radius:6px}
+.pp-check{display:flex;gap:8px;align-items:flex-start;background:var(--warnbg);border-radius:10px;padding:8px 10px;font-size:13.5px}.pp-check input{width:18px;height:18px;min-height:0;margin-top:1px}
+.pp-campos{display:grid;gap:8px;margin-top:6px;max-width:720px}.pp-campos .btn{justify-self:start}.pp-campos textarea{width:100%}
+.pp-lista{margin:0;padding-left:20px;display:grid;gap:3px}
+.pp-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:560px}
+.pp-kpis div{background:var(--bg);border-radius:12px;padding:12px;display:grid}.pp-kpis b{font-size:24px}.pp-kpis span{color:var(--muted);font-size:13px}
+@media (max-width:760px){.pp-prog li b{display:none}.pp-prog li{justify-content:center}.pp-slot,.pp-slot img{height:90px}.pp-nav .btn--lg{flex:1}.pp-kpis b{font-size:20px}}
+
 .srvtabla td{padding:10px 8px}.srvtabla th{padding:10px 8px;white-space:normal}.srvtabla td[data-l=Servicio]{min-width:180px}.srvtabla .pill{margin:0 2px 2px 0}
 .dsel{border:1px solid transparent;background:transparent;color:var(--info);font-weight:600;font-size:14px;padding:2px 4px;margin-left:-4px;border-radius:8px;max-width:none;cursor:pointer;min-height:0}.dsel:hover,.dsel:focus{border-color:var(--line);background:var(--card)}
 /* Ficha del pedido */
@@ -382,6 +431,6 @@ code{font-size:12.5px;background:var(--bg);padding:1px 5px;border-radius:5px;wor
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=71"></script>
+<script src="/admin/admin.js?v=72"></script>
 </body>
 </html>
