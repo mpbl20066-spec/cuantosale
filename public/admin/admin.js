@@ -294,7 +294,7 @@
       (enPapelera || S.provPapelera ? '<button class="btn" data-act="ver-papelera">' + (S.provPapelera ? 'Volver a los proveedores' : 'Papelera (' + enPapelera + ')') + '</button>' : '') +
       '<button class="btn btn--main btn--lg" data-act="nuevo-prov">+ Proveedor</button></div></div>';
     d = Object.assign({}, d, { proveedores: d.proveedores.filter(function (pr) { return S.provPapelera ? pr.eliminado_at : !pr.eliminado_at; }) });
-    var enCatalogo = {}; ((S.ops && S.ops.datos && S.ops.datos.servicios) || []).forEach(function (sv) { if (sv.proveedor_id && !sv.eliminado_at) enCatalogo[sv.proveedor_id] = (enCatalogo[sv.proveedor_id] || 0) + 1; });
+    var enCatalogo = {}, porTipo = { tour: {}, traslado: {} }; ((S.ops && S.ops.datos && S.ops.datos.servicios) || []).forEach(function (sv) { if (sv.proveedor_id && !sv.eliminado_at) { enCatalogo[sv.proveedor_id] = (enCatalogo[sv.proveedor_id] || 0) + 1; var tk = sv.tipo === 'traslado' ? 'traslado' : 'tour'; porTipo[tk][sv.proveedor_id] = (porTipo[tk][sv.proveedor_id] || 0) + 1; } });
     if (!d.proveedores.length && S.provPapelera) return h + '<div class="card"><p class="vacio">La papelera está vacía.</p></div>';
     if (!d.proveedores.length) return h + '<div class="card"><p class="vacio">Todavía no cargaste proveedores. Agregalos para asignarlos a cada servicio y llevar lo que les debés.</p></div>';
     var cuenta = {};
@@ -330,7 +330,7 @@
         (telWa(pr) ? '<button type="button" class="btn btn--sm btn--wa-borde" data-agencia-escribir="' + esc(pr.id) + '|wa" title="Pedir tarifa por WhatsApp">WhatsApp</button>' : '');
     };
     var tags = function (ds, max) { return ds.length ? '<span class="tags">' + ds.slice(0, max).map(function (x) { return '<span class="tag">' + esc(x) + '</span>'; }).join('') + (ds.length > max ? '<span class="tag">+' + (ds.length - max) + '</span>' : '') + '</span>' : '<span class="sub">sin destino</span>'; };
-    var catLnk = function (pr) { return enCatalogo[pr.id] ? '<a class="lnk" href="#" data-ver-srv-prov="' + esc(pr.id) + '">' + enCatalogo[pr.id] + '</a>' : '—'; };
+    var catLnk = function (pr, tk) { var k = porTipo[tk][pr.id]; return k ? '<a class="lnk" href="#" data-ver-srv-prov="' + esc(pr.id) + '|' + tk + '">' + k + '</a>' : '—'; };
     var debe = function (pr) { return deuda[pr.id].aPagar ? '<span class="deuda">' + usd(deuda[pr.id].aPagar) + '</span>' : '<span class="ok">al día</span>'; };
     /* Tacho en cada proveedor: lo manda a la papelera sin abrir la ficha. En la papelera, la flecha lo saca. */
     var tacho = function (pr) {
@@ -344,16 +344,16 @@
         tags(pp.destinos, 4) +
         (pp.hace ? '<span class="sub pc__hace">' + esc(pp.hace) + '</span>' : '') +
         '<span class="sub">' + esc(pr.contacto || '') + (pr.contacto && pr.telefono ? ' · ' : '') + esc(pr.telefono || '') + (pr.email ? '<br>' + esc(pr.email) : '') + '</span>' +
-        '<div class="sc__precios pc__nums"><div><small>Catálogo</small><b>' + catLnk(pr) + '</b></div><div><small>Pedidos</small><b>' + dp.servicios + '</b></div><div><small>Le debemos</small><b>' + debe(pr) + '</b></div></div>' +
+        '<div class="sc__precios pc__nums"><div><small>Tours</small><b>' + catLnk(pr, 'tour') + '</b></div><div><small>Transfer</small><b>' + catLnk(pr, 'traslado') + '</b></div><div><small>Pedidos</small><b>' + dp.servicios + '</b></div><div><small>Debemos</small><b>' + debe(pr) + '</b></div></div>' +
         '<div class="pc__pie">' + (escribir(pr) ? '<span class="sub">Pedir tarifa:</span>' + escribir(pr) : '<span class="sub">Sin email ni WhatsApp</span>') + (pr.tarifa_pedida_at ? '<span class="sub pc__fecha">pedida ' + esc(fecha(pr.tarifa_pedida_at)) + '</span>' : '') + '</div></article>';
     }).join('') + '</div>';
-    h += '<div style="overflow-x:auto"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Tarifa neta</th><th class="num">Transfers y tours</th><th class="num">En pedidos</th><th class="num">Le debemos</th><th></th></tr></thead><tbody>';
+    h += '<div style="overflow-x:auto"><table><thead><tr><th>Proveedor</th><th>Destinos</th><th>Tarifa neta</th><th class="num">Tours</th><th class="num">Transfers</th><th class="num">En pedidos</th><th class="num">Le debemos</th><th></th></tr></thead><tbody>';
     lista.forEach(function (pr) {
       var dp = deuda[pr.id];
       h += '<tr class="row" data-prov="' + esc(pr.id) + '"><td data-l="Proveedor"><b>' + esc(pr.nombre) + '</b>' + (pr.activo === false ? ' <span class="pill p-cancelado">inactivo</span>' : '') + '<span class="sub">' + esc(pr.contacto || '') + (pr.contacto && pr.telefono ? ' · ' : '') + esc(pr.telefono || '') + '</span></td>' +
         '<td data-l="Destinos">' + tags(partesProv(pr).destinos, 3) + '</td>' +
         '<td data-l="Tarifa neta">' + tarifa(pr) + (pr.tarifa_pedida_at ? '<span class="sub">pedida ' + esc(fecha(pr.tarifa_pedida_at)) + '</span>' : '') + '<span class="prov-esc">' + escribir(pr) + '</span></td>' +
-        '<td class="num" data-l="Transfers y tours">' + catLnk(pr) + '</td>' +
+        '<td class="num" data-l="Tours">' + catLnk(pr, 'tour') + '</td><td class="num" data-l="Transfers">' + catLnk(pr, 'traslado') + '</td>' +
         '<td class="num" data-l="En pedidos">' + dp.servicios + '<span class="sub">en ' + dp.pedidos + ' pedido(s)</span></td>' +
         '<td class="num" data-l="Le debemos">' + debe(pr) + '</td><td class="num prov-tacho-td">' + tacho(pr) + '</td></tr>';
     });
@@ -3221,7 +3221,7 @@
     var pv = e.target.closest('[data-precarga]'); if (pv) { var cual = pv.getAttribute('data-precarga'); S.verPre = S.verPre === cual ? '' : cual; pintarFondo(); return; }
     var ud = e.target.closest('[data-uso-dias]'); if (ud) { S.usoDias = +ud.getAttribute('data-uso-dias'); cargarUso(); return; }
     var pd = e.target.closest('[data-pdest]'); if (pd) { S.provDest = pd.getAttribute('data-pdest'); pintar(); return; }
-    var vsp = e.target.closest('[data-ver-srv-prov]'); if (vsp) { e.preventDefault(); S.srvProv = vsp.getAttribute('data-ver-srv-prov'); S.srvFiltro = 'todos'; S.vista = 'servicios'; pintar(); return; }
+    var vsp = e.target.closest('[data-ver-srv-prov]'); if (vsp) { e.preventDefault(); var vsz = vsp.getAttribute('data-ver-srv-prov').split('|'); S.srvProv = vsz[0]; S.srvFiltro = 'todos'; S.srvDest = ''; S.qSrv = ''; S.vista = vsz[1] === 'traslado' ? 'transfers' : 'tours'; pintar(); return; }
     var ir = e.target.closest('[data-ir]'); if (ir) {
       var dest = ir.getAttribute('data-ir'), tipo = dest.slice(0, 2), val = dest.slice(2);
       if (tipo === 'v:') { S.vista = val; }
