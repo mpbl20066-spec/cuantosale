@@ -1458,5 +1458,37 @@
   "perfil": "https://unsplash.com/@samuelfgt",
   "pagina": "https://unsplash.com/photos/white-and-brown-concrete-church-under-white-clouds-and-blue-sky-during-daytime-JbUfkF7HPJI",
   "download": "https://api.unsplash.com/photos/JbUfkF7HPJI/download?ixid=M3wxMDk5NDQwfDB8MXxzZWFyY2h8MXx8bXVzZXUlMjBpbXBlcmlhbCUyMHBldHJvcG9saXN8ZW58MHx8fHwxNzkyMDk1MzM5fDA"
+ },
+ "nat#Pipa, Madeiro y Praia do Amor desde Natal": {
+  "url": "https://images.unsplash.com/photo-1746442506722-906ab4c3a62b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMDk5NDQwfDB8MXxhbGx8fHx8fHx8fHwxNzkyMDk4MDgzfA&ixlib=rb-4.1.0&q=80&w=1080",
+  "autor": "Hugo Fabricio en Unsplash",
+  "licencia": "Licencia Unsplash",
+  "fuente": "unsplash",
+  "id": "DmZABAqWw_0",
+  "perfil": "https://unsplash.com/@hugofabriicio",
+  "pagina": "https://unsplash.com/photos/a-catamaran-floats-on-calm-blue-water-DmZABAqWw_0",
+  "download": "https://api.unsplash.com/photos/DmZABAqWw_0/download?ixid=M3wxMDk5NDQwfDB8MXxhbGx8fHx8fHx8fHwxNzkyMDk4MDgzfA"
+ },
+ "nat#Genipabu, Forte dos Reis Magos y Auto do Potengi": {
+  "url": "https://images.unsplash.com/photo-1791722012707-77be298384ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMDk5NDQwfDB8MXxhbGx8fHx8fHx8fHwxNzkyMDk4MDg0fA&ixlib=rb-4.1.0&q=80&w=1080",
+  "autor": "Ivett M en Unsplash",
+  "licencia": "Licencia Unsplash",
+  "fuente": "unsplash",
+  "id": "mmZRmpLKT2c",
+  "perfil": "https://unsplash.com/@ivett_m",
+  "pagina": "https://unsplash.com/photos/bare-tree-and-bridge-at-golden-hour-mmZRmpLKT2c",
+  "download": "https://api.unsplash.com/photos/mmZRmpLKT2c/download?ixid=M3wxMDk5NDQwfDB8MXxhbGx8fHx8fHx8fHwxNzkyMDk4MDg0fA"
+ },
+ "nat#Lagoa de Alcaçuz en el Aqualand": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/Stand_Up_na_Lagoa_de_Alca%C3%A7uz_-_panoramio.jpg/1280px-Stand_Up_na_Lagoa_de_Alca%C3%A7uz_-_panoramio.jpg",
+  "autor": "Danilo Alencar",
+  "licencia": "CC BY 3.0",
+  "archivo": "Stand Up na Lagoa de Alcaçuz - panoramio.jpg"
+ },
+ "nat#Ruta de los Nativos en 4x4": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/Lagoa_do_Carcar%C3%A1_-_Natal_%285575066337%29.jpg/1280px-Lagoa_do_Carcar%C3%A1_-_Natal_%285575066337%29.jpg",
+  "autor": "Marinelson Almeida",
+  "licencia": "CC BY 2.0",
+  "archivo": "Lagoa do Carcará - Natal (5575066337).jpg"
  }
 }
