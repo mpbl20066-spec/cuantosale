@@ -584,7 +584,14 @@
     var peds = ((S.datos && S.datos.pedidos) || []).filter(function (p) { var f = fechaUY(p.created_at); return f >= desde && f <= hasta; });
     var vivos = function (p, tipo) { return (p.items || []).some(function (i) { return i.tipo === tipo && i.estado !== 'cancelado'; }); };
     var conf = peds.filter(function (p) { return p.estado === 'confirmado' || p.estado === 'completado'; });
-    return {
+    /* De que red vino cada pedido: origen "web:instagram" (lib/pedidos.js). Sin utm en los ultimos 30 dias = "sin link". */
+    var porFuente = {};
+    peds.forEach(function (p) {
+      var k = /^web:/.test(p.origen || '') ? p.origen.slice(4) : (p.origen === 'manual' ? 'cargado a mano' : 'sin link');
+      var x = porFuente[k] = porFuente[k] || { pedidos: 0, confirmados: 0 };
+      x.pedidos++; if (conf.indexOf(p) >= 0) x.confirmados++;
+    });
+    return { porFuente: porFuente,
       home: pag('home'), presupuesto: pag('presupuesto'), destino: pag('destino') + pag('calcular'), flujo: pag('flujo'), costo: pag('costo'), reserva: pag('reserva'), guias: pag('guias') + pag('guia'),
       llegadas: Object.keys(fuentes).reduce(function (t, k) { return t + fuentes[k]; }, 0), fuentes: fuentes,
       pedidos: peds.length, conTraslado: peds.filter(function (p) { return vivos(p, 'traslado'); }).length, conTour: peds.filter(function (p) { return vivos(p, 'tour'); }).length,
@@ -619,6 +626,10 @@
     h += '<section class="sec"><h3>Pedidos (lo cuenta el panel)</h3><table><tbody>' +
       fila('Pedidos nuevos', x.pedidos, ant && ant.pedidos) + fila('Con traslado', x.conTraslado, ant && ant.conTraslado) + fila('Con paseo', x.conTour, ant && ant.conTour) +
       fila('Confirmados', x.confirmados, ant && ant.confirmados) + fila('Con seña o pago cobrado', x.conSena, ant && ant.conSena) + '</tbody></table>';
+    var pf = Object.keys(x.porFuente).sort(function (a, b) { return x.porFuente[b].pedidos - x.porFuente[a].pedidos; });
+    h += '<h3 style="margin-top:14px">Pedidos por fuente</h3>' + (pf.length ? '<table><thead><tr><th>Vino de</th><th class="num">Pedidos</th><th class="num">Confirmados</th></tr></thead><tbody>' +
+      pf.map(function (k) { return '<tr><td>' + esc(k) + '</td><td class="num">' + x.porFuente[k].pedidos + '</td><td class="num">' + x.porFuente[k].confirmados + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="sub">Sin pedidos esta semana.</p>') +
+      '<p class="sub">La web recuerda 30 días el link con el que llegó la persona (bio, historia, creador, anuncio). Los pedidos de antes del 15/10 dicen "sin link".</p>';
     var tasa = function (a, b) { return b ? Math.round(a / b * 100) + ' %' : '—'; };
     h += '<h3 style="margin-top:14px">Pasos del embudo</h3><table><tbody>' +
       '<tr><td>Clics en el enlace / visitas al perfil (IG)</td><td class="num">' + tasa(man.ig_clics || 0, man.ig_perfil) + '</td></tr>' +
@@ -1477,15 +1488,24 @@
     if (S.srvOrden === 'reciente') lista.sort(function (a, b) { return ultimo(b).localeCompare(ultimo(a)); });
     else if (S.srvOrden === 'margen') lista.sort(function (a, b) { return gananciaDe(a) - gananciaDe(b); });
     else if (S.srvOrden === 'precio') lista.sort(function (a, b) { return (Number(conPendiente(a).precio_brl) || 0) - (Number(conPendiente(b).precio_brl) || 0); });
-    var destUsados = {}, provUsados = {};
-    d.servicios.forEach(function (s) { destUsados[s.destino] = 1; if (s.proveedor_id) provUsados[s.proveedor_id] = 1; });
+    var destUsados = {}, provUsados = {}, porRevisar = {};
+    d.servicios.forEach(function (s) {
+      destUsados[s.destino] = 1; if (s.proveedor_id) provUsados[s.proveedor_id] = 1;
+      // "Por revisar" = nuevo o marcado para revisar, del tipo que se esta mirando (tours o traslados).
+      if (!s.eliminado_at && !s.alternativa_de && (!s.publicado_at || s.revision === 'pendiente') && (!S.srvTipo || (S.srvTipo === 'traslado') === esTraslado(s))) { var dk = conPendiente(s).destino; porRevisar[dk] = (porRevisar[dk] || 0) + 1; }
+    });
     var mg = d.config.margen ? (d.config.margen.tipo === 'pct' ? d.config.margen.valor + ' %' : usd(d.config.margen.valor)) + ' por persona' : 'sin margen';
     var h = '<div class="vhead"><div><h2>Servicios</h2><p>Tours, actividades y traslados · cotización ' + esc(String(d.config.cotizacion).replace('.', ',')) + (d.config.cotizacion_fuente ? ' (' + esc(d.config.cotizacion_fuente) + ')' : '') + ' · margen general ' + esc(mg) + '</p></div>' +
       '<div class="top__acc"><button class="btn" data-act="cfg-abrir">Cotización y margen</button><button class="btn btn--main btn--lg" data-act="nuevo-srv">+ Servicio</button></div></div>';
     var barra = '<div class="filtros"><div class="filtros__der">' +
       '<select class="fsel" data-sfiltro-sel aria-label="Ver">' + Object.keys(nombres).map(function (k) { return '<option value="' + k + '"' + (f === k ? ' selected' : '') + '>' + esc(k === 'todos' ? 'Ver: todos' : nombres[k]) + ' (' + cuenta[k] + ')</option>'; }).join('') + '</select>' +
-      '<select class="fsel" data-sdest aria-label="Destino"><option value="">Destino: todos</option>' + Object.keys(destUsados).map(function (k) { return { k: k, n: destNombre(k) }; })
-        .sort(function (a, b) { return a.n.localeCompare(b.n, 'es'); }).map(function (x) { return '<option value="' + esc(x.k) + '"' + (S.srvDest === x.k ? ' selected' : '') + '>' + esc(x.n) + '</option>'; }).join('') + '</select>' +
+      '<select class="fsel" data-sdest aria-label="Destino"><option value="">Destino: todos</option>' + (function () {
+        var dl = Object.keys(destUsados).map(function (k) { return { k: k, n: destNombre(k), p: porRevisar[k] || 0 }; }).sort(function (a, b) { return a.n.localeCompare(b.n, 'es'); });
+        var opt = function (x) { return '<option value="' + esc(x.k) + '"' + (S.srvDest === x.k ? ' selected' : '') + '>' + esc(x.n) + (x.p ? ' · ' + x.p + ' por revisar' : '') + '</option>'; };
+        var con = dl.filter(function (x) { return x.p; }).sort(function (a, b) { return b.p - a.p; }), sin = dl.filter(function (x) { return !x.p; });
+        var tq = S.srvTipo === 'traslado' ? 'traslados' : (S.srvTipo === 'tour' ? 'tours' : 'tours o traslados');
+        return (con.length ? '<optgroup label="Con ' + tq + ' nuevos o para revisar (' + con.length + ')">' + con.map(opt).join('') + '</optgroup>' : '') + (sin.length ? '<optgroup label="Al día">' + sin.map(opt).join('') + '</optgroup>' : '');
+      })() + '</select>' +
       '<select class="fsel" data-sprov aria-label="Proveedor"><option value="">Proveedor: todos</option><option value="-"' + (S.srvProv === '-' ? ' selected' : '') + '>Sin proveedor</option>' +
         S.datos.proveedores.filter(function (p) { return provUsados[p.id]; }).map(function (p) { return '<option value="' + esc(p.id) + '"' + (S.srvProv === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>' +
       '<select class="fsel" data-sorden aria-label="Orden"><option value="">Orden: por destino</option><option value="reciente"' + (S.srvOrden === 'reciente' ? ' selected' : '') + '>Último cambio primero</option><option value="precio"' + (S.srvOrden === 'precio' ? ' selected' : '') + '>Precio del proveedor</option><option value="margen"' + (S.srvOrden === 'margen' ? ' selected' : '') + '>Margen, de menor a mayor</option></select>' +
@@ -1505,6 +1525,7 @@
         '<button class="btn btn--sm" data-act="sel-filtro">Elegir los ' + lista.length + ' de este filtro</button>' +
         (nSel ? '<button class="btn btn--sm" data-act="sel-limpiar">Quitar selección</button><button class="btn btn--sm" data-act="fotos-auto">Traer fotos del proveedor</button><button class="btn btn--sm" data-act="aj-abrir">Ajustar precio %</button>' +
           '<select class="fsel" data-smover aria-label="Mover a otro destino"><option value="">Mover a…</option>' + d.destinos.map(function (x) { return '<option value="' + esc(x.key) + '">' + esc(x.nombre) + '</option>'; }).join('') + '</select>' +
+          '<button class="btn btn--sm" data-act="sel-apagar">Apagar</button><button class="btn btn--sm" data-act="sel-activar">Activar (' + nSel + ')</button>' +
           '<button class="btn btn--sm btn--txt-danger" data-act="sel-papelera">🗑 Papelera (' + nSel + ')</button><button class="btn btn--main btn--sm" data-act="sel-publicar">Publicar (' + nSel + ')</button>' : '') + '</div>';
     }
     h += '<div class="card">' + barra + '<div class="srvtabla"><table><thead><tr>' + (f !== 'papelera' ? '<th></th>' : '') + '<th>Servicio</th><th>Destino</th><th>Precio del proveedor y margen</th><th class="num">En la web</th><th>Estado</th><th>Verificado</th><th></th></tr></thead><tbody>';
@@ -1516,6 +1537,7 @@
       estado += faltaHtml(s).replace('class="pill p-cancelado">sin foto', 'class="pill p-cancelado"' + fil('sinfoto') + '>sin foto');
       if (s.tipo === 'traslado' && !s.eliminado_at) estado += ' <span class="pill p-consultado" title="La web calcula los traslados aparte">no va a la web</span>';
       if (s.revision === 'pendiente') estado += ' <span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '"' + fil('revision') + '>revisar</span>';
+      if (!s.eliminado_at && s.publicado_at) estado += '<span class="sub"><a class="lnk" href="#" data-sactivo="' + esc(s.id) + '|' + (s.activo ? '0' : '1') + '">' + (s.activo ? 'Apagar' : 'Activar') + '</a></span>';
       var dst = conPendiente(s).destino, sale = saleDesde(s, dst);
       h += '<tr class="row" data-srv="' + esc(s.id) + '">' + (s.eliminado_at ? '' : '<td data-l="Elegir"><input type="checkbox" data-ssel="' + esc(s.id) + '" style="width:auto;min-height:0"' + (S.srvSel[s.id] ? ' checked' : '') + '></td>') + '<td data-l="Servicio"><b>' + esc(s.titulo) + '</b><span class="sub"><a class="lnk" href="#" data-sfil="tipo|' + (s.tipo === 'traslado' ? 'traslado' : 'tour') + '">' + esc(TIPOS_SRV[s.tipo] || s.tipo) + '</a> · ' + (pr ? '<a class="lnk" href="#" data-sfil="prov|' + esc(pr.id) + '">' + esc(pr.nombre) + '</a>' : '<i>sin proveedor</i>') + '</span></td>' +
         '<td data-l="Destino">' + (s.eliminado_at ? esc(destNombre(dst)) : '<select class="dsel" data-sdest-uno="' + esc(s.id) + '" aria-label="Destino del servicio" title="Cambiar el destino">' +
@@ -2043,6 +2065,19 @@
       toast(r.errores.length ? r.publicados + ' publicado(s). No se pudo: ' + r.errores.map(function (x) { return x.servicio + ' (' + x.error + ')'; }).join('; ') : r.publicados + ' publicado(s). En la web en hasta 1 minuto.');
       return cargarOps();
     }).catch(function (e) { toast(e.message); });
+  }
+  /* Activar o apagar: se publica en el momento (es lo que se pidio), uno por uno. Un nuevo nunca publicado se
+     activa publicandolo (Publicar), por eso aca solo cuentan los que ya estuvieron en la web. */
+  function activarVarios(ids, activo) {
+    var lista = ids.map(function (id) { return S.ops.datos.servicios.filter(function (x) { return x.id === id; })[0]; })
+      .filter(function (x) { return x && !x.eliminado_at && !!x.activo !== activo && (activo ? x.publicado_at : true); });
+    var nuevos = activo ? ids.length - lista.length : 0;
+    if (!lista.length) { toast(activo ? 'Ninguno para activar' + (nuevos ? ' (los nuevos se activan con Publicar)' : '') : 'Ninguno para apagar'); return; }
+    if (!confirm('¿' + (activo ? 'Activar' : 'Apagar') + ' ' + lista.length + ' servicio(s)? ' + (activo ? 'Se ven en la web' : 'Salen de la web') + ' en hasta 1 minuto.' + (nuevos ? '\n(' + nuevos + ' elegidos no cuentan: son nuevos o ya estaban así; los nuevos se activan con Publicar.)' : ''))) return;
+    var hechos = 0, fallas = [];
+    toast((activo ? 'Activando' : 'Apagando') + '…');
+    return lista.reduce(function (pr, x) { return pr.then(function () { return api('ops/proponer', { id: x.id, cambios: { activo: activo }, publicar: true }).then(function (r) { if (r.publicacion && r.publicacion.errores && r.publicacion.errores.length) fallas.push(x.titulo + ': ' + r.publicacion.errores[0].error); else hechos++; }, function (e) { fallas.push(x.titulo + ': ' + e.message); }); }); }, Promise.resolve())
+      .then(function () { S.srvSel = {}; if (fallas.length) alert(hechos + ' listo(s). No se pudo:\n' + fallas.slice(0, 8).join('\n')); else toast(hechos + (activo ? ' activado(s)' : ' apagado(s)')); return cargarOps(); });
   }
   /* Papelera de varios: de a 20 por pedido para no pasar el tiempo maximo del server. */
   function papeleraVarios(ids) {
@@ -2894,6 +2929,8 @@
       else if (sfz[0] === 'limpiar') { S.srvDest = ''; S.srvProv = ''; S.srvFiltro = 'todos'; S.srvTipo = ''; S.qSrv = ''; }
       pintar(); return;
     }
+    var sac = e.target.closest('[data-sactivo]');
+    if (sac) { e.preventDefault(); e.stopPropagation(); var saz = sac.getAttribute('data-sactivo').split('|'); activarVarios([saz[0]], saz[1] === '1'); return; }
     var smu = e.target.closest('[data-smover-uno]');
     if (smu) {
       e.preventDefault(); e.stopPropagation();
@@ -3004,6 +3041,8 @@
       case 'sel-filtro': (S.srvVisibles || []).forEach(function (id) { var sv = S.ops.datos.servicios.filter(function (x) { return x.id === id; })[0]; if (sv && !sv.eliminado_at) S.srvSel[id] = 1; }); pintar(); break;
       case 'sel-limpiar': S.srvSel = {}; pintar(); break;
       case 'sel-papelera': papeleraVarios(Object.keys(S.srvSel || {})); break;
+      case 'sel-activar': activarVarios(Object.keys(S.srvSel || {}), true); break;
+      case 'sel-apagar': activarVarios(Object.keys(S.srvSel || {}), false); break;
       case 'sel-publicar':
         var pids = Object.keys(S.srvSel || {}).map(function (id) { var pc = pendPorTour()[id]; return pc && pc.id; }).filter(Boolean);
         if (!pids.length) { toast('Los elegidos no tienen nada sin publicar'); break; }
