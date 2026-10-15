@@ -1,4 +1,4 @@
-/* version: 304
+/* version: 306
    Este numero tiene que coincidir con el ?v= de los <link> de index.html y
    grupo.html, y scripts/validar-tema.js lo comprueba.
 
@@ -2794,6 +2794,11 @@ button.logo{min-height:44px}
    a la izquierda de la foto, con un velo para que se lea sobre cualquier imagen. */
 .hotel-badge,.local-tour__tag{background:rgba(10,16,26,.78);color:#F4F6FA;border:1px solid rgba(255,255,255,.14);box-shadow:none}
 .local-tour__tag{position:absolute;z-index:1;top:12px;left:12px;padding:5px 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.02em;line-height:1.2;pointer-events:none}
+/* Las etiquetas elegidas en el panel: color propio cada una, opaco para que se lea sobre cualquier foto. Sin
+   amarillo, que queda para CTAs y activos. */
+.local-tour__tag.is-mas-vendido{background:#B4262D;border-color:rgba(255,255,255,.22);color:#fff}
+.local-tour__tag.is-imperdible{background:#5B32A8;border-color:rgba(255,255,255,.22);color:#fff}
+.local-tour__tag.is-recomendado{background:#0F6E56;border-color:rgba(255,255,255,.22);color:#fff}
 
 /* ---------- Tours compactos: miniatura a la izquierda, datos a la derecha ----------
    Mobile primero: 104px de foto y el cuerpo al lado, sin descripcion (esta en el

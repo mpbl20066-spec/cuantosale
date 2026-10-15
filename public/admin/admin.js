@@ -1397,6 +1397,8 @@
      el numero que vale es el que calcula el server al publicar. */
   var UNIDADES = { persona: 'por persona', vehiculo: 'por vehículo', grupo: 'por grupo', embarcacion: 'por embarcación', tramo: 'por tramo' };
   var TIPOS_SRV = { tour: 'Tour', actividad: 'Actividad', traslado: 'Traslado', barco: 'Paseo en barco', otro: 'Otro' };
+  // Etiqueta sobre la foto en la web (lib/tours.js). La vacia es sin etiqueta.
+  var ETIQUETAS_SRV = { '': 'Sin etiqueta', recomendado: '👍 Recomendado', mas_vendido: '🔥 Más vendido', imperdible: '✨ Imperdible' };
   var ORIGENES = { manual: 'Edición', importacion: 'Importación', ajuste: 'Ajuste masivo', cotizacion: 'Cotización', reversion: 'Vuelta atrás', inicial: 'Precio inicial' };
   var ESTADOS_CAMBIO = { pendiente: 'Pendiente', publicado: 'Publicado', descartado: 'Descartado', reemplazado: 'Reemplazado' };
   var CAMPO_NOMBRE = { precio_brl: 'Precio R$', precio: 'Precio US$', unidad: 'Unidad', capacidad: 'Capacidad', margen_tipo: 'Tipo de margen', margen_valor: 'Margen',
@@ -1617,6 +1619,7 @@
     if (s.revision === 'pendiente') avisos.push('<span class="pill p-pendiente" title="' + esc(s.revision_motivo) + '"' + fil('revision') + '>Revisar</span>');
     if (sinPrecio(x)) avisos.push('<span class="pill p-cancelado"' + fil('sinprecio') + '>Sin precio</span>');
     if (!s.eliminado_at && !tras) { var fa = faltantes(s).filter(function (k) { return k !== 'foto'; }); if (fa.length) avisos.push('<span class="pill p-pendiente" title="Le falta: ' + esc(fa.join(', ')) + '">Ficha: faltan ' + fa.length + '</span>'); }
+    var et = !s.eliminado_at && ((S.ops.datos.etiquetas || {})[s.id]); if (et && ETIQUETAS_SRV[et]) avisos.push('<span class="pill p-confirmado">' + esc(ETIQUETAS_SRV[et]) + '</span>');
     if (p) avisos.push('<span class="pill p-consultado" data-sfil="filtro|pendientes" role="button" title="Tiene un cambio en Por publicar">Cambio sin publicar</span>');
     if (tras && !s.eliminado_at) avisos.push('<span class="pill p-consultado" title="La web calcula los traslados aparte">No va a la web</span>');
     var web = s.precio_publicado != null ? '<b>' + pub(s.precio_publicado) + '</b><span class="sub">' + usd(s.precio_publicado) + ' p/p</span>' : '<b class="sc__nada">—</b><span class="sub">sin publicar</span>';
@@ -2147,7 +2150,9 @@
       '<label class="f">Tipo<select ' + a('tipo') + '>' + opts(TIPOS_SRV, f.tipo || 'tour') + '</select></label>' +
       '<label class="f">Proveedor<select ' + a('proveedor_id') + '><option value="">Sin proveedor</option>' + provs.map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === f.proveedor_id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>' +
         (tarifaHtml(provDe(f.proveedor_id), [Object.assign({}, s.orig || {}, { titulo: f.titulo, destino: f.destino })]) ? '<span class="sub" style="font-weight:400">' + tarifaHtml(provDe(f.proveedor_id), [Object.assign({}, s.orig || {}, { titulo: f.titulo, destino: f.destino })]) + '</span>' : '') + '</label>' +
-      inp('orden', 'Orden en la lista', ' type="number" min="0"') + '</div>' +
+      inp('orden', 'Orden en la lista', ' type="number" min="0"') +
+      (s.orig && s.orig.tipo !== 'traslado' ? '<label class="f">Etiqueta en la web<select data-etiqueta="' + esc(s.orig.id) + '">' + opts(ETIQUETAS_SRV, (d.etiquetas || {})[s.orig.id] || '') + '</select>' +
+        '<span class="sub" style="font-weight:400">Sale sobre la foto y lo pone primero en su destino. Se aplica al elegirla.</span></label>' : '') + '</div>' +
       '<div class="grid" style="grid-template-columns:1fr;margin-top:10px">' + inp('titulo', 'Título (tal cual se muestra)') +
       (s.orig ? '<p class="sub" style="margin:-4px 0 0">Ojo: la foto del tour está atada al título. Si lo cambiás, la tarjeta queda sin foto.</p>' : '') +
       area('descripcion', 'Descripción') + area('detalle', 'Detalle') +
@@ -3019,6 +3024,15 @@
     }
     if (el.hasAttribute('data-smover')) { if (e.type === 'change' && el.value) { var mk = el.value, mids = Object.keys(S.srvSel || {}); el.value = ''; if (mids.length && confirm('¿Pasar ' + mids.length + ' servicio(s) a ' + destNombre(mk) + '? Queda en "Por publicar" hasta que lo publiques.')) moverDestino(mids, mk); } return; }
     if (el.hasAttribute('data-sprov')) { if (e.type === 'change') { S.srvProv = el.value; pintar(); } return; }
+    // La etiqueta no pasa por "Por publicar": no toca el precio y se aplica al elegirla, como la papelera.
+    if (el.hasAttribute('data-etiqueta')) {
+      if (e.type === 'change') api('ops/etiqueta', { id: el.getAttribute('data-etiqueta'), etiqueta: el.value }).then(function (r) {
+        if (S.ops && S.ops.datos) S.ops.datos.etiquetas = r.etiquetas;
+        toast(el.value ? 'Etiqueta «' + ETIQUETAS_SRV[el.value] + '» puesta: ya se ve en la web' : 'Etiqueta sacada');
+        pintar();
+      }).catch(function (x) { toast(x.message); });
+      return;
+    }
     if (el.hasAttribute('data-sel')) { if (e.type === 'change') { if (el.checked) S.sel[el.getAttribute('data-sel')] = 1; else delete S.sel[el.getAttribute('data-sel')]; pintar(); } return; }
     if (el.hasAttribute('data-sf') && S.srv) {
       var sk = el.getAttribute('data-sf');

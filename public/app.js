@@ -2930,6 +2930,8 @@ var HOTEL_NOTA_MINIMA = 8;
   // los necesita. Mismo criterio que los otros globales del proyecto: datos
   // que se leen, no logica que se ejecuta.
   window.CS_TOURS = toursFor;
+  // Etiquetas que se eligen por servicio en el panel (lib/tours.js las manda en tour.etiqueta).
+  var TOUR_ETIQUETAS = { mas_vendido: '🔥 Más vendido', imperdible: '✨ Imperdible', recomendado: '👍 Recomendado' };
   /* Con dos paradas hay una seccion de tours por destino (la del primero y la del
      segundo), cada una con su titulo; con un destino, la de siempre. */
   function localToursMarkup(meta) {
@@ -3028,18 +3030,21 @@ var HOTEL_NOTA_MINIMA = 8;
     /* Etiquetas de la foto, calculadas con datos reales del catalogo: no hay
        dato de ventas, asi que "mas reseñado" (la cantidad de reseñas) y "mejor
        puntuado" (nota con al menos 10 reseñas) salen de rating y reviewsCount. */
+    /* Las que se eligen en el panel (Recomendado, Más vendido, Imperdible) ganan: un tour etiquetado no compite por
+       estas dos. El server ya los manda primero en la lista. */
     var tagMasResenado = -1, tagMejorNota = -1;
     tours.forEach(function (t, i) {
       var rc = Number(t.reviewsCount) || 0, rt = Number(t.rating) || 0;
-      if (rc >= 10 && (tagMasResenado < 0 || rc > Number(tours[tagMasResenado].reviewsCount))) tagMasResenado = i;
+      if (!TOUR_ETIQUETAS[t.etiqueta] && rc >= 10 && (tagMasResenado < 0 || rc > Number(tours[tagMasResenado].reviewsCount))) tagMasResenado = i;
     });
     tours.forEach(function (t, i) {
       var rc = Number(t.reviewsCount) || 0, rt = Number(t.rating) || 0;
-      if (i !== tagMasResenado && rc >= 10 && (tagMejorNota < 0 || rt > Number(tours[tagMejorNota].rating))) tagMejorNota = i;
+      if (!TOUR_ETIQUETAS[t.etiqueta] && i !== tagMasResenado && rc >= 10 && (tagMejorNota < 0 || rt > Number(tours[tagMejorNota].rating))) tagMejorNota = i;
     });
     var cards = tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
-      var tourTag = index === tagMasResenado ? '<span class="local-tour__tag">🔥 Más reseñado</span>'
+      var tourTag = TOUR_ETIQUETAS[tour.etiqueta] ? '<span class="local-tour__tag is-' + tour.etiqueta.replace('_', '-') + '">' + TOUR_ETIQUETAS[tour.etiqueta] + '</span>'
+        : index === tagMasResenado ? '<span class="local-tour__tag">🔥 Más reseñado</span>'
         : index === tagMejorNota ? '<span class="local-tour__tag">⭐ Mejor puntuado</span>' : '';
       // La foto sale de TOUR_PHOTOS, con su autor y su licencia.
       var photo = tour.foto || (tour.image ? { url: tour.image } : tourPhoto(destinationKey, tour));
