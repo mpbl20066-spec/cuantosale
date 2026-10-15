@@ -315,7 +315,9 @@
         '<td data-l="Destinos">' + (pp.destinos.length ? '<span class="tags">' + pp.destinos.map(function (x) { return '<span class="tag">' + esc(x) + '</span>'; }).join('') + '</span>' : '<span class="sub">sin destino</span>') + '</td>' +
         '<td data-l="Contacto">' + esc(pr.contacto) + '<span class="sub">' + esc(pr.telefono) + (pr.email ? ' · ' + esc(pr.email) : '') + '</span></td>' +
         '<td data-l="Hace">' + esc(pp.hace) + '</td><td data-l="Datos de pago">' + esc(pr.datos_pago) + '</td>' +
-        '<td data-l="Tarifa neta">' + (pr.tarifa_estado ? '<span class="pill ' + (pr.tarifa_estado === 'respondio' || pr.tarifa_estado === 'acordada' ? 'p-confirmado' : (pr.tarifa_estado === 'sin_respuesta' || pr.tarifa_estado === 'no_trabaja' ? 'p-cancelado' : 'p-pendiente')) + '">' + esc(TARIFA_TXT[pr.tarifa_estado] || pr.tarifa_estado) + '</span><span class="sub">pedida ' + esc(fecha(pr.tarifa_pedida_at)) + '</span>' : '<span class="sub">no se pidió</span>') + '</td>' +
+        '<td data-l="Tarifa neta">' + (pr.tarifa_estado ? '<span class="pill ' + (pr.tarifa_estado === 'respondio' || pr.tarifa_estado === 'acordada' ? 'p-confirmado' : (pr.tarifa_estado === 'sin_respuesta' || pr.tarifa_estado === 'no_trabaja' ? 'p-cancelado' : 'p-pendiente')) + '">' + esc(TARIFA_TXT[pr.tarifa_estado] || pr.tarifa_estado) + '</span><span class="sub">pedida ' + esc(fecha(pr.tarifa_pedida_at)) + '</span>' : '<span class="sub">no se pidió</span>') +
+          '<span class="prov-esc">' + (mailValido(pr) ? '<button type="button" class="btn btn--sm" data-agencia-escribir="' + esc(pr.id) + '|mail" title="Pedir tarifa por email a ' + esc(mailValido(pr)) + '">✉ Email</button>' : '') +
+          (telWa(pr) ? '<button type="button" class="btn btn--sm btn--wa-borde" data-agencia-escribir="' + esc(pr.id) + '|wa" title="Pedir tarifa por WhatsApp">WhatsApp</button>' : '') + '</span></td>' +
         '<td class="num" data-l="En catálogo">' + (enCatalogo[pr.id] ? '<a class="lnk" href="#" data-ver-srv-prov="' + esc(pr.id) + '">' + enCatalogo[pr.id] + '</a>' : '—') + '</td>' +
         '<td class="num" data-l="En pedidos">' + dp.servicios + '<span class="sub">en ' + dp.pedidos + ' pedido(s)</span></td>' +
         '<td class="num" data-l="Le debemos">' + (dp.aPagar ? '<span class="deuda">' + usd(dp.aPagar) + '</span>' : '<span class="ok">al día</span>') + '</td></tr>';
@@ -2127,38 +2129,47 @@
     });
     return '<p class="sub" style="margin:0 0 4px">' + d.pendientes.length + ' por publicar en ' + nGrupos + ' experiencias · ' + nYa + ' ya tienen uno parecido en la web. Se juntan por el nombre: revisá antes de descartar.</p>' + h;
   }
-  /* Un mensaje a la agencia con sus paseos pendientes (este primero, despues los del mismo destino; la plantilla entra
-     hasta 8). Quedan anotados todos sus pendientes, y la agencia en su ficha (Proveedores). */
-  function escribirConsulta(tourId) {
-    var d = S.ops && S.ops.datos, s = d && d.servicios.filter(function (x) { return x.id === tourId; })[0];
-    var pr = s && provDe(s.proveedor_id);
-    if (!pr) return toast('Este servicio no tiene agencia');
-    var todos = paseosPendAgencia(pr.id).filter(function (x) { return x.id !== s.id; })
-      .sort(function (a, b) { return (b.destino === s.destino) - (a.destino === s.destino) || a.titulo.localeCompare(b.titulo, 'es'); });
-    todos.unshift(s);
+  /* Un mensaje a la agencia con sus paseos pendientes (el tour desde el que se escribe primero, despues los del mismo
+     destino; la plantilla de WhatsApp entra hasta 8). Si no tiene pendientes (se escribe desde Proveedores), van los suyos
+     del catalogo. Quedan anotados todos, y la agencia en su ficha. canal: 'mail', 'wa' o vacio (email si tiene). */
+  function escribirAgencia(prId, canal, primeroId) {
+    var d = S.ops && S.ops.datos, pr = provDe(prId);
+    if (!pr) return toast('Agencia no encontrada');
+    if (!d) return toast('Esperá a que cargue el catálogo');
+    var primero = primeroId ? d.servicios.filter(function (x) { return x.id === primeroId; })[0] : null;
+    var todos = paseosPendAgencia(pr.id);
+    if (!todos.length) todos = d.servicios.filter(function (x) { return x.proveedor_id === pr.id && !x.eliminado_at; });
+    todos = todos.filter(function (x) { return !primero || x.id !== primero.id; })
+      .sort(function (a, b) { return (primero ? (b.destino === primero.destino) - (a.destino === primero.destino) : 0) || a.titulo.localeCompare(b.titulo, 'es'); });
+    if (primero) todos.unshift(primero);
     var nombre = function (x) { return String(x.titulo).replace(/ · [^·]*$/, '') + ' (' + destNombre(x.destino) + ')'; };
     var lista = todos.slice(0, 8).map(nombre);
     if (todos.length > 8) lista[7] = lista[7] + ' e mais ' + (todos.length - 8) + ' passeios';
     var ids = todos.map(function (x) { return x.id; });
     var c = agenciaConsulta(pr.id);
     var ya = c ? '\n\nOJO: ya le escribiste el ' + fechaHora(c.at) + ' (' + CONS_TXT[estConsulta(c)] + ').' : '';
-    var txt = '¿Mandarle a ' + pr.nombre + ' UN mensaje pidiendo tarifa por sus ' + todos.length + ' paseo(s)?\n\n• ' + lista.join('\n• ') + ya;
-    // Por email si tiene (sale desde el server, con un clic); si no, WhatsApp.
-    if (mailValido(pr)) {
-      if (!confirm(txt.replace('UN mensaje', 'UN email (a ' + mailValido(pr) + ')'))) return;
+    var txt = '¿Mandarle a ' + pr.nombre + ' UN mensaje pidiendo tarifa' + (todos.length ? ' por sus ' + todos.length + ' paseo(s)?\n\n• ' + lista.join('\n• ') : '?') + ya;
+    var mail = mailValido(pr), tel = telWa(pr);
+    var porMail = canal === 'mail' || (!canal && mail);
+    if (porMail) {
+      if (!mail) return toast(pr.nombre + ' no tiene email cargado');
+      if (!confirm(txt.replace('UN mensaje', 'UN email (a ' + mail + ')'))) return;
       toast('Enviando email…');
       return api('proveedor/pedir-tarifa-mail', { id: pr.id, paseos: todos.map(nombre) })
-        .then(function (r) { toast('Email enviado a ' + r.email + '. La respuesta llega al mail de reservas.'); marcarTarifa(pr.id, 'enviado'); return marcarConsulta(ids, 'enviado'); })
+        .then(function (r) { toast('Email enviado a ' + r.email + '. La respuesta llega al mail de reservas.'); marcarTarifa(pr.id, 'enviado'); return ids.length ? marcarConsulta(ids, 'enviado') : null; })
         .catch(function (er) { alert(er.message); });
     }
-    if (telWa(pr)) {
-      if (!confirm(txt)) return;
-      toast('Enviando…');
-      return api('proveedor/pedir-tarifa', { id: pr.id, paseos: lista })
-        .then(function () { toast('Enviado a ' + pr.nombre + '. La respuesta llega a WhatsApp en el panel.'); marcarTarifa(pr.id, 'enviado'); return marcarConsulta(ids, 'enviado'); })
-        .catch(function (er) { alert(er.message); });
-    }
-    toast('La agencia no tiene email ni WhatsApp');
+    if (!tel) return toast(pr.nombre + ' no tiene un WhatsApp válido');
+    if (!confirm(txt.replace('UN mensaje', 'UN WhatsApp'))) return;
+    toast('Enviando…');
+    return api('proveedor/pedir-tarifa', { id: pr.id, paseos: lista })
+      .then(function () { toast('Enviado a ' + pr.nombre + '. La respuesta llega a WhatsApp en el panel.'); marcarTarifa(pr.id, 'enviado'); return ids.length ? marcarConsulta(ids, 'enviado') : null; })
+      .catch(function (er) { alert(er.message); });
+  }
+  function escribirConsulta(tourId) {
+    var s = S.ops && S.ops.datos && S.ops.datos.servicios.filter(function (x) { return x.id === tourId; })[0];
+    if (!s || !s.proveedor_id) return toast('Este servicio no tiene agencia');
+    return escribirAgencia(s.proveedor_id, '', tourId);
   }
   /* Respondio / no respondio / borrar: para toda la agencia (sus pendientes y los que ya tenian marca). */
   function marcarAgencia(prId, estado) {
@@ -3269,6 +3280,7 @@
 
   document.addEventListener('click', function (e) {
     if (S.vista === 'pasos' && ppClick(e)) return;
+    var ae = e.target.closest('[data-agencia-escribir]'); if (ae) { e.preventDefault(); e.stopPropagation(); var az = ae.getAttribute('data-agencia-escribir').split('|'); escribirAgencia(az[0], az[1]); return; }
     var tm = e.target.closest('[data-tarifa-marca]'); if (tm) { e.preventDefault(); var pz = tm.getAttribute('data-tarifa-marca').split('|'); marcarTarifa(pz[0], pz[1]); return; }
     var itg = e.target.closest('[data-item-toggle]');
     if (itg) { S.itemAbierto = S.itemAbierto || {}; var kt = itg.getAttribute('data-item-toggle'); S.itemAbierto[kt] = !S.itemAbierto[kt]; refrescarPanel(); return; }
