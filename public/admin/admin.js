@@ -65,6 +65,10 @@
   function pintar(modo) {
     if (modo === 'login') return pintarLogin();
     var d = S.datos; if (!d) { app.innerHTML = '<p class="vacio">Cargando…</p>'; return; }
+    /* Tours y Transfers son la misma pantalla con el tipo fijo. 'servicios' (links internos y lo que quedo guardado)
+       abre la del tipo que se estaba mirando. */
+    if (S.vista === 'servicios') S.vista = S.srvTipo === 'traslado' ? 'transfers' : 'tours';
+    if (esVistaSrv()) S.srvTipo = S.vista === 'transfers' ? 'traslado' : 'tour';
     var k = d.tablero;
     var cuenta = function (e) { return e === 'todos' ? d.pedidos.length : (k.por_estado[e] || 0); };
     var g = grupoDe(S.vista);
@@ -93,7 +97,7 @@
         kpi('Margen', usd(k.margen_usd), k.sin_proveedor ? k.sin_proveedor + ' servicio(s) sin proveedor' : 'facturado − costo') + '</section>';
     }
     html += S.vista.indexOf('mkt-') === 0 ? vistaMkt() : S.vista === 'usuarios' ? vistaUsuarios() : S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
-      (S.vista === 'precarga' ? vistaPrecarga() : (S.vista === 'servicios' ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : (S.vista === 'importar' ? vistaImportar() : (S.vista === 'operaciones' ? vistaOperaciones() : vistaProveedores(d))))))))));
+      (S.vista === 'precarga' ? vistaPrecarga() : (esVistaSrv() ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : (S.vista === 'importar' ? vistaImportar() : (S.vista === 'operaciones' ? vistaOperaciones() : vistaProveedores(d))))))))));
     html += '</div>';
     app.innerHTML = html;
     if (S.draft) abrirPanel();
@@ -107,10 +111,11 @@
     { t: 'Pedidos', vistas: [['pedidos', 'Pedidos']] },
     { t: 'Clientes', vistas: [['usuarios', 'Usuarios'], ['viajes', 'Viajes guardados']] },
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
-    { t: 'Catálogo', vistas: [['servicios', 'Servicios'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
+    { t: 'Catálogo', vistas: [['tours', 'Tours'], ['transfers', 'Transfers'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
     { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso']] },
     { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-estrategia', 'Estrategia'], ['mkt-colabs', 'Perfil y mensajes'], ['mkt-contactos', 'Contactos']] }
   ];
+  function esVistaSrv() { return S.vista === 'tours' || S.vista === 'transfers'; }
   function grupoDe(v) { return GRUPOS.filter(function (g) { return g.vistas.some(function (x) { return x[0] === v; }); })[0] || GRUPOS[0]; }
   function vistaPrecarga() {
     var pc = S.precarga;
@@ -1434,6 +1439,8 @@
   function conPendiente(s) { var p = pendPorTour()[s.id]; return p ? Object.assign({}, s, p.despues) : s; }
   function faltantes(s) {
     var x = conPendiente(s), f = [];
+    // Los transfers no llevan foto ni ficha: la web los calcula aparte.
+    if (x.tipo === 'traslado') return f;
     if (!x.foto_wiki && !x.url_imagen && !(x.galeria || []).length) f.push('foto');
     if (!String(x.descripcion || '').trim()) f.push('descripción');
     if (!String(x.detalle || '').trim()) f.push('detalle');
@@ -1471,9 +1478,9 @@
     if (!S.ops || S.ops.error) S.ops = { cargando: true };
     return api('ops/datos').then(function (d) {
       S.ops = { datos: d };
-      if (S.vista === 'servicios' || S.vista === 'publicar' || S.vista === 'importar' || S.vista === 'operaciones') pintarFondo(); else actualizarBadgePub();
+      if (esVistaSrv() || S.vista === 'publicar' || S.vista === 'importar' || S.vista === 'operaciones') pintarFondo(); else actualizarBadgePub();
       if (S.srv) refrescarSrv();
-    }).catch(function (e) { S.ops = { error: e.message }; if (S.vista === 'servicios' || S.vista === 'publicar') pintarFondo(); });
+    }).catch(function (e) { S.ops = { error: e.message }; if (esVistaSrv() || S.vista === 'publicar') pintarFondo(); });
   }
   function actualizarBadgePub() { var b = document.getElementById('tab-pub'); if (b) { b.textContent = nPend() || ''; b.hidden = !nPend(); } }
   function nPend() { return S.ops && S.ops.datos ? S.ops.datos.pendientes.length : 0; }
@@ -1508,14 +1515,15 @@
       return { todos: true, sinfoto: s.tipo !== 'traslado' && faltantes(s).indexOf('foto') >= 0, sinprecio: sinPrecio(conPendiente(s)), publicados: s.activo && s.revision === 'ok', nuevos: !s.publicado_at, pendientes: !!pend[s.id], revision: s.revision === 'pendiente', inactivos: !s.activo && !!s.publicado_at, viejos: s.activo && viejo(s, dias) };
     };
     var nombres = { todos: 'Todos', publicados: 'Activos', nuevos: 'Nuevos', comparar: 'Para comparar', sinfoto: 'Sin foto', sinprecio: 'Sin precio', pendientes: 'Con cambios sin publicar', revision: 'Para revisar', viejos: 'Precio viejo (+' + dias + ' días)', inactivos: 'Apagados', papelera: 'Papelera' };
+    // Tours y Transfers son pestañas aparte: los indicadores cuentan solo los del tipo que se mira.
+    var esTraslado = function (s) { return s.tipo === 'traslado'; }, tras = S.srvTipo === 'traslado';
+    var delTipo = d.servicios.filter(function (s) { return esTraslado(s) === tras; });
+    if (tras) delete nombres.sinfoto;
     var cuenta = {}; Object.keys(nombres).forEach(function (k) { cuenta[k] = 0; });
-    d.servicios.forEach(function (s) { var c = clase(s); Object.keys(c).forEach(function (k) { if (c[k]) cuenta[k]++; }); });
-    var f = S.srvFiltro || 'todos', q = sinTildes(S.qSrv || '');
-    var esTraslado = function (s) { return s.tipo === 'traslado'; }, nTipo = { tour: 0, traslado: 0 };
-    d.servicios.forEach(function (s) { if (clase(s)[f]) nTipo[esTraslado(s) ? 'traslado' : 'tour']++; });
-    var lista = d.servicios.filter(function (s) {
+    delTipo.forEach(function (s) { var c = clase(s); Object.keys(c).forEach(function (k) { if (c[k] && k in cuenta) cuenta[k]++; }); });
+    var f = S.srvFiltro && S.srvFiltro in nombres ? S.srvFiltro : 'todos', q = sinTildes(S.qSrv || '');
+    var lista = delTipo.filter(function (s) {
       if (!clase(s)[f]) return false;
-      if (S.srvTipo && (S.srvTipo === 'traslado') !== esTraslado(s)) return false;
       if (S.srvDest && conPendiente(s).destino !== S.srvDest) return false;
       if (S.srvProv && (S.srvProv === '-' ? s.proveedor_id : s.proveedor_id !== S.srvProv)) return false;
       if (q) { var pr = provDe(s.proveedor_id); if (sinTildes(s.titulo + ' ' + destNombre(s.destino) + ' ' + (pr ? pr.nombre : '')).indexOf(q) < 0) return false; }
@@ -1527,19 +1535,19 @@
     else if (S.srvOrden === 'margen') lista.sort(function (a, b) { return gananciaDe(a) - gananciaDe(b); });
     else if (S.srvOrden === 'precio') lista.sort(function (a, b) { return (Number(conPendiente(a).precio_brl) || 0) - (Number(conPendiente(b).precio_brl) || 0); });
     var destUsados = {}, provUsados = {}, porRevisar = {};
-    d.servicios.forEach(function (s) {
+    delTipo.forEach(function (s) {
       destUsados[s.destino] = 1; if (s.proveedor_id) provUsados[s.proveedor_id] = 1;
-      // "Por revisar" = nuevo o marcado para revisar, del tipo que se esta mirando (tours o traslados).
-      if (!s.eliminado_at && !s.alternativa_de && (!s.publicado_at || s.revision === 'pendiente') && (!S.srvTipo || (S.srvTipo === 'traslado') === esTraslado(s))) { var dk = conPendiente(s).destino; porRevisar[dk] = (porRevisar[dk] || 0) + 1; }
+      // "Por revisar" = nuevo o marcado para revisar, del tipo que se esta mirando (tours o transfers).
+      if (!s.eliminado_at && !s.alternativa_de && (!s.publicado_at || s.revision === 'pendiente')) { var dk = conPendiente(s).destino; porRevisar[dk] = (porRevisar[dk] || 0) + 1; }
     });
     var mg = d.config.margen ? (d.config.margen.tipo === 'pct' ? d.config.margen.valor + ' %' : usd(d.config.margen.valor)) + ' por persona' : 'sin margen';
     var vista = modoVista('srv');
-    var h = '<div class="vhead"><div><h2>Catálogo turístico</h2><p>Tours, actividades y traslados · cotización ' + esc(String(d.config.cotizacion).replace('.', ',')) + (d.config.cotizacion_fuente ? ' (' + esc(d.config.cotizacion_fuente) + ')' : '') + '</p></div>' +
-      '<div class="top__acc"><button class="btn" data-act="cfg-abrir">Cotización y margen</button><button class="btn btn--main btn--lg" data-act="nuevo-srv">+ Servicio</button></div></div>';
+    var h = '<div class="vhead"><div><h2>' + (tras ? 'Transfers' : 'Tours') + '</h2><p>' + (tras ? 'Traslados de aeropuerto y entre destinos, sin fotos' : 'Tours, paseos y actividades') + ' · cotización ' + esc(String(d.config.cotizacion).replace('.', ',')) + (d.config.cotizacion_fuente ? ' (' + esc(d.config.cotizacion_fuente) + ')' : '') + '</p></div>' +
+      '<div class="top__acc"><button class="btn" data-act="cfg-abrir">Cotización y margen</button><button class="btn btn--main btn--lg" data-act="nuevo-srv">' + (tras ? '+ Transfer' : '+ Tour') + '</button></div></div>';
     // Indicadores: cada uno filtra por lo suyo (otra vez lo saca).
     var kpi = function (k, txt, nota) { return '<button type="button" class="kpi kpi--btn' + (f === k ? ' kpi--on' : '') + '" data-sfil="filtro|' + k + '"><small>' + esc(txt) + '</small><b>' + cuenta[k] + '</b><em>' + esc(nota) + '</em></button>'; };
-    h += '<div class="kpis kpis--srv">' + kpi('todos', 'Servicios', 'en el catálogo') + kpi('publicados', 'En la web', 'activos') + kpi('nuevos', 'Nuevos', 'sin publicar nunca') +
-      kpi('revision', 'Para revisar', 'marcados') + kpi('sinprecio', 'Sin precio', 'no se pueden vender') + kpi('sinfoto', 'Sin foto', 'tours y paseos') +
+    h += '<div class="kpis kpis--srv">' + kpi('todos', tras ? 'Transfers' : 'Tours', 'en el catálogo') + kpi('publicados', 'Activos', tras ? 'publicados' : 'en la web') + kpi('nuevos', 'Nuevos', 'sin publicar nunca') +
+      kpi('revision', 'Para revisar', 'marcados') + kpi('sinprecio', 'Sin precio', 'no se pueden vender') + (tras ? '' : kpi('sinfoto', 'Sin foto', 'no salen en la web')) +
       '<button type="button" class="kpi kpi--btn" data-act="cfg-abrir"><small>Margen general</small><b>' + esc(d.config.margen ? (d.config.margen.tipo === 'pct' ? d.config.margen.valor + ' %' : usd(d.config.margen.valor)) : '—') + '</b><em>' + (d.config.margen ? 'por persona · cambiar' : 'configurar') + '</em></button></div>';
     var barra = '<div class="filtros"><input type="search" id="q-srv" placeholder="Buscar servicio, destino o proveedor" value="' + esc(S.qSrv || '') + '" aria-label="Buscar servicio">' +
       selectorVista('srv', vista) +
@@ -1549,17 +1557,14 @@
         var dl = Object.keys(destUsados).map(function (k) { return { k: k, n: destNombre(k), p: porRevisar[k] || 0 }; }).sort(function (a, b) { return a.n.localeCompare(b.n, 'es'); });
         var opt = function (x) { return '<option value="' + esc(x.k) + '"' + (S.srvDest === x.k ? ' selected' : '') + '>' + esc(x.n) + (x.p ? ' · ' + x.p + ' por revisar' : '') + '</option>'; };
         var con = dl.filter(function (x) { return x.p; }).sort(function (a, b) { return b.p - a.p; }), sin = dl.filter(function (x) { return !x.p; });
-        var tq = S.srvTipo === 'traslado' ? 'traslados' : (S.srvTipo === 'tour' ? 'tours' : 'tours o traslados');
+        var tq = tras ? 'transfers' : 'tours';
         return (con.length ? '<optgroup label="Con ' + tq + ' nuevos o para revisar (' + con.length + ')">' + con.map(opt).join('') + '</optgroup>' : '') + (sin.length ? '<optgroup label="Al día">' + sin.map(opt).join('') + '</optgroup>' : '');
       })() + '</select>' +
       '<select class="fsel" data-sprov aria-label="Proveedor"><option value="">Proveedor: todos</option><option value="-"' + (S.srvProv === '-' ? ' selected' : '') + '>Sin proveedor</option>' +
         S.datos.proveedores.filter(function (p) { return provUsados[p.id]; }).map(function (p) { return '<option value="' + esc(p.id) + '"' + (S.srvProv === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>' +
       '<select class="fsel" data-sorden aria-label="Orden"><option value="">Orden: por destino</option><option value="reciente"' + (S.srvOrden === 'reciente' ? ' selected' : '') + '>Último cambio primero</option><option value="precio"' + (S.srvOrden === 'precio' ? ' selected' : '') + '>Precio del proveedor</option><option value="margen"' + (S.srvOrden === 'margen' ? ' selected' : '') + '>Margen, de menor a mayor</option></select>' +
       '</div></div>' +
-      '<div class="chips" style="padding:0 14px 10px"><button class="chip" data-sfil="tipo|" aria-pressed="' + !S.srvTipo + '">Todo<span>' + (nTipo.tour + nTipo.traslado) + '</span></button>' +
-        '<button class="chip" data-sfil="tipo|tour" aria-pressed="' + (S.srvTipo === 'tour') + '">Tours y paseos<span>' + nTipo.tour + '</span></button>' +
-        '<button class="chip" data-sfil="tipo|traslado" aria-pressed="' + (S.srvTipo === 'traslado') + '">Traslados<span>' + nTipo.traslado + '</span></button>' +
-        (S.srvDest || S.srvProv || f !== 'todos' ? '<button class="chip" data-sfil="limpiar|">✕ Quitar filtros</button>' : '') + '</div>';
+      (S.srvDest || S.srvProv || f !== 'todos' ? '<div class="chips" style="padding:0 14px 10px"><button class="chip" data-sfil="limpiar|">✕ Quitar filtros</button></div>' : '');
     if (f === 'comparar') return h + '<div class="card">' + barra + '</div>' + vistaComparar(lista);
     if (!lista.length) return h + '<div class="card">' + barra + '<p class="vacio">' + (f === 'papelera' ? 'La papelera está vacía.' : 'No hay servicios con ese filtro.') + '</p></div>';
     if (f === 'papelera') h += '<p class="sub" style="margin:-4px 0 12px">Lo que está en la papelera no se ve en la web. "Recuperar" lo deja como estaba; "Borrar" lo elimina para siempre (su historial de precios queda).</p>';
@@ -2107,7 +2112,7 @@
     if (id && !s) return toast('Ese servicio ya no existe');
     var p = s ? pendPorTour()[s.id] : null, f = {};
     CAMPOS_SRV.forEach(function (k) { f[k] = s ? s[k] : null; });
-    if (!s) { f.activo = true; f.unidad = 'persona'; f.tipo = 'tour'; f.orden = 100; f.verificado = hoyISO(); }
+    if (!s) { f.activo = true; f.unidad = 'persona'; f.tipo = S.srvTipo === 'traslado' ? 'traslado' : 'tour'; f.orden = 100; f.verificado = hoyISO(); }
     f.galeria = Array.isArray(f.galeria) ? f.galeria.slice(0, 3) : [];
     if (p) Object.keys(p.despues).forEach(function (k) { f[k] = p.despues[k]; });
     if (!Array.isArray(f.galeria)) f.galeria = [];
@@ -2145,14 +2150,14 @@
     var area = function (campo, label, ayuda) { return '<label class="f">' + label + (ayuda ? ' <span class="sub" style="display:inline;font-weight:400">' + ayuda + '</span>' : '') + '<textarea ' + a(campo) + '>' + esc(f[campo] || '') + '</textarea></label>'; };
     var provs = S.datos.proveedores.filter(function (p) { return !p.eliminado_at || p.id === f.proveedor_id; });
     var pend = s.pend;
-    el.innerHTML = '<div class="panel" role="dialog" aria-modal="true" aria-label="Servicio" style="width:min(820px,100%)"><div class="panel__head"><h2>' + esc(s.orig ? s.orig.titulo : 'Nuevo servicio') +
+    el.innerHTML = '<div class="panel" role="dialog" aria-modal="true" aria-label="Servicio" style="width:min(820px,100%)"><div class="panel__head"><h2>' + esc(s.orig ? s.orig.titulo : (f.tipo === 'traslado' ? 'Nuevo transfer' : 'Nuevo tour')) +
       (s.orig ? ' <span class="pill ' + (s.orig.eliminado_at ? 'p-cancelado">en la papelera' : (!s.orig.publicado_at ? 'p-nuevo">Nuevo' : (s.orig.activo ? 'p-confirmado">Activo' : 'p-cancelado">Apagado'))) + '</span>' : '') + '</h2><button class="btn btn--sm" data-act="cerrar">Cerrar</button></div><div class="panel__body">' +
       (pend ? '<p class="aviso" style="margin:0">Tiene un cambio sin publicar (' + esc(ORIGENES[pend.origen] || pend.origen) + ', ' + esc(fechaHora(pend.creado_at)) + '). Lo que ves abajo ya lo incluye. ' +
         '<button class="btn btn--sm" data-pub-uno="' + esc(pend.id) + '">Publicarlo</button> <button class="btn btn--sm btn--danger" data-desc-uno="' + esc(pend.id) + '">Descartarlo</button></p>' : '') +
       (s.orig && s.orig.revision === 'pendiente' ? '<p class="aviso" style="margin:0">Para revisar: ' + esc(s.orig.revision_motivo || 'faltan datos') + '</p>' : '') +
       (s.orig && faltantes(Object.assign({}, s.orig, srvParaCalc())).length ? '<p class="aviso" style="margin:0">Para verse como tus tours publicados le falta: <b>' + esc(faltantes(Object.assign({}, s.orig, srvParaCalc())).join(', ')) + '</b>.' +
         (s.orig.tipo !== 'traslado' && s.f.link_web ? ' ' + '<button class="btn btn--sm btn--main" data-act="ficha-traer"' + (s.trayendo ? ' disabled' : '') + '>' + (s.trayendo ? 'Trayendo…' : 'Traer textos del proveedor') + '</button>' : '') + '</p>' : '') +
-      '<section class="sec"><h3>Foto</h3><div id="srv-foto">' + fotoSecHtml() + '</div></section>' +
+      (f.tipo === 'traslado' ? '' : '<section class="sec"><h3>Foto</h3><div id="srv-foto">' + fotoSecHtml() + '</div></section>') +
       '<section class="sec"><h3>Precio</h3><div class="grid">' +
       '<label class="f">El proveedor cobra en<select ' + a('_moneda') + '><option value="BRL"' + (f._moneda === 'BRL' ? ' selected' : '') + '>Reales (R$)</option><option value="USD"' + (f._moneda === 'USD' ? ' selected' : '') + '>Dólares (US$)</option></select></label>' +
       '<label class="f">Monto<input ' + a('_monto') + ' type="number" min="0" step="0.01" inputmode="decimal" value="' + esc(f._monto) + '"></label>' +
@@ -3059,6 +3064,8 @@
       /* Cambiar el monto es haberlo verificado hoy, salvo que se ponga otra fecha despues. */
       if (sk === '_monto' || sk === '_moneda') { S.srv.f.verificado = hoyISO(); var vf = document.querySelector('[data-sf="verificado"]'); if (vf) vf.value = S.srv.f.verificado; }
       S.dirty = true;
+      // Pasar a transfer saca la seccion de fotos (y volver a tour la trae): se redibuja el editor.
+      if (sk === 'tipo' && e.type === 'change') { var pn = document.querySelector('#drawer .panel'), y = pn ? pn.scrollTop : 0; abrirSrv(); pn = document.querySelector('#drawer .panel'); if (pn) pn.scrollTop = y; return; }
       var pv = document.getElementById('srv-prev'); if (pv) pv.innerHTML = prevHtml();
 
       return;
@@ -3228,11 +3235,11 @@
     if (sf) {
       e.preventDefault(); e.stopPropagation();
       var sfz = sf.getAttribute('data-sfil').split('|'), sfv = sfz[1];
-      if (sfz[0] === 'tipo') S.srvTipo = sfv;
+      if (sfz[0] === 'tipo') { S.srvTipo = sfv; S.vista = sfv === 'traslado' ? 'transfers' : 'tours'; }
       else if (sfz[0] === 'dest') S.srvDest = S.srvDest === sfv ? '' : sfv;
       else if (sfz[0] === 'prov') S.srvProv = S.srvProv === sfv ? '' : sfv;
       else if (sfz[0] === 'filtro') S.srvFiltro = S.srvFiltro === sfv ? 'todos' : sfv;
-      else if (sfz[0] === 'limpiar') { S.srvDest = ''; S.srvProv = ''; S.srvFiltro = 'todos'; S.srvTipo = ''; S.qSrv = ''; }
+      else if (sfz[0] === 'limpiar') { S.srvDest = ''; S.srvProv = ''; S.srvFiltro = 'todos'; S.qSrv = ''; }
       pintar(); return;
     }
     var sac = e.target.closest('[data-sactivo]');
