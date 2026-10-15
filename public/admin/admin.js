@@ -96,7 +96,7 @@
         kpi('A pagar a proveedores', usd(k.por_pagar_proveedores_usd), 'lo que les debemos', k.por_pagar_proveedores_usd ? 'kpi--warn' : '') +
         kpi('Margen', usd(k.margen_usd), k.sin_proveedor ? k.sin_proveedor + ' servicio(s) sin proveedor' : 'facturado − costo') + '</section>';
     }
-    html += S.vista.indexOf('mkt-') === 0 ? vistaMkt() : S.vista === 'usuarios' ? vistaUsuarios() : S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() : S.vista === 'demanda' ? vistaDemanda() :
+    html += S.vista.indexOf('mkt-') === 0 ? vistaMkt() : S.vista === 'usuarios' ? vistaUsuarios() : S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
       (S.vista === 'precarga' ? vistaPrecarga() : (esVistaSrv() ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : (S.vista === 'importar' ? vistaImportar() : (S.vista === 'operaciones' ? vistaOperaciones() : vistaProveedores(d))))))))));
     html += '</div>';
     app.innerHTML = html;
@@ -112,7 +112,7 @@
     { t: 'Clientes', vistas: [['usuarios', 'Usuarios'], ['viajes', 'Viajes guardados']] },
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
     { t: 'Catálogo', vistas: [['tours', 'Tours'], ['transfers', 'Transfers'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
-    { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso'], ['demanda', 'Demanda']] },
+    { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso']] },
     { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-estrategia', 'Estrategia'], ['mkt-colabs', 'Perfil y mensajes'], ['mkt-contactos', 'Contactos']] }
   ];
   function esVistaSrv() { return S.vista === 'tours' || S.vista === 'transfers'; }
@@ -471,21 +471,6 @@
     var pg = porDetalle('vista_pagina'), pgs = Object.keys(pg).sort(function (a, b) { return pg[b] - pg[a]; });
     h += '<div class="card uso-card"><h3 class="uso-h">Páginas vistas</h3>' + (pgs.length ? '<table><tbody>' + pgs.map(function (k) { return '<tr><td>' + esc(k || '(sin nombre)') + '</td><td class="num">' + pg[k] + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="vacio">Todavía no hay datos.</p>') + '</div>';
     return h + '<p class="sub">Del ' + esc(fecha(u.desde)) + ' al ' + esc(fecha(u.hasta)) + '. Cuenta a todos, sin cookies ni datos de la persona (lib/uso.js); Google Analytics solo ve a quien aceptó las cookies.</p>';
-  }
-  /* ---------- Demanda: que buscan y no les vendemos (lib/demanda.js). La pantalla vive en /admin/demanda.js y se carga
-     la primera vez que se abre la pestana. ---------- */
-  var demPanel = null;
-  function vistaDemanda() {
-    if (demPanel) return demPanel.vista();
-    if (window.CSDemandaPanel) { demPanel = CSDemandaPanel({ S: S, api: api, esc: esc, kpi: kpi, pintar: pintar }); return demPanel.vista(); }
-    if (!S.demCargando) {
-      S.demCargando = true;
-      var sc = document.createElement('script'); sc.src = '/admin/demanda.js?v=1';
-      sc.onload = function () { if (S.vista === 'demanda') pintar(); };
-      sc.onerror = function () { S.demCargando = false; toast('No se pudo abrir Demanda. Recargá la página.'); };
-      document.head.appendChild(sc);
-    }
-    return '<div class="card"><p class="vacio">Cargando…</p></div>';
   }
   function vistaViajes() {
     var v = S.viajes || {};
