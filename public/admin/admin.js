@@ -2923,9 +2923,24 @@
   }
   function papeleraProv() {
     var p = S.prov, eliminar = !p.eliminado_at;
-    if (eliminar && !confirm('¿Mandar a la papelera a ' + p.nombre + '? Queda inactivo y escondido; sus pedidos y servicios no se tocan.')) return;
-    api('proveedor/papelera', { id: p.id, eliminar: eliminar }).then(function () { toast(eliminar ? 'En la papelera' : 'Fuera de la papelera (sigue inactivo hasta que lo actives)'); cerrarPanel(true); return cargar(); })
+    if (eliminar && !confirmarPapeleraProv(p)) return;
+    api('proveedor/papelera', { id: p.id, eliminar: eliminar }).then(function (j) { toast(avisoPapeleraProv(j, eliminar)); cerrarPanel(true); cargarOps(); return cargar(); })
       .catch(function (e) { mensaje(e.message, true); });
+  }
+  /* Un proveedor a la papelera se lleva sus tours y transfers (lib/operaciones.js papeleraDeProveedor): se avisa
+     cuantos y de que destinos antes de hacerlo. Si vuelve, vuelven los que se fueron con el. */
+  function confirmarPapeleraProv(p) {
+    var sv = ((S.ops && S.ops.datos && S.ops.datos.servicios) || []).filter(function (s) { return s.proveedor_id === p.id && !s.eliminado_at; });
+    var porDest = {}; sv.forEach(function (s) { var n = destNombre(s.destino); porDest[n] = (porDest[n] || 0) + 1; });
+    var enWeb = sv.filter(function (s) { return s.activo; }).length;
+    var det = Object.keys(porDest).sort(function (a, b) { return a.localeCompare(b, 'es'); }).map(function (n) { return '· ' + n + ': ' + porDest[n]; }).join('\n');
+    return confirm('¿Mandar a la papelera a ' + p.nombre + '?' + (sv.length
+      ? '\n\nTambién van a la papelera sus ' + sv.length + ' tours y transfers' + (enWeb ? ' (' + enWeb + ' en la web, salen ya)' : '') + ':\n' + det
+      : '\n\nNo tiene tours ni transfers en el catálogo.') + '\n\nSe puede recuperar todo desde la Papelera.');
+  }
+  function avisoPapeleraProv(j, eliminar) {
+    var n = (j && j.servicios) || 0;
+    return eliminar ? 'En la papelera' + (n ? ' con sus ' + n + ' tours y transfers' : '') : 'Fuera de la papelera' + (n ? ', con sus ' + n + ' tours y transfers' : '') + ' (sigue inactivo hasta que lo actives)';
   }
   function abrir(id) {
     var p = S.datos.pedidos.filter(function (x) { return x.id === id; })[0]; if (!p) return;
@@ -3239,9 +3254,10 @@
     if (pta) {
       e.preventDefault(); e.stopPropagation();
       var ptz = pta.getAttribute('data-prov-tacho').split('|'), tirarP = ptz[1] === '1';
+      if (tirarP && !confirmarPapeleraProv(provDe(ptz[0]) || { id: ptz[0], nombre: 'este proveedor' })) return;
       pta.disabled = true;
       api('proveedor/papelera', { id: ptz[0], eliminar: tirarP })
-        .then(function () { toast(tirarP ? 'En la papelera' : 'Fuera de la papelera (sigue inactivo hasta que lo actives)'); return cargar(); })
+        .then(function (j) { toast(avisoPapeleraProv(j, tirarP)); cargarOps(); return cargar(); })
         .catch(function (er) { pta.disabled = false; toast(er.message); });
       return;
     }
