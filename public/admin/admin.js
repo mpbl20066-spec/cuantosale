@@ -1734,6 +1734,10 @@
     var cons = d0.consultas || {}, nCons = {};
     d.pendientes.forEach(function (c) { var k = estConsulta(cons[c.tour_id]); nCons[k] = (nCons[k] || 0) + 1; });
     if (S.pubCons) d.pendientes = d.pendientes.filter(function (c) { return estConsulta(cons[c.tour_id]) === S.pubCons; });
+    // Tours y traslados por separado: se revisan distinto (los traslados no van a la web como paseo).
+    var esTr = function (c) { var s = porId[c.tour_id]; return !!s && s.tipo === 'traslado'; }, nTr = { tour: 0, traslado: 0 };
+    d.pendientes.forEach(function (c) { nTr[esTr(c) ? 'traslado' : 'tour']++; });
+    if (S.pubTipo) d.pendientes = d.pendientes.filter(function (c) { return esTr(c) === (S.pubTipo === 'traslado'); });
     var agrupado = S.pubModo !== 'lista';
     S.pubVisibles = d.pendientes.map(function (c) { return c.id; });
     S.sel = S.sel || {};
@@ -1746,6 +1750,7 @@
     h += '<div class="pubbar"><label class="pubbar__todos"><input type="checkbox" data-act="sel-todos"' + (nSel && nSel === d.pendientes.length ? ' checked' : '') + '> ' + (nSel ? nSel + ' elegido' + (nSel > 1 ? 's' : '') : 'Elegir todos') + '</label>' +
       (dests.length > 1 ? '<select class="fsel" data-pdes aria-label="Destino"><option value="">Todos los destinos (' + d0.pendientes.length + ')</option>' + dests.map(function (k) { return '<option value="' + esc(k) + '"' + (S.pubDest === k ? ' selected' : '') + '>' + esc(destNombre(k)) + ' (' + destPend[k] + ')</option>'; }).join('') + '</select>' : '') +
       '<select class="fsel" data-pcons aria-label="Consulta a la agencia"><option value="">Consulta: todas</option>' + Object.keys(CONS_TXT).map(function (k) { return '<option value="' + k + '"' + (S.pubCons === k ? ' selected' : '') + '>' + esc(CONS_TXT[k]) + ' (' + (nCons[k] || 0) + ')</option>'; }).join('') + '</select>' +
+      '<span class="chips" style="flex:0 0 auto"><button class="chip" data-ptipo="" aria-pressed="' + !S.pubTipo + '">Todo<span>' + (nTr.tour + nTr.traslado) + '</span></button><button class="chip" data-ptipo="tour" aria-pressed="' + (S.pubTipo === 'tour') + '">Tours<span>' + nTr.tour + '</span></button><button class="chip" data-ptipo="traslado" aria-pressed="' + (S.pubTipo === 'traslado') + '">Traslados<span>' + nTr.traslado + '</span></button></span>' +
       '<span class="chips" style="flex:0 0 auto"><button class="chip" data-pmodo="grupos" aria-pressed="' + agrupado + '">Parecidos juntos</button><button class="chip" data-pmodo="lista" aria-pressed="' + !agrupado + '">Lista</button></span>' +
       '<span class="pubbar__esp"></span>' +
       '<button class="btn btn--txt-danger" data-act="desc-sel"' + (nSel ? '' : ' disabled') + '>Descartar (' + nSel + ')</button>' +
@@ -2891,6 +2896,7 @@
       return;
     }
     var sv = e.target.closest('[data-srv]'); if (sv && !e.target.closest('input') && !e.target.closest('.mg')) { e.preventDefault(); if (S.dirty && document.getElementById('drawer') && !confirm('Tenés cambios sin guardar. ¿Seguir?')) return; abrirServicio(sv.getAttribute('data-srv')); return; }
+    var pt = e.target.closest('[data-ptipo]'); if (pt) { S.pubTipo = pt.getAttribute('data-ptipo'); pintar(); return; }
     var pm = e.target.closest('[data-pmodo]'); if (pm) { S.pubModo = pm.getAttribute('data-pmodo'); try { localStorage.setItem('cs_pub_modo', S.pubModo); } catch (er) {} pintar(); return; }
     var ce = e.target.closest('[data-cons-escribir]'); if (ce) { e.preventDefault(); escribirConsulta(ce.getAttribute('data-cons-escribir')); return; }
     var cm = e.target.closest('[data-cons-marca]'); if (cm) { var cz = cm.getAttribute('data-cons-marca').split('|'); marcarConsulta([cz[0]], cz[1]); return; }
