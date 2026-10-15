@@ -46,6 +46,11 @@ SSA	Itacaré	359	5.7	Compartido	Auto	1	4			235	Por persona
 SSA	Morro de São Paulo	242	3.9	Compartido	Auto	1	4			162	Por persona
 SSA	Porto Seguro	699	11.4	Compartido	Auto	1	4			445	Por persona
 SSA	Praia do Forte	62	1.1	Compartido	Auto	1	4			50	Por persona
+SSA	Praia do Forte	62	1.1	Privado	Auto	1	2	220	15%	253	Por vehiculo
+SSA	Praia do Forte	62	1.1	Privado	Auto	3	4	280	15%	322	Por vehiculo
+SSA	Praia do Forte	62	1.1	Privado	Van	5	6	350	15%	402	Por vehiculo
+SSA	Praia do Forte	62	1.1	Privado	Van	7	12	450	15%	518	Por vehiculo
+SSA	Praia do Forte	62	1.1	Privado	Van	13	15	650	15%	747	Por vehiculo
 SSA	Trancoso	163	2.7	Compartido	Auto	1	4			113	Por persona
 FOR	Fortaleza	9	0.2	Compartido	Auto	1	4			30	Por persona
 FOR	Jericoacoara	295	5.6	Compartido	Auto	1	4			195	Por persona

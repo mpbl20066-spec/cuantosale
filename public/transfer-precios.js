@@ -42,7 +42,7 @@
   morro: { name: "Morro de São Paulo", iata: "SSA", modo: "car", km: 242, compartido: 31.15, privado: 35.77, compartido_brl: 162, privado_brl: 186, escalones: [] },
   portoseguro: { name: "Porto Seguro", iata: "SSA", modo: "car", km: 699, compartido: 85.58, privado: 92.31, compartido_brl: 445, privado_brl: 480, escalones: [] },
   itacare: { name: "Itacaré", iata: "SSA", modo: "car", km: 359, compartido: 45.19, privado: 242.31, compartido_brl: 235, privado_brl: 1260, escalones: [] },
-  forte: { name: "Praia do Forte", iata: "SSA", modo: "car", km: 62, compartido: 9.62, privado: 46.15, compartido_brl: 50, privado_brl: 240, escalones: [] },
+  forte: { name: "Praia do Forte", iata: "SSA", modo: "car", km: 62, compartido: 9.62, privado: 48.65, compartido_brl: 50, privado_brl: 253, escalones: [{"min":1,"max":2,"vehiculo":"Auto","brl":253},{"min":3,"max":4,"vehiculo":"Auto","brl":322},{"min":5,"max":6,"vehiculo":"Van","brl":402},{"min":7,"max":12,"vehiculo":"Van","brl":518},{"min":13,"max":15,"vehiculo":"Van","brl":747}] },
   fernando: { name: "Fernando de Noronha", iata: "FEN", modo: "vuelo", compartido: 18.27, privado: 108.08, compartido_brl: 95, privado_brl: 562, escalones: [] },
   fln: { name: "Florianópolis", iata: "FLN", modo: "car", km: 17, compartido: 5.77, privado: 92.31, compartido_brl: 30, privado_brl: 480, escalones: [] },
   bombinhas: { name: "Bombinhas", iata: "FLN", modo: "car", km: 89, compartido: 12.88, privado: 131.54, compartido_brl: 67, privado_brl: 684, escalones: [] },
@@ -329,13 +329,13 @@
       "horas": 5.7
     },
   forte: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Praia do Forte. Compartido por persona: R$ 50 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 62 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Praia do Forte. Privado por vehiculo de Bahia Terra Turismo (su tarifa pública, nos dan 10 % de comisión; +20 % antes de las 08:00 y desde las 18:00; cancelación gratis hasta 24 h; la vuelta vale lo mismo) (base R$ 220 + 15% y R$ 280 + 15% y R$ 350 + 15% y R$ 450 + 15% y R$ 650 + 15%): 1 a 2 personas, Auto, R$ 253; 3 a 4 personas, Auto, R$ 322; 5 a 6 personas, Van, R$ 402; 7 a 12 personas, Van, R$ 518; 13 a 15 personas, Van, R$ 747. Compartido por persona: R$ 50 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 62 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
-      "verificado": "2026-10-01",
+      "verificado": "2026-10-15",
       "real": [
+        "privado",
         "compartido"
       ],
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 62,
       "horas": 1.1
     },
