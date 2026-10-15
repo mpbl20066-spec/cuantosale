@@ -1398,7 +1398,7 @@
   var UNIDADES = { persona: 'por persona', vehiculo: 'por vehículo', grupo: 'por grupo', embarcacion: 'por embarcación', tramo: 'por tramo' };
   var TIPOS_SRV = { tour: 'Tour', actividad: 'Actividad', traslado: 'Traslado', barco: 'Paseo en barco', otro: 'Otro' };
   // Etiqueta sobre la foto en la web (lib/tours.js). La vacia es sin etiqueta.
-  var ETIQUETAS_SRV = { '': 'Sin etiqueta', recomendado: '👍 Recomendado', mas_vendido: '🔥 Más vendido', imperdible: '✨ Imperdible' };
+  var ETIQUETAS_SRV = { '': 'Sin etiqueta', recomendado: 'Recomendado', mas_vendido: 'Más vendido', imperdible: 'Imperdible' };
   var ORIGENES = { manual: 'Edición', importacion: 'Importación', ajuste: 'Ajuste masivo', cotizacion: 'Cotización', reversion: 'Vuelta atrás', inicial: 'Precio inicial' };
   var ESTADOS_CAMBIO = { pendiente: 'Pendiente', publicado: 'Publicado', descartado: 'Descartado', reemplazado: 'Reemplazado' };
   var CAMPO_NOMBRE = { precio_brl: 'Precio R$', precio: 'Precio US$', unidad: 'Unidad', capacidad: 'Capacidad', margen_tipo: 'Tipo de margen', margen_valor: 'Margen',

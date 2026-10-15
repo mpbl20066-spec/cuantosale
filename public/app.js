@@ -2931,7 +2931,7 @@ var HOTEL_NOTA_MINIMA = 8;
   // que se leen, no logica que se ejecuta.
   window.CS_TOURS = toursFor;
   // Etiquetas que se eligen por servicio en el panel (lib/tours.js las manda en tour.etiqueta).
-  var TOUR_ETIQUETAS = { mas_vendido: '🔥 Más vendido', imperdible: '✨ Imperdible', recomendado: '👍 Recomendado' };
+  var TOUR_ETIQUETAS = { mas_vendido: 'Más vendido', imperdible: 'Imperdible', recomendado: 'Recomendado' };
   /* Con dos paradas hay una seccion de tours por destino (la del primero y la del
      segundo), cada una con su titulo; con un destino, la de siempre. */
   function localToursMarkup(meta) {
@@ -3044,8 +3044,8 @@ var HOTEL_NOTA_MINIMA = 8;
     var cards = tours.map(function (tour, index) {
       var id = 'tour-' + destinationKey + '-' + index;
       var tourTag = TOUR_ETIQUETAS[tour.etiqueta] ? '<span class="local-tour__tag is-' + tour.etiqueta.replace('_', '-') + '">' + TOUR_ETIQUETAS[tour.etiqueta] + '</span>'
-        : index === tagMasResenado ? '<span class="local-tour__tag">🔥 Más reseñado</span>'
-        : index === tagMejorNota ? '<span class="local-tour__tag">⭐ Mejor puntuado</span>' : '';
+        : index === tagMasResenado ? '<span class="local-tour__tag">Más reseñado</span>'
+        : index === tagMejorNota ? '<span class="local-tour__tag">Mejor puntuado</span>' : '';
       // La foto sale de TOUR_PHOTOS, con su autor y su licencia.
       var photo = tour.foto || (tour.image ? { url: tour.image } : tourPhoto(destinationKey, tour));
       // Solo se acreditan las fotos con autor y licencia (Wikimedia). La foto de la agencia, que se
