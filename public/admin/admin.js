@@ -1728,13 +1728,18 @@
     var nTipo = { tour: 0, traslado: 0 }; todos.forEach(function (s) { nTipo[s.tipo === 'traslado' ? 'traslado' : 'tour']++; });
     var delTipo = todos.filter(function (s) { return (s.tipo === 'traslado') === (p.tipo === 'traslado'); });
     var nEst = {}; delTipo.forEach(function (s) { var k = ppEstado(s).k; nEst[k] = (nEst[k] || 0) + 1; });
-    var lista = delTipo.filter(function (s) { return !p.filtro || ppEstado(s).k === p.filtro; })
+    // Listo = no le falta nada y tiene algo para publicar (no esta en la web, o tiene un cambio esperando).
+    var esListo = function (s) { return !ppFalta(s).length && (!s.activo || pendPorTour()[s.id]); };
+    nEst.listo = delTipo.filter(esListo).length;
+    var nUniD = delTipo.filter(esperaUnidad).length;
+    var lista = delTipo.filter(function (s) { return !p.filtro || (p.filtro === 'listo' ? esListo(s) : ppEstado(s).k === p.filtro); })
       .sort(function (a, b) { var o = { nuevo: 0, revision: 1, apagado: 2, activo: 3 }; return o[ppEstado(a).k] - o[ppEstado(b).k] || a.titulo.localeCompare(b.titulo, 'es'); });
     var elegidos = ppElegidos(), visiblesSel = lista.filter(function (s) { return p.sel[s.id]; }).length;
     var chip = function (k, t, nn) { return '<button class="chip" data-pp="filtro|' + k + '" aria-pressed="' + (p.filtro === k) + '">' + t + '<span>' + nn + '</span></button>'; };
     var h = '<div class="pp-barra"><span class="chips" style="flex:0 0 auto"><button class="chip" data-pp="tipo|tour" aria-pressed="' + (p.tipo !== 'traslado') + '">Tours<span>' + nTipo.tour + '</span></button><button class="chip" data-pp="tipo|traslado" aria-pressed="' + (p.tipo === 'traslado') + '">Traslados<span>' + nTipo.traslado + '</span></button></span>' +
-      '<span class="chips">' + chip('', 'Todos', delTipo.length) + chip('nuevo', 'Pendientes', nEst.nuevo || 0) + chip('revision', 'En revisión', nEst.revision || 0) + chip('activo', 'Publicados', nEst.activo || 0) + chip('apagado', 'Desactivados', nEst.apagado || 0) + '</span>' +
+      '<span class="chips">' + chip('', 'Todos', delTipo.length) + chip('listo', '✓ Listos para publicar', nEst.listo || 0) + chip('nuevo', 'Pendientes', nEst.nuevo || 0) + chip('revision', 'En revisión', nEst.revision || 0) + chip('activo', 'Publicados', nEst.activo || 0) + chip('apagado', 'Desactivados', nEst.apagado || 0) + '</span>' +
       (lista.length ? '<button class="btn btn--sm" data-pp="todos">' + (visiblesSel === lista.length ? 'Soltar estos ' : 'Elegir estos ') + lista.length + '</button>' : '') + '</div>';
+    if (nUniD) h += '<p class="aviso" style="margin:0 0 10px">' + nUniD + ' de estos esperan que confirmes si el precio es por persona o por vehículo. <a class="lnk" href="#" data-uni="abrir">Confirmarlos todos juntos</a></p>';
     h += '<div class="pp-tours">' + lista.map(function (s) {
       var e = ppEstado(s), f = ppPortada(s), pr = provDe(s.proveedor_id), x = conPendiente(s), pc = pendPorTour()[s.id];
       var precio = pc && pc.publicado_despues != null ? pc.publicado_despues : s.precio_publicado;
@@ -2186,10 +2191,65 @@
     }).catch(function (e) { toast(e.message); });
   }
 
+  /* ---------- Por publicar > Confirmar por persona o por vehiculo ----------
+     Los importados que no decian la unidad no se pueden publicar hasta confirmarla. Aca van todos juntos, con una
+     sugerencia por el nombre (buggy, cuatriciclo, privado, "hasta N", van, auto = por vehiculo; el resto por persona).
+     Por vehiculo necesita capacidad: si el nombre dice "hasta 4" se toma, si no hay que escribirla. Confirmar guarda la
+     unidad como cambio sin publicar (eso es lo que la confirma: lib/operaciones.js proponer). */
+  var UNI_VEH = /buggy|quadri|cuatri|lancha priv|privativ|privad|hasta \d|até \d|ate \d|veh[ií]cul|ve[ií]cul|\bvan\b|\bauto\b|\bcarro\b|exclusiv/i;
+  function esperaUnidad(s) { return !s.eliminado_at && s.revision === 'pendiente' && /persona o por/.test(s.revision_motivo || ''); }
+  function uniSugerida(s) {
+    var t = s.titulo || '', m = t.match(/(?:hasta|até|ate)\s*0?(\d{1,2})|\((\d{1,2})\s*(?:pax|personas|pessoas|plazas|lugares)\)/i);
+    return UNI_VEH.test(t) ? { unidad: 'vehiculo', capacidad: m ? Number(m[1] || m[2]) : '' } : { unidad: 'persona', capacidad: '' };
+  }
+  function vistaUnidades() {
+    var d = S.ops.datos, pend = pendPorTour(), u = S.uni = S.uni || { elec: {} };
+    var lista = d.servicios.filter(esperaUnidad).sort(function (a, b) { return destNombre(conPendiente(a).destino).localeCompare(destNombre(conPendiente(b).destino), 'es') || a.titulo.localeCompare(b.titulo, 'es'); });
+    var h = '<div class="vhead"><div><h2>Por persona o por vehículo</h2><p>' + lista.length + ' tour(s) importados no decían si el precio es por persona o por vehículo. Revisá la sugerencia y confirmá. No se publica nada: queda en "Por publicar".</p></div>' +
+      '<div class="top__acc"><button class="btn" data-uni="volver">← Volver</button></div></div>';
+    if (!lista.length) return h + '<div class="card"><p class="vacio">No queda ninguno por confirmar. 🎉</p></div>';
+    var nSel = 0;
+    var filas = lista.map(function (s) {
+      var e = u.elec[s.id] = u.elec[s.id] || Object.assign({ ok: true }, uniSugerida(s));
+      if (e.ok) nSel++;
+      var x = conPendiente(s), pr = provDe(s.proveedor_id), p = pend[s.id], precio = x.precio_brl != null ? brl(x.precio_brl) : (x.precio != null ? usd(x.precio) : 'sin precio');
+      var falta = e.unidad === 'vehiculo' && !(Number(e.capacidad) > 0);
+      return '<tr' + (e.ok ? '' : ' style="opacity:.55"') + '><td style="width:28px"><input type="checkbox" data-uni-ok="' + esc(s.id) + '"' + (e.ok ? ' checked' : '') + ' style="width:18px;height:18px;min-height:0;accent-color:var(--ink)"></td>' +
+        '<td data-l="Tour"><a class="lnk" href="#" data-srv="' + esc(s.id) + '">' + esc(x.titulo) + '</a><span class="sub">' + esc(destNombre(x.destino)) + ' · ' + esc(TIPOS_SRV[x.tipo] || x.tipo) + ' · ' + esc(pr ? pr.nombre : 'sin agencia') + (s.link_web ? ' · ' + verProv(s.link_web) : '') + '</span></td>' +
+        '<td data-l="Precio" class="num"><b>' + esc(precio) + '</b>' + (p && p.publicado_despues != null ? '<span class="sub">web: ' + pub(p.publicado_despues) + '</span>' : '') + '</td>' +
+        '<td data-l="Es"><span class="chips" style="flex:0 0 auto"><button class="chip" data-uni-set="' + esc(s.id) + '|persona" aria-pressed="' + (e.unidad === 'persona') + '">Por persona</button><button class="chip" data-uni-set="' + esc(s.id) + '|vehiculo" aria-pressed="' + (e.unidad === 'vehiculo') + '">Por vehículo</button></span>' +
+          (e.unidad === 'vehiculo' ? '<label class="sub" style="display:flex;gap:6px;align-items:center;margin-top:6px">hasta <input type="number" min="1" max="60" data-uni-cap="' + esc(s.id) + '" value="' + esc(e.capacidad) + '" style="width:70px' + (falta ? ';border-color:var(--bad)' : '') + '"> personas</label>' : '') + '</td></tr>';
+    }).join('');
+    return h + '<div class="pubbar"><b>' + nSel + ' elegido(s)</b><span class="pubbar__esp"></span><button class="btn btn--main" data-uni="confirmar"' + (nSel && !u.guardando ? '' : ' disabled') + '>' + (u.guardando ? 'Guardando… ' + u.guardando : 'Confirmar ' + nSel) + '</button></div>' +
+      '<div class="card"><table><thead><tr><th></th><th>Tour</th><th class="num">Precio</th><th>El precio es</th></tr></thead><tbody>' + filas + '</tbody></table></div>';
+  }
+  function confirmarUnidades() {
+    var u = S.uni, d = S.ops.datos;
+    var ids = Object.keys(u.elec).filter(function (id) { var e = u.elec[id], s = d.servicios.filter(function (x) { return x.id === id; })[0]; return e.ok && s && esperaUnidad(s); });
+    var malos = ids.filter(function (id) { return u.elec[id].unidad === 'vehiculo' && !(Number(u.elec[id].capacidad) > 0); });
+    if (malos.length) return alert(malos.length + ' marcado(s) "por vehículo" sin capacidad: poné para cuántas personas es, o pasalos a "por persona".');
+    if (!ids.length) return;
+    var nv = ids.filter(function (id) { return u.elec[id].unidad === 'vehiculo'; }).length;
+    if (!confirm('¿Confirmar ' + ids.length + ' tour(s)? ' + (ids.length - nv) + ' por persona y ' + nv + ' por vehículo. Queda en "Por publicar".')) return;
+    var hechos = 0, fallas = [];
+    u.guardando = '0/' + ids.length; pintar();
+    return ids.reduce(function (pr, id) {
+      return pr.then(function () {
+        var e = u.elec[id], c = e.unidad === 'vehiculo' ? { unidad: 'vehiculo', capacidad: Number(e.capacidad) } : { unidad: 'persona' };
+        return api('ops/proponer', { id: id, cambios: c, publicar: false, nota: 'Unidad confirmada' }).then(function () { hechos++; }, function (er) { fallas.push(er.message); })
+          .then(function () { u.guardando = (hechos + fallas.length) + '/' + ids.length; var b = document.querySelector('[data-uni="confirmar"]'); if (b) b.textContent = 'Guardando… ' + u.guardando; });
+      });
+    }, Promise.resolve()).then(function () {
+      u.guardando = null; u.elec = {};
+      toast(hechos + ' confirmado(s)' + (fallas.length ? ' · ' + fallas.length + ' no: ' + fallas[0] : ''));
+      return cargarOps();
+    });
+  }
   function vistaPublicar() {
     var o = S.ops;
     if (!o || o.cargando) return '<p class="vacio">Cargando…</p>';
     if (o.error) return '<div class="card"><p class="vacio">No se pudo cargar: ' + esc(o.error) + ' <button class="btn" data-act="ops-recargar">Reintentar</button></p></div>';
+    if (S.pubUnidades) return vistaUnidades();
     var d0 = o.datos, porId = {}; d0.servicios.forEach(function (s) { porId[s.id] = s; });
     /* Filtro por destino: para revisar los nuevos de un lugar y decidir cuales publicar. Seleccionar todos, publicar y
        descartar se aplican solo a lo que se ve. */
@@ -2209,7 +2269,9 @@
     Object.keys(S.sel).forEach(function (k) { if (!d.pendientes.some(function (c) { return c.id === k; })) delete S.sel[k]; });
     var nSel = Object.keys(S.sel).length;
     var dests = Object.keys(destPend).sort(function (a, b) { return destNombre(a).localeCompare(destNombre(b), 'es'); });
-    var h = '<div class="vhead"><div><h2>Por publicar</h2><p>' + (d0.pendientes.length ? d0.pendientes.length + (d0.pendientes.length === 1 ? ' cambio esperando' : ' cambios esperando') + ' tu revisión. ' : '') + 'Nada de esto se ve en la web hasta que lo publicás; los cambios de precio de más de 20 % aparecen en rojo.</p></div></div>';
+    var nUni = d0.servicios.filter(function (s) { return esperaUnidad(s) && !s.eliminado_at; }).length;
+    var h = '<div class="vhead"><div><h2>Por publicar</h2><p>' + (d0.pendientes.length ? d0.pendientes.length + (d0.pendientes.length === 1 ? ' cambio esperando' : ' cambios esperando') + ' tu revisión. ' : '') + 'Nada de esto se ve en la web hasta que lo publicás; los cambios de precio de más de 20 % aparecen en rojo.</p></div>' +
+      (nUni ? '<div class="top__acc"><button class="btn btn--main" data-uni="abrir">Confirmar por persona o por vehículo (' + nUni + ')</button></div>' : '') + '</div>';
     if (!d0.pendientes.length) return h + '<div class="card"><p class="vacio">Cuando edites un precio o importes un archivo, los cambios quedan acá para que los revises antes de publicarlos.</p></div>';
     /* Barra de acciones: queda a la vista mientras se baja por la lista. */
     h += '<div class="pubbar"><label class="pubbar__todos"><input type="checkbox" data-act="sel-todos"' + (nSel && nSel === d.pendientes.length ? ' checked' : '') + '> ' + (nSel ? nSel + ' elegido' + (nSel > 1 ? 's' : '') : 'Elegir todos') + '</label>' +
@@ -3162,6 +3224,8 @@
     if (el.id === 'q-srv') { S.qSrv = el.value; var ps = el.selectionStart; pintar(); var qs = document.getElementById('q-srv'); if (qs) { qs.focus(); try { qs.setSelectionRange(ps, ps); } catch (er) { /* sin rango */ } } return; }
     if (el.hasAttribute('data-cmp-unidad')) { S.cmpUnidad = S.cmpUnidad || {}; S.cmpUnidad[el.getAttribute('data-cmp-unidad')] = el.value; return; }
     if (el.hasAttribute('data-pdes')) { if (e.type === 'change') { S.pubDest = el.value; pintar(); } return; }
+    if (el.hasAttribute('data-uni-ok')) { if (e.type === 'change') { S.uni.elec[el.getAttribute('data-uni-ok')].ok = el.checked; pintar(); } return; }
+    if (el.hasAttribute('data-uni-cap')) { S.uni.elec[el.getAttribute('data-uni-cap')].capacidad = el.value; if (e.type === 'change') pintar(); return; }
     if (el.hasAttribute('data-pcons')) { if (e.type === 'change') { S.pubCons = el.value; pintar(); } return; }
     if (el.hasAttribute('data-ssel')) { if (e.type === 'change') { if (el.checked) S.srvSel[el.getAttribute('data-ssel')] = 1; else delete S.srvSel[el.getAttribute('data-ssel')]; pintar(); } return; }
     if (el.hasAttribute('data-cfg') && S.modal) { S.modal[el.getAttribute('data-cfg')] = el.value; if (el.getAttribute('data-cfg') === 'cotizacion') S.modal.fuente = ''; S.modal.st = null; return; }
@@ -3280,6 +3344,9 @@
 
   document.addEventListener('click', function (e) {
     if (S.vista === 'pasos' && ppClick(e)) return;
+    var un = e.target.closest('[data-uni]');
+    if (un) { e.preventDefault(); var ua = un.getAttribute('data-uni'); if (ua === 'abrir') { S.pubUnidades = true; S.uni = { elec: {} }; S.vista = 'publicar'; pintar(); window.scrollTo(0, 0); } else if (ua === 'volver') { S.pubUnidades = false; pintar(); } else if (ua === 'confirmar') confirmarUnidades(); return; }
+    var us = e.target.closest('[data-uni-set]'); if (us) { e.preventDefault(); var uz = us.getAttribute('data-uni-set').split('|'); S.uni.elec[uz[0]].unidad = uz[1]; pintar(); return; }
     var ae = e.target.closest('[data-agencia-escribir]'); if (ae) { e.preventDefault(); e.stopPropagation(); var az = ae.getAttribute('data-agencia-escribir').split('|'); escribirAgencia(az[0], az[1]); return; }
     var tm = e.target.closest('[data-tarifa-marca]'); if (tm) { e.preventDefault(); var pz = tm.getAttribute('data-tarifa-marca').split('|'); marcarTarifa(pz[0], pz[1]); return; }
     var itg = e.target.closest('[data-item-toggle]');
