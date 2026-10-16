@@ -2386,7 +2386,7 @@ function servirGuiaSecreta(req, res, url) {
   // antes de las actividades locales. Si el catalogo no responde, la guia sale igual, sin tours.
   return tours.destino(dest).catch(function () { return []; }).then(function (lista) {
     const resumidos = (lista || []).slice(0, 12).map(function (x) {
-      return { title: x.title, description: x.description, price: x.price, duracion: x.duracion || '',
+      return { title: x.title, description: x.description, price: x.price, duracion: x.duracion || '', etiqueta: x.etiqueta || '',
         foto: (x.images && x.images[0]) || (x.foto && x.foto.url) || x.image || '' };
     });
     sendJson(res, 200, { guia: guia, region: model.DEST[dest].region || '', tours: resumidos });

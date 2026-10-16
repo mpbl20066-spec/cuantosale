@@ -81,8 +81,18 @@
   .u-dato__r+.u-dato__r{margin-top:5px}
   .u-dato__r small{display:block;margin-top:1px;font-size:14.5px;font-weight:600;color:var(--ink2)}
   .u-dato__n{display:block;margin-top:8px;font-size:14px;font-weight:600;line-height:1.45;color:var(--ink2)}
-  .u-tabs{display:flex;gap:8px;position:sticky;top:0;z-index:3;margin:0 -18px;padding:12px 18px;background:var(--bg);overflow-x:auto;scrollbar-width:none}
+  .u-tabs-w{position:sticky;top:0;z-index:3;margin:0 -18px;background:var(--bg)}
+  .u-tabs{display:flex;gap:8px;padding:12px 18px;overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth}
   .u-tabs::-webkit-scrollbar{display:none}
+  /* Las pestanas no entran en el celular: degrade + flecha en el borde para que se note que siguen */
+  .u-tabs-f{position:absolute;top:0;bottom:0;width:58px;display:flex;align-items:center;border:0;padding:0;cursor:pointer;transition:opacity .2s;color:var(--ink)}
+  .u-tabs-f--d{right:0;justify-content:flex-end;padding-right:8px;background:linear-gradient(to right,transparent,var(--bg) 60%)}
+  .u-tabs-f--i{left:0;justify-content:flex-start;padding-left:8px;background:linear-gradient(to left,transparent,var(--bg) 60%)}
+  .u-tabs-f span{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--surface);border:1.5px solid var(--line);font-size:18px;font-weight:800;line-height:1;box-shadow:0 2px 6px rgba(10,16,26,.12)}
+  .u-tabs-w.is-nuevo .u-tabs-f--d span{animation:u-empuje 1.4s ease-in-out 2}
+  @keyframes u-empuje{50%{transform:translateX(4px)}}
+  .u-tabs-w:not(.hay-d) .u-tabs-f--d,.u-tabs-w:not(.hay-i) .u-tabs-f--i{opacity:0;pointer-events:none}
+  @media (prefers-reduced-motion:reduce){.u-tabs{scroll-behavior:auto}.u-tabs-f--d span{animation:none}}
   .u-tab{flex:0 0 auto;padding:11px 17px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface);color:var(--ink);font-size:15.5px;font-weight:700;cursor:pointer}
   .u-tab.is-on{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
   .u-tab:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
@@ -96,6 +106,10 @@
   .u-mas{margin:6px 0 0;padding:6px 0;border:0;background:transparent;color:var(--azul);font-size:14.5px;font-weight:800;cursor:pointer}
   .u-mas:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
   .u-foto{height:220px;margin:-16px -16px 14px;border-radius:20px 20px 0 0;background:var(--cel-soft) center/cover}
+  /* Etiqueta del panel (Más vendido, Imperdible, Recomendado): los mismos colores que en la tarjeta de la app. */
+  .u-tag{display:inline-block;margin:0 0 8px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.02em;line-height:1.2;color:#fff;background:#0F6E56}
+  .u-tag.is-mas_vendido{background:#B4262D}
+  .u-tag.is-imperdible{background:#5B32A8}
   .u-precio{display:inline-block;margin-top:7px;padding:5px 11px;border-radius:99px;background:var(--good-soft);color:var(--good);font-size:14px;font-weight:800}
   [role="tabpanel"]>section[aria-label="Clima por mes"],[role="tabpanel"]>.u-mar{grid-column:1/-1}
   .u-mar h3{margin:0 0 4px;font-size:19px;font-weight:800;color:var(--ink)}.u-mar-n{margin:0 0 10px;font-size:15px;font-weight:600;color:var(--ink2)}
@@ -221,7 +235,25 @@
   var aPresupuesto = function (fuente) { return CSEstimado.linkApp('home-destino.html?destino=' + K + '&fuente=' + fuente, S.est); };
   var track = function (n, p) { window.mockTrack(n, Object.assign({ destino: K }, p || {})); };
   var usd = function (n) { return window.CSMoneda ? CSMoneda.fmt(Number(n) || 0) : 'US$ ' + Math.round(Number(n) || 0); };
-  var lista = function (k) { return (S.guia && Array.isArray(S.guia[k])) ? S.guia[k] : []; };
+  /* Una actividad local que repite un paseo del catalogo no se muestra: el del catalogo ya trae precio y reserva.
+     Se considera repetida si comparten una palabra de lugar (Sibaúma, Delfines...), sin contar las que describen
+     la actividad (paseo, buggy, barco...), que solas no dicen que sea el mismo. */
+  var GENERICAS = { paseo: 1, paseos: 1, excursion: 1, tour: 1, barco: 1, lancha: 1, buggy: 1, cuatriciclo: 1, cuadriciclo: 1, jeep: 1, playa: 1, playas: 1, desde: 1, dunas: 1, clase: 1, bautismo: 1, buceo: 1, snorkel: 1, caminata: 1, sandboard: 1, surf: 1 };
+  var palabras = function (s) {
+    return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().split(/[^a-z0-9]+/)
+      .filter(function (w) { return w.length >= 5 && !GENERICAS[w]; });
+  };
+  var repiteCatalogo = function (x) {
+    var mias = palabras(x.name);
+    return (S.tours || []).some(function (t) {
+      var suyas = palabras(t.title);
+      return mias.some(function (w) { return suyas.indexOf(w) >= 0; });
+    });
+  };
+  var lista = function (k) {
+    var l = (S.guia && Array.isArray(S.guia[k])) ? S.guia[k] : [];
+    return k === 'hacer' ? l.filter(function (x) { return !repiteCatalogo(x); }) : l;
+  };
   var cuantos = function (t) {
     if (t.id === 'clima') return (S.guia && S.guia.clima && Array.isArray(S.guia.clima.meses)) || (S.guia && S.guia.temporada && S.guia.temporada.nota) ? 1 : 0;
     return lista(t.k).length + (t.id === 'hacer' ? S.tours.length : 0);
@@ -409,8 +441,10 @@
       }).join('');
     }
     if (S.tab === 'hacer') {
+      var ETIQ = { mas_vendido: 'Más vendido', imperdible: 'Imperdible', recomendado: 'Recomendado' };
       var tl = S.tours.map(function (x) {
         return '<div class="u-item">' + (x.foto ? '<div class="u-foto" style="background-image:url(' + esc(x.foto) + ')"></div>' : '') +
+          (ETIQ[x.etiqueta] ? '<span class="u-tag is-' + esc(x.etiqueta) + '">' + ETIQ[x.etiqueta] + '</span><br>' : '') +
           '<b>' + esc(x.title) + '</b>' + (x.duracion ? '<span class="meta">' + esc(x.duracion) + '</span>' : '') +
           (x.description ? '<p>' + esc(x.description) + '</p>' + (String(x.description).length > 110 ? '<button type="button" class="u-mas" data-mas="1" aria-expanded="false">Ver más</button>' : '') : '') +
           '<div class="u-acc">' + (x.price > 0 ? '<span class="u-precio">Desde ' + usd(x.price) + '</span>' : '') +
@@ -550,9 +584,11 @@
       var ts = tabs();
       if (!ts.some(function (t) { return t.id === S.tab; })) S.tab = ts.length ? ts[0].id : '';
       cuerpo = '<p class="u-lead">' + esc(S.guia.resumen || '') + '</p>' + mesesHtml() +
-        (ts.length ? '<div class="u-tabs" role="tablist" aria-label="Categorías de la guía">' + ts.map(function (t) {
+        (ts.length ? '<div class="u-tabs-w"><div class="u-tabs" role="tablist" aria-label="Categorías de la guía">' + ts.map(function (t) {
           return '<button type="button" role="tab" class="u-tab' + (S.tab === t.id ? ' is-on' : '') + '" data-tab="' + t.id + '" aria-selected="' + (S.tab === t.id) + '">' + t.nom + (t.id === 'clima' ? '' : ' <small>' + cuantos(t) + '</small>') + '</button>';
         }).join('') + '</div>' +
+          '<button type="button" class="u-tabs-f u-tabs-f--i" data-tabs-mover="-1" aria-label="Ver categorías anteriores" tabindex="-1"><span aria-hidden="true">‹</span></button>' +
+          '<button type="button" class="u-tabs-f u-tabs-f--d" data-tabs-mover="1" aria-label="Ver más categorías" tabindex="-1"><span aria-hidden="true">›</span></button></div>' +
         '<div role="tabpanel">' + listaGuia() + '</div>' : '') +
         '<div class="u-cierre">' +
         cierre() + '</div>';
@@ -564,7 +600,28 @@
     if (md) md.setAttribute('content', 'Guía de ' + NOM + ' para viajar desde Uruguay: qué hacer, playas, dónde comer, cuándo ir y cuánto cuesta el viaje completo.');
     montarMapa();
     ajustarMas();
+    montarTabs();
   }
+  /* pintar() rehace las pestanas y el scroll vuelve a 0: se recupera para que la elegida quede a la vista,
+     y se prenden las flechas segun haya mas pestanas a cada lado. */
+  var tabsX = 0, tabsVistas = false;
+  function montarTabs() {
+    var tb = document.querySelector('.u-tabs'); if (!tb) return;
+    var w = tb.parentNode, on = tb.querySelector('.is-on');
+    if (!tabsVistas) { tabsVistas = true; w.classList.add('is-nuevo'); }
+    var marcar = function () {
+      tabsX = tb.scrollLeft;
+      w.classList.toggle('hay-i', tb.scrollLeft > 4);
+      w.classList.toggle('hay-d', tb.scrollLeft + tb.clientWidth < tb.scrollWidth - 4);
+    };
+    tb.style.scrollBehavior = 'auto';
+    tb.scrollLeft = tabsX;
+    if (on && (on.offsetLeft < tb.scrollLeft || on.offsetLeft + on.offsetWidth > tb.scrollLeft + tb.clientWidth - 40)) tb.scrollLeft = on.offsetLeft - 18;
+    tb.style.scrollBehavior = '';
+    marcar();
+    tb.addEventListener('scroll', marcar, { passive: true });
+  }
+  window.addEventListener('resize', function () { var tb = document.querySelector('.u-tabs'); if (tb) tb.dispatchEvent(new Event('scroll')); });
   function ajustarMas() {
     Array.prototype.forEach.call(document.querySelectorAll('.u-mas'), function (b) {
       var p = b.previousElementSibling, it = b.closest('.u-item');
@@ -608,6 +665,7 @@
     if (t.hasAttribute('data-fav-guia')) { alternarFav(); return; }
     if (t.hasAttribute('data-alerta')) { crearAlerta(); return; }
     if (t.hasAttribute('data-alerta-ver')) { if (window.CSCuenta) CSCuenta.abrir('alertas'); return; }
+    if (t.dataset.tabsMover) { var tb = document.querySelector('.u-tabs'); if (tb) tb.scrollBy({ left: +t.dataset.tabsMover * tb.clientWidth * 0.7 }); return; }
     if (t.dataset.tab) { S.tab = t.dataset.tab; track('guia_pestana', { pestana: S.tab }); pintar(); $('main').scrollTop = 0; return; }
     if (t.dataset.login) { if (window.CSCuenta) CSCuenta.abrir(); return; }
     if (t.dataset.mas) { var it = t.closest('.u-item'), ab = it.classList.toggle('is-abierta'); t.textContent = ab ? 'Ver menos' : 'Ver más'; t.setAttribute('aria-expanded', String(ab)); return; }
