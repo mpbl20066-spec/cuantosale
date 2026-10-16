@@ -104,17 +104,24 @@ const CASOS = [
   {
     nombre: '"si" condicional convertido en "sí" afirmativa',
     archivo: GUIAS, orig: origGuias,
-    romper: (s) => s.replace('Si lo pides como si fuera bus urbano', 'Si lo pides como sí fuera bus urbano')
+    // Estos tres buscan un patron y no una frase exacta: las frases fijas se perdian cada vez que se reescribia
+    // el texto de una guia, y el escenario dejaba de romper nada sin que nadie lo notara.
+    romper: (s) => s.replace(/\bsi vas a\b/, 'sí vas a')
   },
   {
     nombre: 'un caracter fuera del alfabeto colado en el texto',
     archivo: GUIAS, orig: origGuias,
-    romper: (s) => s.replace('con el mejor atardecer del estado', 'con el mejor atardecer del 奇怪 estado')
+    // En el primer "name:" del bloque de datos, que es lo que revisa test.js.
+    romper: (s) => {
+      const j = s.indexOf("name: '", s.indexOf('var GUIAS'));
+      return j < 0 ? s : s.slice(0, j + 7) + '奇怪 ' + s.slice(j + 7);
+    }
   },
   {
     nombre: 'un precio de comida mas caro que un dia entero',
     archivo: GUIAS, orig: origGuias,
-    romper: (s) => s.replace("usd: 3, momento: 'Cualquier hora', nota: 'Se hace en el momento", "usd: 900, momento: 'Cualquier hora', nota: 'Se hace en el momento")
+    // "momento" solo lo tienen los items de "comer": el primero pasa a costar US$ 900.
+    romper: (s) => s.replace(/usd: \d+, momento:/, 'usd: 900, momento:')
   },
   {
     nombre: 'toursFor duplicada en app.js',
