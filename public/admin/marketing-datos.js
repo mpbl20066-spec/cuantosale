@@ -19,7 +19,7 @@ window.CS_MKT = {
    "meta": 40
   }
  ],
- "generado": "2026-10-15",
+ "generado": "2026-10-16",
  "estrategia": [
   {
    "id": "resumen",
@@ -175,7 +175,7 @@ window.CS_MKT = {
     "- 5. **Acción:** entrar a la app o escribir TRASLADO.",
     "- En el calendario: Río (15/10 presupuesto → 26/10 Cristo + Pan de Azúcar), Ilha Grande (22/10 traslado en historias → 30/10 dos paseos), Porto de Galinhas (23/10 jangada → 31/10 qué hacer), Maragogi (21/10 Galés → 3/11 buggy).",
     "## Tours y traslados desde la primera semana",
-    "- Son lo que genera ingresos: no quedan para el final. Primera semana: 16/10 (traslado a Búzios), 17/10 (encuesta + tour real), 19/10 (cómo reservar un tour), 21/10 (Galés).",
+    "- Son lo que genera ingresos: no quedan para el final. Primera semana: 16/10 (jeep 4x4 en Pipa), 17/10 (encuesta + tour real), 19/10 (cómo reservar un tour), 21/10 (Galés).",
     "- **Solo productos reales:** tours y traslados que están en el catálogo, con el precio vigente de la app el día que se arma la pieza. Nada de descuentos ni \"últimos lugares\" inventados.",
     "## Reglas para el resto de las piezas",
     "- Tres historias útiles con un enlace bien elegido valen más que una secuencia larga sin objetivo.",
@@ -662,40 +662,39 @@ window.CS_MKT = {
    "f": "2026-10-16",
    "obj": "convertir",
    "cat": "experiencias",
-   "tema": "Traslado a Búzios desde el aeropuerto de Río",
+   "tema": "Jeep 4x4 en Pipa: playas, acantilados y atardecer",
    "com": {
-    "prod": "Traslado aeropuerto de Río (GIG) → Búzios, compartido por persona o privado por vehículo",
-    "cta": "Consultá el traslado en Cuánto Sale",
-    "reserva": "Búzios queda a 174 km del aeropuerto: el que va, necesita el traslado. Precio y seña claros.",
-    "mide": "Consultas \"TRASLADO\" y pedidos con traslado a Búzios"
+    "prod": "Tour \"Jeep 4x4 por las playas del sur de Pipa\" (día completo, con conductor-guía y sandboard)",
+    "cta": "Descubrí la experiencia en Cuánto Sale",
+    "reserva": "Tour real del catálogo con precio por persona: el que va a Pipa lo reserva con seña.",
+    "mide": "Consultas y pedidos del jeep en Pipa"
    },
    "ig": {
-    "tipo": "Reel (a producir)",
-    "pieza": "Traslado a Búzios",
-    "estado": "Pedíselo a Claude: fotos de Búzios + texto grande, sin voz. Portada estilo grilla (chip de categoría + título corto + flecha): pedísela a Claude, o usá la de la carpeta si dice PORTADA-grilla. Precio: el vigente en la app (al 12/10, US$ 31 por persona compartido).",
-    "gancho": "¿Cómo llegás del aeropuerto de Río a Búzios?",
+    "tipo": "Reel",
+    "pieza": "Jeep 4x4 en Pipa: US$ 34 por persona",
+    "carpeta": "reel-10-jeep-pipa → reel-jeep-pipa.mp4 (portada: PORTADA-grilla.png)",
+    "estado": "Ya armado con el video de Pipa Aventura (con su permiso). Precio al 16/10: US$ 34 por persona (publicado US$ 33,55, redondeado). Si cambió, pedile a Claude que lo actualice.",
+    "gancho": "¿Cuánto sale recorrer Pipa en jeep 4x4?",
     "guion": [
-     "0–2 s: \"¿Cómo llegás del aeropuerto de Río a Búzios?\".",
-     "2–6 s: \"Son 174 km: unas 3 horas por ruta\".",
-     "6–10 s: \"Compartido: US$ [ ] por persona. Privado: US$ [ ] el vehículo\".",
-     "10–14 s: \"Te esperan en el aeropuerto y te dejan en tu posada\".",
-     "14–17 s: \"Se reserva con una seña del 50 %. Consultalo en cuantosale.uy\"."
+     "Ya armado (17 s, sin audio: la música se elige en Instagram)."
     ],
-    "copy": "¿Cómo llegás del aeropuerto de Río a Búzios? 🚐\n\nSon 174 km, unas 3 horas por ruta. Te esperan en el aeropuerto y te dejan en tu posada.\n\n👥 Compartido: US$ [ ] por persona\n🚗 Privado: US$ [ ] el vehículo\n\nSe reserva con una seña del 50 % y no se cobra nada en la web.\nConsultá el traslado en cuantosale.uy (link en la bio).\n\n[Precio solo ida al __/__. Puede cambiar.]\n\n#buzios #riodejaneiro #viajarabrasil #uruguay #cuantosale",
-    "cta": "Consultá el traslado en Cuánto Sale"
+    "cta": "Descubrí la experiencia en cuantosale.uy",
+    "copy": "¿Cuánto sale recorrer Pipa en jeep 4x4? 🚙\n\nUn día entero por el sur de Pipa: los acantilados del Chapadão, la Praia das Minas, Sibaúma y las piscinas naturales de Barra de Cunhaú. A la vuelta, sandboard en las dunas y el atardecer en la Lagoa Guaraíras.\n\n⏱️ Día completo, hasta el atardecer\n🧑‍✈️ Jeep 4x4 con conductor-guía\n🏄 Sandboard incluido\n💵 US$ 34 por persona\n\nTe buscan en tu posada. Se reserva con una seña y no se cobra nada en la web.\nDescubrí la experiencia en cuantosale.uy (link en la bio).\n\n[Precio por persona al 16/10. Del 23/12 al 20/2 sube un poco por temporada alta.]\n\n#pipa #riograndedonorte #jeep #viajarabrasil #uruguay #cuantosale\n\n---\nTikTok:\n¿Cuánto sale recorrer Pipa en jeep 4x4? 🚙 US$ 34 por persona, día completo.\n\nCalculá el tuyo: link en el perfil.\n\n#pipa #viajarabrasil #brasil #uruguay #cuantosale"
    },
    "tt": {
-    "tipo": "Reel (a producir) (el mismo video)",
-    "pieza": "Traslado a Búzios",
+    "tipo": "Reel (el mismo video)",
+    "pieza": "Jeep 4x4 en Pipa: US$ 34 por persona",
+    "carpeta": "reel-10-jeep-pipa → reel-jeep-pipa.mp4 (portada: PORTADA-grilla.png)",
     "igual": true,
-    "copy": "¿Cómo llegás del aeropuerto de Río a Búzios? 🚐\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
+    "copy": "¿Cuánto sale recorrer Pipa en jeep 4x4? 🚙\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
-    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
-    "Historia: \"¿Vas a Búzios, Ilha Grande o Jeri? Escribinos TRASLADO y te pasamos el precio 🚐\"."
+    "Compartí el reel del jeep en historias con el sticker de enlace a cuantosale.uy/destino/pipa?utm_source=ig_historia (texto del sticker: \"Ver el tour\").",
+    "Historia: \"¿Vas a Pipa? 🌊 Mirá la guía gratis: playas, mareas, qué hacer y cuánto sale\" con un cuadro del reel de la guía de Pipa (reel-09-guia-pipa) y el mismo sticker de enlace (texto: \"Ver la guía\").",
+    "Encuesta: \"¿Jeep o cuadriciclo en Pipa?\" 🚙 Jeep (día completo) / 🏍️ Cuadriciclo (2 h). A la noche, la ganadora con su precio de la app."
    ],
    "acc": [
-    "Respondé cada \"TRASLADO\" el mismo día con el precio del catálogo. Anotalo en el Tablero (consultas).",
+    "Respondé cada consulta el mismo día con el precio del catálogo. Anotala en el Tablero (consultas).",
     "Unite a 3 grupos de Facebook de viajeros a Brasil y respondé 3 preguntas con datos, sin link."
    ],
    "n": 3
