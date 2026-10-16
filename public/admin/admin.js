@@ -115,7 +115,7 @@
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
     { t: 'Catálogo', vistas: [['tours', 'Tours'], ['transfers', 'Transfers'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
     { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso']] },
-    { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-contactos', 'Contactos'], ['mkt-creadores', 'Creadores']] }
+    { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-contactos', 'Contactos'], ['mkt-creadores', 'Creadores'], ['mkt-grupos', 'Grupos y foros']] }
   ];
   function esVistaSrv() { return S.vista === 'tours' || S.vista === 'transfers'; }
   function grupoDe(v) { return GRUPOS.filter(function (g) { return g.vistas.some(function (x) { return x[0] === v; }); })[0] || GRUPOS[0]; }
@@ -579,6 +579,7 @@
     if (S.vista === 'mkt-tablero') return h + vistaMktTablero();
     if (S.vista === 'mkt-contactos') return h + vistaMktContactos();
     if (S.vista === 'mkt-creadores') return h + vistaMktCreadores();
+    if (S.vista === 'mkt-grupos') return h + vistaMktGrupos();
     return h + vistaMktHoy();
   }
   function bloqueMkt(p) {
@@ -730,6 +731,24 @@
       var sc = document.createElement('script'); sc.src = '/admin/creadores.js?v=1';
       sc.onload = function () { if (S.vista === 'mkt-creadores') pintar(); };
       sc.onerror = function () { S.crCargando = false; toast('No se pudo abrir Creadores. Recargá la página.'); };
+      document.head.appendChild(sc);
+    }
+    return '<div class="card"><p class="vacio">Cargando…</p></div>';
+  }
+  /* ---------- Grupos y foros: donde se responde, la regla 4 a 1 y lo que trae cada grupo. La pantalla vive en
+     /admin/grupos.js y se carga la primera vez que se abre la pestana. ---------- */
+  var grPanel = null;
+  function vistaMktGrupos() {
+    if (grPanel) return grPanel.vista();
+    if (window.CSGruposPanel) {
+      grPanel = CSGruposPanel({ S: S, esc: esc, kpi: kpi, pintar: pintar, toast: toast, hoy: hoyUY, guardarMkt: guardarMkt, copiar: copiarTexto });
+      return grPanel.vista();
+    }
+    if (!S.grCargando) {
+      S.grCargando = true;
+      var sc = document.createElement('script'); sc.src = '/admin/grupos.js?v=1';
+      sc.onload = function () { if (S.vista === 'mkt-grupos') pintar(); };
+      sc.onerror = function () { S.grCargando = false; toast('No se pudo abrir Grupos. Recargá la página.'); };
       document.head.appendChild(sc);
     }
     return '<div class="card"><p class="vacio">Cargando…</p></div>';
@@ -3507,7 +3526,7 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden) revisarVersion(); });
 
   /* ---------- arranque ---------- */
-  var vq = /[?&]vista=(operaciones|servicios|publicar|proveedores|importar|mkt-hoy|mkt-calendario|mkt-tablero|mkt-contactos|mkt-creadores)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
+  var vq = /[?&]vista=(operaciones|servicios|publicar|proveedores|importar|mkt-hoy|mkt-calendario|mkt-tablero|mkt-contactos|mkt-creadores|mkt-grupos)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
   api('sesion').then(function (s) {
     if (!s.configurado) { app.innerHTML = '<div class="login"><div class="sec"><h1 style="margin:0 0 8px;font-size:18px">Panel sin configurar</h1><p class="sub">Definí las variables ADMIN_USER y ADMIN_PASS en el servidor (y reiniciá) para activar el panel.</p></div></div>'; return; }
     if (s.activo) cargar(); else pintarLogin();
