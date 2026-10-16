@@ -115,7 +115,7 @@
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
     { t: 'Catálogo', vistas: [['tours', 'Tours'], ['transfers', 'Transfers'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
     { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso']] },
-    { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-estrategia', 'Estrategia'], ['mkt-colabs', 'Perfil y mensajes'], ['mkt-contactos', 'Contactos'], ['mkt-creadores', 'Creadores']] }
+    { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-contactos', 'Contactos'], ['mkt-creadores', 'Creadores']] }
   ];
   function esVistaSrv() { return S.vista === 'tours' || S.vista === 'transfers'; }
   function grupoDe(v) { return GRUPOS.filter(function (g) { return g.vistas.some(function (x) { return x[0] === v; }); })[0] || GRUPOS[0]; }
@@ -577,10 +577,9 @@
     if (S.vista === 'mkt-hoy') return h + vistaMktHoy();
     if (S.vista === 'mkt-calendario') return h + vistaMktCalendario();
     if (S.vista === 'mkt-tablero') return h + vistaMktTablero();
-    if (S.vista === 'mkt-estrategia') return h + vistaMktEstrategia();
     if (S.vista === 'mkt-contactos') return h + vistaMktContactos();
     if (S.vista === 'mkt-creadores') return h + vistaMktCreadores();
-    return h + vistaMktColabs();
+    return h + vistaMktHoy();
   }
   function bloqueMkt(p) {
     if (!p) return '';
@@ -714,30 +713,8 @@
     }).join('') + '<p class="sub">Se guarda solo al salir de cada casillero.</p></section>';
     h += '<section class="sec"><h3>Revisión de la semana</h3><p class="sub">1 cosa que repito, 1 que cambio, 1 que dejo. Y las preguntas que se repitieron.</p>' +
       '<textarea rows="6" data-mkt-nota="' + id + '" placeholder="Repito: …&#10;Cambio: …&#10;Dejo: …&#10;Preguntas que llegaron: …">' + esc(S.mkt.estado.notas[id] || '') + '</textarea>' +
-      '<p class="sub">Cómo hacer la revisión: Estrategia > Revisión del martes.</p></section>';
+      '</section>';
     return h + '</div>';
-  }
-  function vistaMktEstrategia() {
-    var M = window.CS_MKT, secs = M.estrategia.slice(0, 7).concat([{ id: 'fijados', t: 'Los 3 reels fijados' }], M.estrategia.slice(7));
-    var sel = S.mktSec || 'resumen', s = secs.filter(function (x) { return x.id === sel; })[0] || secs[0];
-    var h = '<div class="vhead"><div><h2>Estrategia</h2><p>El porqué del plan. Para el día a día no hace falta: usá Hoy.</p></div></div>';
-    h += '<div class="bar"><div class="chips">' + secs.map(function (x) { return '<button class="chip" data-mkt-sec="' + x.id + '" aria-pressed="' + (x === s) + '">' + esc(x.t) + '</button>'; }).join('') + '</div></div>';
-    if (s.id !== 'fijados') return h + '<section class="sec mkt-texto"><h3>' + esc(s.t) + '</h3>' + (s.id === 'pilares' ? barrasCat() : '') + textoMkt(s.txt) + '</section>';
-    h += '<section class="sec mkt-texto">' + textoMkt(M.fijados.intro) + '</section>';
-    M.fijados.reels.forEach(function (r) {
-      h += '<section class="sec mkt-texto" style="margin-top:12px"><div class="sec__cab"><h3>Fijado ' + r.n + ' · ' + esc(r.t) + ' · ' + esc(r.dur) + '</h3>' + checkMkt('fijado-' + r.n, 'Publicado y fijado') + '</div>' +
-        '<p class="mkt-estado">' + esc(r.estado) + '</p><p class="sub">Carpeta: <code>' + esc(r.carpeta) + '</code></p>' +
-        (r.grabar ? '<p class="mkt-nota"><b>Qué grabar:</b> ' + esc(r.grabar) + '</p>' : '') +
-        '<table><thead><tr><th>Tiempo</th><th>Imagen</th><th>Texto en pantalla</th></tr></thead><tbody>' + r.escenas.map(function (e) { return '<tr><td data-l="Tiempo">' + esc(e[0]) + '</td><td data-l="Imagen">' + esc(e[1]) + '</td><td data-l="Texto"><b>' + esc(e[2]) + '</b></td></tr>'; }).join('') + '</tbody></table>' +
-        copiable(r.voz, 'Voz sintética (opcional)') + copiable(r.copy, 'Texto de la publicación') + '<p><span class="mkt-et">Llamado a la acción</span> ' + esc(r.cta) + '</p></section>';
-    });
-    return h;
-  }
-  function vistaMktColabs() {
-    var M = window.CS_MKT;
-    return '<div class="vhead"><div><h2>Perfil, creadores y alianzas</h2><p>Los mensajes están listos para copiar; cambiá lo que está entre corchetes.</p></div></div>' +
-      '<div class="mkt-grid"><section class="sec mkt-texto">' + textoMkt(M.colabs.txt) + '</section><section class="sec">' +
-      M.mensajes.map(function (m) { return copiable(m.copy, m.t); }).join('') + '</section></div>';
   }
   /* ---------- Creadores: los socios, su link, lo que trajeron y lo que se les debe. La pantalla vive en
      /admin/creadores.js y se carga la primera vez que se abre la pestana. ---------- */
@@ -818,7 +795,7 @@
     var rondas = todos.map(function (c) { return c.ronda; }).filter(function (r, i, a) { return r && a.indexOf(r) === i; }).sort();
     var cuenta = function (f) { return l.filter(f).length; };
     var opts = function (obj, v) { return Object.keys(obj).map(function (k) { return '<option value="' + k + '"' + (k === v ? ' selected' : '') + '>' + esc(obj[k]) + '</option>'; }).join(''); };
-    var h = '<div class="vhead"><div><h2>Contactos</h2><p>A quién le escribiste, por dónde y qué respondió. Se guarda solo al cambiar cada campo. Los mensajes para mandar están en Perfil y mensajes.</p></div>' +
+    var h = '<div class="vhead"><div><h2>Contactos</h2><p>A quién le escribiste, por dónde y qué respondió. Se guarda solo al cambiar cada campo.</p></div>' +
       '<button class="btn" data-mkt-ct-nuevo>+ Agregar contacto</button></div>';
     h += '<section class="kpis kpis--4">' + kpi('Pendientes de escribir', cuenta(function (c) { return c.estado === 'pendiente'; }), 'todavía no les escribiste') +
       kpi('Esperando respuesta', cuenta(function (c) { return c.estado === 'escrito' || c.estado === 'seguimiento'; }), 'les escribiste') +
@@ -3303,7 +3280,6 @@
     var md = e.target.closest('[data-mkt-dia]'); if (md) { S.mktDia = +md.getAttribute('data-mkt-dia'); pintar(); window.scrollTo(0, 0); return; }
     var mi = e.target.closest('[data-mkt-ir]'); if (mi) { S.mktDia = +mi.getAttribute('data-mkt-ir'); S.vista = 'mkt-hoy'; pintar(); window.scrollTo(0, 0); return; }
     var ms = e.target.closest('[data-mkt-sem]'); if (ms) { S.mktSem = +ms.getAttribute('data-mkt-sem'); pintar(); return; }
-    var mse = e.target.closest('[data-mkt-sec]'); if (mse) { S.mktSec = mse.getAttribute('data-mkt-sec'); pintar(); return; }
     if (e.target.closest('[data-mkt-recargar]')) { S.mkt = null; pintar(); return; }
     if (e.target.closest('[data-mkt-ir-creadores]')) { S.vista = 'mkt-creadores'; pintar(); window.scrollTo(0, 0); return; }
     var mct = e.target.closest('[data-mkt-ct-tipo]'); if (mct) { S.mktCtTipo = mct.getAttribute('data-mkt-ct-tipo'); pintar(); return; }
@@ -3531,7 +3507,7 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden) revisarVersion(); });
 
   /* ---------- arranque ---------- */
-  var vq = /[?&]vista=(operaciones|servicios|publicar|proveedores|importar|mkt-hoy|mkt-calendario|mkt-tablero|mkt-estrategia|mkt-colabs|mkt-contactos)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
+  var vq = /[?&]vista=(operaciones|servicios|publicar|proveedores|importar|mkt-hoy|mkt-calendario|mkt-tablero|mkt-contactos|mkt-creadores)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
   api('sesion').then(function (s) {
     if (!s.configurado) { app.innerHTML = '<div class="login"><div class="sec"><h1 style="margin:0 0 8px;font-size:18px">Panel sin configurar</h1><p class="sub">Definí las variables ADMIN_USER y ADMIN_PASS en el servidor (y reiniciá) para activar el panel.</p></div></div>'; return; }
     if (s.activo) cargar(); else pintarLogin();
