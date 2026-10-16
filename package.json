@@ -54,7 +54,9 @@
     "test:operativa": "node test-operativa.js",
     "test:travelpayouts": "node test-travelpayouts.js",
     "test:login": "node test-login-intentos.js",
-    "test:todo": "node test.js && node test-checkout.js && node test-hoteles.js && node test-tours.js && node test-serpapi-cache.js && node test-operaciones.js && node test-finanzas.js && node test-reglas.js && node test-operativa.js && node test-travelpayouts.js && node test-login-intentos.js && node test-guias-humo.js"
+    "test:salud": "node test-salud.js",
+    "test:todo": "node test.js && node test-checkout.js && node test-hoteles.js && node test-tours.js && node test-serpapi-cache.js && node test-operaciones.js && node test-finanzas.js && node test-reglas.js && node test-operativa.js && node test-travelpayouts.js && node test-login-intentos.js && node test-salud.js && node test-guias-humo.js",
+    "respaldo:bajar": "node scripts/bajar-respaldo.js"
   },
   "engines": {
     "node": ">=18"

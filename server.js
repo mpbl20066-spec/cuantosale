@@ -34,6 +34,7 @@ const guiSecreta = require('./lib/guias');
 const playas = require('./lib/playas');
 const mareas = require('./lib/mareas');
 const destinosWeb = require('./lib/destinos-web');
+const salud = require('./lib/salud');
 const blog = require('./lib/blog');
 // Vuelos reales. El agregador es el único que habla con SerpAPI: ahí viven el
 // cache, el dedupe de pedidos simultáneos y la pausa cuando se acaban los
@@ -1959,6 +1960,7 @@ async function precalentarVuelos(req, res) {
     /* Solo en la de las 9 (sin ronda) y la de las 21 UTC (ronda=5): con los hoteles guardados 8 h alcanza, y sumada a
        las guias la corrida rozaba el tope de 60 s de Vercel (medido: 63 s) */
     conPopulares ? precalentarPopulares(topeEnv('PRECALENTAR_POPULARES_MAX', 6)) : null]);
+  await salud.marcar('precalentar', true, { ronda: ronda, vuelos: r[0], guias: r[1] });
   return sendJson(res, 200, Object.assign({ rutas: rutas.length }, r[0], { guias: Object.assign({ rutas: meses.length }, r[1]), hoteles: r[2], populares: r[3] }));
 }
 
@@ -3056,7 +3058,7 @@ const PRELAUNCH_PUBLIC_API = new Set(['/api/config', '/api/guia/token', '/api/tr
 // el único que lo necesitaba era el webhook de Duffel, que ya no existe porque
 // la app ya no emite boletos. Todos los endpoints de la API, incluido el
 // calendario de vuelos, siguen pidiendo user/pass.
-const PRELAUNCH_EXEMPT = new Set(['/api/precalentar', '/api/alertas/revisar', '/api/mails/revisar']);   // traen su propio secreto (CRON_SECRET)
+const PRELAUNCH_EXEMPT = new Set(['/api/precalentar', '/api/alertas/revisar', '/api/mails/revisar', '/api/respaldo', '/api/salud/revisar']);   // traen su propio secreto (CRON_SECRET)
 
 function denyPrelaunchJson(res) {
   // Sin WWW-Authenticate a propósito: en una respuesta a un fetch de la app
@@ -3608,15 +3610,39 @@ function handleRequest(req, res) {
       /* De paso, la cotizacion del real contra la del catalogo: si se alejo mas que el umbral, un mail al panel. */
       return require('./lib/mail-avisos').revisar({ tasas: getTasas }).then(async function (r) {
         r.cotizacion = await require('./lib/reglas').revisarCotizacion(getTasas).catch(function (e) { return { error: e.message }; });
+        await salud.marcar('mails', true);
         sendJson(res, 200, r);
-      }).catch(function (e) {
+      }).catch(async function (e) {
         console.error('[mails]', e.message);
+        await salud.marcar('mails', false, { error: e.message });
         sendJson(res, 500, { error: e.message });
       });
     }
     if (req.method === 'GET' && url.pathname === '/api/precalentar') {
-      return precalentarVuelos(req, res).catch(function (e) {
+      return precalentarVuelos(req, res).catch(async function (e) {
         console.error('[precalentar]', e.message);
+        await salud.marcar('precalentar', false, { error: e.message });
+        sendJson(res, 500, { error: e.message });
+      });
+    }
+    /* Respaldo diario de la base a Supabase Storage (lib/respaldo.js) y la revision de salud que avisa por mail si
+       algo falla (lib/salud.js). Crons de Vercel con CRON_SECRET, como /api/precalentar. */
+    if (req.method === 'GET' && (url.pathname === '/api/respaldo' || url.pathname === '/api/salud/revisar')) {
+      const cron = String(process.env.CRON_SECRET || '').trim();
+      if (cron && req.headers.authorization !== 'Bearer ' + cron) { res.writeHead(401); return res.end(); }
+      if (url.pathname === '/api/salud/revisar') {
+        return salud.revisar().then(function (r) { sendJson(res, 200, r); }).catch(function (e) {
+          console.error('[salud]', e.message);
+          sendJson(res, 500, { error: e.message });
+        });
+      }
+      return require('./lib/respaldo').respaldar().then(async function (r) {
+        const fallidas = Object.keys(r.errores);
+        await salud.marcar('respaldo', !fallidas.length, fallidas.length ? { error: 'fallaron: ' + fallidas.join(', '), resumen: r } : r);
+        sendJson(res, 200, r);
+      }).catch(async function (e) {
+        console.error('[respaldo]', e.message);
+        await salud.marcar('respaldo', false, { error: e.message });
         sendJson(res, 500, { error: e.message });
       });
     }

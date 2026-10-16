@@ -313,6 +313,11 @@ El server ya sabía ir en cualquier orden: cotiza con `?dest=` y `?second=` y la
 
 `/api/vuelos/calendario` devuelve 200 con `puntos: []` cuando no hay credenciales, y también cuando falla: es una mejora sobre la estimación, nunca la única fuente. Un fallo nunca rompe la pantalla de resultados.
 
+### Respaldo y avisos cuando algo falla
+
+- **Respaldo diario** (`/api/respaldo`, 6 UTC, `lib/respaldo.js`): baja todas las tablas que la service role puede leer a Supabase Storage, bucket privado `interno`, en `respaldos/<fecha>/`, y guarda 30 días. No cubre los archivos de Storage (comprobantes, fotos) ni la pérdida del proyecto entero: para eso, bajar uno de vez en cuando con `npm run respaldo:bajar -- <fecha>` y restaurar con `scripts/restaurar-base.js`.
+- **Revisión de salud** (`/api/salud/revisar`, 14 UTC, `lib/salud.js`): cada cron anota cómo le fue en `interno/estado/`; la revisión mira que todos hayan corrido en las últimas 26 h y salido bien, que Supabase responda, que estén las keys de Ignav y Booking y que el último precalentar no haya fallado entero. **Manda mail solo si algo falla**, a `ADMIN_NOTIFY_EMAIL` (o `RESERVAS_EMAIL`).
+
 ### Costos y límites de las consultas
 
 - El gasto de vuelos lo topa `IGNAV_DAILY_MAX` por instancia; el consumo real hay que mirarlo en el panel de Ignav.
@@ -330,7 +335,7 @@ Sirve cualquier hosting que ejecute Node (Render, Railway, Fly.io, un VPS, etc.)
 
 ## 4. Pruebas
 
-`npm run test:todo` corre todas las pruebas en orden (`test.js`, checkout, hoteles, tours, cache de vuelos, operaciones, finanzas, reglas, operativa, Travelpayouts, intentos de login y la de humo de las guías). Ninguna consume cuota de proveedores.
+`npm run test:todo` corre todas las pruebas en orden (`test.js`, checkout, hoteles, tours, cache de vuelos, operaciones, finanzas, reglas, operativa, Travelpayouts, intentos de login, salud y respaldo, y la de humo de las guías). Ninguna consume cuota de proveedores.
 
 `node test.js` corre pruebas del modelo de costos y el servidor. Las búsquedas reales usan la suscripción de RapidAPI y consumen la cuota del plan; las pruebas locales no deben consumirla.
 

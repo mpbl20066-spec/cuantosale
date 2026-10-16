@@ -44,6 +44,14 @@
     {
       "path": "/api/mails/revisar",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/respaldo",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/salud/revisar",
+      "schedule": "0 14 * * *"
     }
   ]
 }
