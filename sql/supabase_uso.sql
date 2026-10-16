@@ -28,3 +28,7 @@ $$;
 
 revoke all on function public.uso_sumar(date, text, text) from public, anon, authenticated;
 grant execute on function public.uso_sumar(date, text, text) to service_role;
+
+-- El server lee el resumen para el panel (select); las sumas pasan por la funcion de arriba.
+revoke all on public.uso_diario from anon, authenticated;
+grant select on public.uso_diario to service_role;
