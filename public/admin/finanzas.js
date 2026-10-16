@@ -19,6 +19,7 @@
   var EST = { registrado: 'Por verificar', verificado: 'Verificado', anulado: 'Anulado' };
   var EST_CLS = { registrado: 'p-pendiente', verificado: 'p-pagado', anulado: 'fin-anul' };
   var CONC = { sena: 'Seña', saldo: 'Saldo', total: 'Total', penalidad: 'Penalidad', ajuste: 'Ajuste' };
+  var MI_PCT = 20;   // Reparto: mi comision, % del margen cobrado. El resto le toca a Martin.
   var MEDIO = { transferencia: 'Transferencia', pix: 'Pix', deposito: 'Depósito', efectivo: 'Efectivo', otro: 'Otro' };
 
   window.CSFinanzasPanel = function (ctx) {
@@ -29,6 +30,7 @@
     function m$(mon, n) { return (SIMB[mon] || mon) + ' ' + (Number(n) || 0).toLocaleString('es-UY', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
     function porMon(o) { var p = MONEDAS.filter(function (k) { return o && o[k]; }).map(function (k) { return m$(k, o[k]); }); return p.length ? p.join(' · ') : '—'; }
     function f(d) { return ctx.fecha ? ctx.fecha(d) : d; }
+    function r2(n) { return Math.round(n * 100) / 100; }
     function hoy() { return new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10); }
     /* tc = destino / origen. Se muestra al reves si queda mas legible: "1 US$ = $U 40,56". */
     function tcTxt(a, origen) { var tc = Number(a.tc) || 0; return tc >= 1 ? '1 ' + mon(origen) + ' = ' + m$(a.moneda_destino, Math.round(tc * 100) / 100) : '1 ' + mon(a.moneda_destino) + ' = ' + m$(origen, Math.round(100 / tc) / 100); }
@@ -71,6 +73,7 @@
 
     /* ---------- pantallas ---------- */
     function vista() {
+      if (S.vista === 'fin-reparto') return vistaReparto();   // sale de los pedidos: no necesita las tablas de finanzas
       if (!st.estado && !st.cargando && !st.error) cargar();
       if (st.error) return '<p class="aviso">' + esc(st.error) + '</p>';
       if (!st.estado || (st.cargando && !st.datos)) return '<div class="card"><p class="vacio">Cargando…</p></div>';
@@ -131,6 +134,56 @@
       }).join('') + '</ul>' : '<p class="vacio">Nada pendiente.</p>') + '</div>';
       return h;
     }
+
+    /* Reparto: de cada pedido, el margen (venta − costo) menos la comision del creador que lo trajo, en la parte que ya
+       cobramos. MI_PCT de eso es mio; el resto, de Martin. Si el cliente pago la sena, se reparte en proporcion a lo
+       cobrado; lo que falta cobrar se muestra aparte. El mes es el del ultimo pago del pedido. */
+    function vistaReparto() {
+      var cr = ctx.creadores ? ctx.creadores() : {};
+      if (!cr) return '<div class="card"><p class="vacio">Cargando las comisiones de los creadores…</p></div>';
+      var aviso = cr.error ? '<p class="aviso">No se pudieron cargar las comisiones de los creadores (' + esc(cr.error) + '): el reparto se muestra sin descontarlas.</p>' : '';
+      if (cr.error) cr = {};
+      var neto = function (p) { return (Number((p.cuentas || {}).margen_usd) || 0) - (cr[p.id] ? cr[p.id].com : 0); };
+      var filas = pedidos().map(function (p) {
+        var c = p.cuentas || {};
+        var total = Number(c.total_usd) || 0, cobrado = Math.max(0, Number(c.cobrado_usd) || 0);
+        if (!cobrado || total <= 0) return null;
+        var frac = Math.min(1, cobrado / total);
+        var ult = (p.pagos || []).filter(function (x) { return !x.reembolso; }).map(function (x) { return x.fecha; }).sort().pop() || String(p.created_at || '').slice(0, 10);
+        var mg = r2((Number(c.margen_usd) || 0) * frac), crea = cr[p.id] ? r2(cr[p.id].com * frac) : 0, m = r2(mg - crea);
+        return { p: p, mes: ult.slice(0, 7), fecha: ult, total: total, cobrado: cobrado, mg: mg, crea: crea, creador: cr[p.id] && cr[p.id].nombre, margen: m, falta: r2(neto(p) - m), mio: r2(m * MI_PCT / 100), martin: r2(m * (100 - MI_PCT) / 100) };
+      }).filter(Boolean).sort(function (a, b) { return b.fecha.localeCompare(a.fecha); });
+      var meses = {}; filas.forEach(function (x) { meses[x.mes] = (meses[x.mes] || 0) + 1; });
+      var esteMes = hoy().slice(0, 7);
+      if (!st.fMes) st.fMes = esteMes;
+      var ops = [[esteMes, nombreMes(esteMes), meses[esteMes] || 0]].concat(Object.keys(meses).filter(function (k) { return k !== esteMes; }).sort().reverse().slice(0, 5).map(function (k) { return [k, nombreMes(k), meses[k]]; }), [['todo', 'Todo', filas.length]]);
+      var lista = filas.filter(function (x) { return st.fMes === 'todo' || x.mes === st.fMes; });
+      var sum = function (k) { return r2(lista.reduce(function (a, x) { return a + x[k]; }, 0)); };
+      var falta = r2(pedidos().reduce(function (a, p) {
+        var c = p.cuentas || {}, total = Number(c.total_usd) || 0, cob = Math.max(0, Number(c.cobrado_usd) || 0);
+        return p.estado === 'cancelado' || total <= 0 ? a : a + neto(p) * (1 - Math.min(1, cob / total));
+      }, 0));
+      var h = aviso + '<section class="kpis kpis--4" aria-label="Reparto">' +
+        kpi('Le toca a Martín', ctx.usd(sum('martin')), (100 - MI_PCT) + ' % de lo que queda', 'kpi--ok') +
+        kpi('Tu comisión', ctx.usd(sum('mio')), MI_PCT + ' % de lo que queda', 'kpi--ok') +
+        kpi('Queda para repartir', ctx.usd(sum('margen')), 'margen cobrado ' + ctx.usd(sum('mg')) + (sum('crea') ? ' − creadores ' + ctx.usd(sum('crea')) : ''), '') +
+        kpi('Por entrar', ctx.usd(r2(falta * MI_PCT / 100)), 'tu parte de lo que falta cobrar (Martín: ' + ctx.usd(r2(falta * (100 - MI_PCT) / 100)) + ')', '') + '</section>';
+      h += '<div class="bar">' + chips('fMes', st.fMes, ops) + '</div>';
+      if (!lista.length) return h + '<div class="card"><p class="vacio">No hay pedidos cobrados en este período.</p></div>';
+      return h + '<div class="card fin-tabla"><table><thead><tr><th>Pedido</th><th>Último pago</th><th class="num">Cobrado</th><th class="num">Margen cobrado</th><th class="num">Creador</th><th class="num">Martín (' + (100 - MI_PCT) + ' %)</th><th class="num">Vos (' + MI_PCT + ' %)</th></tr></thead><tbody>' +
+        lista.map(function (x) {
+          return '<tr><td data-l="Pedido"><b>' + esc(x.p.ref || '') + '</b><span class="sub">' + esc(x.p.cliente_nombre || 'sin nombre') + (x.p.estado === 'cancelado' ? ' · cancelado' : '') + '</span></td>' +
+            '<td data-l="Último pago">' + esc(f(x.fecha)) + '</td>' +
+            '<td class="num" data-l="Cobrado">' + esc(ctx.usd(x.cobrado)) + (x.cobrado + 0.005 < x.total ? '<span class="sub">de ' + esc(ctx.usd(x.total)) + '</span>' : '') + '</td>' +
+            '<td class="num" data-l="Margen cobrado">' + esc(ctx.usd(x.mg)) + '</td>' +
+            '<td class="num" data-l="Creador">' + (x.crea ? '− ' + esc(ctx.usd(x.crea)) + '<span class="sub">' + esc(x.creador || '') + '</span>' : '<span class="sub">—</span>') + '</td>' +
+            '<td class="num" data-l="Martín"><b>' + esc(ctx.usd(x.martin)) + '</b></td>' +
+            '<td class="num" data-l="Vos"><b class="ok">' + esc(ctx.usd(x.mio)) + '</b>' + (x.falta > 0 ? '<span class="sub">faltan cobrar ' + esc(ctx.usd(x.falta)) + ' a repartir</span>' : '') + '</td></tr>';
+        }).join('') +
+        '<tr class="fin-tot"><td colspan="2"><b>Total</b></td><td class="num">' + esc(ctx.usd(sum('cobrado'))) + '</td><td class="num">' + esc(ctx.usd(sum('mg'))) + '</td><td class="num">' + (sum('crea') ? '− ' + esc(ctx.usd(sum('crea'))) : '—') + '</td><td class="num"><b>' + esc(ctx.usd(sum('martin'))) + '</b></td><td class="num"><b class="ok">' + esc(ctx.usd(sum('mio'))) + '</b></td></tr>' +
+        '</tbody></table></div><p class="sub">Margen = lo que paga el cliente − lo que cobra el proveedor (en US$, como figura en el pedido). Primero se descuenta la comisión del creador que trajo el pedido (la de Marketing &gt; Creadores) y lo que queda se reparte. Si un pedido está pagado en parte, se reparte la parte cobrada.</p>';
+    }
+    function nombreMes(k) { var n = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][Number(k.slice(5, 7)) - 1] || k; return n.charAt(0).toUpperCase() + n.slice(1) + (k.slice(0, 4) !== hoy().slice(0, 4) ? ' ' + k.slice(0, 4) : ''); }
 
     function chips(nombre, actual, ops) {
       return '<div class="chips">' + ops.map(function (o) { return '<button class="chip" data-fin-f="' + nombre + '" data-v="' + o[0] + '" aria-pressed="' + (actual === o[0]) + '">' + esc(o[1]) + (o[2] != null ? '<span>' + o[2] + '</span>' : '') + '</button>'; }).join('') + '</div>';
@@ -509,7 +562,7 @@
         '.fin-at{list-style:none;margin:0;padding:0 8px 8px}.fin-at li{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 10px;border-top:1px solid var(--line);border-left:4px solid var(--info)}' +
         '.fin-at li.fin-at--bad{border-left-color:var(--bad)}.fin-at li.fin-at--warn{border-left-color:var(--warn)}.fin-at .btn{flex:none}' +
         '.fin-tabla{overflow-x:auto}.fin-tabla td[data-l=Fecha],.fin-tabla td[data-l=Vence],.fin-tabla td[data-l="Próximo venc."]{white-space:nowrap}.fin-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.fin-tachado td{opacity:.6}.fin-anul{background:var(--line);color:var(--muted)}' +
-        '.fin-x{border:0;background:none;color:var(--bad);font-weight:700;cursor:pointer;padding:0 4px;min-height:0}.kpi--bad b{color:var(--bad)}' +
+        '.fin-x{border:0;background:none;color:var(--bad);font-weight:700;cursor:pointer;padding:0 4px;min-height:0}.kpi--bad b{color:var(--bad)}.fin-tot td{border-top:2px solid var(--line)}' +
         '.fin-velo{position:fixed;inset:0;z-index:50;background:rgba(5,8,15,.55);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 16px}' +
         '.fin-caja{width:min(640px,100%);background:var(--bg);border-radius:16px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.3)}' +
         '.fin-form{padding:16px 18px;display:grid;gap:12px}.fin-ancho{grid-column:1/-1}.fin-det{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}' +

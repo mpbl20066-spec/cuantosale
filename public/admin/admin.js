@@ -110,7 +110,7 @@
      recuerda la ultima pantalla abierta. */
   var GRUPOS = [
     { t: 'Pedidos', vistas: [['pedidos', 'Pedidos']] },
-    { t: 'Finanzas', vistas: [['fin-resumen', 'Resumen'], ['fin-cobros', 'Cobros'], ['fin-pagos', 'Pagos a proveedores'], ['fin-movs', 'Transferencias'], ['fin-audit', 'Auditoría']] },
+    { t: 'Finanzas', vistas: [['fin-resumen', 'Resumen'], ['fin-cobros', 'Cobros'], ['fin-pagos', 'Pagos a proveedores'], ['fin-movs', 'Transferencias'], ['fin-reparto', 'Le toca a Martín'], ['fin-audit', 'Auditoría']] },
     { t: 'Clientes', vistas: [['usuarios', 'Usuarios'], ['viajes', 'Viajes guardados']] },
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
     { t: 'Catálogo', vistas: [['tours', 'Tours'], ['transfers', 'Transfers'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
@@ -124,15 +124,34 @@
   var finPanel = null;
   function vistaFin() {
     if (finPanel) return finPanel.vista();
-    if (window.CSFinanzasPanel) { finPanel = CSFinanzasPanel({ S: S, api: api, esc: esc, kpi: kpi, pintar: pintar, toast: toast, usd: usd, fecha: fecha, fechaHora: fechaHora }); return finPanel.vista(); }
+    if (window.CSFinanzasPanel) { finPanel = CSFinanzasPanel({ S: S, api: api, esc: esc, kpi: kpi, pintar: pintar, toast: toast, usd: usd, fecha: fecha, fechaHora: fechaHora, creadores: comisionesCreadores }); return finPanel.vista(); }
     if (!S.finCargando) {
       S.finCargando = true;
-      var sc = document.createElement('script'); sc.src = '/admin/finanzas.js?v=1';
+      var sc = document.createElement('script'); sc.src = '/admin/finanzas.js?v=3';
       sc.onload = function () { if (S.vista.indexOf('fin-') === 0) pintar(); };
       sc.onerror = function () { S.finCargando = false; toast('No se pudo abrir Finanzas. Recargá la página.'); };
       document.head.appendChild(sc);
     }
     return '<div class="card"><p class="vacio">Cargando…</p></div>';
+  }
+  /* Para Finanzas > Le toca a Martin: la comision del creador de cada pedido, { pedido_id: { nombre, com } }. Misma
+     cuenta que Marketing > Creadores (creadores.js): % de lo vendido en los items que siguen en pie; cancelado no paga.
+     null mientras se carga Marketing; { error } si no se pudo. */
+  function comisionesCreadores() {
+    if (!S.mkt) cargarMkt();
+    if (!S.mkt || S.mkt.cargando) return null;
+    if (S.mkt.error) return { error: S.mkt.error };
+    var socios = contactosMkt().filter(function (c) { return c.tipo === 'creador' && c.estado === 'acepto'; });
+    var porId = {}, porCodigo = {}, asig = S.mkt.estado.asignados || {}, out = {};
+    socios.forEach(function (c) { porId[c.id] = c; if (c.codigo) porCodigo['creador-' + c.codigo] = c; });
+    (S.datos.pedidos || []).forEach(function (p) {
+      var m = /^web:(.+)$/.exec(p.origen || ''), c = asig[p.id] ? porId[asig[p.id]] : m && porCodigo[m[1]];
+      if (!c || p.estado === 'cancelado') return;
+      var pct = Number(c.comision === '' || c.comision == null ? 6 : c.comision) || 0;   // 6: COMISION de creadores.js
+      var v = (p.items || []).reduce(function (t, i) { return t + (i.estado === 'cancelado' ? 0 : Number(i.precio_usd) || 0); }, 0);
+      out[p.id] = { nombre: c.persona || c.medio || c.codigo, com: Math.round(v * pct) / 100 };
+    });
+    return out;
   }
   function vistaPrecarga() {
     var pc = S.precarga;
@@ -535,8 +554,8 @@
     Promise.all([datos, api('marketing'), api('uso?dias=90').catch(function () { return null; })]).then(function (r) {
       S.mkt = { estado: r[1].estado, almacenamiento: r[1].almacenamiento }; S.mktUso = r[2];
       if (S.mktDia == null) S.mktDia = Math.max(0, Math.min(window.CS_MKT.dias.length - 1, difDias(window.CS_MKT.inicio, hoyUY())));
-      if (S.vista.indexOf('mkt-') === 0) pintar();
-    }).catch(function (e) { S.mkt = { error: e.message }; if (S.vista.indexOf('mkt-') === 0) pintar(); });
+      if (S.vista.indexOf('mkt-') === 0 || S.vista === 'fin-reparto') pintar();
+    }).catch(function (e) { S.mkt = { error: e.message }; if (S.vista.indexOf('mkt-') === 0 || S.vista === 'fin-reparto') pintar(); });
   }
   function guardarMkt(cuerpo) {
     return api('marketing/guardar', cuerpo).then(function (r) { S.mkt.estado = r.estado; }).catch(function (e) { toast(e.message); });
