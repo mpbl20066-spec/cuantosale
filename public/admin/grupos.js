@@ -28,6 +28,13 @@
     ['Pregunta de precio (sin link)', 'Te paso lo que vengo viendo para [mes]: el vuelo [ciudad] ida y vuelta anda en US$ [x] por persona. Del aeropuerto a [destino] son [horas]; el traslado compartido sale unos US$ [y] por persona y el privado US$ [z] por auto (si van 3 o 4, conviene el privado).\n\nOjo que el vuelo cambia mucho según el día: saliendo [día] suele estar más barato.'],
     ['La 5ª respuesta (con link)', 'Para una semana de a 2 calculá unos US$ [total] por persona entre vuelo, traslado y alojamiento, sin comidas.\n\nSi querés verlo con tus fechas, lo armamos todo sumado en Cuánto Sale (somos uruguayos, es gratis): [link del grupo]'],
     ['Grupo que no acepta links', '[El dato concreto que preguntaron].\n\nSi te sirve, nosotros armamos el viaje entero sumado (vuelo, traslado, alojamiento y paseos) en una app que se llama Cuánto Sale: la encontrás en Google.'],
+    ['Post para Reddit (r/uruguay, aporte con datos)', 'Título: Cuánto sale una semana en Brasil desde Montevideo en [mes]: comparé [n] destinos\n\n' +
+      'Estuve juntando precios reales para el verano y capaz le sirve a alguien que esté armando el viaje. Todo para 2 personas, 7 noches, precios del [fecha] (cambian todos los días):\n\n' +
+      '| Destino | Vuelo i/v (los 2) | Traslado aeropuerto | Alojamiento 7 noches | Total por persona |\n|---|---|---|---|---|\n' +
+      '| [Floripa] | US$ [x] | US$ [y] | desde US$ [z] | ~US$ [t] |\n| [Río] | US$ [x] | US$ [y] | desde US$ [z] | ~US$ [t] |\n| [Bombinhas] | US$ [x] | US$ [y] | desde US$ [z] | ~US$ [t] |\n\n' +
+      'Lo que más me sorprendió:\n- [dato 1: ej. saliendo martes el vuelo baja US$ X]\n- [dato 2: ej. a Bombinhas no hay aeropuerto, el traslado desde Floripa es 1 h 30]\n- [dato 3]\n\n' +
+      'Sin comidas ni paseos. Si alguien quiere que mire otro destino o fechas, pregunte en los comentarios.\n\n' +
+      'Aclaración: los números los saqué de Cuánto Sale, una app que armamos nosotros para sumar el viaje entero. No vendemos vuelos, es gratis.'],
     ['Pedir entrar al grupo', 'Hola! Somos uruguayos y armamos viajes a Brasil (Cuánto Sale). Nos gustaría sumarnos para responder dudas de traslados, horarios y precios con datos actualizados. No hacemos spam ni publicamos promociones.']
   ];
 
@@ -179,7 +186,7 @@
         '<li><b>4 a 1:</b> 4 respuestas sin link, con el dato concreto (precio, horas de traslado, qué día sale más barato). Recién en la 5ª, si preguntan «¿cuánto me sale?», el link.</li>' +
         '<li><b>Nunca la misma respuesta pegada en todos lados:</b> adaptala a lo que preguntaron. Los admins echan a quien copia y pega.</li>' +
         '<li><b>Decí quién sos</b> si te preguntan: «somos de Cuánto Sale». Nada de hacerse pasar por un viajero cualquiera.</li>' +
-        '<li><b>No abras publicaciones propias</b> de promoción (en Reddit, nunca): solo respondé.</li>' +
+        '<li><b>No abras publicaciones de promoción.</b> En Reddit, como mucho 1 post por mes y que sea un aporte con datos (el modelo de abajo), avisando que la app es tuya. El resto del tiempo, solo respondé.</li>' +
         '<li><b>Leé las reglas del grupo</b> antes de la primera respuesta y anotalas en el grupo (si acepta links o no).</li></ul></section>';
       h += '<section class="sec"><h3>Respuestas modelo</h3><p class="sub">Completá lo que va entre corchetes con el dato real del día. El link de cada grupo lo copiás de su tarjeta.</p><div class="gr-modelos">' +
         MODELOS.map(function (m) { return copiable(m[0], m[1]); }).join('') + '</div></section>';
