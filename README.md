@@ -330,7 +330,7 @@ Sirve cualquier hosting que ejecute Node (Render, Railway, Fly.io, un VPS, etc.)
 
 ## 4. Pruebas
 
-`npm run test:todo` corre todas las pruebas en orden (`test.js`, checkout, hoteles, tours, cache de vuelos, operaciones, finanzas, reglas, operativa, Travelpayouts y la de humo de las guías). Ninguna consume cuota de proveedores.
+`npm run test:todo` corre todas las pruebas en orden (`test.js`, checkout, hoteles, tours, cache de vuelos, operaciones, finanzas, reglas, operativa, Travelpayouts, intentos de login y la de humo de las guías). Ninguna consume cuota de proveedores.
 
 `node test.js` corre pruebas del modelo de costos y el servidor. Las búsquedas reales usan la suscripción de RapidAPI y consumen la cuota del plan; las pruebas locales no deben consumirla.
 
