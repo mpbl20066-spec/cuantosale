@@ -3,9 +3,9 @@
 
     python scripts/build-costos-desde-xlsx.py
 
-Escribe supabase_costos_cargados.sql, que se pega en el SQL Editor de Supabase.
+Escribe sql/supabase_costos_cargados.sql, que se pega en el SQL Editor de Supabase.
 Solo emite filas que tienen ALGO cargado: los 45 destinos ya los crea
-supabase_transfer_costos.sql, asi que no hay que volver a mandarlos.
+sql/supabase_transfer_costos.sql, asi que no hay que volver a mandarlos.
 
 Este script es el puente para trabajar en Excel. La fuente de verdad del costo
 es la tabla transfer_destinos: el .xlsx se regenera con `npm run db:pull` y lo
@@ -18,7 +18,7 @@ from openpyxl import load_workbook
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 XLSX = os.path.join(BASE, "data", "tabla-transfers.xlsx")
 JSON = os.path.join(BASE, "data", "transfer-precios.json")
-OUT = os.path.join(BASE, "supabase_costos_cargados.sql")
+OUT = os.path.join(BASE, "sql/supabase_costos_cargados.sql")
 
 import json as _json
 
@@ -140,7 +140,7 @@ sql = """-- Costos de transfer cargados desde data/tabla-transfers.xlsx.
 -- Supabase y darle Run.
 --
 -- SOLO va lo que tiene costo cargado. Los 45 destinos y sus columnas de
--- referencia los crea supabase_transfer_costos.sql: si ese todavia no se corrio,
+-- referencia los crea sql/supabase_transfer_costos.sql: si ese todavia no se corrio,
 -- esto agrega las filas con on conflict, asi que tambien sirve para crearlas de
 -- a poco.
 --

@@ -58,3 +58,18 @@ reels hoy/
 
 # Respaldos de la base (scripts/respaldo-base.js): tienen datos de clientes y proveedores.
 data/respaldos/
+
+# Logs locales de cualquier comando (vercel login, corridas con redirect...).
+# _login.log llego a subirse con un codigo de autorizacion de Vercel adentro.
+*.log
+*.bak
+
+# Copia vieja del proyecto con su propio .git y su propio .env (con claves).
+# Estaba versionada como gitlink; no es parte de la app.
+/CuantoSale/
+
+# Previews y material pesado suelto en la raiz: videos, PDFs de proveedores.
+/s4
+/*.mp4
+/*.pdf
+!/guia-florianopolis.pdf

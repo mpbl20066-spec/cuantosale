@@ -5,7 +5,7 @@
  *
  *   node scripts/buscar-fotos-catalogo.js            (usa el cache de consultas)
  *
- * Reglas, las mismas que buscar-fotos-tours.js:
+ * Reglas, las mismas que scripts/sueltos/buscar-fotos-tours.js:
  *  - solo licencias libres (CC0, CC BY, CC BY-SA, dominio publico),
  *  - solo JPEG de al menos 900 px de ancho,
  *  - se guarda autor y licencia, porque CC BY/CC BY-SA exigen acreditarlos.

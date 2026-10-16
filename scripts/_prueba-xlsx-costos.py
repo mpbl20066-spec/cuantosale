@@ -56,7 +56,7 @@ try:
     if r.stderr:
         print("STDERR:", r.stderr[:500])
 
-    out = os.path.join(BASE, "supabase_costos_cargados.sql")
+    out = os.path.join(BASE, "sql/supabase_costos_cargados.sql")
     sql = open(out, encoding="utf-8").read()
     print("--- filas generadas ---")
     for linea in sql.splitlines():

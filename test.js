@@ -463,7 +463,7 @@ function haversineKm(a, b) {
   });
 
   await t('guias: la tabla de creditos no perdio fotos ya acreditadas', function () {
-    // creditos-fotos.js sobreescribia una tabla completa con una parcial
+    // scripts/sueltos/creditos-fotos.js sobreescribia una tabla completa con una parcial
     // cuando se lo cortaba a mitad de camino, y seis fotos quedaban
     // publicadas sin licencia. El script ahora no escribe si la corrida da
     // menos creditos de los que ya habia; esto es la segunda linea.
@@ -493,7 +493,7 @@ function haversineKm(a, b) {
   });
 
   await t('fotos de tours: toda clave de SUBJECTS coincide con un tour del catalogo', function () {
-    // buscar-fotos-tours.js cruza sus claves "destino#Titulo" contra los
+    // scripts/sueltos/buscar-fotos-tours.js cruza sus claves "destino#Titulo" contra los
     // tours con un indexOf literal. Si el titulo no calza al
     // caracter, el cruce no falla: la clave simplemente no aparece y ese tour
     // se queda sin foto sin error ni aviso. Por eso 15 claves estaban rotas y
@@ -510,7 +510,7 @@ function haversineKm(a, b) {
     assert.ok(catalogo.length > 20, 'tours.generated.js tiene ' + catalogo.length + ' entradas');
     const tours = new Set(catalogo.map(function (x) { return x.destinations[0] + '#' + x.title; }));
 
-    const script = fs.readFileSync(path.join(__dirname, 'buscar-fotos-tours.js'), 'utf8');
+    const script = fs.readFileSync(path.join(__dirname, 'scripts/sueltos/buscar-fotos-tours.js'), 'utf8');
     const bloque = script.slice(script.indexOf('const SUBJECTS'), script.indexOf('const UA'));
     const claves = [...bloque.matchAll(/^\s*'((?:[^'\\]|\\.)*)':/gm)].map(function (x) { return x[1]; });
     // El piso es solo para detectar que el regex no leyo el bloque (daria 0 claves).

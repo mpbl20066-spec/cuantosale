@@ -8,31 +8,34 @@ Es una web con un servidor propio. Requiere Node 18 o superior.
 
 ```
 cuantosale/
-├─ server.js                  Servidor: API + sirve la web
+├─ server.js                  Servidor: API + sirve la web (en Vercel, todo entra por acá)
 ├─ lib/
 │  ├─ model.js                Cálculo de costos, propuestas, ahorros y comparador de fechas
+│  ├─ guias.js, tours.js, traslados.js   Guía Secreta, catálogo de tours y transfers
+│  ├─ pedidos.js, reservas.js, operaciones.js, operativa.js, reglas.js
+│  │                          Pedidos del checkout y su operación (proveedores, estados, reglas)
+│  ├─ finanzas.js             Cobros, márgenes y reparto
+│  ├─ admin.js                Login y sesiones del panel (ADMIN_USER / ADMIN_PASS)
+│  ├─ mail-*.js, push.js, wa-*.js   Avisos por mail, push y WhatsApp
 │  └─ providers/
-│     ├─ index.js             Agregador de vuelos: cache, dedupe y pausa por cuota
-│     ├─ serpapi.js           Vuelos: búsqueda y normalización de Google Flights
-│     ├─ (buses)              Buses: estimado (sin proveedor por ahora)
+│     ├─ vuelos.js            Vuelos: solo Ignav (SerpAPI deshabilitado)
+│     ├─ ignav.js             Cliente de Ignav
+│     ├─ index.js             Agregador de vuelos: cache, dedupe y tope diario
+│     ├─ cache-persistente.js Cache de vuelos en Supabase (sql/vuelos_cache.sql)
+│     ├─ serpapi.js           Ya no se carga; queda como referencia
 │     └─ hotels.js            Hoteles: Booking.com / RapidAPI
-├─ data/
-│  ├─ costos-diarios.json     Comida y transporte local por destino (fuente + confianza)
-│  ├─ transfer-precios.json   Transfer de aeropuerto por destino (fuente + confianza)
-│  └─ distancias-aeropuerto.json  Km reales de OSRM, cacheados
-├─ scripts/
-│  ├─ build-costos.js         Reparte costos-diarios.json al modelo y al cliente
-│  ├─ build-transfer.js       Reparte transfer-precios.json al modelo y al cliente
-│  ├─ build-transfer-precios.js  Propone la tabla de transfer desde los anclas y los km
-│  ├─ validar-costos.js       Valida costos-diarios.json y sus copias generadas
-│  ├─ validar-transfer.js     Valida transfer-precios.json y sus copias generadas
-│  ├─ pull-aeropuertos.js     Coordenadas de los 15 aeropuertos, desde OurAirports
-│  └─ pull-distancias.js      Km de carretera desde OSRM
+├─ data/                      Tablas fuente (costos, transfers, tours, destinos)
+├─ scripts/                   build-*, validar-*, pull-*, cargar-*: los que usa package.json
+│  └─ sueltos/                Scripts de una vez: sondas, auditorías, búsqueda de fotos.
+│                             Se corren desde la raíz: node scripts/sueltos/<script>.js
+├─ sql/                       Scripts para el SQL Editor de Supabase, uno por tabla o cambio.
+│                             Los *_revertir.sql deshacen el script del mismo nombre.
 ├─ public/                    La web (index.html, style.css, app.js)
-│  ├─ guiAs.js                Contenido de la Guía Secreta, por destino
+│  ├─ admin/                  Panel de administración
+│  ├─ web/                    Páginas de la home (assets con hash automático)
 │  ├─ daily-costs.js          GENERADO. No editar a mano. Números + procedencia.
 │  └─ transfer-precios.js     GENERADO. No editar a mano. Números + procedencia.
-├─ test.js                    Pruebas automáticas
+├─ test.js, test-*.js         Pruebas automáticas (npm run test:todo las corre todas)
 ├─ .env.example               Plantilla de configuración
 └─ package.json
 ```
@@ -43,15 +46,20 @@ cuantosale/
 2. En la carpeta del proyecto: `node server.js`
 3. Abrí http://localhost:3000
 
-Sin `SERPAPI_API_KEY`, el servidor arranca en modo estimado: la web anda, el buscador de vuelos responde con un aviso controlado y el gráfico de fechas muestra la estimación. No se rompe nada.
+Sin `IGNAV_API_KEY`, el servidor arranca igual: la web anda y los vuelos se muestran como no disponibles, sin consultar a otro proveedor. No se rompe nada.
 
-## 2. Conectar SerpAPI (vuelos)
+## 2. Conectar Ignav (vuelos)
 
-1. Creá una cuenta en https://serpapi.com y copiá tu API key del dashboard. Guardala en Vercel (o en tu `.env`) como `SERPAPI_API_KEY`. Es un secreto de servidor: no uses prefijos `NEXT_PUBLIC_`.
-2. Redeployá después de guardar o cambiar la key. Las llamadas usan el motor `google_flights` contra `https://serpapi.com/search.json`.
-3. Conservá `BOOKING_API_KEY` y `BOOKING_API_HOST` por separado: esas variables siguen correspondiendo únicamente a alojamientos.
+El proveedor de vuelos es Ignav (https://ignav.com, ~US$ 2 cada 1.000 pedidos). SerpAPI está deshabilitado en `lib/providers/vuelos.js`: no se usa ni como respaldo.
 
-Opcionales, con valores por defecto que ya funcionan: `SERPAPI_GL=uy`, `SERPAPI_HL=es`, `SERPAPI_CABIN_COMODO=2`, `SERPAPI_CALENDAR_TTL_H=24`, `SERPAPI_CACHE_MAX=2000`.
+1. Guardá la key en Vercel (o en tu `.env`) como `IGNAV_API_KEY`. Es un secreto de servidor.
+2. `IGNAV_MARKET=UY` (por defecto): Ignav devuelve pesos y la app los pasa a USD con la cotización del día.
+3. `IGNAV_DAILY_MAX` (300 por defecto) topa los pedidos pagos por día y por instancia, sumando búsqueda y calendario. `IGNAV_CALENDAR_LIVE=1` prende el calendario "mismo viaje, otra fecha" con precios reales (11 pedidos por viaje distinto, compartidos por el cache entre viajes cercanos).
+4. Ignav no cotiza vueltas a más de ~360 días: `IGNAV_MAX_DAYS` (355) corta antes de pedirlas.
+
+Los nombres viejos `SERPAPI_CALENDAR_LIVE`, `SERPAPI_DAILY_MAX` y `SERPAPI_CALENDAR_TTL_H` siguen valiendo como respaldo. `BOOKING_API_KEY` y `BOOKING_API_HOST` son solo para alojamientos.
+
+> Lo que sigue en esta sección es la historia de cuando los vuelos salían de SerpAPI. Se deja porque explica decisiones que siguen en pie (el cache por punto, los códigos de aeropuerto), pero los números de cuota ya no aplican.
 
 ### Por qué SerpAPI y no una API de ventas
 
@@ -243,7 +251,7 @@ El schema y las reglas de contenido están documentados en la cabecera del archi
 
 | Componente | Origen |
 |---|---|
-| Pasajes de avión desde Montevideo | Google Flights vía SerpAPI cuando hay `SERPAPI_API_KEY`; el presupuesto suma tarifas en USD |
+| Pasajes de avión desde Montevideo | Ignav cuando hay `IGNAV_API_KEY`; el presupuesto suma tarifas en USD |
 | Comparador de fechas ("mismo viaje, otra fecha") | Precio real de vuelo por fecha cuando el punto se pudo consultar; estimado en los puntos que fallaron |
 | Alojamiento | Booking.com / RapidAPI, con tarifa y foto reales |
 | Tours | **Estimado** (`LOCAL_TOURS` en `public/app.js`); la card lo rotula "Precio referencial" |
@@ -279,11 +287,11 @@ El control "¿Sumás una segunda parada?" ofrece **95 pares**, y un par va en lo
 | `chooseCombo()` | al elegir un par invertido manda la segunda parada del dato como `secondKeyForzado` |
 | `selectDestination(…, secondKeyForzado)` | con ese argumento, `S.second` no se deduce del nombre sino de la opción elegida |
 
-El server ya sabía ir en cualquier orden: cotiza con `?dest=` y `?second=` y la combinabilidad la decide `model.comboTransfer()`, que mira la geografía y es simétrica. El problema era solo de la lista. `prueba-pares.js` tiene un punto 8 que evalúa las cuatro funciones reales contra los 190 sentidos de los 95 pares.
+El server ya sabía ir en cualquier orden: cotiza con `?dest=` y `?second=` y la combinabilidad la decide `model.comboTransfer()`, que mira la geografía y es simétrica. El problema era solo de la lista. `scripts/sueltos/prueba-pares.js` tiene un punto 8 que evalúa las cuatro funciones reales contra los 190 sentidos de los 95 pares.
 
 **"Fortaleza / Jericoacoara" eran dos ciudades con una barra.** Son 358 km una de la otra, con costos, traslados y actividades propias, y el nombre no decía a cuál de las dos pertenecía el precio. Ahora son dos destinos y un par: **Fortaleza** sola, **Jericoacoara** sola y **"Fortaleza + Jeri"** como viaje de dos paradas. Jericoacoara ya estaba en `DEST` con costos, traslados, guía y actividades: lo que no estaba era en la lista, o sea que era data que nadie podía cotizar. Pasó también a `HOME_DESTINATION_KEYS` en `server.js`.
 
-**Jericoacoara NO se sommó a las `keys` del Nordeste.** El modelo combina dos paradas a menos de `COMBO_MAX_KM` (1.100 km) por carretera: de Fortaleza a Jeri son 358, pero de Recife a Jeri son 1.100 y de Maceió 1.170. Un grupo es el conjunto de destinos que se combinan entre sí, así que Jeri va en grupo propio y solo ofrece los tres pares que se pueden cotizar (con Fortaleza, Natal y Pipa). Por eso `prueba-pares.js` ya **no** compara el total contra `C(n,2)`: ese cálculo da por hecho que todo par de un grupo se puede cotizar, que es falso, y obligaba a ofrecer combinaciones que el server rechaza con un 400. Ahora el total se cuenta con `comboTransfer()`.
+**Jericoacoara NO se sommó a las `keys` del Nordeste.** El modelo combina dos paradas a menos de `COMBO_MAX_KM` (1.100 km) por carretera: de Fortaleza a Jeri son 358, pero de Recife a Jeri son 1.100 y de Maceió 1.170. Un grupo es el conjunto de destinos que se combinan entre sí, así que Jeri va en grupo propio y solo ofrece los tres pares que se pueden cotizar (con Fortaleza, Natal y Pipa). Por eso `scripts/sueltos/prueba-pares.js` ya **no** compara el total contra `C(n,2)`: ese cálculo da por hecho que todo par de un grupo se puede cotizar, que es falso, y obligaba a ofrecer combinaciones que el server rechaza con un 400. Ahora el total se cuenta con `comboTransfer()`.
 
 ### El calendario no pasa de un año
 
@@ -307,7 +315,7 @@ El server ya sabía ir en cualquier orden: cotiza con `?dest=` y `?second=` y la
 
 ### Costos y límites de las consultas
 
-- El contador de cuota es de SerpAPI, no de la app. Es el número que hay que mirar antes de habilitar tráfico público.
+- El gasto de vuelos lo topa `IGNAV_DAILY_MAX` por instancia; el consumo real hay que mirarlo en el panel de Ignav.
 - Cada persona puede hacer `RATE_LIMIT_PER_MIN` búsquedas por minuto (30 por defecto), y los endpoints caros tienen cubos separados de los gratuitos.
 - **Límite conocido:** el cache y el rate limit viven en la memoria del proceso. En Vercel cada instancia es efímera, así que dos instancias distintas no comparten cache: el mismo precio puede pagarse dos veces si la petición cae en otra instancia.
 
@@ -316,10 +324,13 @@ El server ya sabía ir en cualquier orden: cotiza con `?dest=` y `?second=` y la
 Sirve cualquier hosting que ejecute Node (Render, Railway, Fly.io, un VPS, etc.):
 
 - Comando de inicio: `node server.js`
-- Variables de entorno: `SERPAPI_API_KEY`; para hoteles, `BOOKING_API_KEY` y `BOOKING_API_HOST`
+- Variables de entorno: `IGNAV_API_KEY`; para hoteles, `BOOKING_API_KEY` y `BOOKING_API_HOST`; el resto (Supabase, panel, mails, WhatsApp) está documentado en `.env.example`
+- En producción corre en Vercel (`vercel.json`): cada push a `main` despliega
 - El puerto lo define el hosting con `PORT`; el servidor ya lo lee.
 
 ## 4. Pruebas
+
+`npm run test:todo` corre todas las pruebas en orden (`test.js`, checkout, hoteles, tours, cache de vuelos, operaciones, finanzas, reglas, operativa, Travelpayouts y la de humo de las guías). Ninguna consume cuota de proveedores.
 
 `node test.js` corre pruebas del modelo de costos y el servidor. Las búsquedas reales usan la suscripción de RapidAPI y consumen la cuota del plan; las pruebas locales no deben consumirla.
 
@@ -364,4 +375,4 @@ Los que no llevan versión se sirven con `no-cache`, pero eso obliga a revalidar
 3. `npm run pull:distancias` para guardar los km desde OSRM, y `npm run build:todo` para repartir.
 4. `npm run check:todo` y `npm test`.
 
-Los tres validadores (`validar-costos.js`, `validar-transfer.js` y `prueba-destinos.js`) están para que un destino agregado a medias se note al instante, no tres meses después.
+Los tres validadores (`validar-costos.js`, `validar-transfer.js` y `scripts/sueltos/prueba-destinos.js`) están para que un destino agregado a medias se note al instante, no tres meses después.

@@ -98,7 +98,7 @@ async function rpc(fn, body) {
     console.error('  Project Settings -> API Keys -> service_role');
     console.error('');
     console.error('Ojo: la anon key NO sirve. La tabla tours esta cerrada a proposito (ver');
-    console.error('supabase_tours.sql) y solo la service role pasa por encima de RLS.');
+    console.error('sql/supabase_tours.sql) y solo la service role pasa por encima de RLS.');
     process.exit(1);
   }
 
@@ -225,7 +225,7 @@ async function rpc(fn, body) {
   /* La ficha (grupo, punto de salida, edad y el apagado) va por su propia
      funcion, tours_ficha_lote(), que solo actualiza filas existentes. Solo se
      manda lo que el JSON trae: una clave ausente deja la columna como esta. Si
-     la migracion supabase_tours_ficha.sql no se corrio, avisa y sigue. */
+     la migracion sql/supabase_tours_ficha.sql no se corrio, avisa y sigue. */
   const ficha = datos.tours.map((t) => {
     const f = { destino: t.destinos[0], titulo: t.titulo };
     if (t.grupo) f.grupo = t.grupo;
@@ -248,7 +248,7 @@ async function rpc(fn, body) {
     } catch (e) {
       console.log('');
       console.log('AVISO: no se pudo guardar la ficha (' + e.message.slice(0, 160) + ')');
-      console.log('Si dice que la funcion no existe, corré supabase_tours_ficha.sql en el SQL Editor de Supabase y volvé a correr este script.');
+      console.log('Si dice que la funcion no existe, corré sql/supabase_tours_ficha.sql en el SQL Editor de Supabase y volvé a correr este script.');
     }
   }
 

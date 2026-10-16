@@ -224,7 +224,7 @@ def main():
     if not url or not key:
         sys.exit("\nFaltan SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY.\n"
                  "La anon key NO sirve: la tabla esta cerrada a proposito\n"
-                 "(ver supabase_transfer_precios.sql) y solo la service role pasa\n"
+                 "(ver sql/supabase_transfer_precios.sql) y solo la service role pasa\n"
                  "por encima de RLS.")
 
     # on_confident para que se pueda correr de nuevo: la clave primaria es
@@ -247,7 +247,7 @@ def main():
         cuerpo = e.read().decode("utf-8", "replace")[:300]
         sys.exit("Supabase respondio %d: %s\n%s" % (e.code, cuerpo,
                  "\nSi dice 'relation transfer_precios does not exist', corré primero\n"
-                 "supabase_transfer_precios.sql en el SQL Editor."))
+                 "sql/supabase_transfer_precios.sql en el SQL Editor."))
 
     print("")
     print("cargados %d precios en %d destinos" % (len(filas), len(destinos)))

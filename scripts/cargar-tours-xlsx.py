@@ -515,7 +515,7 @@ def main():
     key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
     if not url or not key:
         sys.exit("\nFaltan SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY.\n"
-                 "La anon key NO sirve: la tabla esta cerrada a proposito (ver supabase_tours.sql)\n"
+                 "La anon key NO sirve: la tabla esta cerrada a proposito (ver sql/supabase_tours.sql)\n"
                  "y solo la service role pasa por encima de RLS.")
 
     import urllib.request

@@ -112,11 +112,11 @@ const doc = {
     actualizado: new Date().toISOString().slice(0, 10),
     origen_de_esta_migracion: 'Los 111 tours estaban escritos a mano en public/app.js (array LOCAL_TOURS) y se movieron acá con scripts/migrar-tours.js el ' + new Date().toISOString().slice(0, 10) + '. A partir de este archivo los edita la Sheet de Google Drive.',
     aviso: 'El precio es REFERENCIAL, no un precio de reserva. No hay operador de tours que lo tome: el boton arma el pedido por WhatsApp y el precio se confirma segun fecha, cupo y operador. La card lo rotula como estimacion justamente por esto.',
-    aviso_fotos: 'TOUR_PHOTOS se indexa por "destinoKey#titulo" con el titulo EXACTO. Cambiar un titulo deja la card sin foto (cae al degradado con el icono) sin que nada falle. Para fotos de un tour nuevo: node buscar-fotos-tours.js',
+    aviso_fotos: 'TOUR_PHOTOS se indexa por "destinoKey#titulo" con el titulo EXACTO. Cambiar un titulo deja la card sin foto (cae al degradado con el icono) sin que nada falle. Para fotos de un tour nuevo: node scripts/sueltos/buscar-fotos-tours.js',
     columnas: {
       'destinos': 'Key del destino, como en lib/model.js. Solo uno por tour: si un tour sirve a dos ciudades, se duplica la fila.',
       'destino': 'Nombre para mostrar, con pais. Sale del mapa _destinos si se deja vacio.',
-      'titulo': 'EXACTO como se muestra. Es la clave de la foto: no lo reescribas sin correr antes buscar-fotos-tours.js.',
+      'titulo': 'EXACTO como se muestra. Es la clave de la foto: no lo reescribas sin correr antes scripts/sueltos/buscar-fotos-tours.js.',
       'descripcion': 'Una linea, la que va en la bajada de la card.',
       'precio': 'Numero en USD por persona. Sin signo ni separador de miles. Acepta "45.50", "45,50" y "US$ 45".',
       'precio_brl': 'Opcional. El precio real en reales. Gana sobre "precio": el build lo convierte con la cotizacion de _meta y le suma el margen. Llenalo cuando el precio venga de un operador brasilero.',

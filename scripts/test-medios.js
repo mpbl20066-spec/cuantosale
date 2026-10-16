@@ -30,8 +30,8 @@ const ok = function (cond, msg) { if (!cond) { console.log('  FALLA: ' + msg); f
 
 /* Los datos que las pantallas leen. */
 global.window = {};
-(0, eval)(fs.readFileSync(path.join(RAIZ, 'public', 'test', 'destinos-datos.js'), 'utf8'));
-(0, eval)(fs.readFileSync(path.join(RAIZ, 'public', 'test', 'ruta-datos.js'), 'utf8'));
+(0, eval)(fs.readFileSync(path.join(RAIZ, 'public', 'web', 'destinos-datos.js'), 'utf8'));
+(0, eval)(fs.readFileSync(path.join(RAIZ, 'public', 'web', 'ruta-datos.js'), 'utf8'));
 const DESTS = window.CS_DESTS;
 const RT = window.RT_DATA;
 
@@ -74,8 +74,8 @@ DESTS.forEach(function (d) {
       medio cotizable (auto o bus ademas del avion). Un destino de solo avion
       no puede quedar trabado en una pantalla con una unica opcion. */
 console.log('4. home-destino.html: el medio se pregunta solo si hay mas de uno');
-const htmlDestino = fs.readFileSync(path.join(RAIZ, 'public', 'test', 'home-destino.html'), 'utf8');
-const htmlCalcular = fs.readFileSync(path.join(RAIZ, 'public', 'test', 'home-calcular.html'), 'utf8');
+const htmlDestino = fs.readFileSync(path.join(RAIZ, 'public', 'web', 'home-destino.html'), 'utf8');
+const htmlCalcular = fs.readFileSync(path.join(RAIZ, 'public', 'web', 'home-calcular.html'), 'utf8');
 ok(/function irA\(\) \{ if \(mediosDe\(destInfo\(\)\)\.length > 1\) ir\(3\); else aResultados\(\); \}/.test(htmlDestino),
   'de las fechas: con un solo medio va derecho a resultados, con varios a la pantalla 3');
 ok(/if \(S\.dest && destInfo\(\) && qs\.get\('pax'\) && !qs\.get\('editar'\)\) \{ if \(mediosDe\(destInfo\(\)\)\.length > 1 && !qs\.get\('modo'\)\) \{ S\.pant = 3; \} else \{ aResultados\(\); \} \}/.test(htmlDestino),
@@ -88,7 +88,7 @@ ok(!/porTierra/.test(htmlDestino), 'home-destino no decide por region (porTierra
 ok(!/GRUPO\[/.test(htmlDestino), 'home-destino no mapea region a grupo de transporte');
 /* El CSS de las tarjetas de medio se borro junto con la pantalla: si queda, es
    codigo muerto que la proxima persona va a tratar de usar. */
-const webCss = fs.readFileSync(path.join(RAIZ, 'public', 'test', 'web.css'), 'utf8');
+const webCss = fs.readFileSync(path.join(RAIZ, 'public', 'web', 'web.css'), 'utf8');
 ok(!/d-medio|d-nota/.test(webCss), 'web.css no tiene reglas de .d-medio ni .d-nota');
 ok(!/data-pant="3"/.test(webCss), 'web.css no tiene reglas para el paso 3 de destino');
 
@@ -120,7 +120,7 @@ ok(/comparar: \[/.test(htmlCalcular), "MEDIO_TXT tiene la entrada 'comparar' (si
 ok(/d\[3\] && d\[3\]\.length \? d\[3\] : \['avion'\]/.test(htmlCalcular), 'sin datos, el destino cae a avion');
 
 console.log('6. home-presupuesto.html: la preferencia se respeta');
-const htmlPresupuesto = fs.readFileSync(path.join(RAIZ, 'public', 'test', 'home-presupuesto.html'), 'utf8');
+const htmlPresupuesto = fs.readFileSync(path.join(RAIZ, 'public', 'web', 'home-presupuesto.html'), 'utf8');
 ok(/comparar/.test(htmlPresupuesto), 'se puede comparar todos los medios');
 ok(/Filtramos por esta forma de llegar/.test(htmlPresupuesto), 'el texto dice que es un filtro');
 ok(/S\.modo = S\.medio === 'comparar' \? 'todos' : S\.medio/.test(htmlPresupuesto), 'la preferencia elegida es la que filtra los resultados');

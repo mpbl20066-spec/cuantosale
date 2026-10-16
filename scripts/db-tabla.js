@@ -83,7 +83,7 @@ async function fetchRows(cfg, soloConCosto) {
     let msg = text.slice(0, 300);
     try { msg = JSON.parse(text).message || msg; } catch (e) { /* texto plano */ }
     if (res.status === 404 || /relation .* does not exist/i.test(msg)) {
-      msg = 'la tabla ' + TABLA + ' no existe. Corré supabase_transfer_costos.sql '
+      msg = 'la tabla ' + TABLA + ' no existe. Corré sql/supabase_transfer_costos.sql '
           + 'en el SQL Editor del dashboard de Supabase.';
     } else if (res.status === 401 || res.status === 403) {
       msg = 'la clave no tiene permiso sobre ' + TABLA + '. Es la service role, '
@@ -117,7 +117,7 @@ async function main() {
     console.error(cfg.error);
     console.error('');
     console.error('Montaje: dashboard de Supabase -> SQL Editor -> pegá');
-    console.error('supabase_transfer_costos.sql y dale Run. Después:');
+    console.error('sql/supabase_transfer_costos.sql y dale Run. Después:');
     console.error('  node scripts/db-tabla.js estado');
     console.error('');
     console.error('La service role sale de Project Settings -> API -> service_role.');

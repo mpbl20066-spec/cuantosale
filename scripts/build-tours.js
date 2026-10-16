@@ -301,7 +301,7 @@ if (sinFoto.length) {
   console.log('  sin foto (muestran el degradado con el icono):');
   sinFoto.slice(0, 8).forEach((k) => console.log('    - ' + k));
   if (sinFoto.length > 8) console.log('    ... y ' + (sinFoto.length - 8) + ' mas');
-  console.log('  para buscarles foto: node buscar-fotos-tours.js');
+  console.log('  para buscarles foto: node scripts/sueltos/buscar-fotos-tours.js');
 }
 if (avisos.length) {
   console.log('\navisos:');

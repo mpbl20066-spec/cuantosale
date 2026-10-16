@@ -252,7 +252,7 @@ const AIR_DESTINATIONS = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG',
 // 44. No hay tope tecnico, habia un tope editorial.
 //
 // Debe coincidir con la union de DESTINATION_GROUPS en public/app.js.
-// prueba-destinos.js lo verifica, porque la desincronizacion es la causa raiz
+// scripts/sueltos/prueba-destinos.js lo verifica, porque la desincronizacion es la causa raiz
 // de que un destino exista y no se vea.
 const HOME_DESTINATION_KEYS = [
   // Rio de Janeiro
@@ -1643,7 +1643,7 @@ async function bienvenidaResend(email, nombre, metodo) {
    de 8 caracteres; GET /v/<codigo> redirige a /?viaje=<token>, que la app ya
    sabe abrir. El codigo sale del hash del token: el mismo viaje da siempre el
    mismo codigo y no se duplican filas. La tabla se crea con
-   supabase_enlaces_viaje.sql y solo la toca el server, con la service role. */
+   sql/supabase_enlaces_viaje.sql y solo la toca el server, con la service role. */
 const ENLACE_TOKEN_RE = /^[A-Za-z0-9_-]{20,6000}$/;
 function supaServicio() {
   const url = String(process.env.SUPABASE_URL || '').trim();

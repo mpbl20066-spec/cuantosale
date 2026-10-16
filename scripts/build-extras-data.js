@@ -158,7 +158,7 @@ Object.keys(porDestino).forEach(function (k) {
 });
 console.log('  ' + Object.keys(porDestino).length + ' destinos, ' + n + ' filas, ' + sinFoto.length + ' sin foto (degradado con el icono)');
 if (sinFoto.length) {
-  console.log('  para buscarles foto: node buscar-fotos-tours.js');
+  console.log('  para buscarles foto: node scripts/sueltos/buscar-fotos-tours.js');
   sinFoto.forEach((k) => console.log('    - ' + k));
 }
 if (avisos.length) { console.log('\navisos:'); avisos.forEach((a) => console.log('  - ' + a)); }

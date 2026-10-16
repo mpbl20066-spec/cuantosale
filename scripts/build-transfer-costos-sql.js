@@ -1,18 +1,18 @@
 /*
- * Genera supabase_transfer_costos.sql: la tabla de costos que carga la agencia
+ * Genera sql/supabase_transfer_costos.sql: la tabla de costos que carga la agencia
  * mas las 45 filas de referencia.
  *
  * Se genera en vez de escribirse a mano por la misma razon que el resto de las
  * tablas del repo: el destino_key tiene que coincidir con DEST de lib/model.js,
  * y si alguien lo tipea mal el costo queda pegado a un destino que no existe
- * sin que nada se queje. Ver scripts/validar-transfer.js y prueba-destinos.js.
+ * sin que nada se queje. Ver scripts/validar-transfer.js y scripts/sueltos/prueba-destinos.js.
  */
 const fs = require('fs');
 const path = require('path');
 
 const BASE = path.resolve(__dirname, '..');
 const SRC = path.join(BASE, 'data', 'transfer-precios.json');
-const OUT = path.join(BASE, 'supabase_transfer_costos.sql');
+const OUT = path.join(BASE, 'sql/supabase_transfer_costos.sql');
 
 const tabla = JSON.parse(fs.readFileSync(SRC, 'utf8')).destinos;
 

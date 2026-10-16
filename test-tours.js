@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 
 const LIB = path.join(__dirname, 'lib', 'tours.js');
-const SQL = path.join(__dirname, 'supabase_tours.sql');
+const SQL = path.join(__dirname, 'sql/supabase_tours.sql');
 const APP = path.join(__dirname, 'public', 'app.js');
 const SERVIDOR = path.join(__dirname, 'server.js');
 
@@ -161,7 +161,7 @@ function conEnv(vars, fn) {
 
   await t('el precio publicado desde /admin gana sobre la cuenta con la cotizacion', function () {
     // Si una cotizacion nueva en data/tours.json moviera un precio ya publicado,
-    // se publicaria un cambio que nadie reviso. Ver supabase_operaciones.sql.
+    // se publicaria un cambio que nadie reviso. Ver sql/supabase_operaciones.sql.
     const fila = { destino: 'fln', titulo: 'X', descripcion: '', precio: null, precio_brl: 190, precio_publicado: 44.5, detalle: '' };
     const t1 = require(LIB).desdeFila(fila, 'Florianópolis, Brasil', 5.1414, 5);
     assert.strictEqual(t1.price, 44.5);
@@ -201,7 +201,7 @@ function conEnv(vars, fn) {
   });
 
   console.log('');
-  console.log('supabase_tours.sql: la tabla esta cerrada');
+  console.log('sql/supabase_tours.sql: la tabla esta cerrada');
 
   const sql = fs.readFileSync(SQL, 'utf8');
 
@@ -229,9 +229,9 @@ function conEnv(vars, fn) {
   });
 
   await t('es_agencia() se llama SIN argumento, como la define el proyecto', function () {
-    // supabase.sql la define como es_agencia() sin parametros, sacando el
+    // sql/supabase.sql la define como es_agencia() sin parametros, sacando el
     // correo del JWT. Llamarla con un argumento daria "function does not exist".
-    assert.ok(!/es_agencia\([^)]/.test(sql), 'la estan llamando con un argumento: revisar contra supabase.sql');
+    assert.ok(!/es_agencia\([^)]/.test(sql), 'la estan llamando con un argumento: revisar contra sql/supabase.sql');
   });
 
   await t('la carga por lotes no pide permiso de agencia', function () {

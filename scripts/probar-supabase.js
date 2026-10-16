@@ -50,7 +50,7 @@ if (key.startsWith('sb_secret_')) {
     console.log('  ' + t.slice(0, 300));
     console.log('');
     console.log('Si dice "function tours_todos does not exist" o "relation does not",');
-    console.log('falta correr supabase-setup.sql en el SQL Editor.');
+    console.log('falta correr sql/supabase-setup.sql en el SQL Editor.');
     process.exit(1);
   }
 

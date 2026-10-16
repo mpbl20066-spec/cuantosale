@@ -13,7 +13,7 @@
  * Postgres. Solo toca filas sin precio_publicado, asi que correrlo de nuevo no
  * pisa nada publicado desde el panel.
  *
- * Requiere haber corrido supabase_operaciones.sql.
+ * Requiere haber corrido sql/supabase_operaciones.sql.
  */
 const fs = require('fs');
 const path = require('path');
@@ -52,7 +52,7 @@ async function pedir(ruta, opciones) {
     filas = await pedir('tours?select=id,destino,titulo,precio,precio_brl,precio_publicado,activo&precio_publicado=is.null');
   } catch (e) {
     if (/precio_publicado/.test(e.message)) {
-      console.log('La columna precio_publicado no existe: primero corre supabase_operaciones.sql en Supabase.');
+      console.log('La columna precio_publicado no existe: primero corre sql/supabase_operaciones.sql en Supabase.');
       process.exit(1);
     }
     throw e;
