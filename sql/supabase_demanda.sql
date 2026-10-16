@@ -25,3 +25,7 @@ create table if not exists public.demanda_eventos (
 create index if not exists demanda_eventos_creado on public.demanda_eventos (creado);
 
 alter table public.demanda_eventos enable row level security;
+
+-- El server inserta los eventos (POST /api/demanda) y los lee para el panel, con la service role.
+revoke all on public.demanda_eventos from anon, authenticated;
+grant select, insert on public.demanda_eventos to service_role;
