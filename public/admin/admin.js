@@ -765,7 +765,7 @@
     }
     if (!S.grCargando) {
       S.grCargando = true;
-      var sc = document.createElement('script'); sc.src = '/admin/grupos.js?v=2';
+      var sc = document.createElement('script'); sc.src = '/admin/grupos.js?v=3';
       sc.onload = function () { if (S.vista === 'mkt-grupos') pintar(); };
       sc.onerror = function () { S.grCargando = false; toast('No se pudo abrir Grupos. Recargá la página.'); };
       document.head.appendChild(sc);

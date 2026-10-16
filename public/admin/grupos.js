@@ -24,17 +24,32 @@
     ['r/uruguay: preguntas de Brasil', 'https://www.reddit.com/r/uruguay/search/?q=brasil&sort=new'],
     ['Foros de TripAdvisor (Brasil)', 'https://www.google.com/search?q=' + encodeURIComponent('site:tripadvisor.com.ar ShowTopic Brasil traslado')]
   ];
+  /* Subreddits para sumar con un toque: [nombre, link, si acepta links, nota]. */
+  var SUGERIDOS = [
+    ['r/uruguay', 'https://www.reddit.com/r/uruguay/', '', 'Tu público directo. El post mensual con precios va acá. Avisá siempre que la app es tuya.'],
+    ['r/Montevideo', 'https://www.reddit.com/r/Montevideo/', '', 'Más chico, la misma gente. Mejor responder que postear.'],
+    ['r/viajes', 'https://www.reddit.com/r/viajes/', '', 'Viajeros en español. El post con precios sirve si aporta datos, no links.'],
+    ['r/argentina', 'https://www.reddit.com/r/argentina/', 'no', 'Muchos van a Floripa y Bombinhas. Muy estrictos con la autopromoción: solo responder.'],
+    ['r/Brazil', 'https://www.reddit.com/r/Brazil/', 'no', 'En inglés: extranjeros preguntando traslados y destinos. Solo respuestas útiles.'],
+    ['r/brasil', 'https://www.reddit.com/r/brasil/', 'no', 'En portugués, casi todo de brasileños. Solo si preguntan por turistas.']
+  ];
   var MODELOS = [
     ['Pregunta de precio (sin link)', 'Te paso lo que vengo viendo para [mes]: el vuelo [ciudad] ida y vuelta anda en US$ [x] por persona. Del aeropuerto a [destino] son [horas]; el traslado compartido sale unos US$ [y] por persona y el privado US$ [z] por auto (si van 3 o 4, conviene el privado).\n\nOjo que el vuelo cambia mucho según el día: saliendo [día] suele estar más barato.'],
     ['La 5ª respuesta (con link)', 'Para una semana de a 2 calculá unos US$ [total] por persona entre vuelo, traslado y alojamiento, sin comidas.\n\nSi querés verlo con tus fechas, lo armamos todo sumado en Cuánto Sale (somos uruguayos, es gratis): [link del grupo]'],
     ['Grupo que no acepta links', '[El dato concreto que preguntaron].\n\nSi te sirve, nosotros armamos el viaje entero sumado (vuelo, traslado, alojamiento y paseos) en una app que se llama Cuánto Sale: la encontrás en Google.'],
-    ['Post para Reddit (r/uruguay, aporte con datos)', 'Título: Cuánto sale una semana en Brasil desde Montevideo en [mes]: comparé [n] destinos\n\n' +
-      'Estuve juntando precios reales para el verano y capaz le sirve a alguien que esté armando el viaje. Todo para 2 personas, 7 noches, precios del [fecha] (cambian todos los días):\n\n' +
-      '| Destino | Vuelo i/v (los 2) | Traslado aeropuerto | Alojamiento 7 noches | Total por persona |\n|---|---|---|---|---|\n' +
-      '| [Floripa] | US$ [x] | US$ [y] | desde US$ [z] | ~US$ [t] |\n| [Río] | US$ [x] | US$ [y] | desde US$ [z] | ~US$ [t] |\n| [Bombinhas] | US$ [x] | US$ [y] | desde US$ [z] | ~US$ [t] |\n\n' +
-      'Lo que más me sorprendió:\n- [dato 1: ej. saliendo martes el vuelo baja US$ X]\n- [dato 2: ej. a Bombinhas no hay aeropuerto, el traslado desde Floripa es 1 h 30]\n- [dato 3]\n\n' +
-      'Sin comidas ni paseos. Si alguien quiere que mire otro destino o fechas, pregunte en los comentarios.\n\n' +
-      'Aclaración: los números los saqué de Cuánto Sale, una app que armamos nosotros para sumar el viaje entero. No vendemos vuelos, es gratis.'],
+    ['Post para Reddit (precios del 12 y 13/10: actualizalos el día que lo publiques)', 'Título: Sumé lo que sale de verdad una semana en Brasil saliendo de Montevideo. El pasaje es la mitad del viaje\n\n' +
+      'Cada verano aparece acá la misma pregunta, «¿cuánto me sale ir a Brasil?», y casi siempre la respuesta es el precio del pasaje. Así que sumamos todo para varios destinos, de a 2 y 7 noches, con precios consultados el 12 y 13 de octubre:\n\n' +
+      '| Destino | Fechas | Por persona | Qué incluye |\n|---|---|---|---|\n' +
+      '| Río de Janeiro | 25/10 al 1/11 | US$ 608 | Vuelo Gol directo, traslado y alojamiento |\n' +
+      '| Balneário Camboriú | 9 al 16/2 | US$ 826 | Vuelo, traslado, hotel, comidas y moverse |\n' +
+      '| Bombinhas | enero | US$ 958 | El viaje entero |\n' +
+      '| Jericoacoara | 9 al 16/1 | US$ 1.222 | Vuelo, traslado, posada, comidas (sin paseos) |\n\n' +
+      'Lo que aprendimos armándolo:\n\n' +
+      '- **Mover un día la salida pesa más que cambiar de hotel.** A Camboriú, saliendo el 31/12 en vez del 3/1 son US$ 224 menos para los 2, con las mismas noches.\n' +
+      '- **El traslado es lo que nadie calcula.** Búzios está a 174 km del aeropuerto de Río: traslado compartido ida y vuelta y un paseo en barco son unos US$ 86 por persona. Jeri está a 5 h 36 de Fortaleza, y el último tramo es por arena.\n' +
+      '- **A Camboriú en auto cierra si tenés los días.** Nafta y peajes, ida y vuelta (2.620 km): unos US$ 302 para los 2, contra US$ 713 del vuelo.\n\n' +
+      'Si quieren que mire otro destino o fechas, pregunten y lo sumo en los comentarios.\n\n' +
+      'Para que quede claro: los números salen de Cuánto Sale, una app uruguaya que hicimos nosotros. Calcular es gratis; ganamos si alguien reserva un traslado o un paseo con nosotros.'],
     ['Pedir entrar al grupo', 'Hola! Somos uruguayos y armamos viajes a Brasil (Cuánto Sale). Nos gustaría sumarnos para responder dudas de traslados, horarios y precios con datos actualizados. No hacemos spam ni publicamos promociones.']
   ];
 
@@ -179,6 +194,15 @@
       h += xs.length ? '<div class="gr-grid">' + xs.map(tarjeta).join('') + '</div>' :
         '<div class="cr-vacio"><b>Todavía no anotaste ningún grupo.</b><p>Buscalos con los botones de abajo, quedate con los que tengan publicaciones de esta semana y agregalos acá.</p></div>';
 
+      /* Subreddits sugeridos que todavia no se agregaron */
+      var yaEsta = {}; grupos().forEach(function (g) { yaEsta[String(g.url || '').toLowerCase()] = 1; });
+      var faltan = SUGERIDOS.filter(function (r) { return !yaEsta[r[1].toLowerCase()]; });
+      if (faltan.length) h += '<section class="sec"><h3>Reddit: sugeridos</h3><p class="sub">Agregalos y leé las reglas de cada uno (en la barra del costado) antes de postear.</p><ul class="gr-sug">' +
+        faltan.map(function (r) {
+          return '<li><div><a href="' + esc(r[1]) + '" target="_blank" rel="noopener"><b>' + esc(r[0]) + '</b></a><small>' + esc(r[3]) + '</small></div>' +
+            '<button class="btn btn--sm" data-gr-sugerido="' + SUGERIDOS.indexOf(r) + '">Agregar a mis grupos</button></li>';
+        }).join('') + '</ul></section>';
+
       /* Donde buscar, reglas y respuestas modelo */
       h += '<section class="sec"><h3>Dónde buscar</h3><p class="sub">Quedate con los que tengan publicaciones de esta semana y gente preguntando, no solo fotos.</p><div class="gr-buscar">' +
         BUSCAR.map(function (b) { return '<a class="btn btn--sm" href="' + esc(b[1]) + '" target="_blank" rel="noopener">' + esc(b[0]) + ' ↗</a>'; }).join('') + '</div></section>';
@@ -205,9 +229,15 @@
     function aqui() { return S.vista === 'mkt-grupos'; }
     document.addEventListener('click', function (e) {
       if (!aqui()) return;
-      var t = e.target.closest('[data-gr-copiar],[data-gr-copiar-link],[data-gr-abrir],[data-gr-agregar],[data-gr-quitar],[data-gr-borrar-aporte]');
+      var t = e.target.closest('[data-gr-copiar],[data-gr-copiar-link],[data-gr-abrir],[data-gr-agregar],[data-gr-quitar],[data-gr-borrar-aporte],[data-gr-sugerido]');
       if (!t) return;
       e.preventDefault();
+      if (t.hasAttribute('data-gr-sugerido')) {
+        var r = SUGERIDOS[+t.getAttribute('data-gr-sugerido')]; if (!r) return;
+        t.disabled = true;
+        guardar({ grupo: { id: 'g' + Date.now().toString(36), campos: { nombre: r[0], red: 'reddit', url: r[1], links: r[2], nota: r[3], estado: 'buscar', codigo: codigoLibre(r[0]) } } }).then(function () { ctx.toast(r[0] + ' agregado'); });
+        return;
+      }
       if (t.hasAttribute('data-gr-copiar')) return ctx.copiar(st.textos[+t.getAttribute('data-gr-copiar')] || '');
       if (t.hasAttribute('data-gr-copiar-link')) { var g = grupos().filter(function (x) { return x.id === t.getAttribute('data-gr-copiar-link'); })[0]; if (g) ctx.copiar(link(g)); return; }
       if (t.hasAttribute('data-gr-abrir')) { var id = t.getAttribute('data-gr-abrir'); st.abierto[id] = !st.abierto[id]; ctx.pintar(); return; }
@@ -272,6 +302,9 @@
         '.gr-rep{margin-top:16px;background:var(--infobg);border-radius:16px;padding:14px 18px}.gr-rep h3{margin:0}.gr-rep .sub{margin:2px 0 8px}' +
         '.gr-rep ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}.gr-rep li{background:var(--card);border-radius:99px;padding:4px 12px;font-size:13.5px}' +
         '.gr-buscar{display:flex;flex-wrap:wrap;gap:6px}' +
+        '.gr-sug{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:8px}' +
+        '.gr-sug li{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 10px 10px 14px}' +
+        '.gr-sug li div{flex:1;min-width:0}.gr-sug a{color:inherit}.gr-sug small{display:block;color:var(--muted);font-size:12.5px;line-height:1.35}' +
         '.gr-modelos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:10px}.gr-modelos pre{white-space:pre-wrap}' +
         '.cr-vacio{margin-top:14px;border:2px dashed var(--line);border-radius:18px;padding:24px;text-align:center;color:var(--muted)}.cr-vacio b{color:var(--ink);font-size:16px}' +
         '@media (max-width:560px){.gr{padding:13px}.gr__stats{grid-template-columns:repeat(2,1fr)}.gr__ajustes{grid-template-columns:1fr}.gr-anotar__f .btn{width:100%}}';
