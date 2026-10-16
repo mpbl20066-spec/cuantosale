@@ -95,26 +95,30 @@
       "modo": "car",
       "km": 174,
       "horas": 2.7,
-      "compartido": 30.77,
-      "privado": 86.54,
+      "compartido": 28.85,
+      "privado": 67.31,
       "real": [
         "privado",
         "compartido"
       ],
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Búzios. Privado por vehiculo: 1 a 4 personas, Auto, R$ 450. Compartido por persona: R$ 160 (Micro, 1 a 10 personas). Precio final de venta, en reales. Trayecto de 174 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
-      "verificado": "2026-10-01",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Búzios. Privado por vehiculo (sin operador anotado): 1 a 4 personas, Auto, R$ 350. Compartido por persona (sin operador anotado): R$ 150 (Micro, 1 a 10 personas). Precio final de venta, en reales. Trayecto de 174 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-16",
       "confianza": "alta",
-      "privado_brl": 450,
+      "privado_brl": 350,
       "fuente_propia": "Precio propio en reales, de tabla-transfers.xlsx (compartido y privado). El compartido es por persona; el privado, por vehiculo. USD = R$ / 5.2.",
       "privado_escalones": [
         {
           "min": 1,
           "max": 4,
           "vehiculo": "Auto",
-          "brl": 450
+          "brl": 350
         }
       ],
-      "compartido_brl": 160
+      "compartido_brl": 150,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "arraial": {
       "nombre": "Arraial do Cabo",
@@ -141,7 +145,11 @@
           "brl": 450
         }
       ],
-      "compartido_brl": 230
+      "compartido_brl": 230,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "cabo": {
       "nombre": "Cabo Frio",
@@ -168,7 +176,11 @@
           "brl": 450
         }
       ],
-      "compartido_brl": 230
+      "compartido_brl": 230,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "ilha": {
       "nombre": "Ilha Grande",
@@ -194,7 +206,11 @@
           "brl": 450
         }
       ],
-      "compartido_brl": 280
+      "compartido_brl": 280,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "paraty": {
       "nombre": "Paraty",
@@ -221,7 +237,11 @@
           "brl": 600
         }
       ],
-      "compartido_brl": 400
+      "compartido_brl": 400,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "ilhabela": {
       "nombre": "Ilhabela",
@@ -240,7 +260,11 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
       "privado_brl": 2640,
-      "compartido_brl": 127
+      "compartido_brl": 127,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "ubatuba": {
       "nombre": "Ubatuba",
@@ -267,7 +291,11 @@
           "brl": 800
         }
       ],
-      "compartido_brl": 140
+      "compartido_brl": 140,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "rio": {
       "nombre": "Río de Janeiro",
@@ -294,7 +322,11 @@
         }
       ],
       "privado_brl": 110,
-      "compartido_brl": 156
+      "compartido_brl": 156,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "angra": {
       "nombre": "Angra dos Reis",
@@ -321,7 +353,11 @@
           "brl": 550
         }
       ],
-      "compartido_brl": 300
+      "compartido_brl": 300,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "sao": {
       "nombre": "São Paulo",
@@ -339,7 +375,11 @@
       "confianza": "alta",
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
-      "compartido_brl": 41
+      "compartido_brl": 41,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "porto": {
       "nombre": "Porto de Galinhas",
@@ -389,7 +429,11 @@
         }
       ],
       "compartido_brl": 45,
-      "privado_brl": 231
+      "privado_brl": 231,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "mcz": {
       "nombre": "Maceió",
@@ -416,7 +460,11 @@
           "vehiculo": "Auto",
           "brl": 270
         }
-      ]
+      ],
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "maragogi": {
       "nombre": "Maragogi",
@@ -460,7 +508,11 @@
         }
       ],
       "compartido_brl": 92,
-      "privado_brl": 634
+      "privado_brl": 634,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "nat": {
       "nombre": "Natal",
@@ -478,7 +530,11 @@
       "confianza": "alta",
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
-      "compartido_brl": 30
+      "compartido_brl": 30,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "pip": {
       "nombre": "Pipa",
@@ -497,7 +553,11 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
       "privado_brl": 300,
-      "compartido_brl": 31
+      "compartido_brl": 31,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "ajuda": {
       "nombre": "Arraial d’Ajuda",
@@ -516,7 +576,11 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
       "privado_brl": 360,
-      "compartido_brl": 118
+      "compartido_brl": 118,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "trancoso": {
       "nombre": "Trancoso",
@@ -535,7 +599,11 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
       "privado_brl": 456,
-      "compartido_brl": 113
+      "compartido_brl": 113,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "ssa": {
       "nombre": "Salvador de Bahía",
@@ -545,17 +613,58 @@
       "horas": 0.5,
       "appRideUsd": 11,
       "compartido": 5.77,
-      "privado": 34.62,
+      "privado": 33.27,
       "real": [
+        "privado",
         "compartido"
       ],
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Salvador de Bahía. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 24 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
-      "verificado": "2026-10-01",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Salvador de Bahía. Privado por vehiculo de Bahia Terra Turismo (base R$ 150 + 15% y R$ 200 + 15% y R$ 260 + 15% y R$ 300 + 15% y R$ 400 + 15% y R$ 500 + 15%): 1 a 3 personas, Auto, R$ 173; 4 personas, Auto, R$ 230; 5 a 6 personas, Van, R$ 299; 7 a 8 personas, Van, R$ 345; 9 a 12 personas, Van, R$ 460; 13 a 15 personas, Van, R$ 575. Compartido por persona (sin operador anotado): R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 24 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-16",
       "confianza": "alta",
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
-      "privado_escalones": [],
-      "privado_brl": 180,
-      "compartido_brl": 30
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 3,
+          "vehiculo": "Auto",
+          "brl": 173
+        },
+        {
+          "min": 4,
+          "max": 4,
+          "vehiculo": "Auto",
+          "brl": 230
+        },
+        {
+          "min": 5,
+          "max": 6,
+          "vehiculo": "Van",
+          "brl": 299
+        },
+        {
+          "min": 7,
+          "max": 8,
+          "vehiculo": "Van",
+          "brl": 345
+        },
+        {
+          "min": 9,
+          "max": 12,
+          "vehiculo": "Van",
+          "brl": 460
+        },
+        {
+          "min": 13,
+          "max": 15,
+          "vehiculo": "Van",
+          "brl": 575
+        }
+      ],
+      "privado_brl": 173,
+      "compartido_brl": 30,
+      "operador": {
+        "privado": "Bahia Terra Turismo",
+        "compartido": null
+      }
     },
     "for": {
       "nombre": "Fortaleza",
@@ -573,7 +682,11 @@
       "confianza": "alta",
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
-      "compartido_brl": 30
+      "compartido_brl": 30,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "jericoacoara": {
       "nombre": "Jericoacoara",
@@ -592,7 +705,11 @@
       "privado_escalones": [],
       "compartido_brl": 195,
       "privado_brl": 2040,
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real."
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "morro": {
       "nombre": "Morro de São Paulo",
@@ -611,7 +728,11 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
       "privado_brl": 186,
-      "compartido_brl": 162
+      "compartido_brl": 162,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "portoseguro": {
       "nombre": "Porto Seguro",
@@ -630,7 +751,11 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
       "privado_brl": 480,
-      "compartido_brl": 445
+      "compartido_brl": 445,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "itacare": {
       "nombre": "Itacaré",
@@ -639,17 +764,40 @@
       "km": 359,
       "horas": 5.7,
       "compartido": 45.19,
-      "privado": 242.31,
+      "privado": 460,
       "real": [
+        "privado",
         "compartido"
       ],
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Itacaré. Compartido por persona: R$ 235 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 359 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
-      "verificado": "2026-10-01",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Itacaré. Privado por vehiculo de Bahia Terra Turismo (base R$ 2080 + 15% y R$ 3400 + 15% y R$ 3500 + 15%): 1 a 3 personas, Auto, R$ 2392; 4 a 10 personas, Van, R$ 3910; 11 a 12 personas, Van, R$ 4025. Compartido por persona (sin operador anotado): R$ 235 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 359 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-16",
       "confianza": "alta",
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
-      "privado_escalones": [],
-      "privado_brl": 1260,
-      "compartido_brl": 235
+      "privado_escalones": [
+        {
+          "min": 1,
+          "max": 3,
+          "vehiculo": "Auto",
+          "brl": 2392
+        },
+        {
+          "min": 4,
+          "max": 10,
+          "vehiculo": "Van",
+          "brl": 3910
+        },
+        {
+          "min": 11,
+          "max": 12,
+          "vehiculo": "Van",
+          "brl": 4025
+        }
+      ],
+      "privado_brl": 2392,
+      "compartido_brl": 235,
+      "operador": {
+        "privado": "Bahia Terra Turismo",
+        "compartido": null
+      }
     },
     "forte": {
       "nombre": "Praia do Forte",
@@ -663,8 +811,8 @@
         "privado",
         "compartido"
       ],
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Praia do Forte. Privado por vehiculo de Bahia Terra Turismo (su tarifa pública, nos dan 10 % de comisión; +20 % antes de las 08:00 y desde las 18:00; cancelación gratis hasta 24 h; la vuelta vale lo mismo) (base R$ 220 + 15% y R$ 280 + 15% y R$ 350 + 15% y R$ 450 + 15% y R$ 650 + 15%): 1 a 2 personas, Auto, R$ 253; 3 a 4 personas, Auto, R$ 322; 5 a 6 personas, Van, R$ 402; 7 a 12 personas, Van, R$ 518; 13 a 15 personas, Van, R$ 747. Compartido por persona: R$ 50 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 62 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
-      "verificado": "2026-10-15",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Praia do Forte. Privado por vehiculo de Bahia Terra Turismo (base R$ 220 + 15% y R$ 280 + 15% y R$ 390 + 15% y R$ 450 + 15% y R$ 650 + 15%): 1 a 2 personas, Auto, R$ 253; 3 a 4 personas, Auto, R$ 322; 5 a 6 personas, Van, R$ 448; 7 a 12 personas, Van, R$ 518; 13 a 15 personas, Van, R$ 747. Compartido por persona (sin operador anotado): R$ 50 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 62 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "verificado": "2026-10-16",
       "confianza": "alta",
       "privado_escalones": [
         {
@@ -683,7 +831,7 @@
           "min": 5,
           "max": 6,
           "vehiculo": "Van",
-          "brl": 402
+          "brl": 448
         },
         {
           "min": 7,
@@ -699,7 +847,11 @@
         }
       ],
       "compartido_brl": 50,
-      "privado_brl": 253
+      "privado_brl": 253,
+      "operador": {
+        "privado": "Bahia Terra Turismo",
+        "compartido": null
+      }
     },
     "fernando": {
       "nombre": "Fernando de Noronha",
@@ -717,7 +869,11 @@
       "nota": "No es un traslado por carretera: isla a 350 km de la costa, se llega en vuelo corto desde REC.",
       "privado_escalones": [],
       "privado_brl": 562,
-      "compartido_brl": 95
+      "compartido_brl": 95,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "fln": {
       "nombre": "Florianópolis",
@@ -736,7 +892,11 @@
       "privado_escalones": [],
       "privado_brl": 480,
       "compartido_brl": 30,
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real."
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "bombinhas": {
       "nombre": "Bombinhas",
@@ -755,7 +915,11 @@
       "privado_escalones": [],
       "privado_brl": 684,
       "compartido_brl": 67,
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real."
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "rosa": {
       "nombre": "Praia do Rosa",
@@ -774,7 +938,11 @@
       "privado_escalones": [],
       "privado_brl": 696,
       "compartido_brl": 72,
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real."
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "bcm": {
       "nombre": "Balneário Camboriú",
@@ -794,7 +962,11 @@
       "privado_escalones": [],
       "privado_brl": 582,
       "compartido_brl": 72,
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real."
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "itapema": {
       "nombre": "Itapema",
@@ -812,7 +984,11 @@
       "confianza": "alta",
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
-      "compartido_brl": 67
+      "compartido_brl": 67,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "garopaba": {
       "nombre": "Garopaba",
@@ -831,7 +1007,11 @@
       "privado_escalones": [],
       "privado_brl": 696,
       "compartido_brl": 67,
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real."
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "ferrugem": {
       "nombre": "Ferrugem",
@@ -850,7 +1030,11 @@
       "privado_escalones": [],
       "privado_brl": 696,
       "compartido_brl": 74,
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real."
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "picarras": {
       "nombre": "Piçarras",
@@ -869,7 +1053,11 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
       "privado_brl": 336,
-      "compartido_brl": 92
+      "compartido_brl": 92,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "gram": {
       "nombre": "Gramado",
@@ -888,7 +1076,11 @@
       "privado_escalones": [],
       "privado_brl": 1320,
       "compartido_brl": 80,
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real."
+      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "canela": {
       "nombre": "Canela",
@@ -907,7 +1099,11 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
       "privado_brl": 504,
-      "compartido_brl": 83
+      "compartido_brl": 83,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "torres": {
       "nombre": "Torres",
@@ -926,7 +1122,11 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
       "privado_brl": 480,
-      "compartido_brl": 126
+      "compartido_brl": 126,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "canoa": {
       "nombre": "Capão da Canoa",
@@ -945,7 +1145,11 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
       "privado_brl": 540,
-      "compartido_brl": 96
+      "compartido_brl": 96,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "rec": {
       "nombre": "Recife",
@@ -995,7 +1199,11 @@
         }
       ],
       "compartido_brl": 30,
-      "privado_brl": 101
+      "privado_brl": 101,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "joaopessoa": {
       "nombre": "João Pessoa",
@@ -1014,7 +1222,11 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
       "privado_brl": 132,
-      "compartido_brl": 30
+      "compartido_brl": 30,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     },
     "poa": {
       "nombre": "Porto Alegre",
@@ -1033,7 +1245,11 @@
       "confianza": "alta",
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "privado_escalones": [],
-      "compartido_brl": 30
+      "compartido_brl": 30,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
     }
   }
 }

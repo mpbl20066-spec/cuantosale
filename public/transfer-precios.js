@@ -19,7 +19,7 @@
     Object.defineProperty(module.exports, 'provenance', { value: proc, enumerable: false });
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this, {
-  buz: { name: "Búzios", iata: "GIG", modo: "car", km: 174, compartido: 30.77, privado: 86.54, compartido_brl: 160, privado_brl: 450, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":450}] },
+  buz: { name: "Búzios", iata: "GIG", modo: "car", km: 174, compartido: 28.85, privado: 67.31, compartido_brl: 150, privado_brl: 350, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":350}] },
   arraial: { name: "Arraial do Cabo", iata: "GIG", modo: "car", km: 170, compartido: 44.23, privado: 86.54, compartido_brl: 230, privado_brl: 450, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":450}] },
   cabo: { name: "Cabo Frio", iata: "GIG", modo: "car", km: 160, compartido: 44.23, privado: 86.54, compartido_brl: 230, privado_brl: 450, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":450}] },
   ilha: { name: "Ilha Grande", iata: "GIG", modo: "ferry", compartido: 53.85, privado: 86.54, compartido_brl: 280, privado_brl: 450, escalones: [{"min":1,"max":4,"vehiculo":"Auto","brl":450}] },
@@ -36,13 +36,13 @@
   pip: { name: "Pipa", iata: "NAT", modo: "car", km: 30, compartido: 5.96, privado: 57.69, compartido_brl: 31, privado_brl: 300, escalones: [] },
   ajuda: { name: "Arraial d’Ajuda", iata: "SSA", modo: "car", km: 170, compartido: 22.69, privado: 69.23, compartido_brl: 118, privado_brl: 360, escalones: [] },
   trancoso: { name: "Trancoso", iata: "SSA", modo: "car", km: 163, compartido: 21.73, privado: 87.69, compartido_brl: 113, privado_brl: 456, escalones: [] },
-  ssa: { name: "Salvador de Bahía", iata: "SSA", modo: "car", km: 24, compartido: 5.77, privado: 34.62, compartido_brl: 30, privado_brl: 180, appRideUsd: 11, escalones: [] },
+  ssa: { name: "Salvador de Bahía", iata: "SSA", modo: "car", km: 24, compartido: 5.77, privado: 33.27, compartido_brl: 30, privado_brl: 173, appRideUsd: 11, escalones: [{"min":1,"max":3,"vehiculo":"Auto","brl":173},{"min":4,"max":4,"vehiculo":"Auto","brl":230},{"min":5,"max":6,"vehiculo":"Van","brl":299},{"min":7,"max":8,"vehiculo":"Van","brl":345},{"min":9,"max":12,"vehiculo":"Van","brl":460},{"min":13,"max":15,"vehiculo":"Van","brl":575}] },
   for: { name: "Fortaleza", iata: "FOR", modo: "car", km: 9, compartido: 5.77, privado: 30, compartido_brl: 30, escalones: [] },
   jericoacoara: { name: "Jericoacoara", iata: "FOR", modo: "car", km: 295, compartido: 37.5, privado: 392.31, compartido_brl: 195, privado_brl: 2040, escalones: [] },
   morro: { name: "Morro de São Paulo", iata: "SSA", modo: "car", km: 242, compartido: 31.15, privado: 35.77, compartido_brl: 162, privado_brl: 186, escalones: [] },
   portoseguro: { name: "Porto Seguro", iata: "SSA", modo: "car", km: 699, compartido: 85.58, privado: 92.31, compartido_brl: 445, privado_brl: 480, escalones: [] },
-  itacare: { name: "Itacaré", iata: "SSA", modo: "car", km: 359, compartido: 45.19, privado: 242.31, compartido_brl: 235, privado_brl: 1260, escalones: [] },
-  forte: { name: "Praia do Forte", iata: "SSA", modo: "car", km: 62, compartido: 9.62, privado: 48.65, compartido_brl: 50, privado_brl: 253, escalones: [{"min":1,"max":2,"vehiculo":"Auto","brl":253},{"min":3,"max":4,"vehiculo":"Auto","brl":322},{"min":5,"max":6,"vehiculo":"Van","brl":402},{"min":7,"max":12,"vehiculo":"Van","brl":518},{"min":13,"max":15,"vehiculo":"Van","brl":747}] },
+  itacare: { name: "Itacaré", iata: "SSA", modo: "car", km: 359, compartido: 45.19, privado: 460, compartido_brl: 235, privado_brl: 2392, escalones: [{"min":1,"max":3,"vehiculo":"Auto","brl":2392},{"min":4,"max":10,"vehiculo":"Van","brl":3910},{"min":11,"max":12,"vehiculo":"Van","brl":4025}] },
+  forte: { name: "Praia do Forte", iata: "SSA", modo: "car", km: 62, compartido: 9.62, privado: 48.65, compartido_brl: 50, privado_brl: 253, escalones: [{"min":1,"max":2,"vehiculo":"Auto","brl":253},{"min":3,"max":4,"vehiculo":"Auto","brl":322},{"min":5,"max":6,"vehiculo":"Van","brl":448},{"min":7,"max":12,"vehiculo":"Van","brl":518},{"min":13,"max":15,"vehiculo":"Van","brl":747}] },
   fernando: { name: "Fernando de Noronha", iata: "FEN", modo: "vuelo", compartido: 18.27, privado: 108.08, compartido_brl: 95, privado_brl: 562, escalones: [] },
   fln: { name: "Florianópolis", iata: "FLN", modo: "car", km: 17, compartido: 5.77, privado: 92.31, compartido_brl: 30, privado_brl: 480, escalones: [] },
   bombinhas: { name: "Bombinhas", iata: "FLN", modo: "car", km: 89, compartido: 12.88, privado: 131.54, compartido_brl: 67, privado_brl: 684, escalones: [] },
@@ -76,9 +76,9 @@
       }
     },
   buz: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Búzios. Privado por vehiculo: 1 a 4 personas, Auto, R$ 450. Compartido por persona: R$ 160 (Micro, 1 a 10 personas). Precio final de venta, en reales. Trayecto de 174 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila GIG a Búzios. Privado por vehiculo (sin operador anotado): 1 a 4 personas, Auto, R$ 350. Compartido por persona (sin operador anotado): R$ 150 (Micro, 1 a 10 personas). Precio final de venta, en reales. Trayecto de 174 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
-      "verificado": "2026-10-01",
+      "verificado": "2026-10-16",
       "real": [
         "privado",
         "compartido"
@@ -262,13 +262,13 @@
       "horas": 2.7
     },
   ssa: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Salvador de Bahía. Compartido por persona: R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 24 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Salvador de Bahía. Privado por vehiculo de Bahia Terra Turismo (base R$ 150 + 15% y R$ 200 + 15% y R$ 260 + 15% y R$ 300 + 15% y R$ 400 + 15% y R$ 500 + 15%): 1 a 3 personas, Auto, R$ 173; 4 personas, Auto, R$ 230; 5 a 6 personas, Van, R$ 299; 7 a 8 personas, Van, R$ 345; 9 a 12 personas, Van, R$ 460; 13 a 15 personas, Van, R$ 575. Compartido por persona (sin operador anotado): R$ 30 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 24 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
-      "verificado": "2026-10-01",
+      "verificado": "2026-10-16",
       "real": [
+        "privado",
         "compartido"
       ],
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 24,
       "horas": 0.5,
       "appRideUsd": 11
@@ -318,20 +318,20 @@
       "horas": 11.4
     },
   itacare: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Itacaré. Compartido por persona: R$ 235 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 359 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Itacaré. Privado por vehiculo de Bahia Terra Turismo (base R$ 2080 + 15% y R$ 3400 + 15% y R$ 3500 + 15%): 1 a 3 personas, Auto, R$ 2392; 4 a 10 personas, Van, R$ 3910; 11 a 12 personas, Van, R$ 4025. Compartido por persona (sin operador anotado): R$ 235 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 359 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
-      "verificado": "2026-10-01",
+      "verificado": "2026-10-16",
       "real": [
+        "privado",
         "compartido"
       ],
-      "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 359,
       "horas": 5.7
     },
   forte: {
-      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Praia do Forte. Privado por vehiculo de Bahia Terra Turismo (su tarifa pública, nos dan 10 % de comisión; +20 % antes de las 08:00 y desde las 18:00; cancelación gratis hasta 24 h; la vuelta vale lo mismo) (base R$ 220 + 15% y R$ 280 + 15% y R$ 350 + 15% y R$ 450 + 15% y R$ 650 + 15%): 1 a 2 personas, Auto, R$ 253; 3 a 4 personas, Auto, R$ 322; 5 a 6 personas, Van, R$ 402; 7 a 12 personas, Van, R$ 518; 13 a 15 personas, Van, R$ 747. Compartido por persona: R$ 50 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 62 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
+      "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Praia do Forte. Privado por vehiculo de Bahia Terra Turismo (base R$ 220 + 15% y R$ 280 + 15% y R$ 390 + 15% y R$ 450 + 15% y R$ 650 + 15%): 1 a 2 personas, Auto, R$ 253; 3 a 4 personas, Auto, R$ 322; 5 a 6 personas, Van, R$ 448; 7 a 12 personas, Van, R$ 518; 13 a 15 personas, Van, R$ 747. Compartido por persona (sin operador anotado): R$ 50 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 62 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",
       "confianza": "alta",
-      "verificado": "2026-10-15",
+      "verificado": "2026-10-16",
       "real": [
         "privado",
         "compartido"

@@ -21,6 +21,12 @@
  * privado del modelo salia mas barato que el compartido, que no puede ser. Eso lo
  * detecta validar-transfer.js. Sin escalones, `privado` no se toca.
  *
+ * operador:   la columna Operador (opcional, la ultima) pasa a destinos[k].operador,
+ *             { privado, compartido }, con el nombre del proveedor tal como esta en
+ *             la tabla proveedores, o null si la fila no lo tiene anotado. Se cita
+ *             en "fuente". Solo se anota cuando el precio de la fila ES la tarifa de
+ *             ese operador: un proveedor de la zona con otro precio no cuenta.
+ *
  * Tambien actualiza la procedencia (real, confianza, fuente, derivacion), que antes
  * no se movia: un destino con tarifa cargada de la planilla seguia declarando que
  * sus dos precios salian del modelo de distancia. Eso era una afirmacion falsa, y
@@ -62,7 +68,7 @@ const planilla = {};
 for (const k of Object.keys(D)) { escalones[k] = []; planilla[k] = { iata: null, privado: [], compartido: null }; }
 
 for (const f of filas) {
-  const [iata, destino, km, , modalidad, vehiculo, cmin, cmax, base, comision, precio, unidad] = f;
+  const [iata, destino, km, , modalidad, vehiculo, cmin, cmax, base, comision, precio, unidad, operador] = f;
   const k = claveDe[iata + '|' + destino];
   if (!k) { problemas.push('destino sin clave (se pierde la fila): ' + iata + ' ' + destino); continue; }
   // Precios en reales enteros: 425,50 -> 426.
@@ -72,7 +78,7 @@ for (const f of filas) {
     // en "Consultar", que es lo que ya muestra.
     continue;
   }
-  const de = { base: (base || '').trim(), comision: (comision || '').trim(), brl: brl, km: km || '' };
+  const de = { base: (base || '').trim(), comision: (comision || '').trim(), brl: brl, km: km || '', operador: (operador || '').trim() };
   if (!planilla[k].iata) planilla[k].iata = iata;
   if (modalidad === 'Privado') {
     const min = Number(cmin), max = Number(cmax);
@@ -117,7 +123,17 @@ for (const k of Object.keys(D)) {
     delete D[k].compartido_brl;
     D[k].compartido_consultar = true;
   }
+  // Quien hace el servicio, por modalidad: la columna Operador de la planilla. null
+  // es "no esta anotado", no "no hay operador": el precio puede ser real igual, pero
+  // no hay a quien pasarle la reserva sin buscarlo primero.
+  D[k].operador = { privado: operadorDe(planilla[k].privado), compartido: operadorDe(planilla[k].compartido ? [planilla[k].compartido] : []) };
   actualizarProcedencia(k);
+}
+
+/* Los operadores distintos de las filas de una modalidad, o null si ninguna lo tiene. */
+function operadorDe(filasDe) {
+  const ops = [...new Set(filasDe.map((p) => p.operador).filter(Boolean))];
+  return ops.length ? ops.join(' y ') : null;
 }
 
 /* Que la procedencia diga la verdad despues de cargar la planilla.
@@ -173,14 +189,15 @@ function actualizarProcedencia(k) {
     // de la otra se lee como si el auto de Gramado costara R$ 90, que es el base
     // de la van compartida.
     const bases = planilla[k].privado.filter((p) => p.base).map((p) => 'R$ ' + p.base + ' + ' + (p.comision || '?')).join(' y ');
-    citas.push('Privado por vehiculo' + (bases ? ' (base ' + bases + ')' : '') + ': ' + rango.join('; ') + '.');
+    citas.push('Privado por vehiculo' + (v.operador.privado ? ' de ' + v.operador.privado : ' (sin operador anotado)') +
+      (bases ? ' (base ' + bases + ')' : '') + ': ' + rango.join('; ') + '.');
   }
   if (real.includes('compartido')) {
     const c = planilla[k].compartido;
     const det = [];
     if (c.vehiculo) det.push(c.vehiculo);
     if (c.min && c.max) det.push(c.min === c.max ? c.min + ' persona' : c.min + ' a ' + c.max + ' personas');
-    citas.push('Compartido por persona' + (c.base ? ' (base R$ ' + c.base + ' + ' + (c.comision || '?') + ')' : '') +
+    citas.push('Compartido por persona' + (v.operador.compartido ? ' de ' + v.operador.compartido : ' (sin operador anotado)') + (c.base ? ' (base R$ ' + c.base + ' + ' + (c.comision || '?') + ')' : '') +
       ': R$ ' + compartido[k] + (det.length ? ' (' + det.join(', ') + ')' : '') + '.');
   }
 

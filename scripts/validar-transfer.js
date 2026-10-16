@@ -244,6 +244,14 @@ for (const v of Object.values(D)) conf[v.confianza]++;
 const conApp = Object.values(D).filter((v) => v.appRideUsd != null).length;
 console.log('confianza  alta ' + conf.alta + ' / media ' + conf.media + ' / baja ' + conf.baja +
   '   (con precio de app: ' + conApp + ')');
+// Quien hace cada servicio (columna Operador de la planilla). Un precio sin operador
+// no es un error, pero es un transfer que se vende sin saber a quien reservarlo.
+for (const m of ['privado', 'compartido']) {
+  const conPrecio = claves.filter((k) => (D[k].real || []).includes(m));
+  const sinOp = conPrecio.filter((k) => !(D[k].operador && D[k].operador[m]));
+  console.log('operador ' + m + ': ' + (conPrecio.length - sinOp.length) + ' de ' + conPrecio.length + ' con precio' +
+    (sinOp.length ? '   sin operador: ' + sinOp.join(' ') : ''));
+}
 const sinKm = claves.filter((k) => D[k].modo !== 'car');
 console.log('sin carretera: ' + sinKm.join(' ') + '  (' + sinKm.map((k) => k + '=' + D[k].modo).join(', ') + ')');
 console.log('\n' + (errores ? errores + ' FALLAS, ' + avisos + ' avisos' : avisos ? avisos + ' avisos, sin fallas' : 'todo bien'));
