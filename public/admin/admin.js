@@ -97,7 +97,9 @@
         kpi('Margen', usd(k.margen_usd), k.sin_proveedor ? k.sin_proveedor + ' servicio(s) sin proveedor' : 'facturado − costo') + '</section>';
     }
     if (S.vista.indexOf('fin-') === 0) html += vistaFin(); else
-    html += S.vista.indexOf('mkt-') === 0 ? vistaMkt() : S.vista === 'usuarios' ? vistaUsuarios() : S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() :
+    if (OP_VISTAS[S.vista]) html += vistaOp(); else
+    if (S.vista === 'disponibilidad' || S.vista === 'temporadas') html += vistaReglas(); else
+    html += S.vista.indexOf('mkt-') === 0 ? vistaMkt() : S.vista === 'usuarios' ? vistaUsuarios() : S.vista === 'pedidos' ? vistaPedidos(d, cuenta) : (S.vista === 'whatsapp' ? vistaWhatsapp() : (S.vista === 'mensajes' ? vistaMensajes() : (S.vista === 'viajes' ? vistaViajes() : (S.vista === 'uso' ? vistaUso() : S.vista === 'demanda' ? vistaDemanda() :
       (S.vista === 'precarga' ? vistaPrecarga() : (esVistaSrv() ? vistaServicios() : (S.vista === 'publicar' ? vistaPublicar() : (S.vista === 'importar' ? vistaImportar() : (S.vista === 'operaciones' ? vistaOperaciones() : vistaProveedores(d))))))))));
     html += '</div>';
     app.innerHTML = html;
@@ -109,18 +111,52 @@
   /* El menu de arriba son 4 secciones; las que tienen mas de una pantalla muestran sus subpestanas debajo. Cada seccion
      recuerda la ultima pantalla abierta. */
   var GRUPOS = [
-    { t: 'Pedidos', vistas: [['pedidos', 'Pedidos']] },
-    { t: 'Finanzas', vistas: [['fin-resumen', 'Resumen'], ['fin-cobros', 'Cobros'], ['fin-pagos', 'Pagos a proveedores'], ['fin-movs', 'Transferencias'], ['fin-reparto', 'Le toca a Martín'], ['fin-audit', 'Auditoría']] },
-    { t: 'Clientes', vistas: [['usuarios', 'Usuarios'], ['viajes', 'Viajes guardados']] },
+    { t: 'Pedidos', vistas: [['pedidos', 'Pedidos'], ['agenda', 'Agenda de servicios'], ['salidas', 'Salidas y manifiestos'], ['cancelaciones', 'Cancelaciones']] },
+    { t: 'Finanzas', vistas: [['fin-resumen', 'Resumen'], ['fin-cobros', 'Cobros'], ['fin-pagos', 'Pagos a proveedores'], ['fin-movs', 'Transferencias'], ['rentabilidad', 'Rentabilidad'], ['fin-reparto', 'Le toca a Martín'], ['fin-audit', 'Auditoría']] },
+    { t: 'Clientes', vistas: [['clientes', 'Compradores'], ['usuarios', 'Usuarios de la web'], ['viajes', 'Viajes guardados']] },
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
-    { t: 'Catálogo', vistas: [['tours', 'Tours'], ['transfers', 'Transfers'], ['publicar', 'Por publicar'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
-    { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso']] },
+    { t: 'Catálogo', vistas: [['tours', 'Tours'], ['transfers', 'Transfers'], ['publicar', 'Por publicar'], ['disponibilidad', 'Disponibilidad'], ['temporadas', 'Temporadas y combos'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
+    { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso'], ['demanda', 'Demanda']] },
     { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-contactos', 'Contactos'], ['mkt-creadores', 'Creadores'], ['mkt-grupos', 'Grupos y foros']] }
   ];
   function esVistaSrv() { return S.vista === 'tours' || S.vista === 'transfers'; }
   function grupoDe(v) { return GRUPOS.filter(function (g) { return g.vistas.some(function (x) { return x[0] === v; }); })[0] || GRUPOS[0]; }
   /* ---------- Finanzas: cobros, pagos a proveedores, transferencias y auditoria (lib/finanzas.js). La pantalla vive en
      /admin/finanzas.js y se carga la primera vez que se abre la pestana. ---------- */
+  /* ---------- Agenda de servicios y Compradores (lib/operativa.js). La pantalla vive en /admin/operativa.js. ---------- */
+  /* Pantallas de lib/operativa.js: Agenda, Salidas y manifiestos, Cancelaciones, Compradores y Rentabilidad. */
+  var OP_VISTAS = { agenda: 1, clientes: 1, salidas: 1, cancelaciones: 1, rentabilidad: 1 };
+  var opPanel = null;
+  function vistaOp() {
+    if (opPanel) return opPanel.vista();
+    if (window.CSOperativaPanel) {
+      opPanel = CSOperativaPanel({ S: S, api: api, esc: esc, kpi: kpi, pintar: pintar, toast: toast, usd: usd, fecha: fecha, fechaHora: fechaHora, calc: calc, ESTADOS: ESTADOS, claveCli: claveCli, cargarFichas: cargarFichas,
+        abrirPedido: function (id) { abrir(id); }, recargarDatos: function () { return cargar(); }, irChat: function (tel) { S.vista = 'mensajes'; S.chatTel = tel; S.conv = null; pintar(); cargarConv(true); } });
+      return opPanel.vista();
+    }
+    if (!S.opCargando) {
+      S.opCargando = true;
+      var sc = document.createElement('script'); sc.src = '/admin/operativa.js?v=2';
+      sc.onload = function () { if (OP_VISTAS[S.vista]) pintar(); };
+      sc.onerror = function () { S.opCargando = false; toast('No se pudo abrir la pantalla. Recargá la página.'); };
+      document.head.appendChild(sc);
+    }
+    return '<div class="card"><p class="vacio">Cargando…</p></div>';
+  }
+  /* ---------- Disponibilidad y Temporadas y combos (lib/reglas.js). La pantalla vive en /admin/reglas.js. ---------- */
+  var rgPanel = null;
+  function vistaReglas() {
+    if (rgPanel) return rgPanel.vista();
+    if (window.CSReglasPanel) { rgPanel = CSReglasPanel({ S: S, api: api, esc: esc, kpi: kpi, pintar: pintar, toast: toast, usd: usd, fecha: fecha, recargarOps: cargarOps }); return rgPanel.vista(); }
+    if (!S.rgCargando) {
+      S.rgCargando = true;
+      var sc = document.createElement('script'); sc.src = '/admin/reglas.js?v=1';
+      sc.onload = function () { if (S.vista === 'disponibilidad' || S.vista === 'temporadas') pintar(); };
+      sc.onerror = function () { S.rgCargando = false; toast('No se pudo abrir la pantalla. Recargá la página.'); };
+      document.head.appendChild(sc);
+    }
+    return '<div class="card"><p class="vacio">Cargando…</p></div>';
+  }
   var finPanel = null;
   function vistaFin() {
     if (finPanel) return finPanel.vista();
@@ -507,6 +543,21 @@
     var pg = porDetalle('vista_pagina'), pgs = Object.keys(pg).sort(function (a, b) { return pg[b] - pg[a]; });
     h += '<div class="card uso-card"><h3 class="uso-h">Páginas vistas</h3>' + (pgs.length ? '<table><tbody>' + pgs.map(function (k) { return '<tr><td>' + esc(k || '(sin nombre)') + '</td><td class="num">' + pg[k] + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="vacio">Todavía no hay datos.</p>') + '</div>';
     return h + '<p class="sub">Del ' + esc(fecha(u.desde)) + ' al ' + esc(fecha(u.hasta)) + '. Cuenta a todos, sin cookies ni datos de la persona (lib/uso.js); Google Analytics solo ve a quien aceptó las cookies.</p>';
+  }
+  /* ---------- Demanda: que buscan y no les vendemos (lib/demanda.js). La pantalla vive en /admin/demanda.js y se carga
+     la primera vez que se abre la pestana. ---------- */
+  var demPanel = null;
+  function vistaDemanda() {
+    if (demPanel) return demPanel.vista();
+    if (window.CSDemandaPanel) { demPanel = CSDemandaPanel({ S: S, api: api, esc: esc, kpi: kpi, pintar: pintar }); return demPanel.vista(); }
+    if (!S.demCargando) {
+      S.demCargando = true;
+      var sc = document.createElement('script'); sc.src = '/admin/demanda.js?v=1';
+      sc.onload = function () { if (S.vista === 'demanda') pintar(); };
+      sc.onerror = function () { S.demCargando = false; toast('No se pudo abrir Demanda. Recargá la página.'); };
+      document.head.appendChild(sc);
+    }
+    return '<div class="card"><p class="vacio">Cargando…</p></div>';
   }
   function vistaViajes() {
     var v = S.viajes || {};
@@ -1089,7 +1140,7 @@
 
   /* ---------- detalle de un pedido ---------- */
   function nuevoDraft() { return { id: null, ref: 'Pedido manual', estado: 'nuevo', cliente_nombre: '', cliente_telefono: '', cliente_email: '', destino: '', fecha_ida: '', fecha_vuelta: '', personas: 2, medio_pago: '', notas: '', items: [], pagos: [], origen: 'manual' }; }
-  function itemVacio() { return { id: 'n' + Date.now() + Math.random().toString(36).slice(2, 5), tipo: 'tour', nombre: '', detalle: '', precio_usd: 0, proveedor_id: '', proveedor_nombre: '', costo_usd: 0, pagado_proveedor_usd: 0, estado: 'pendiente', ref_proveedor: '', notas: '' }; }
+  function itemVacio() { return { id: 'n' + Date.now() + Math.random().toString(36).slice(2, 5), tipo: 'tour', nombre: '', detalle: '', precio_usd: 0, proveedor_id: '', proveedor_nombre: '', costo_usd: 0, pagado_proveedor_usd: 0, estado: 'pendiente', ref_proveedor: '', notas: '', fecha_servicio: null, hora: '', pickup: '' }; }
   /* Los proveedores que nombran el destino del pedido en "Qué servicios hace" van primero. */
   function sinTildes(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
   function provOpts(sel) {
@@ -1165,9 +1216,18 @@
     L.push('', 'Cuando pagues, mandanos el comprobante por acá.', 'Ref: ' + (p.ref || ''));
     return L.join('\n');
   }
+  /* Fecha, hora y pickup del servicio en una linea (sin fecha propia, las del viaje). */
+  function cuandoServicio(p, it) {
+    return [it.fecha_servicio ? fecha(it.fecha_servicio) : (fecha(p.fecha_ida) + (p.fecha_vuelta ? ' al ' + fecha(p.fecha_vuelta) : '')), it.hora ? it.hora + ' h' : '', it.pickup ? 'Pickup: ' + it.pickup : ''].filter(Boolean).join(' · ');
+  }
+  /* Nombres y edades, sin documentos: esos se mandan solo si el proveedor los pide. */
+  function paxLinea(p) {
+    var l = (p.pasajeros || []).filter(function (x) { return x.nombre; }).map(function (x) { return x.nombre + (x.edad != null && x.edad !== '' ? ' (' + x.edad + ')' : '') + (x.nota ? ' – ' + x.nota : ''); });
+    return String(p.personas || l.length || '') + (l.length ? ': ' + l.join('; ') : '');
+  }
   function mensajeProveedor(p, it, pr) {
     return 'Hola' + (pr && pr.contacto ? ' ' + pr.contacto : '') + '! Te consulto disponibilidad para: ' + it.nombre + (it.detalle ? ' (' + it.detalle + ')' : '') +
-      '. Fecha: ' + fecha(p.fecha_ida) + (p.fecha_vuelta ? ' al ' + fecha(p.fecha_vuelta) : '') + '. Pasajeros: ' + p.personas + '. A nombre de ' + p.cliente_nombre + '. Ref ' + p.ref + '. ¡Gracias!';
+      '. Fecha: ' + cuandoServicio(p, it) + '. Pasajeros: ' + paxLinea(p) + '. A nombre de ' + p.cliente_nombre + '. Ref ' + p.ref + '. ¡Gracias!';
   }
   /* Los botones de WhatsApp de la ficha salen por la Cloud API (lib/wa-panel.js): con la ventana de 24 h abierta va el
      texto de siempre; si no, la plantilla, con estos datos en una linea cada uno. */
@@ -1201,7 +1261,7 @@
     }
     if (tipo === 'saludo') return { texto: 'Hola ' + nombre + '! Te escribimos de CuántoSale por tu pedido ' + p.ref + '.', params: [nombre, p.ref] };
     var it = (p.items || [])[i] || {}, pr = S.datos.proveedores.filter(function (x) { return x.id === it.proveedor_id; })[0] || {};
-    return { texto: mensajeProveedor(p, it, pr), params: [pr.contacto || pr.nombre || 'equipe', it.nombre + (it.detalle ? ' (' + it.detalle + ')' : ''), fechas, String(p.personas || ''), p.cliente_nombre || nombre, p.ref], a: pr.nombre };
+    return { texto: mensajeProveedor(p, it, pr), params: [pr.contacto || pr.nombre || 'equipe', it.nombre + (it.detalle ? ' (' + it.detalle + ')' : ''), cuandoServicio(p, it) || fechas, paxLinea(p), p.cliente_nombre || nombre, p.ref], a: pr.nombre };
   }
   /* Anota la seña cobrada, guarda el pedido y ofrece avisarle al cliente (sena_recibida, con el saldo que le queda). */
   function registrarSena() {
@@ -1359,6 +1419,9 @@
       '<b class="item__precio">' + usd(it.precio_usd) + '</b></div>' +
       '<div class="item__ctrl"><label class="f">Proveedor<select ' + f('proveedor_id') + '>' + provOpts(it.proveedor_id) + '</select></label>' +
       '<label class="f">Estado del servicio<select ' + f('estado') + '>' + opts(ESTADOS_ITEM, it.estado) + '</select></label></div>' +
+      '<div class="item__op"><label class="f">Fecha del servicio<input ' + f('fecha_servicio', 'date') + ' value="' + esc(it.fecha_servicio || '') + '"></label>' +
+      '<label class="f">Hora de pickup / salida<input ' + f('hora', 'time') + ' value="' + esc(it.hora || '') + '"></label>' +
+      '<label class="f item__pickup">Pickup: hotel o dirección exacta<input ' + f('pickup') + ' value="' + esc(it.pickup || '') + '" placeholder="Ej. Hotel Ibis, Av. Beira Mar 123, hab. 204"></label></div>' +
       politicaHtml(it) +
       (it.estado === 'cancelado' || S.draft.estado === 'cancelado' ? '<div class="grid"><label class="f">Se le cobra igual al cliente (US$)<input ' + f('cargo_cliente_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (it.cargo_cliente_usd || '') + '" placeholder="0 = se le devuelve"></label>' +
         '<label class="f">Se le paga igual al proveedor (US$)<input ' + f('cargo_proveedor_usd', 'number', ' min="0" step="0.01" inputmode="decimal"') + ' value="' + (it.cargo_proveedor_usd || '') + '" placeholder="0 = no se le paga"></label></div>' : '') +
@@ -1378,6 +1441,25 @@
         '<button type="button" class="btn btn--sm btn--txt-danger" data-quitar-item="' + i + '">Quitar servicio</button></div></div>' : '') +
       '</div>';
   }
+  /* Pasajeros: nombre, documento, edad (tarifas de ninos) y requerimientos especiales. Solo los ve el panel. */
+  function paxHtml(x, i) {
+    var f = function (campo, tipo, extra) { return 'data-pax="' + i + '" data-f="' + campo + '"' + (tipo ? ' type="' + tipo + '"' : '') + (extra || ''); };
+    return '<div class="paxRow"><input ' + f('nombre') + ' value="' + esc(x.nombre) + '" placeholder="Nombre y apellido" aria-label="Nombre">' +
+      '<input ' + f('documento') + ' value="' + esc(x.documento) + '" placeholder="Pasaporte / CI" aria-label="Documento">' +
+      '<input ' + f('edad', 'number', ' min="0" max="120" inputmode="numeric"') + ' value="' + esc(x.edad == null ? '' : x.edad) + '" placeholder="Edad" aria-label="Edad">' +
+      '<input ' + f('nota') + ' value="' + esc(x.nota) + '" placeholder="Requerimientos (silla de bebé, dieta…)" aria-label="Requerimientos especiales">' +
+      '<button type="button" class="btn btn--sm btn--danger btn--x" data-act="quitar-pax" data-n="' + i + '" aria-label="Quitar pasajero">✕</button></div>';
+  }
+  /* Clave del cliente (igual que lib/operativa.js): su WhatsApp, o el email si no dejo telefono. */
+  function claveCli(p) {
+    var d = String((p && p.cliente_telefono) || '').replace(/\D/g, '').replace(/^00/, '');
+    if (/^09\d{7}$/.test(d)) d = '598' + d.slice(1); else if (/^9\d{7}$/.test(d)) d = '598' + d;
+    if (/^\d{8,15}$/.test(d)) return 'tel:' + d;
+    var m = String((p && p.cliente_email) || '').trim().toLowerCase();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m) ? 'mail:' + m : '';
+  }
+  function fichaDe(p) { var k = claveCli(p); return ((S.fichas && S.fichas.fichas) || []).filter(function (x) { return x.clave === k; })[0] || null; }
+  function cargarFichas() { return api('op/clientes').then(function (j) { S.fichas = j; if (S.draft) refrescarPanel(); return j; }).catch(function () { S.fichas = { fichas: [], error: true }; }); }
   function pagoHtml(pg, i) {
     var f = function (campo, tipo, extra) { return 'data-p="' + i + '" data-f="' + campo + '"' + (tipo ? ' type="' + tipo + '"' : '') + (extra || ''); };
     return '<div class="pagoRow"><input ' + f('fecha', 'date') + ' value="' + esc(pg.fecha) + '" aria-label="Fecha">' +
@@ -1402,13 +1484,18 @@
     el.innerHTML = '<div class="panel" role="dialog" aria-modal="true" aria-label="Detalle del pedido">' +
       '<div class="panel__head ficha__cab">' + (esNuevo ? '<h2>Nuevo pedido manual</h2>'
         : '<div class="ficha__quien"><h2>' + esc(p.cliente_nombre || 'Sin nombre') + ' <span class="pill p-' + p.estado + '" id="pill-estado">' + esc(ESTADOS[p.estado]) + '</span></h2>' +
-          '<p>' + esc(viaje) + '</p><p class="sub">' + [p.cliente_telefono, p.cliente_email, 'Ref ' + p.ref].filter(Boolean).map(esc).join(' · ') + '</p></div>') +
+          '<p>' + esc(viaje) + '</p><p class="sub">' + [p.cliente_telefono, p.cliente_email, 'Ref ' + p.ref].filter(Boolean).map(esc).join(' · ') +
+          (claveCli(p) ? ' · <a href="#" data-act="ver-ficha">Ficha del cliente</a>' : '') + '</p>' +
+          (fichaDe(p) && fichaDe(p).alerta ? '<p class="ficha__alerta">⚠ ' + esc(fichaDe(p).alerta) + '</p>' : '') + '</div>') +
         '<div class="ficha__acc">' + menuWa + '<button class="btn btn--icono" data-act="cerrar" aria-label="Cerrar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></div>' +
       '<div class="panel__body">' +
       (esNuevo ? '' : '<div id="etapas-box">' + etapasHtml(p) + '</div><div id="paso-box">' + pasoHtml(p) + '</div>') +
       '<section class="sec"><div class="sec__cab"><h3>Servicios</h3><button type="button" class="btn btn--sm" data-act="add-item">+ Agregar servicio</button></div><div id="items-box">' + (p.items.length ? p.items.map(itemHtml).join('') : '<p class="sub">Sin servicios todavía.</p>') + '</div></section>' +
+      '<section class="sec"><div class="sec__cab"><h3>Pasajeros' + ((p.pasajeros || []).length ? ' (' + p.pasajeros.length + ' de ' + (p.personas || '?') + ')' : '') + '</h3><button type="button" class="btn btn--sm" data-act="add-pax">+ Agregar pasajero</button></div>' +
+        ((p.pasajeros || []).length ? (p.pasajeros || []).map(paxHtml).join('') : '<p class="sub">Sin pasajeros cargados. Nombre, documento y edad hacen falta para algunos paseos (barcos, parques) y para las tarifas de niños.</p>') + '</section>' +
       (esNuevo ? '' : '<section class="sec"><div class="sec__cab"><h3>Pagos del cliente</h3><div class="item__acc"><button type="button" class="btn btn--sm" data-act="add-pago">+ Registrar cobro</button><button type="button" class="btn btn--sm" data-act="cobrar-saldo">Cobró todo</button>' +
         (c.cobrado > 0 && tieneMail(p) ? '<button type="button" class="btn btn--sm" data-act="mail-recibo">' + (c.saldo > 0 ? 'Mandar recibo por mail' : 'Mandar voucher por mail') + '</button>' : '') +
+        (c.cobrado > 0 ? '<button type="button" class="btn btn--sm" data-act="voucher-pdf">' + (c.saldo > 0 ? 'Descargar recibo PDF' : 'Descargar voucher PDF') + '</button>' : '') +
         (c.devolver > 0 ? '<button type="button" class="btn btn--sm btn--danger" data-act="registrar-reembolso">Registrar reembolso de ' + usd(c.devolver) + '</button>' : '') + '</div></div>' +
         '<div id="sena-box">' + pagosResumenHtml(p) + '</div><div id="pagos-box">' + (p.pagos.length ? p.pagos.map(pagoHtml).join('') : '<p class="sub">Todavía no registraste cobros.</p>') + '</div></section>') +
       '<section class="sec sec--franja" aria-label="Cuentas"><div class="cuentas cuentas--franja" id="cuentas-box">' + cuentasHtml(p) + '</div></section>' +
@@ -2961,7 +3048,7 @@
     /* Lo que se cobra y se paga igual por lo que se cancela se define ahora, antes de guardar. */
     if (!definirCancelacion(p, recienCancelado ? activosAntes : serviciosCancelados)) { mensaje('No se guardó: falta definir la cancelación.', true); return Promise.resolve(); }
     var cuerpo = { estado: p.estado, cliente_nombre: p.cliente_nombre, cliente_telefono: p.cliente_telefono, cliente_email: p.cliente_email, destino: p.destino,
-      fecha_ida: p.fecha_ida || null, fecha_vuelta: p.fecha_vuelta || null, personas: p.personas, medio_pago: p.medio_pago, notas: p.notas, items: p.items, pagos: p.pagos };
+      fecha_ida: p.fecha_ida || null, fecha_vuelta: p.fecha_vuelta || null, personas: p.personas, medio_pago: p.medio_pago, notas: p.notas, items: p.items, pagos: p.pagos, pasajeros: p.pasajeros || [] };
     var llamada = p.id ? api('pedido/actualizar', { id: p.id, cambios: cuerpo }) : api('pedido/crear', cuerpo);
     mensaje('Guardando…');
     return llamada.then(function (r) {
@@ -3035,7 +3122,8 @@
   }
   function abrir(id) {
     var p = S.datos.pedidos.filter(function (x) { return x.id === id; })[0]; if (!p) return;
-    S.draft = JSON.parse(JSON.stringify(p)); S.dirty = false; cargarTasas(); abrirPanel(); cargarPoliticas(id);
+    S.draft = JSON.parse(JSON.stringify(p)); S.draft.pasajeros = S.draft.pasajeros || []; S.dirty = false; cargarTasas(); abrirPanel(); cargarPoliticas(id);
+    if (!S.fichas) cargarFichas();
   }
   /* Politica de cancelacion de cada servicio y si hoy tiene reembolso (POST pedido/politicas, lib/politicas.js). */
   function cargarPoliticas(id) {
@@ -3197,6 +3285,8 @@
       }
     } else if (el.hasAttribute('data-p')) {
       S.draft.pagos[+el.getAttribute('data-p')][campo] = v;
+    } else if (el.hasAttribute('data-pax')) {
+      S.draft.pasajeros[+el.getAttribute('data-pax')][campo] = v;
     } else {
       S.draft[campo] = (campo === 'fecha_ida' || campo === 'fecha_vuelta') && !v ? null : v;
       if (campo === 'estado') { var pl = document.getElementById('pill-estado'); if (pl) { pl.className = 'pill p-' + v; pl.textContent = ESTADOS[v]; } }
@@ -3445,6 +3535,18 @@
       case 'nuevo-prov': S.prov = nuevoProveedor(); S.dirty = false; abrirProv(); break;
       case 'cerrar': cerrarPanel(false); break;
       case 'add-item': S.draft.items.push(itemVacio()); S.dirty = true; refrescarPanel(); break;
+      case 'add-pax': (S.draft.pasajeros = S.draft.pasajeros || []).push({ nombre: '', documento: '', edad: null, nota: '' }); S.dirty = true; refrescarPanel(); break;
+      case 'quitar-pax': S.draft.pasajeros.splice(+t.getAttribute('data-n'), 1); S.dirty = true; refrescarPanel(); break;
+      case 'voucher-pdf':
+        if (S.dirty) { toast('Guardá los cambios antes: el PDF sale del pedido guardado.'); break; }
+        window.open('/api/admin/op/voucher?id=' + encodeURIComponent(S.draft.id) + '&tipo=' + (calc(S.draft).saldo > 0 ? 'sena' : 'saldo'), '_blank');
+        break;
+      case 'ver-ficha':
+        e.preventDefault();
+        var clave = claveCli(S.draft); if (!clave) break;
+        if (S.dirty && !confirm('Tenés cambios sin guardar. ¿Ir a la ficha igual?')) break;
+        cerrarPanel(true); S.vista = 'clientes'; S.opFicha = clave; pintar();
+        break;
       case 'registrar-reembolso':
         var dev = calc(S.draft).devolver;
         if (dev > 0 && confirm('¿Registrar que le devolviste ' + usd(dev) + ' a ' + (S.draft.cliente_nombre || 'el cliente') + '?')) {

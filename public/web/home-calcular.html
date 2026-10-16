@@ -225,6 +225,7 @@
     var q = norm(S.q || '').trim(), lista;
     if (q) {
       lista = DESTS.filter(function (d) { return norm(d[1]).indexOf(q) > -1 || norm(d[2]).indexOf(q) > -1; });
+      if (window.CSDemanda) CSDemanda.buscado(q, lista.length > 0);   /* destino que no tenemos: Sistema > Demanda */
       return lista.length ? '<div class="c-dg">' + lista.map(function (d) { return tarjetaDest(d, 'busqueda'); }).join('') + '</div>' : '<p class="c-ej">No encontramos «' + esc(S.q) + '». Probá con otro nombre o región.</p>';
     }
     var pop = POPULARES.map(function (k) { return DESTS.filter(function (d) { return d[0] === k; })[0]; }).filter(Boolean);

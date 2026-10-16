@@ -365,6 +365,10 @@ td.prov-tacho-td{width:44px}
 a.lnk{color:var(--info);font-weight:600;text-decoration:none}
 a.lnk:hover{text-decoration:underline}
 .pagoRow{display:grid;grid-template-columns:130px 110px 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center}
+/* Operativa: fecha, hora y pickup de cada servicio; pasajeros; alerta del cliente */
+.item__op{display:grid;grid-template-columns:160px 130px minmax(0,1fr);gap:10px}
+.paxRow{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 80px minmax(0,1.6fr) auto;gap:8px;margin-bottom:8px;align-items:center}
+.ficha__alerta{margin:6px 0 0;color:var(--bad);background:var(--badbg);border-radius:8px;padding:4px 10px;font-weight:700;font-size:13.5px;display:inline-block}
 .chat{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 290px);min-height:420px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:24px}
 .chat-lista{border-right:1px solid var(--line);overflow:auto}
 .chat-it{display:grid;gap:2px;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line);padding:10px 14px}
@@ -400,6 +404,8 @@ a.lnk:hover{text-decoration:underline}
   td::before{content:attr(data-l);color:var(--muted);font-size:12.5px;font-weight:600;text-align:left}
   .num{text-align:right}
   .pagoRow{grid-template-columns:1fr 1fr}
+  .item__op{grid-template-columns:1fr 1fr}.item__pickup{grid-column:1/-1}
+  .paxRow{grid-template-columns:1fr 1fr}
   .bar input[type=search]{max-width:none;flex:1 1 100%}
 }
 .uso-card{margin-top:12px}.uso-h{margin:0;padding:14px 14px 6px;font-size:15px}.uso-card>.sub,.uso-card>.vacio{padding:0 14px 12px}
@@ -439,6 +445,6 @@ code{font-size:12.5px;background:var(--bg);padding:1px 5px;border-radius:5px;wor
 </head>
 <body>
 <main id="app"></main>
-<script src="/admin/admin.js?v=107"></script>
+<script src="/admin/admin.js?v=108"></script>
 </body>
 </html>

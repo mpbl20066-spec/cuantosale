@@ -38,6 +38,38 @@
       else fetch('/api/uso', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: cuerpo, keepalive: true }).catch(function () {});
     } catch (e) { /* el contador nunca rompe la pagina */ }
   }
+  /* Demanda insatisfecha (/api/demanda, lib/demanda.js, panel Sistema > Demanda): que destinos cotiza la gente, si hubo
+     vuelos, si pidio algo y que busca que no tenemos. Para contar PERSONAS y no solo busquedas, el navegador guarda un
+     numero al azar (cs_v): no es nombre, ni correo, ni IP. Va tambien como cookie para que el pedido de reserva
+     (lib/reservas.js) sepa de que visitante es sin cambiar el formulario. */
+  var visitante = '';
+  try { visitante = localStorage.getItem('cs_v') || ''; } catch (e) { /* modo privado */ }
+  if (!/^[a-z0-9]{8,24}$/.test(visitante)) {
+    visitante = (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)).slice(0, 18);
+    try { localStorage.setItem('cs_v', visitante); } catch (e) { /* modo privado: dura la visita */ }
+  }
+  try { document.cookie = 'cs_v=' + visitante + '; Path=/; Max-Age=31536000; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : ''); } catch (e) { /* sin cookies */ }
+  function demanda(evento, datos) {
+    if (debug || !/^https?:$/.test(location.protocol)) return;
+    try {
+      var cuerpo = JSON.stringify(Object.assign({ v: visitante, e: evento }, datos || {}));
+      if (navigator.sendBeacon) navigator.sendBeacon('/api/demanda', new Blob([cuerpo], { type: 'application/json' }));
+      else fetch('/api/demanda', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: cuerpo, keepalive: true }).catch(function () {});
+    } catch (e) { /* nunca rompe la pagina */ }
+  }
+  /* Buscadores de destinos: se llama en cada tecla con lo escrito y si hubo resultados. Manda solo lo que quedo quieto
+     1,5 s sin resultados, una vez por texto y visita. */
+  var buscarT = null, buscados = {};
+  window.CSDemanda = {
+    cotizo: function (d) { demanda('cotizo', d); },
+    vuelos: function (d) { demanda('vuelos', d); },
+    buscado: function (texto, hayResultados) {
+      clearTimeout(buscarT);
+      var q = String(texto || '').trim().toLowerCase();
+      if (hayResultados || q.length < 3 || /[0-9@]/.test(q)) return;
+      buscarT = setTimeout(function () { if (buscados[q]) return; buscados[q] = 1; demanda('buscar_sin', { q: q }); }, 1500);
+    }
+  };
   window.mockTrack = function (nombre, params) {
     params = params || {};
     if (!params.viaje_id) params.viaje_id = window.CS_VIAJE_ID;

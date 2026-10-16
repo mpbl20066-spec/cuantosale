@@ -2267,9 +2267,12 @@ async function cotizar(req, res, url) {
      del detalle, que es la sensacion de "algo todavia esta cargando" que la
      pagina no quiere.
    */
+  /* Sin los tours que no tienen lugar en las fechas del viaje (bloqueos y cupos) y con el % de temporada
+     (lib/reglas.js, Catalogo > Disponibilidad y Temporadas del panel). */
+  const reglas = require('./lib/reglas');
   const [toursList, toursSecond] = await Promise.all([
-    tours.destino(v.S.dest),
-    secondKey ? tours.destino(secondKey) : Promise.resolve([])
+    tours.destino(v.S.dest).then(function (l) { return reglas.aplicarATours(l, v.S.dest, v.S.dep, v.S.ret, v.S.pax); }),
+    secondKey ? tours.destino(secondKey).then(function (l) { return reglas.aplicarATours(l, secondKey, v.S.dep, v.S.ret, v.S.pax); }) : Promise.resolve([])
   ]);
   sendJson(res, 200, Object.assign({
     meta: {
@@ -3451,7 +3454,27 @@ const viajesGuardados = require('./lib/viajes-guardados');
 /* Contador de uso propio (lib/uso.js): POST /api/uso desde home-track.js y la pestana "Uso" del panel. */
 let usoCache = null;
 function usoApi() { if (!usoCache) usoCache = require('./lib/uso')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp }); return usoCache; }
-const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual, precarga: estadoPrecarga, tasas: getTasas, uso: function (dias) { return usoApi().resumen(dias).then(function (r) { r.nombres = {}; Object.keys(model.DEST).forEach(function (k) { r.nombres[k] = model.DEST[k].name; }); return r; }); } });
+const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual, precarga: estadoPrecarga, tasas: getTasas, uso: function (dias) { return usoApi().resumen(dias).then(function (r) { r.nombres = {}; Object.keys(model.DEST).forEach(function (k) { r.nombres[k] = model.DEST[k].name; }); return r; }); }, demanda: demandaPanel });
+/* Demanda insatisfecha (lib/demanda.js): POST /api/demanda desde home-track.js y la pestana Sistema > Demanda. Las visitas
+   de un navegador con sesion del panel quedan marcadas como prueba. */
+const demanda = require('./lib/demanda');
+let demandaCache = null;
+function demandaApi() { if (!demandaCache) demandaCache = demanda.crear({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp }); return demandaCache; }
+demanda.configurar({ esPrueba: function (req) { return adminPanel.sesionValida(req); } });
+/* Para el panel: los eventos y lo que hoy vendemos en cada destino (tours del catalogo y traslado con precio), que es
+   lo que dice si la demanda esta atendida. */
+async function demandaPanel(dias, conPrueba) {
+  const r = await demanda.filas(dias, conPrueba);
+  const lista = await tours.todos().catch(function () { return []; });
+  await require('./lib/traslados').refrescar().catch(function () { return null; });
+  r.oferta = {};
+  Object.keys(model.DEST).forEach(function (k) {
+    const tp = model.TRANSFER_PRICES[k];
+    r.oferta[k] = { nombre: model.DEST[k].name, tours: 0, traslado: !!(tp && (Number(tp.privado) > 0 || Number(tp.compartido) > 0)) };
+  });
+  lista.forEach(function (t) { (t.destinations || []).forEach(function (d) { if (r.oferta[d]) r.oferta[d].tours++; }); });
+  return r;
+}
 /* Webhook de WhatsApp (Cloud API de Meta): mensajes de los clientes y estados de los nuestros, para la bandeja del
    panel (lib/mensajes.js). GET es la verificacion que hace Meta al configurarlo (WHATSAPP_VERIFY_TOKEN). En POST se
    comprueba la firma X-Hub-Signature-256 con WHATSAPP_APP_SECRET (la clave secreta de la app de Meta): sin ella
@@ -3582,7 +3605,11 @@ function handleRequest(req, res) {
     if (req.method === 'GET' && url.pathname === '/api/mails/revisar') {
       const cron = String(process.env.CRON_SECRET || '').trim();
       if (cron && req.headers.authorization !== 'Bearer ' + cron) { res.writeHead(401); return res.end(); }
-      return require('./lib/mail-avisos').revisar({ tasas: getTasas }).then(function (r) { sendJson(res, 200, r); }).catch(function (e) {
+      /* De paso, la cotizacion del real contra la del catalogo: si se alejo mas que el umbral, un mail al panel. */
+      return require('./lib/mail-avisos').revisar({ tasas: getTasas }).then(async function (r) {
+        r.cotizacion = await require('./lib/reglas').revisarCotizacion(getTasas).catch(function (e) { return { error: e.message }; });
+        sendJson(res, 200, r);
+      }).catch(function (e) {
         console.error('[mails]', e.message);
         sendJson(res, 500, { error: e.message });
       });
@@ -3616,6 +3643,12 @@ function handleRequest(req, res) {
       if (url.pathname === '/api/pasaporte' && req.method === 'GET') return pas.getEstado(req, res).catch(alFallarPas);
       if (url.pathname === '/api/pasaporte/evento' && req.method === 'POST') return pas.postEvento(req, res).catch(alFallarPas);
       res.writeHead(405, { Allow: 'GET, POST' }); return res.end();
+    }
+    /* Disponibilidad, temporada y combos de un viaje para la pagina de reserva (lib/reglas.js): que tours no tienen
+       lugar en esas fechas, el % de temporada y los combos activos. Publico y sin datos de clientes. */
+    if (url.pathname === '/api/disponibilidad' && req.method === 'GET') {
+      if (limited('disponibilidad:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas consultas.' });
+      return require('./lib/reglas').apiPublica(req, res, url, { sendJson: sendJson }).catch(function (e) { sendJson(res, 500, { error: e.message }); });
     }
     /* Estado de un pedido para la pagina del cliente: solo el estado (sin nombre, telefono ni montos). El id es un uuid
        que solo tiene el navegador que hizo el pedido. Cuando el asesor confirma en /admin, aca aparece "confirmado". */
@@ -3671,6 +3704,9 @@ function handleRequest(req, res) {
     /* contador de uso (lib/uso.js): antes del cortafuegos de POST */
     if (url.pathname === '/api/uso') {
       return usoApi().api(req, res).catch(function (e) { if (!res.headersSent) sendJson(res, 500, { error: 'Error inesperado.' }); console.error('[uso]', e); });
+    }
+    if (url.pathname === '/api/demanda') {
+      return demandaApi().api(req, res).catch(function (e) { if (!res.headersSent) sendJson(res, 500, { error: 'Error inesperado.' }); console.error('[demanda]', e); });
     }
     if (req.method === 'POST') { res.writeHead(404); return res.end(); }
     if (url.pathname === '/api/destinos') {

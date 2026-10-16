@@ -745,6 +745,9 @@
   .cf-lista{border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
   .cf-svc{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line)}
   .cf-svc .fin-ico{flex:0 0 46px;height:46px}
+  .cf-combo{margin:0;padding:8px 12px;font-size:13.5px;font-weight:700;color:#067647;background:#DCFAE6;border-radius:10px}
+  .xr.is-agotado{opacity:.55;cursor:not-allowed}.x-agot{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;color:#B42318}
+  .x-temp{display:block;font-size:11px;font-weight:600;color:var(--azul,#1D4ED8)}
   .cf-total{display:flex;justify-content:space-between;align-items:center;padding:12px;font-size:15px;font-weight:700;color:var(--ink)}
   .cf-total b{font-family:var(--fh);font-size:22px}
   .cf-nota{margin:12px 0 0;font-size:13px;color:var(--ink2)}
@@ -1564,6 +1567,8 @@
      persona, precio referencial). Traslados adicionales, auto y otros servicios todavia no tienen
      catalogo en la app: van marcados como ejemplo. */
   var TOURS = (window.MOCK_TOURS || {})[destKey] || [];
+  /* Sistema > Demanda del panel (home-track.js, lib/demanda.js): esta persona quiere ir a este destino en estas fechas. */
+  if (DESTS[destKey] && window.CSDemanda) CSDemanda.cotizo({ dest: destKey, seg: PAR ? PAR.l[1].k : '', ida: IDA, vuelta: VUELTA, medio: MODO, pax: pax });
   /* Traslados a otros lugares: van dentro de "Tours y actividades" (ya no hay seccion aparte). Son paseos de Santa
      Catarina, asi que solo se ofrecen en los destinos de esa zona. */
   var CATARINA = { fln: 1, bombinhas: 1, bcm: 1, itapema: 1, rosa: 1, garopaba: 1, ferrugem: 1, picarras: 1 };
@@ -1603,6 +1608,34 @@
   var precioVuelo = function (v) { return v.precio * k; };
   var precioExtra = function (e) { return e.pp ? e.precio * pax : e.precio; };
   var todosExtras = [].concat.apply([], EXTRAS.map(function (s) { return s.items; }));
+  /* Reglas del catalogo para este viaje (/api/disponibilidad, lib/reglas.js): los tours sin lugar en estas fechas
+     (bloqueos y cupos) quedan sin poder elegirse, la temporada sube o baja los precios de tours y traslados y los
+     combos descuentan los tours en la reserva. Si no responde, todo queda como esta. */
+  var REGLAS = null;
+  var normT = function (s) { return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); };
+  function aplicarReglas(j) {
+    REGLAS = j || {};
+    var no = {}; (REGLAS.no || []).forEach(function (x) { no[normT(x.titulo)] = x.motivo || 'Sin lugar'; });
+    var temp = function (dk, tipo) { var t = REGLAS.temporada && REGLAS.temporada[dk]; return t && t[tipo] ? t[tipo] : null; };
+    var conTemp = function (o, t) { if (o.base == null) o.base = o.precio; o.precio = t ? Math.round(o.base * (1 + t.pct / 100) * 100) / 100 : o.base; o.temporada = t ? t.nombre : ''; };
+    todosExtras.forEach(function (e) {
+      var dk = String(e.id).charAt(0) === 'u' && PAR ? PAR.l[1].k : destKey;
+      if (e.cat === 'tours') { conTemp(e, temp(dk, 'tours')); e.agotado = no[normT(e.nom)] || ''; if (e.agotado && S.extras[e.id]) S.extras[e.id] = false; }
+      else if (e.cat === 'tras') conTemp(e, temp(destKey, 'traslados'));
+    });
+    TRASLADOS.forEach(function (t) { conTemp(t, temp(destKey, 'traslados')); });
+    if ($('main')) { var y = $('main').scrollTop; render(false); $('main').scrollTop = y; }
+  }
+  if (/^https?:$/.test(location.protocol) && IDA) {
+    fetch('/api/disponibilidad?' + new URLSearchParams({ dest: destKey, dest2: PAR ? PAR.l[1].k : '', ida: IDA, vuelta: VUELTA || IDA, pax: pax }).toString())
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+      .then(function (j) { if (j) setTimeout(function () { aplicarReglas(j); }, 0); });
+  }
+  /* El mejor combo para lo elegido en todo el viaje (no solo en la parte que se reserva ahora). */
+  function comboActual(lista) {
+    var cs = (REGLAS && REGLAS.combos) || [], n = lista.filter(function (x) { return x.ico === 'palm'; }).length, tras = lista.some(function (x) { return x.esTraslado; });
+    return cs.filter(function (c) { return n >= c.min_tours && (!c.con_traslado || tras) && n > 0; }).sort(function (a, b) { return b.pct - a.pct; })[0] || null;
+  }
 
   /* ---- Estado ---- */
   var S = { entre: true, catH: 'economico', dia: { local: { k: 'eco' }, comidas: { k: 'casual' } }, cargandoV: false, avisoV: '', res: {}, avisoCs: '', avisoGuardado: '', comidasAbierto: false, reservar: false, fExtra: 'todos', xmas: {}, delta: 0, nH: 4, playaSel: 'todas', cargandoH: false, hotelesListos: false, avisoH: '', tIV: true, fTras: 'todos', paso: 1, vuelo: '', traslado: 'priv', hotel: 'mar', extras: {}, fVuelo: 'rec', fHotel: 'precio', comidasMonto: null, cmp: null, reales: {}, editRes: '', verMasVuelos: false };
@@ -2236,13 +2269,16 @@
   }
   function filaExtra(e, grupo) {
     var on = !!S.extras[e.id], tag = etiquetaDe(e, grupo), unidad = e.pp ? ' / persona' : (e.unidadTxt ? ' / ' + e.unidadTxt : '');
+    if (e.agotado) return '<div class="opt xr is-agotado" aria-disabled="true">' +
+      '<div class="xr__img"' + (e.foto ? ' style="background-image:url(\'' + esc(e.foto) + '\')"' : '') + ' role="img" aria-label="' + esc(e.nom) + '">' + (e.foto ? '' : ic(iImg, 26)) + '</div>' +
+      '<div class="xr__b"><b>' + esc(e.nom) + '</b><span class="x-agot">Sin lugar en tus fechas · ' + esc(e.agotado) + '</span></div><div class="xr__r"></div></div>';
     return '<div class="opt xr' + sel(on) + '" role="button" tabindex="0" data-extra="' + e.id + '" aria-pressed="' + on + '">' + tick +
       (e.cat === 'tours' ? '<div class="xr__img"' + (e.foto ? ' style="background-image:url(\'' + esc(e.foto) + '\')" title="Foto: ' + esc(e.autor || 'Wikimedia Commons') + '"' : '') + ' role="img" aria-label="' + esc(e.nom) + '">' + (e.foto ? '' : ic(iImg, 26)) + '</div>'
         : '<div class="xr__img is-veh" style="background-image:url(\'' + (e.cat === 'tras' && /compart|bus|van/i.test(e.nom) ? 'traslado-van.png' : 'traslado-auto.png') + '\')" role="img" aria-label="' + esc(e.nom) + '"></div>') +
       '<div class="xr__b">' + (tag ? '<span class="cs-pill xr__pill">' + tag + '</span>' : '') + '<b>' + esc(e.nom) + '</b>' +
       '<small>' + ic(iClock, 13) + (e.cat === 'tours' ? esc(jornada(e.dur)) : esc(e.dur || 'Duración a confirmar') + (e.grupo ? ' · ' + esc(e.grupo) : '')) + '</small>' +
       (e.real ? '' : '<span class="x-ej">Precio de ejemplo</span>') + '</div>' +
-      '<div class="xr__r"><div class="x-p"><b>' + f(e.precio) + '</b><small>' + unidad.replace(/^ \/ /, '/ ') + '</small></div>' +
+      '<div class="xr__r"><div class="x-p"><b>' + f(e.precio) + '</b><small>' + unidad.replace(/^ \/ /, '/ ') + '</small>' + (e.temporada ? '<span class="x-temp">' + esc(e.temporada) + '</span>' : '') + '</div>' +
       (e.cat === 'tours' ? '<button type="button" class="x-add" data-tdet="' + e.id + '">Ver detalles</button>' : '') + '</div></div>';
   }
   var MAS_TXT = { tours: 'Ver más tours', tours2: 'Ver más tours', tras: 'Ver más traslados' };
@@ -2687,11 +2723,13 @@
   /* k = 'tras' (transfer y traslados) o 'tours' (actividades): cada uno se reserva por separado. Sin k, todos. */
   function serviciosCs(k) {
     var d = datosFinal(), pers = personasTxt(), lista = [];
-    if (d.t) lista.push({ ico: 'van', nom: d.t.nom + ' aeropuerto', det: PAR ? 'Aeropuerto → ' + DEST1 + ' · ' + PAR.l[1].nom + ' → aeropuerto' : 'Aeropuerto ⇄ alojamiento', pers: pers, precio: d.tTras });
+    if (d.t) lista.push({ esTraslado: true, ico: 'van', nom: d.t.nom + ' aeropuerto', det: PAR ? 'Aeropuerto → ' + DEST1 + ' · ' + PAR.l[1].nom + ' → aeropuerto' : 'Aeropuerto ⇄ alojamiento', pers: pers, precio: d.tTras });
     if (d.tEntre) lista.push({ ico: 'van', nom: (PAR.tramo.modo === 'ferry' ? 'Ferry ' : 'Traslado ') + DEST1 + ' → ' + PAR.l[1].nom, det: PAR.tramo.km + ' km · solo ida · ' + fdc(PAR.l[1].ida), pers: pers, precio: d.tEntre });
     d.ex.forEach(function (e) {
       if (e.cat === 'tours' || e.cat === 'tras') lista.push({ ico: e.cat === 'tras' ? 'van' : 'palm', nom: e.nom, det: e.dur || '', pers: e.pp ? pers : (e.grupo || ''), precio: precioExtra(e) });
     });
+    var combo = comboActual(lista);
+    if (combo) lista.forEach(function (x) { if (x.ico !== 'palm') return; x.sinCombo = x.precio; x.precio = Math.round(x.precio * (1 - combo.pct / 100) * 100) / 100; x.combo = combo.nombre + ' (−' + combo.pct + ' %)'; });
     return k ? lista.filter(function (x) { return (x.ico === 'palm') === (k === 'tours'); }) : lista;
   }
   /* Paso 13: Reserva confirmada (la confirma el asesor; en la maqueta se simula al tocar una fila "Solicitado"). */
@@ -2750,6 +2788,7 @@
     var err = function (k) { return er[k] ? '<p class="g-err" role="alert">' + esc(er[k]) + '</p>' : ''; };
     return cab + '<h2 class="fin-h2">Servicios a reservar</h2><div class="cf-lista">' +
       lista.map(function (x) { return '<div class="cf-svc"><span class="fin-ico fin-ico--green">' + ic(I[x.ico], 24) + '</span><span class="fin-t"><b>' + esc(x.nom) + '</b><small>' + esc(x.det) + '<br>' + esc(x.pers) + '</small></span><span class="fin-p">' + f(x.precio) + '</span></div>'; }).join('') +
+      (function () { var c = lista.filter(function (x) { return x.combo; }); return c.length ? '<p class="cf-combo">Combo ' + esc(c[0].combo) + ': ahorrás ' + f(sum(c, function (x) { return x.sinCombo - x.precio; })) + ' en los tours.</p>' : ''; })() +
       '<div class="cf-total"><span>Total</span><b>' + f(total) + '</b></div></div>' +
       '<h2 class="fin-h2">Tus datos</h2>' +
       '<form id="cs-form" class="af" novalidate>' +
@@ -3205,8 +3244,10 @@
         if (d.destination) AEROPUERTO[destKey] = d.destination;
         S.vuelo = marcarMejor().id; S.avisoV = '';
         track('flujo_vuelos', { reales: true, cantidad: VUELOS.length });
+        if (window.CSDemanda) CSDemanda.vuelos({ dest: destKey, ida: IDA, vuelta: VUELTA, medio: 'avion', pax: pax, r: 'ok' });
       })
-      .catch(function (e) { VUELOS = []; S.vuelo = ''; S.avisoV = e && e.message === 'sin vuelos' ? 'No encontramos vuelos para estas fechas.' : 'No pudimos buscar vuelos ahora. Probá de nuevo en unos minutos o cambiá las fechas.'; track('flujo_vuelos', { reales: false }); })
+      .catch(function (e) { VUELOS = []; S.vuelo = ''; S.avisoV = e && e.message === 'sin vuelos' ? 'No encontramos vuelos para estas fechas.' : 'No pudimos buscar vuelos ahora. Probá de nuevo en unos minutos o cambiá las fechas.'; track('flujo_vuelos', { reales: false });
+        if (window.CSDemanda) CSDemanda.vuelos({ dest: destKey, ida: IDA, vuelta: VUELTA, medio: 'avion', pax: pax, r: e && e.message === 'sin vuelos' ? 'sin' : 'error' }); })
       .then(function () { S.cargandoV = false; render(false); });
   }
   var CTAS = { 1: 'Continuar a Alojamiento →', 2: 'Continuar a Extras →', 3: 'Continuar a Tu presupuesto →', 4: 'Reservar mi viaje →' };
@@ -3554,7 +3595,7 @@
     if (e.target.closest('[data-bk]')) { irATercero('alojamiento', +e.target.closest('[data-bk]').dataset.bk || 0); return; }
     if (e.target.closest('[data-sg]')) { irASeguro(); return; }
     var ex = e.target.closest('[data-extra]');
-    if (ex) { var xid = ex.dataset.extra; S.extras[xid] = !S.extras[xid]; var xe = todosExtras.filter(function (z) { return z.id === xid; })[0]; track('flujo_extra', { opcion: xid, nombre: xe && xe.nom, categoria: xe && xe.cat, precio: xe && Math.round(precioExtra(xe)), real: !!(xe && xe.real), agregado: S.extras[xid], desde: 'detalle' }); cerrarModal(); var yy = $('main').scrollTop; render(false); $('main').scrollTop = yy; return; }
+    if (ex) { var xid = ex.dataset.extra; if (!S.extras[xid] && todosExtras.some(function (z) { return z.id === xid && z.agotado; })) return; S.extras[xid] = !S.extras[xid]; var xe = todosExtras.filter(function (z) { return z.id === xid; })[0]; track('flujo_extra', { opcion: xid, nombre: xe && xe.nom, categoria: xe && xe.cat, precio: xe && Math.round(precioExtra(xe)), real: !!(xe && xe.real), agregado: S.extras[xid], desde: 'detalle' }); cerrarModal(); var yy = $('main').scrollTop; render(false); $('main').scrollTop = yy; return; }
     var rv = e.target.closest('[data-reservar]'); if (rv) { reservar(rv.dataset.reservar); return; }
     var g = e.target.closest('[data-g]');
     if (g) {
@@ -3737,7 +3778,7 @@
       var q = t.dataset.filtro.split(':'); S[{ vuelo: 'fVuelo', hotel: 'fHotel', tras: 'fTras' }[q[0]]] = q[1]; if (q[0] === 'hotel') S.nH = MAX_HOTELES;
       track('flujo_filtro', { lista: q[0], filtro: q[1] });
     } else if (t.dataset.extra) {
-      var id2 = t.dataset.extra; S.extras[id2] = !S.extras[id2];
+      var id2 = t.dataset.extra; if (!S.extras[id2] && todosExtras.some(function (z) { return z.id === id2 && z.agotado; })) return; S.extras[id2] = !S.extras[id2];
       var ex2 = todosExtras.filter(function (x) { return x.id === id2; })[0]; track('flujo_extra', { opcion: id2, nombre: ex2 && ex2.nom, categoria: ex2 && ex2.cat, precio: ex2 && Math.round(precioExtra(ex2)), real: !!(ex2 && ex2.real), agregado: S.extras[id2] });
     } else if (t.dataset.mas) {
       S.verMasVuelos = !S.verMasVuelos; track('flujo_ver_mas', { lista: 'vuelos' });

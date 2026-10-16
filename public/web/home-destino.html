@@ -390,6 +390,7 @@
       if (qn()) { var pa = puntaje(a, S.q), pb = puntaje(b, S.q); if (pa !== pb) return pa - pb; return a[1].localeCompare(b[1], 'es'); }
       return S.todos ? a[1].localeCompare(b[1], 'es') : POPULARES.indexOf(a[0]) - POPULARES.indexOf(b[0]);
     });
+    if (window.CSDemanda) CSDemanda.buscado(qn(), lista.length > 0);   /* destino que no tenemos: Sistema > Demanda */
     if (!lista.length) return '<p class="d-vacio">No encontramos destinos con ese nombre.<br>Probá con otro.</p>';
     return '<div class="d-grid' + (!qn() && !S.todos ? ' d-grid--pop' : '') + '">' + lista.map(function (d) {
       return '<button type="button" class="d-card" data-dest="' + d[0] + '" data-evento="destino_elegido" data-destino="' + d[0] + '">' +

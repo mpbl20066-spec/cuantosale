@@ -137,7 +137,19 @@ Poderiam confirmar a disponibilidade? Obrigado!
 ```
 Ejemplos: `Carlos` · `Paddle en Lagoa de Ibiraquera (2 horas)` · `26 nov. al 3 dic.` · `2` · `Juan Pérez` · `CS-MV7HTN3-B05A2C`
 
-Nombres distintos se configuran con `WHATSAPP_TEMPLATE_CONFIRMACION`, `WHATSAPP_TEMPLATE_SENA`, `WHATSAPP_TEMPLATE_RETOMAR` y `WHATSAPP_TEMPLATE_RESERVA_PROV`.
+**`salida_suspendida`**, Español (Pedidos → Salidas y manifiestos → "Suspender salida"):
+
+```
+Hola {{1}}, te escribimos por tu reserva en {{2}}: {{3}} del {{4}} se suspendió. Motivo: {{5}}.
+
+Podés elegir otra fecha sin costo o el reembolso de ese servicio. Respondé este mensaje con lo que prefieras y lo coordinamos.
+Referencia: {{6}}
+```
+Ejemplos: `Juan` · `Arraial do Cabo` · `Paseo en barco` · `jue 16/10` · `Mal tiempo: la Marina no autorizó las salidas` · `CS-MV7HTN3-B05A2C`
+
+Mientras no esté aprobada, a quien no escribió en las últimas 24 h le llega solo el mail; el panel muestra a quién no le salió el WhatsApp.
+
+Nombres distintos se configuran con `WHATSAPP_TEMPLATE_CONFIRMACION`, `WHATSAPP_TEMPLATE_SENA`, `WHATSAPP_TEMPLATE_RETOMAR`, `WHATSAPP_TEMPLATE_RESERVA_PROV` y `WHATSAPP_TEMPLATE_SUSPENSION`.
 
 **`sena_recibida`**, Español (Utilidad). Sale al tocar "Registrar seña cobrada" y aceptar el aviso:
 

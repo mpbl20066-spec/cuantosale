@@ -467,6 +467,7 @@
       l = POPULARES; $('gmPopT').textContent = 'Destinos populares';
     }
     g.classList.toggle('is-filtro', hayFiltro());
+    if (window.CSDemanda) CSDemanda.buscado(S.tipo ? '' : S.q, l.length > 0);   /* destino que no tenemos: Sistema > Demanda */
     g.innerHTML = l.length ? l.map(tarjeta).join('') : '<p class="gm-vacio">No encontramos destinos con ese nombre. Probá con otro, o con el estado (Bahía, Santa Catarina...).</p>';
   }
 

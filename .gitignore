@@ -73,3 +73,6 @@ data/respaldos/
 /*.mp4
 /*.pdf
 !/guia-florianopolis.pdf
+
+# Fotos de trabajo (originales pesados de destinos); las que usa la web viven en public/.
+/fotos/

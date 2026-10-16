@@ -50,9 +50,11 @@
     "historias:limpio": "node outputs/historias/_build/build.js limpio",
     "test:ops": "node test-operaciones.js",
     "test:fin": "node test-finanzas.js",
+    "test:reglas": "node test-reglas.js",
+    "test:operativa": "node test-operativa.js",
     "test:travelpayouts": "node test-travelpayouts.js",
     "test:login": "node test-login-intentos.js",
-    "test:todo": "node test.js && node test-checkout.js && node test-hoteles.js && node test-tours.js && node test-serpapi-cache.js && node test-operaciones.js && node test-finanzas.js && node test-travelpayouts.js && node test-login-intentos.js && node test-guias-humo.js"
+    "test:todo": "node test.js && node test-checkout.js && node test-hoteles.js && node test-tours.js && node test-serpapi-cache.js && node test-operaciones.js && node test-finanzas.js && node test-reglas.js && node test-operativa.js && node test-travelpayouts.js && node test-login-intentos.js && node test-guias-humo.js"
   },
   "engines": {
     "node": ">=18"
