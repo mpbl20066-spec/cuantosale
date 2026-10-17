@@ -3822,6 +3822,12 @@ function handleRequest(req, res) {
         sendJson(res, 502, { error: 'No pudimos cargar las habitaciones ahora.' });
       });
     }
+    if (url.pathname === '/api/pousadas-socias') {
+      return require('./lib/pousadas-socias').pousadasSocias(url.searchParams.get('dest')).then(function (l) { sendJson(res, 200, { pousadas: l }); }).catch(function (e) {
+        console.error('[pousadas-socias]', e.message);
+        sendJson(res, 200, { pousadas: [] });   // sin socias la pantalla sigue con Booking
+      });
+    }
     if (url.pathname === '/api/hoteles') {
       return cotizarHoteles(req, res, url).catch(function (e) {
         console.error('[hoteles]', e);
