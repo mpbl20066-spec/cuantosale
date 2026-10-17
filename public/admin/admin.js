@@ -539,6 +539,14 @@
       kpi('Favoritos guardados', fav, 'corazones') +
       kpi('Alertas de precio', alerta, 'guía y vuelos') + '</section>';
     h += embudoUso();
+    /* De donde viene la gente: los eventos 'llegada' (lib/uso.js), que se cuentan solo si el link trae ?utm_source=. */
+    var fuentesUso = porDetalle('llegada'), fk = Object.keys(fuentesUso).sort(function (a, b) { return fuentesUso[b] - fuentesUso[a]; });
+    var totLleg = fk.reduce(function (t, k) { return t + fuentesUso[k]; }, 0);
+    var enlaces = ['instagram', 'tiktok', 'whatsapp'].map(function (n) { return '<code>' + esc(location.origin) + '/?utm_source=' + n + '</code>'; }).join('<br>');
+    h += '<div class="card uso-card"><h3 class="uso-h">De dónde vienen</h3>' + (fk.length
+      ? '<table><thead><tr><th>Fuente</th><th class="num">Visitas</th><th class="num">%</th></tr></thead><tbody>' + fk.map(function (k) { return '<tr><td>' + esc(k || '(sin nombre)') + '</td><td class="num">' + fuentesUso[k] + '</td><td class="num">' + pct(fuentesUso[k], totLleg) + '</td></tr>'; }).join('') + '</tbody></table>'
+      : '<p class="vacio">Todavía nadie llegó con un link con fuente.</p>') +
+      '<p class="sub">Solo cuenta a quien entra con <code>?utm_source=</code> en el link; el resto (escribió la dirección, vino de Google o de un link sin fuente) no se sabe de dónde viene. Para saberlo, usá un link distinto en cada lugar:<br>' + enlaces + '</p></div>';
     /* embudo de la pantalla Destinos */
     var pasos = [['Entraron a Destinos', vDest], ['Tocaron una pestaña del mes', suma('guias_ranking')], ['Abrieron una guía desde Destinos', suma('guias_abrir')], ['Fueron a cotizar desde Más baratos', suma('guias_cotizar')]];
     h += '<div class="card uso-card"><h3 class="uso-h">Destinos: de la visita a la cotización</h3><table><tbody>' + pasos.map(function (p) {
