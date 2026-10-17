@@ -3456,13 +3456,28 @@ const viajesGuardados = require('./lib/viajes-guardados');
 /* Contador de uso propio (lib/uso.js): POST /api/uso desde home-track.js y la pestana "Uso" del panel. */
 let usoCache = null;
 function usoApi() { if (!usoCache) usoCache = require('./lib/uso')({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp }); return usoCache; }
-const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual, precarga: estadoPrecarga, tasas: getTasas, uso: function (dias) { return usoApi().resumen(dias).then(function (r) { r.nombres = {}; Object.keys(model.DEST).forEach(function (k) { r.nombres[k] = model.DEST[k].name; }); return r; }); }, demanda: demandaPanel });
+const adminPanel = require('./lib/admin').crear({ sendJson: sendJson, readJson: readJson, clientIp: clientIp, safeEqual: safeEqual, precarga: estadoPrecarga, tasas: getTasas, uso: function (dias) { return usoApi().resumen(dias).then(function (r) { r.nombres = {}; Object.keys(model.DEST).forEach(function (k) { r.nombres[k] = model.DEST[k].name; }); return r; }); }, demanda: demandaPanel, embudo: function (dias) {
+  return require('./lib/embudo').calcular({
+    uso: function (n) { return usoApi().resumen(n); },
+    demanda: function (n, conPrueba) { return demanda.filas(n, conPrueba); },
+    pedidos: function () { return require('./lib/pedidos').listarPedidos(); }
+  }, dias);
+} });
 /* Demanda insatisfecha (lib/demanda.js): POST /api/demanda desde home-track.js y la pestana Sistema > Demanda. Las visitas
    de un navegador con sesion del panel quedan marcadas como prueba. */
 const demanda = require('./lib/demanda');
 let demandaCache = null;
 function demandaApi() { if (!demandaCache) demandaCache = demanda.crear({ sendJson: sendJson, readJson: readJson, limited: limited, clientIp: clientIp }); return demandaCache; }
-demanda.configurar({ esPrueba: function (req) { return adminPanel.sesionValida(req); } });
+/* Las visitas nuestras no son clientes: las del panel /admin, las de un navegador marcado en /yo (cookie cs_yo, por si no
+   se entro al panel desde ese celular o computadora) y las de localhost. No se cuentan en el contador de uso y en
+   demanda quedan marcadas como prueba. */
+function esMio(req) {
+  return /(?:^|;\s*)cs_yo=1(?:;|$)/.test(String(req.headers.cookie || ''));
+}
+function esVisitaNuestra(req) {
+  return esMio(req) || !!adminPanel.sesionValida(req);
+}
+demanda.configurar({ esPrueba: esVisitaNuestra });
 /* Para el panel: los eventos y lo que hoy vendemos en cada destino (tours del catalogo y traslado con precio), que es
    lo que dice si la demanda esta atendida. */
 async function demandaPanel(dias, conPrueba) {
@@ -3728,7 +3743,21 @@ function handleRequest(req, res) {
       });
     }
     /* contador de uso (lib/uso.js): antes del cortafuegos de POST */
+    /* /yo marca este navegador como nuestro durante un año (cs_yo): sus visitas no cuentan. /yo?salir=1 lo desmarca. */
+    if (req.method === 'GET' && url.pathname === '/yo') {
+      const salir = url.searchParams.get('salir') === '1';
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex',
+        'Set-Cookie': 'cs_yo=' + (salir ? '0; Max-Age=0' : '1; Max-Age=31536000') + '; Path=/; HttpOnly; SameSite=Lax' + (url.protocol === 'https:' || req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : '')
+      });
+      return res.end('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>CuántoSale</title>' +
+        '<body style="font:18px/1.5 system-ui,sans-serif;max-width:30em;margin:12vh auto;padding:0 20px"><h1 style="font-size:22px">' +
+        (salir ? 'Listo: este navegador vuelve a contar' : 'Listo: este navegador ya no cuenta') + '</h1><p>' +
+        (salir ? 'Sus visitas vuelven a sumarse a las estadísticas.' : 'Tus visitas a cuantosale.uy desde acá no suman a las estadísticas. Hacelo una vez en cada celular o computadora que uses.') +
+        '</p><p><a href="/yo' + (salir ? '' : '?salir=1') + '">' + (salir ? 'Marcar este navegador como mío' : 'Deshacer') + '</a></p></body></html>');
+    }
     if (url.pathname === '/api/uso') {
+      if (esVisitaNuestra(req)) { res.statusCode = 204; return res.end(); }
       return usoApi().api(req, res).catch(function (e) { if (!res.headersSent) sendJson(res, 500, { error: 'Error inesperado.' }); console.error('[uso]', e); });
     }
     if (url.pathname === '/api/demanda') {

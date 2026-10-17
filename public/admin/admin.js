@@ -496,9 +496,29 @@
      Cuenta a todos (no guarda nada de la persona, no depende de las cookies). Lo que mas importa: cuanta gente llega a
      Destinos y a las guias, y cuantos de ahi van a cotizar, guardan o crean una alerta. */
   function cargarUso() {
-    S.uso = { cargando: true }; pintar();
+    S.uso = { cargando: true }; S.embudo = null; pintar();
     api('uso?dias=' + (S.usoDias || 30)).then(function (j) { S.uso = j; if (S.vista === 'uso') pintar(); })
       .catch(function (e) { S.uso = { error: e.message }; if (S.vista === 'uso') pintar(); });
+    /* El embudo cruza visitas, cotizaciones y pedidos: si falla no tira abajo el resto de la pantalla. */
+    api('embudo?dias=' + (S.usoDias || 30)).then(function (j) { S.embudo = j; if (S.vista === 'uso') pintar(); })
+      .catch(function (e) { S.embudo = { error: e.message }; if (S.vista === 'uso') pintar(); });
+  }
+  /* De la visita a la seña pagada (lib/embudo.js). Cada paso tiene su propia unidad, por eso se dice en cada fila. */
+  function embudoUso() {
+    var m = S.embudo;
+    if (!m) return '';
+    if (m.error) return '<p class="aviso">No se pudo calcular el embudo: ' + esc(m.error) + '</p>';
+    var base = m.pasos && m.pasos[0] ? m.pasos[0].n : 0;
+    var filas = (m.pasos || []).map(function (p, i) {
+      var ant = i ? m.pasos[i - 1].n : 0;
+      var w = base ? Math.min(100, Math.round(p.n / base * 100)) : 0;
+      /* el paso 2 son personas y el 1 son visitas: el % entre ellos es solo una referencia */
+      var paso = i && ant ? Math.round(p.n / ant * 100) + ' %' : '—';
+      return '<tr><td>' + esc(p.nombre) + '<br><span class="sub">' + esc(p.unidad) + '</span></td><td class="num">' + p.n + '</td><td class="num">' + paso + '</td><td style="width:35%"><span class="uso-barra" style="width:' + (p.n ? Math.max(w, 2) : 0) + '%"></span></td></tr>';
+    }).join('');
+    return '<div class="card uso-card"><h3 class="uso-h">Embudo: de la visita a la seña</h3><table><thead><tr><th>Paso</th><th class="num">Cantidad</th><th class="num">Del paso anterior</th><th></th></tr></thead><tbody>' + filas + '</tbody></table>' +
+      '<p class="sub">Las visitas nuestras no se cuentan (sesión del panel, navegador marcado en /yo' + (m.pruebas ? '; en este período hubo ' + m.pruebas + ' persona' + (m.pruebas === 1 ? '' : 's') + ' de prueba que cotizaron' : '') + '). ' +
+      'El primer paso son visitas y el segundo personas, así que el porcentaje entre ellos es una referencia.</p></div>';
   }
   function vistaUso() {
     var u = S.uso || {}, dias = S.usoDias || 30;
@@ -518,6 +538,7 @@
       kpi('Fueron a cotizar', cot, 'desde Destinos y las guías', 'kpi--ok') +
       kpi('Favoritos guardados', fav, 'corazones') +
       kpi('Alertas de precio', alerta, 'guía y vuelos') + '</section>';
+    h += embudoUso();
     /* embudo de la pantalla Destinos */
     var pasos = [['Entraron a Destinos', vDest], ['Tocaron una pestaña del mes', suma('guias_ranking')], ['Abrieron una guía desde Destinos', suma('guias_abrir')], ['Fueron a cotizar desde Más baratos', suma('guias_cotizar')]];
     h += '<div class="card uso-card"><h3 class="uso-h">Destinos: de la visita a la cotización</h3><table><tbody>' + pasos.map(function (p) {
