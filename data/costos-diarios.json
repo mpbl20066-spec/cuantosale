@@ -668,6 +668,24 @@
       "metodo": "Comida: precios de fuentes locales (cartas, guias y comparadores del destino). Los totales por dia salen de la tabla por comida de Quanto Custa Viajar (cafe + almuerzo + cena) escalada con la mediana de 13 destinos de referencia (USD = R$ x 0,338 / 0,471 / 0,546 para casual / moderado / gourmet), asi quedan en la misma escala que el resto. Donde no hay tabla de Quanto Custa Viajar (o es inconsistente, Canela) se usan los precios locales de arriba (almuerzo + snack + cena por nivel) con la escala equivalente (x 0,264 / 0,333 / 0,283). Traslado: tarifas reales de bus, van, Uber y taxi del destino; eco = ~4 viajes en bus/van o a pie, confort = 3-4 viajes en app o taxi por dia.",
       "anterior": "2026-10-12: antes {\"comida\":{\"casual\":38,\"moderado\":70,\"gourmet\":120},\"traslado\":{\"eco\":5,\"medio\":10,\"confort\":20}} (derivado de otro destino, confianza baja)."
     },
+    "caraiva": {
+      "comida": {
+        "casual": 32,
+        "moderado": 62,
+        "gourmet": 108
+      },
+      "traslado": {
+        "eco": 2,
+        "medio": 5,
+        "confort": 12
+      },
+      "fuente": "Sin fuente publica de precios para Caraiva. Referencias: Trancoso (comida) y Morro de São Paulo (traslado, otra vila sin autos). Canoa para cruzar el rio: R$5 a R$10 por tramo.",
+      "verificado": "2026-10-17",
+      "confianza": "baja",
+      "derivacion": "Derivado de Trancoso (misma costa, mismo publico): la comida baja un escalon porque en la vila no hay beach clubs de lujo como en el Quadrado (38/70/120 -> 32/62/108). El traslado es el de Morro de São Paulo, la otra vila sin autos del catalogo, con el confort algo mas bajo: adentro de la vila se camina, y el gasto es la canoa para cruzar el rio (R$5 a R$10 por tramo) y alguna carroza o buggy a Espelho o Corumbau.",
+      "nota": "Vila sin autos del otro lado del rio Caraiva: calles de arena, se camina a todos lados. No hay fuente publica con precios de este destino; tratarlo como estimacion hasta que se revisen cartas.",
+      "notaMedio": "El nivel medio de traslado es la media geometrica de eco y confort, redondeada."
+    },
     "morro": {
       "comida": {
         "casual": 19,

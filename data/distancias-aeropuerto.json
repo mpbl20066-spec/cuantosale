@@ -183,5 +183,15 @@
     "km": 9,
     "horas": 0.2,
     "lineaRecta": 6.6
+  },
+  "ajuda|SSA": {
+    "km": 693,
+    "horas": 11.4,
+    "lineaRecta": 408.7
+  },
+  "caraiva|SSA": {
+    "km": 733,
+    "horas": 12.3,
+    "lineaRecta": 442.8
   }
 }

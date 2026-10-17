@@ -64,6 +64,7 @@
     // - "garopaba" quedo en 1152 px, mas chica que las demas, porque las
     //   candidatas grandes que hay son de Armacao (Florianopolis).
     portoseguro: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Porto_Seguro_-_State_of_Bahia%2C_Brazil_-_panoramio.jpg/1280px-Porto_Seguro_-_State_of_Bahia%2C_Brazil_-_panoramio.jpg',
+    caraiva: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Cara%C3%ADva%2C_Bahia%2C_Brasil.jpg/1280px-Cara%C3%ADva%2C_Bahia%2C_Brasil.jpg',
     itacare: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Farol_de_Itacar%C3%A9_-_Bahia_-_Brasil_%2811547133894%29.jpg/1280px-Farol_de_Itacar%C3%A9_-_Bahia_-_Brasil_%2811547133894%29.jpg',
     forte: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Projeto_Tamar_-_Praia_do_Forte%2C_Bahia_%287291356354%29.jpg/1280px-Projeto_Tamar_-_Praia_do_Forte%2C_Bahia_%287291356354%29.jpg',
     itapema: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Praia_de_Itapema_-_Orla.jpg/1280px-Praia_de_Itapema_-_Orla.jpg',
@@ -487,7 +488,7 @@
 { label: 'Capão da Canoa', key: 'canoa' },
       { label: 'Torres + Capão da Canoa', key: 'torres', secondKey: 'canoa' }
     ] },
-    { id: 'bahia', label: 'Bahía', image: 'ssa', keys: ['ssa', 'portoseguro', 'forte', 'morro', 'itacare', 'trancoso', 'ajuda'], subcategories: [
+    { id: 'bahia', label: 'Bahía', image: 'ssa', keys: ['ssa', 'portoseguro', 'forte', 'morro', 'itacare', 'trancoso', 'ajuda', 'caraiva'], subcategories: [
 { label: 'Salvador de Bahía', key: 'ssa' },
 { label: 'Porto Seguro', key: 'portoseguro' },
 { label: 'Praia do Forte', key: 'forte' },
@@ -495,6 +496,7 @@
 { label: 'Itacaré', key: 'itacare' },
 { label: 'Trancoso', key: 'trancoso' },
 { label: 'Arraial d\'Ajuda', key: 'ajuda' },
+{ label: 'Caraíva', key: 'caraiva' },
       { label: 'Salvador + Porto Seguro', key: 'ssa', secondKey: 'portoseguro' },
       { label: 'Salvador + Praia do Forte', key: 'ssa', secondKey: 'forte' },
       { label: 'Salvador + Morro de São Paulo', key: 'ssa', secondKey: 'morro' },
@@ -519,7 +521,12 @@
          server lo acepta facil, pero es el viaje que de verdad se hace cuando se
          va a esa costa: dos noches, una en cada uno, y el traslado entre ellos
          son veinte minutos. */
-      { label: 'Trancoso + Arraial d\'Ajuda', key: 'trancoso', secondKey: 'ajuda' }
+      { label: 'Trancoso + Arraial d\'Ajuda', key: 'trancoso', secondKey: 'ajuda' },
+      /* Caraiva se combina solo con los pueblos de su costa: 30 a 45 km por el
+         camino de Trancoso. Con Salvador o Morro seria un dia entero de ruta. */
+      { label: 'Porto Seguro + Caraíva', key: 'portoseguro', secondKey: 'caraiva' },
+      { label: 'Arraial d\'Ajuda + Caraíva', key: 'ajuda', secondKey: 'caraiva' },
+      { label: 'Trancoso + Caraíva', key: 'trancoso', secondKey: 'caraiva' }
     ] },
     /* Jericoacoara entra al Nordeste y "Fortaleza / Jericoacoara" se separa en
        dos destinos y un par.
@@ -732,7 +739,7 @@
   }
   // Códigos IATA usados por el buscador de vuelos. Se mantienen en el cliente
   // porque /api/cotizar devuelve el nombre del destino para la interfaz.
-  var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ajuda: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
+  var IATA_BY_DEST = { buz: 'GIG', arraial: 'GIG', cabo: 'GIG', ilha: 'GIG', paraty: 'GIG', ilhabela: 'GRU', ubatuba: 'GRU', rio: 'GIG', angra: 'GIG', sao: 'GRU', porto: 'REC', mcz: 'MCZ', maragogi: 'MCZ', nat: 'NAT', pip: 'NAT', trancoso: 'SSA', ajuda: 'SSA', caraiva: 'SSA', ssa: 'SSA', for: 'FOR', jericoacoara: 'FOR', morro: 'SSA', fernando: 'FEN', fln: 'FLN', bombinhas: 'FLN', rosa: 'FLN', bcm: 'FLN', gram: 'POA', canela: 'POA', rec: 'REC', poa: 'POA', portoseguro: 'SSA', itacare: 'SSA', forte: 'SSA', itapema: 'FLN', garopaba: 'FLN', ferrugem: 'FLN', picarras: 'FLN', torres: 'POA', canoa: 'POA', joaopessoa: 'JPA' };
   var DEST_IATA_ALIASES = { rio: 'RIO GIG', buz: 'GIG', arraial: 'GIG', cabo: 'GIG', porto: 'REC', mcz: 'MCZ', ssa: 'SSA', fln: 'FLN', ilhabela: 'GRU', ubatuba: 'GRU', paraty: 'GIG' };
   // Segunda superficie: el desplegable de "destino" de arriba. Tiene que traer
   // los mismos 31 que la grilla, o el destino se ofrece en un lado y no en el
@@ -822,6 +829,7 @@
 { label: 'Itacaré', key: 'itacare', codes: 'SSA' },
 { label: 'Trancoso', key: 'trancoso', codes: 'SSA' },
 { label: 'Arraial d\'Ajuda', key: 'ajuda', codes: 'SSA' },
+{ label: 'Caraíva', key: 'caraiva', codes: 'SSA' },
       { label: 'Salvador + Porto Seguro', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Porto Seguro' },
       { label: 'Salvador + Praia do Forte', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Praia do Forte' },
       { label: 'Salvador + Morro de São Paulo', key: 'ssa', codes: 'SSA', subcategory: 'Salvador + Morro de São Paulo' },
@@ -842,7 +850,10 @@
       { label: 'Morro de São Paulo + Trancoso', key: 'morro', codes: 'SSA', subcategory: 'Morro de São Paulo + Trancoso' },
       { label: 'Itacaré + Arraial d\'Ajuda', key: 'itacare', codes: 'SSA', subcategory: 'Itacaré + Arraial d\'Ajuda' },
       { label: 'Itacaré + Trancoso', key: 'itacare', codes: 'SSA', subcategory: 'Itacaré + Trancoso' },
-      { label: 'Trancoso + Arraial d\'Ajuda', key: 'trancoso', codes: 'SSA', subcategory: 'Trancoso + Arraial d\'Ajuda' }
+      { label: 'Trancoso + Arraial d\'Ajuda', key: 'trancoso', codes: 'SSA', subcategory: 'Trancoso + Arraial d\'Ajuda' },
+      { label: 'Porto Seguro + Caraíva', key: 'portoseguro', codes: 'SSA', subcategory: 'Porto Seguro + Caraíva' },
+      { label: 'Arraial d\'Ajuda + Caraíva', key: 'ajuda', codes: 'SSA', subcategory: 'Arraial d\'Ajuda + Caraíva' },
+      { label: 'Trancoso + Caraíva', key: 'trancoso', codes: 'SSA', subcategory: 'Trancoso + Caraíva' }
     ] },
     { name: 'Nordeste', codes: 'REC / MCZ / SSA / NAT / JPA / FOR', options: [
 { label: 'Porto de Galinhas', key: 'porto', codes: 'REC' },

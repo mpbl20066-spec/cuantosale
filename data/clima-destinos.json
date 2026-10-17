@@ -21,6 +21,7 @@
    "nat": "temperatura: estacion Natal / Santa Luzia (3 km); lluvia y sol: Open-Meteo",
    "pip": "Open-Meteo (sin estacion cerca con datos suficientes)",
    "trancoso": "temperatura: estacion Porto Seguro (5 km); lluvia y sol: Open-Meteo",
+   "caraiva": "Open-Meteo (sin estacion cerca con datos suficientes)",
    "ssa": "temperatura: estacion Salvador / Ondina (4 km); lluvia y sol: Open-Meteo",
    "jericoacoara": "Open-Meteo (sin estacion cerca con datos suficientes)",
    "morro": "Open-Meteo (sin estacion cerca con datos suficientes)",
@@ -44,7 +45,7 @@
    "joaopessoa": "temperatura: estacion Joao Pessoa (3 km); lluvia y sol: Open-Meteo",
    "poa": "todo de la estacion Porto Alegre (2 km): temperatura y dias de lluvia 2015-2024, lluvia del mes y sol de las normales 1991-2020"
   },
-  "generado": "2026-10-12",
+  "generado": "2026-10-17",
   "regenerar": "node scripts/build-clima.js && node scripts/build-destinos-datos.js"
  },
  "destinos": {
@@ -1593,6 +1594,92 @@
     "min": 23,
     "lluvia": 171,
     "dias": 6,
+    "sol": 10.9
+   }
+  ],
+  "caraiva": [
+   {
+    "max": 28.6,
+    "min": 23.9,
+    "lluvia": 94,
+    "dias": 4,
+    "sol": 11.3
+   },
+   {
+    "max": 29,
+    "min": 24.2,
+    "lluvia": 76,
+    "dias": 4,
+    "sol": 11.2
+   },
+   {
+    "max": 29,
+    "min": 23.9,
+    "lluvia": 83,
+    "dias": 5,
+    "sol": 11.1
+   },
+   {
+    "max": 28.1,
+    "min": 23.3,
+    "lluvia": 153,
+    "dias": 7,
+    "sol": 10.1
+   },
+   {
+    "max": 26.9,
+    "min": 22,
+    "lluvia": 112,
+    "dias": 6,
+    "sol": 10.1
+   },
+   {
+    "max": 25.8,
+    "min": 20.9,
+    "lluvia": 96,
+    "dias": 6,
+    "sol": 10.1
+   },
+   {
+    "max": 25.1,
+    "min": 20.2,
+    "lluvia": 75,
+    "dias": 4,
+    "sol": 10.2
+   },
+   {
+    "max": 25.1,
+    "min": 20.4,
+    "lluvia": 84,
+    "dias": 4,
+    "sol": 10.2
+   },
+   {
+    "max": 26.2,
+    "min": 21.5,
+    "lluvia": 60,
+    "dias": 3,
+    "sol": 10.4
+   },
+   {
+    "max": 27.3,
+    "min": 22.7,
+    "lluvia": 92,
+    "dias": 5,
+    "sol": 10.6
+   },
+   {
+    "max": 27.6,
+    "min": 22.9,
+    "lluvia": 179,
+    "dias": 8,
+    "sol": 10
+   },
+   {
+    "max": 28.4,
+    "min": 23.5,
+    "lluvia": 172,
+    "dias": 7,
     "sol": 10.9
    }
   ],

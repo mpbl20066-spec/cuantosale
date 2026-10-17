@@ -11,7 +11,7 @@
 const model = require('../lib/model');
 
 const BASE = (process.argv[2] || 'http://localhost:' + (process.env.PORT || 3000)).replace(/\/$/, '');
-const NORDESTE = ['porto', 'mcz', 'maragogi', 'nat', 'pip', 'ssa', 'for', 'jericoacoara', 'morro', 'portoseguro', 'itacare', 'forte', 'ajuda', 'trancoso', 'rec', 'joaopessoa'];
+const NORDESTE = ['porto', 'mcz', 'maragogi', 'nat', 'pip', 'ssa', 'for', 'jericoacoara', 'morro', 'portoseguro', 'itacare', 'forte', 'ajuda', 'trancoso', 'caraiva', 'rec', 'joaopessoa'];
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 const pad = function (n) { return String(n).padStart(2, '0'); };
 

@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Créditos de las fotos. Archivo GENERADO por creditos-fotos.js: no editar a
+ * Créditos de las fotos. Archivo GENERADO por scripts/sueltos/creditos-fotos.js: no editar a
  * mano.
  *
  * CC BY y CC BY-SA no permiten usar una foto sin atribuir a su autor y nombrar
@@ -9,7 +9,7 @@
  * autorizado.
  *
  * Cualquier foto nueva que se sume a app.js tiene que pasar por
- * creditos-fotos.js: si no aparece acá, no se está acreditando.
+ * scripts/sueltos/creditos-fotos.js: si no aparece acá, no se está acreditando.
  */
 var FOTO_CREDITOS = {
   "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/20210116081318_ru%C3%ADnas_lazareto_ilha_grande.jpg/1280px-20210116081318_ru%C3%ADnas_lazareto_ilha_grande.jpg": { autor: "VALDOGILDO", licencia: "CC BY-SA 4.0" },
@@ -755,6 +755,7 @@ var FOTO_CREDITOS = {
   "https://upload.wikimedia.org/wikipedia/commons/2/27/Praia-vermelha-do-centro-ubatuba-170115-047.jpg": { autor: "DeyvesMartins", licencia: "CC BY-SA 4.0" },
   "https://upload.wikimedia.org/wikipedia/commons/2/28/Praia-do-cruzeiro-iperoig-ubatuba-161020-004.jpg": { autor: "DeyvesMartins", licencia: "CC BY-SA 4.0" },
   "https://upload.wikimedia.org/wikipedia/commons/2/29/Vista_da_Praia_de_Barra_do_Jacu%C3%ADpe.jpg": { autor: "Lucas Luis Vitor Morais de Azevedo", licencia: "CC BY-SA 4.0" },
+  "https://upload.wikimedia.org/wikipedia/commons/3/36/Rio_e_mar_-_cara%C3%ADva.jpg": { autor: "Nathalia Resende from São Paulo, Brazil", licencia: "CC BY 2.0" },
   "https://upload.wikimedia.org/wikipedia/commons/3/3b/Trilha_Lopes_Mendes_-_Palmas_-_panoramio.jpg": { autor: "Dario Bittencourt Fr…", licencia: "CC BY-SA 3.0" },
   "https://upload.wikimedia.org/wikipedia/commons/3/3c/Surf_na_praia_vermelha_-_Ubatuba_SP_%281366413191%29.jpg": { autor: "Glauco Umbelino", licencia: "CC BY 2.0" },
   "https://upload.wikimedia.org/wikipedia/commons/4/40/Forte_de_Pau_Amarelo_Paulista_PE.jpg": { autor: "Fabiana Barbosa do N Silva", licencia: "CC BY-SA 4.0" },
@@ -771,6 +772,7 @@ var FOTO_CREDITOS = {
   "https://upload.wikimedia.org/wikipedia/commons/7/7f/Praia_de_Ipioca_-_Macei%C3%B3_-_Alagoas_%2811394603505%29.jpg": { autor: "Cícero R. C. Omena", licencia: "CC BY 2.0" },
   "https://upload.wikimedia.org/wikipedia/commons/8/80/TRILHA-PRAINHA.JPG": { autor: "FlaviaC", licencia: "CC BY-SA 3.0" },
   "https://upload.wikimedia.org/wikipedia/commons/8/82/Antonio_Vaz_island_-_Recife%2C_Pernambuco%2C_Brazil_%28cropped%29.jpg": { autor: "Portal da Copa/ME", licencia: "CC BY 3.0 br" },
+  "https://upload.wikimedia.org/wikipedia/commons/8/86/Cara%C3%ADva_barcos.jpg": { autor: "marco antonio cortes valencia from viña del mar, chile", licencia: "CC BY 2.0" },
   "https://upload.wikimedia.org/wikipedia/commons/8/8b/Lagoa_Verde_em_Ilha_Grande-RJ-Brasil_%281376956558%29.jpg": { autor: "Glauco Umbelino from Diamantina, Brasil", licencia: "CC BY 2.0" },
   "https://upload.wikimedia.org/wikipedia/commons/8/8d/BALONISMO_EM_TORRES_-_panoramio.jpg": { autor: "rafael alexandre de …", licencia: "CC BY 3.0" },
   "https://upload.wikimedia.org/wikipedia/commons/9/91/EDUARDO_MURUCI_-_BAIA_DOS_PORCOS-%28recorte%29.jpg": { autor: "Eduardo Muruci", licencia: "CC BY-SA 3.0" },
@@ -782,6 +784,7 @@ var FOTO_CREDITOS = {
   "https://upload.wikimedia.org/wikipedia/commons/c/ce/Praia_do_Tabuleiro.jpg": { autor: "Paulo Marcelo Adamek", licencia: "CC BY-SA 4.0" },
   "https://upload.wikimedia.org/wikipedia/commons/c/cf/BALNE%C3%81RIO_CAMBORI%C3%9A_%28Praia_do_Buraco%29%2C_Santa_Catarina%2C_Brasil_by_Nivaldo_Cit_Filho_-_panoramio.jpg": { autor: "Nivaldo Cit filho", licencia: "CC BY-SA 3.0" },
   "https://upload.wikimedia.org/wikipedia/commons/c/cf/Praia_da_Lula_%28140734402%29.jpg": { autor: "Diego Torres Silvestre from Sao Paulo, Brazil", licencia: "CC BY 2.0" },
+  "https://upload.wikimedia.org/wikipedia/commons/e/e1/Cara%C3%ADva%2C_rua.jpg": { autor: "Nathalia Resende from São Paulo, Brazil", licencia: "CC BY 2.0" },
   "https://upload.wikimedia.org/wikipedia/commons/f/f1/Chapad%C3%A3o_Pipa_RN.jpg": { autor: "Universos Paralelos de Can!", licencia: "CC BY 2.0" },
   "https://upload.wikimedia.org/wikipedia/commons/f/ff/Praia_da_Arma%C3%A7%C3%A3o_-_Florian%C3%B3polis_-_Santa_Catarina_-_panoramio_%281%29.jpg": { autor: "Vanderlei Bissiato", licencia: "CC BY-SA 3.0" }
 };

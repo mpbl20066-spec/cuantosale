@@ -582,6 +582,28 @@
         "compartido": null
       }
     },
+    "caraiva": {
+      "nombre": "Caraíva",
+      "iata": "SSA",
+      "modo": "car",
+      "km": 733,
+      "horas": 12.3,
+      "compartido": 0,
+      "compartido_consultar": true,
+      "privado": 107.69,
+      "real": [],
+      "fuente": "Sin tarifa en la planilla de transfers (data/transfer-escalones.tsv): no hay fila SSA a Caraíva. Trayecto de 733 km de OSRM hasta la vila (el ultimo tramo es camino de tierra y se cruza el rio en canoa).",
+      "verificado": "2026-10-17",
+      "confianza": "baja",
+      "derivacion": "Las dos modalidades salen \"Consultar\" en la app hasta que se cargue la fila en la planilla. El privado de presupuesto es el de Porto Seguro (R$ 480) mas R$ 80 por los 40 km extra de camino de tierra: R$ 560.",
+      "privado_escalones": [],
+      "privado_brl": 560,
+      "compartido_brl": 0,
+      "operador": {
+        "privado": null,
+        "compartido": null
+      }
+    },
     "trancoso": {
       "nombre": "Trancoso",
       "iata": "SSA",

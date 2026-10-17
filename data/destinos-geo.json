@@ -125,6 +125,12 @@
       "lat": -16.4832,
       "lon": -39.08369
     },
+    "caraiva": {
+      "name": "Caraíva",
+      "region": "Bahía",
+      "lat": -16.8102,
+      "lon": -39.1454
+    },
     "ssa": {
       "name": "Salvador de Bahía",
       "region": "Bahía",

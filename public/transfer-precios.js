@@ -35,6 +35,7 @@
   nat: { name: "Natal", iata: "NAT", modo: "car", km: 25, compartido: 5.77, privado: 30, compartido_brl: 30, escalones: [] },
   pip: { name: "Pipa", iata: "NAT", modo: "car", km: 30, compartido: 5.96, privado: 57.69, compartido_brl: 31, privado_brl: 300, escalones: [] },
   ajuda: { name: "Arraial d’Ajuda", iata: "SSA", modo: "car", km: 170, compartido: 22.69, privado: 69.23, compartido_brl: 118, privado_brl: 360, escalones: [] },
+  caraiva: { name: "Caraíva", iata: "SSA", modo: "car", km: 733, compartido: 0, privado: 107.69, compartido_brl: 0, privado_brl: 560, compartidoConsultar: true, escalones: [] },
   trancoso: { name: "Trancoso", iata: "SSA", modo: "car", km: 163, compartido: 21.73, privado: 87.69, compartido_brl: 113, privado_brl: 456, escalones: [] },
   ssa: { name: "Salvador de Bahía", iata: "SSA", modo: "car", km: 24, compartido: 5.77, privado: 33.27, compartido_brl: 30, privado_brl: 173, appRideUsd: 11, escalones: [{"min":1,"max":3,"vehiculo":"Auto","brl":173},{"min":4,"max":4,"vehiculo":"Auto","brl":230},{"min":5,"max":6,"vehiculo":"Van","brl":299},{"min":7,"max":8,"vehiculo":"Van","brl":345},{"min":9,"max":12,"vehiculo":"Van","brl":460},{"min":13,"max":15,"vehiculo":"Van","brl":575}] },
   for: { name: "Fortaleza", iata: "FOR", modo: "car", km: 9, compartido: 5.77, privado: 30, compartido_brl: 30, escalones: [] },
@@ -249,6 +250,15 @@
       "derivacion": "La modalidad privado no tiene fila con precio en la planilla: la app muestra \"Consultar\". La otra sale de la fila citada, con su precio real.",
       "km": 170,
       "horas": 2.8
+    },
+  caraiva: {
+      "fuente": "Sin tarifa en la planilla de transfers (data/transfer-escalones.tsv): no hay fila SSA a Caraíva. Trayecto de 733 km de OSRM hasta la vila (el ultimo tramo es camino de tierra y se cruza el rio en canoa).",
+      "confianza": "baja",
+      "verificado": "2026-10-17",
+      "real": [],
+      "derivacion": "Las dos modalidades salen \"Consultar\" en la app hasta que se cargue la fila en la planilla. El privado de presupuesto es el de Porto Seguro (R$ 480) mas R$ 80 por los 40 km extra de camino de tierra: R$ 560.",
+      "km": 733,
+      "horas": 12.3
     },
   trancoso: {
       "fuente": "Fuente: la planilla de transfers (data/transfer-escalones.tsv), fila SSA a Trancoso. Compartido por persona: R$ 113 (Auto, 1 a 4 personas). Precio final de venta, en reales. Trayecto de 163 km de OSRM. Un solo trayecto (aeropuerto a hotel), en reales.",

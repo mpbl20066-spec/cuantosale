@@ -52,6 +52,7 @@
   pip: { name: 'Pipa', transport: { eco: 3, medio: 6, confort: 12 }, food: { casual: 17, moderado: 41, gourmet: 73 } },
   trancoso: { name: 'Trancoso', transport: { eco: 5, medio: 13, confort: 33 }, food: { casual: 38, moderado: 70, gourmet: 120 } },
   ajuda: { name: 'Arraial d’Ajuda', transport: { eco: 4, medio: 8, confort: 17 }, food: { casual: 19, moderado: 35, gourmet: 57 } },
+  caraiva: { name: 'Caraíva', transport: { eco: 2, medio: 5, confort: 12 }, food: { casual: 32, moderado: 62, gourmet: 108 } },
   morro: { name: 'Morro de São Paulo', transport: { eco: 1, medio: 4, confort: 15 }, food: { casual: 19, moderado: 52, gourmet: 75 } },
   portoseguro: { name: 'Porto Seguro', transport: { eco: 4, medio: 8, confort: 17 }, food: { casual: 33, moderado: 60, gourmet: 105 } },
   itacare: { name: 'Itacaré', transport: { eco: 5, medio: 9, confort: 15 }, food: { casual: 32, moderado: 58, gourmet: 100 } },
@@ -268,6 +269,13 @@
       "fuente": "Viciada em Viajar (feb/2024): Rabanete por kilo R$90/kg, esfiha R$10, moqueca individual de camarón en La Plage R$68, taxi minimo R$30, van Pitinga-centro R$5. Pé na Estrada (ene/2024): ejecutivo Cantinho Mineiro desde R$18, pizza grande Paolo R$39. Viaje na Viagem: comida o cena R$45-90 con servicio, mariscos en Praia do Espelho R$85-140 por plato. Melhores Destinos: van R$5-7.",
       "confianza": "media",
       "verificado": "2026-10-12"
+    },
+  caraiva: {
+      "fuente": "Sin fuente publica de precios para Caraiva. Referencias: Trancoso (comida) y Morro de São Paulo (traslado, otra vila sin autos). Canoa para cruzar el rio: R$5 a R$10 por tramo.",
+      "confianza": "baja",
+      "verificado": "2026-10-17",
+      "nota": "Vila sin autos del otro lado del rio Caraiva: calles de arena, se camina a todos lados. No hay fuente publica con precios de este destino; tratarlo como estimacion hasta que se revisen cartas.",
+      "derivacion": "Derivado de Trancoso (misma costa, mismo publico): la comida baja un escalon porque en la vila no hay beach clubs de lujo como en el Quadrado (38/70/120 -> 32/62/108). El traslado es el de Morro de São Paulo, la otra vila sin autos del catalogo, con el confort algo mas bajo: adentro de la vila se camina, y el gasto es la canoa para cruzar el rio (R$5 a R$10 por tramo) y alguna carroza o buggy a Espelho o Corumbau."
     },
   morro: {
       "fuente": "Morro de São Paulo Catamarã (oct/2024): PF Papoula R$29, PF Banana Blue R$35, Boteco do Conde desde R$25, menú del día ~R$60. Bossa Nova Bistrô (carta en su sitio): camarão ao limone R$82, frutos do mar R$92, moqueca de camarón R$219. Minha Louca Paixão moqueca para dos R$165,99. Catraca Livre: tapioca R$8-12. Pueblo sin autos: de la Primera a la Cuarta Praia a pie; taxi/tractor a la Quinta Praia desde R$80 por vehículo, barco a Gamboa R$4 (Melhores Destinos).",
