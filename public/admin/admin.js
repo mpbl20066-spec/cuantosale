@@ -117,7 +117,7 @@
     { t: 'WhatsApp', vistas: [['mensajes', 'Chats'], ['whatsapp', 'Número y plantillas']] },
     { t: 'Catálogo', vistas: [['tours', 'Tours'], ['transfers', 'Transfers'], ['publicar', 'Por publicar'], ['disponibilidad', 'Disponibilidad'], ['temporadas', 'Temporadas y combos'], ['proveedores', 'Proveedores'], ['importar', 'Importar'], ['operaciones', 'Resumen']] },
     { t: 'Sistema', vistas: [['precarga', 'Precios de las guías'], ['uso', 'Uso'], ['demanda', 'Demanda']] },
-    { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-contactos', 'Contactos'], ['mkt-creadores', 'Creadores'], ['mkt-grupos', 'Grupos y foros']] }
+    { t: 'Marketing', vistas: [['mkt-hoy', 'Hoy'], ['mkt-calendario', 'Calendario'], ['mkt-tablero', 'Tablero semanal'], ['mkt-contactos', 'Contactos'], ['mkt-creadores', 'Creadores'], ['mkt-pousadas', 'Pousadas'], ['mkt-grupos', 'Grupos y foros']] }
   ];
   function esVistaSrv() { return S.vista === 'tours' || S.vista === 'transfers'; }
   function grupoDe(v) { return GRUPOS.filter(function (g) { return g.vistas.some(function (x) { return x[0] === v; }); })[0] || GRUPOS[0]; }
@@ -679,6 +679,7 @@
     if (S.vista === 'mkt-contactos') return h + vistaMktContactos();
     if (S.vista === 'mkt-creadores') return h + vistaMktCreadores();
     if (S.vista === 'mkt-grupos') return h + vistaMktGrupos();
+    if (S.vista === 'mkt-pousadas') return h + vistaMktPousadas();
     return h + vistaMktHoy();
   }
   function bloqueMkt(p) {
@@ -852,6 +853,26 @@
     }
     return '<div class="card"><p class="vacio">Cargando…</p></div>';
   }
+  /* ---------- Pousadas: a las que se les propone comision por recomendacion. La pantalla vive en /admin/pousadas.js
+     y la lista en /admin/pousadas-datos.js; se cargan la primera vez que se abre la pestana. ---------- */
+  var pzPanel = null;
+  function vistaMktPousadas() {
+    if (pzPanel) return pzPanel.vista();
+    if (window.CSPousadasPanel && window.CS_POUSADAS) {
+      pzPanel = CSPousadasPanel({ S: S, esc: esc, pintar: pintar, toast: toast, hoy: hoyUY, guardarMkt: guardarMkt, copiar: copiarTexto });
+      return pzPanel.vista();
+    }
+    if (!S.pzCargando) {
+      S.pzCargando = true;
+      var faltan = 2, listo = function () { if (--faltan === 0 && S.vista === 'mkt-pousadas') pintar(); };
+      ['/admin/pousadas-datos.js?v=1', '/admin/pousadas.js?v=1'].forEach(function (src) {
+        var sc = document.createElement('script'); sc.src = src; sc.onload = listo;
+        sc.onerror = function () { S.pzCargando = false; toast('No se pudo abrir Pousadas. Recargá la página.'); };
+        document.head.appendChild(sc);
+      });
+    }
+    return '<div class="card"><p class="vacio">Cargando…</p></div>';
+  }
   /* Contactos: prensa, creadores y alianzas a los que se les escribe. Los que trae el plan (CS_MKT.contactos) se
      mezclan con lo guardado (lib/marketing.js, mismo id); los agregados a mano viven solo en lo guardado. */
   var TIPOS_CT = { prensa: 'Prensa', creador: 'Creador', alianza: 'Alianza' };
@@ -906,7 +927,8 @@
   }
   function vistaMktContactos() {
     S.mktCtMsj = {};   // el mensaje de cada tarjeta, para el boton "Mandar por Instagram"
-    var todos = contactosMkt(), tipo = S.mktCtTipo || 'todos', ronda = S.mktCtRonda || 0;
+    /* Las pousadas tienen su pestana (Marketing > Pousadas): aca no se mezclan con prensa y creadores. */
+    var todos = contactosMkt().filter(function (c) { return c.tipo !== 'pousada'; }), tipo = S.mktCtTipo || 'todos', ronda = S.mktCtRonda || 0;
     var l = todos.filter(function (c) { return (tipo === 'todos' || c.tipo === tipo) && (!ronda || c.ronda === ronda); });
     /* Los creadores van en rondas de 5 (CS_MKT.contactos, ronda): primero los de la ronda mas baja. */
     l.sort(function (x, y) { return (x.ronda || 99) - (y.ronda || 99); });
@@ -3676,7 +3698,7 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden) revisarVersion(); });
 
   /* ---------- arranque ---------- */
-  var vq = /[?&]vista=(operaciones|servicios|publicar|proveedores|importar|mkt-hoy|mkt-calendario|mkt-tablero|mkt-contactos|mkt-creadores|mkt-grupos)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
+  var vq = /[?&]vista=(operaciones|servicios|publicar|proveedores|importar|mkt-hoy|mkt-calendario|mkt-tablero|mkt-contactos|mkt-creadores|mkt-pousadas|mkt-grupos)(?:&|$)/.exec(location.search); if (vq) S.vista = vq[1];
   api('sesion').then(function (s) {
     if (!s.configurado) { app.innerHTML = '<div class="login"><div class="sec"><h1 style="margin:0 0 8px;font-size:18px">Panel sin configurar</h1><p class="sub">Definí las variables ADMIN_USER y ADMIN_PASS en el servidor (y reiniciá) para activar el panel.</p></div></div>'; return; }
     if (s.activo) cargar(); else pintarLogin();
