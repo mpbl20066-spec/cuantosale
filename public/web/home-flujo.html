@@ -205,7 +205,6 @@
   .x-otros .opt{margin-top:6px}
   .ho__hab{margin-top:4px;font-size:11.5px;font-weight:700;color:var(--good);line-height:1.3}
   button.ho__ver{font-family:var(--fb);cursor:pointer}
-  .ho__soc{flex:1 1 140px;max-width:190px;font-size:11.5px;line-height:1.35;color:var(--ink2);text-align:right}
   .f-modal{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:flex-end}
   .f-modal[hidden]{display:none}
   .f-modal__bg{position:absolute;inset:0;background:rgba(10,16,26,.5)}
@@ -2212,10 +2211,10 @@
           '<div class="ho__n">' + esc(h.nom) + '</div>' +
           '<div class="ho__c">' + (h.rat ? '<span class="ho__r">★ ' + String(h.rat).replace('.', ',') + '</span>' + (h.n ? ' (' + h.n.toLocaleString('es-UY') + (h.n === 1 ? ' opinión' : ' opiniones') + ')' : '') : 'Sin puntaje todavía') + '</div>' +
           '<div class="ho__u">' + ic(iPin, 14) + '<span>' + esc(h.zona) + (h.playa != null ? ' · ' + dist(h.playa) : '') + '</span></div>' +
-          (S.habitacion && S.habitacion.hotelId === h.id ? '<div class="ho__hab">Habitación: ' + esc(S.habitacion.nombre) + '</div>' : '') + '<ul class="ho__f">' + feats.map(function (x) { return '<li>✓ ' + esc(x) + '</li>'; }).join('') + '</ul>' +
+          (S.habitacion && S.habitacion.hotelId === h.id ? '<div class="ho__hab">Habitación: ' + esc(S.habitacion.nombre) + '</div>' : (h.socia && h.habDef ? '<div class="ho__hab">Habitación: ' + esc(h.habDef) + '</div>' : '')) + '<ul class="ho__f">' + feats.map(function (x) { return '<li>✓ ' + esc(x) + '</li>'; }).join('') + '</ul>' +
           '</div>' +
           '<div class="ho__p"><div><b>' + f(precioHotel(h)) + '</b><small>total · ' + nochesTxt(HNOCHES) + ' · ' + personas + '</small></div>' +
-          (h.socia ? '<small class="ho__soc">Precio estimado. Te confirmamos disponibilidad y pagás en la pousada.</small>' : h.ejemplo ? '' : '<button type="button" class="ho__ver" data-habs="' + esc(h.id) + '">' + (S.habitacion && S.habitacion.hotelId === h.id ? 'Cambiar habitación' : 'Elegir habitación') + '</button>') + '</div></div>';
+          (h.ejemplo ? '' : '<button type="button" class="ho__ver" data-habs="' + esc(h.id) + '">' + (S.habitacion && S.habitacion.hotelId === h.id ? 'Cambiar habitación' : 'Elegir habitación') + '</button>') + '</div></div>';
       }).join('') +
       (lista.length > mostrados.length ? '<p class="f-sub" style="text-align:center;margin-top:8px">Elegimos ' + (mostrados.length - socias.length) + ' opciones distintas entre ' + (lista.length - socias.length) + ' alojamientos' + (S.playaSel === 'todas' ? '' : ' en ' + esc(S.playaSel)) + '.</p>' : '') + sinAlojBtn;
   }
@@ -2692,8 +2691,8 @@
      viaje. Asi la reserva la manda CuantoSale y la pousada sabe que es de CuantoSale sin depender de ningun codigo. */
   function pedirSocia(parada) {
     var m = enParada(parada || 0, function () {
-      var h = hotel();
-      return 'Hola CuántoSale! Quiero reservar la *' + h.nom + '* (' + h.zona + ', ' + HN + ').\n\n*Fechas:* ' + fdc(HIDA) + ' → ' + fdc(HVUELTA) +
+      var h = hotel(), hab = S.habitacion && S.habitacion.hotelId === h.id ? S.habitacion.nombre : h.habDef;
+      return 'Hola CuántoSale! Quiero reservar la *' + h.nom + '* (' + h.zona + ', ' + HN + ').\n\n' + (hab ? '*Habitación:* ' + hab + '\n' : '') + '*Fechas:* ' + fdc(HIDA) + ' → ' + fdc(HVUELTA) +
         '\n*Personas:* ' + personasTxt() + '\n\n¿Tiene disponibilidad?\nRef: ' + window.CS_VIAJE_ID;
     });
     track('flujo_pousada_socia_pedir', { parada: (parada || 0) + 1 });
@@ -3342,12 +3341,24 @@
       playa: h.playaKm != null ? Math.round(h.playaKm * 1000) : null, serv: [m, det].filter(Boolean).slice(0, 2).concat(h.mealPlan ? [h.mealPlan] : []),
       precio: Number(h.total), rec: !!h.recommended, img: h.image || 'home-ilha-bahia.jpg' };
   }
-  /* Una pousada socia como alojamiento de la lista: el precio es el acordado con la pousada por noche y habitacion
-     doble, y no tiene habitaciones de Booking para elegir. */
+  /* Una pousada socia como alojamiento de la lista. Sus habitaciones tienen precio por noche de temporada alta (noches
+     de diciembre a febrero) y baja: cada noche del viaje se cobra con la suya, por las habitaciones que hagan falta para
+     el grupo. Se elige de entrada la mas barata; las demas, con "Elegir habitacion" (como las de Booking). Se llama
+     dentro de enParada: HIDA y HVUELTA son los de la parada. */
+  function totalHabSocia(r) {
+    var t = 0, d = new Date(HIDA + 'T12:00:00Z'), fin = new Date(HVUELTA + 'T12:00:00Z');
+    for (; d < fin; d.setUTCDate(d.getUTCDate() + 1)) { var mes = d.getUTCMonth(); t += mes === 11 || mes <= 1 ? r.alta : r.baja; }
+    return Math.round(t * Math.ceil(pax / r.personas));
+  }
   function mapSocia(s) {
+    var habs = (s.habitaciones || []).map(function (r, i) {
+      var cant = Math.ceil(pax / r.personas);
+      return { id: s.id + ':' + i, socia: true, name: (cant > 1 ? cant + ' × ' : '') + r.nombre, maxOccupancy: r.personas, total: totalHabSocia(r) };
+    }).sort(function (a, b) { return a.total - b.total; });
+    var def = habs[0] || { name: '', total: 0 };
     return { id: s.id, tipo: s.categoria, socia: true, nom: s.nombre, cat: s.tipo || 'Pousada', rat: Number(s.nota) || 0, n: Number(s.resenas) || 0,
       zona: s.playa || HN, barrio: false, playa: null, serv: ['Te la reservamos nosotros', 'Pagás en la pousada'],
-      precio: Math.round(s.noche * HNOCHES * Math.ceil(pax / 2)), rec: true, img: s.foto || 'home-ilha-bahia.jpg' };
+      habs: habs, habDef: def.name, precio: def.total, rec: true, img: s.foto || 'home-ilha-bahia.jpg' };
   }
   function cargarHoteles() {
     S.hotelesListos = true;
@@ -3363,7 +3374,7 @@
     var socias = fetch('/api/pousadas-socias?dest=' + encodeURIComponent(q0.dest)).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
     return (S.promH = Promise.all(TIPOS.map(function (t) { return pedir(t).catch(function () { return { hotels: [] }; }); }).concat([socias])).then(function (rs) {
       enParada(pi, function () {
-        var vistos = {}, lista = (rs.pop().pousadas || []).map(mapSocia);
+        var vistos = {}, lista = (rs.pop().pousadas || []).map(mapSocia).filter(function (h) { return h.precio > 0; });
         rs.forEach(function (d, i) { sumarHoteles(lista, vistos, d, TIPOS[i]); });
         if (!lista.length) throw new Error('Booking no devolvió alojamientos');
         HOTELES = lista;
@@ -3420,6 +3431,7 @@
   /* ---- Habitaciones de un hotel (Booking, /api/hotel-habitaciones de la app) ---- */
   function abrirHabitaciones(hotelId) {
     var h = HOTELES.filter(function (x) { return x.id === hotelId; })[0]; if (!h) return;
+    if (h.socia) { S.modal = { hotelId: hotelId, socia: true, cargando: false, rooms: h.habs, error: '' }; track('flujo_ver_habitaciones', { hotel: hotelId, nombre: h.nom, zona: h.zona, socia: true }); pintarModal(); return; }
     S.modal = { hotelId: hotelId, cargando: true, rooms: [], error: '' };
     track('flujo_ver_habitaciones', { hotel: hotelId, nombre: h.nom, zona: h.zona });
     pintarModal();
@@ -3520,14 +3532,15 @@
           '<div class="hb__img"' + (r.photo ? ' style="background-image:url(\'' + esc(r.photo) + '\')"' : '') + ' aria-hidden="true"></div>' +
           '<div class="hb__b"><b>' + esc(r.name) + '</b><small>' + [r.beds, r.surface ? r.surface + ' m²' : '', r.maxOccupancy ? 'hasta ' + r.maxOccupancy + (r.maxOccupancy === 1 ? ' persona' : ' personas') : ''].filter(Boolean).join(' · ') + '</small>' +
           (r.maxOccupancy && r.maxOccupancy < pax ? '<span class="hb__no">No entran las ' + pax + ' personas</span>' : '') +
-          (r.meal ? '<span class="hb__ok">' + esc(r.meal) + '</span>' : '<span class="hb__no">No incluye comidas</span>') +
-          (r.cancelText ? '<span class="' + (libre ? 'hb__ok' : 'hb__no') + '">' + esc(r.cancelText) + '</span>' : '') + '</div>' +
+          (r.socia ? '<span class="hb__ok">Pagás en la pousada</span>' : (r.meal ? '<span class="hb__ok">' + esc(r.meal) + '</span>' : '<span class="hb__no">No incluye comidas</span>') +
+          (r.cancelText ? '<span class="' + (libre ? 'hb__ok' : 'hb__no') + '">' + esc(r.cancelText) + '</span>' : '')) + '</div>' +
           '<div class="hb__p"><b>' + f(r.total) + '</b><small>total ' + nochesTxt(HNOCHES) + '</small></div></button>';
       }).join(''));
     el.hidden = false;
     el.innerHTML = '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet" role="dialog" aria-modal="true" aria-label="Habitaciones disponibles">' +
       '<div class="f-modal__top"><div><small>HABITACIONES DISPONIBLES</small><h2>' + esc(h ? h.nom : '') + '</h2></div><button type="button" class="f-modal__x" data-cerrar="1" aria-label="Cerrar">✕</button></div>' +
-      '<p class="f-modal__note">Precios totales con impuestos para tus fechas. Tocá una habitación para sumarla a tu presupuesto.</p>' + cuerpo + '</div>';
+      '<p class="f-modal__note">' + (m.socia ? 'Precios acordados con la pousada para tus fechas (de diciembre a febrero es temporada alta). Tocá una habitación para sumarla a tu presupuesto: antes de reservar te confirmamos la disponibilidad.'
+        : 'Precios totales con impuestos para tus fechas. Tocá una habitación para sumarla a tu presupuesto.') + '</p>' + cuerpo + '</div>';
     var x = el.querySelector('.f-modal__x'); if (x && m.cargando) x.focus();
   }
   var PAGINAS = { 1: [MODO === 'auto' ? 'auto' : (MODO === 'bus' ? 'bus' : 'vuelos-traslados'), NOMBRES[0]], 2: ['alojamiento', 'Alojamiento'], 3: ['extras', 'Extras'], 4: ['presupuesto', 'Tu presupuesto'], 5: ['guardado', 'Viaje guardado'], 6: ['reservar', 'Reservá tu viaje'], 7: ['estado', 'Estado de tu viaje'], 8: ['reservar-alojamiento', 'Reservar alojamiento'], 9: ['confirmar-reserva', '¿Reservaste?'], 10: ['alojamiento-reservado', 'Informar alojamiento'], 11: ['confirmar-reserva-cuantosale', 'Confirmá tu reserva'], 12: ['continuar-whatsapp', 'Continuar por WhatsApp'], 13: ['reserva-confirmada', 'Reserva confirmada'] };

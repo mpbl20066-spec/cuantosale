@@ -865,7 +865,7 @@
     if (!S.pzCargando) {
       S.pzCargando = true;
       var faltan = 2, listo = function () { if (--faltan === 0 && S.vista === 'mkt-pousadas') pintar(); };
-      ['/admin/pousadas-datos.js?v=2', '/admin/pousadas.js?v=2'].forEach(function (src) {
+      ['/admin/pousadas-datos.js?v=3', '/admin/pousadas.js?v=3'].forEach(function (src) {
         var sc = document.createElement('script'); sc.src = src; sc.onload = listo;
         sc.onerror = function () { S.pzCargando = false; toast('No se pudo abrir Pousadas. Recargá la página.'); };
         document.head.appendChild(sc);
