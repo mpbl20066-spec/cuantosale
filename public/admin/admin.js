@@ -827,7 +827,7 @@
     }
     if (!S.crCargando) {
       S.crCargando = true;
-      var sc = document.createElement('script'); sc.src = '/admin/creadores.js?v=3';
+      var sc = document.createElement('script'); sc.src = '/admin/creadores.js?v=4';
       sc.onload = function () { if (S.vista === 'mkt-creadores') pintar(); };
       sc.onerror = function () { S.crCargando = false; toast('No se pudo abrir Creadores. Recargá la página.'); };
       document.head.appendChild(sc);

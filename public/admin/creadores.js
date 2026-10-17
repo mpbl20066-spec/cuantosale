@@ -17,8 +17,9 @@
   /* Lista para contactar: los creadores del plan (CS_MKT.contactos, todos uruguayos) mas estos, que se guardan como
      contacto la primera vez que se toca uno. [id, pais, nombre, persona, @instagram, seguidores, nota].
      Seguidores de HypeAuditor (oct 2026) y Feedspot; los sin dato, verificalos en el perfil.
-     8º campo opcional: el perfil (PERFILES), si no es influencer. Si el 5º es una URL, va sin Instagram (canal otro). */
+     8º campo opcional: el perfil (PERFILES), si no es influencer; 9º y 10º: estado y fecha, si ya se habló. Si el 5º es una URL, va sin Instagram (canal otro). */
   var LISTA = [
+    ['cr-camilatecheira', 'UY', 'Camila Techeira', 'Camila', 'camilatecheira7', '', 'Respondió por Instagram el 17/10/2026: cobra 5000 pesos por mes, 1 publicación por semana. No trabaja a comisión. Averiguá si son pesos uruguayos o argentinos.', 'influencer', 'no', '2026-10-17'],
     ['cr-viajealavuelta', 'UY', 'A la Vuelta · Viajes por el mundo', '', 'viajealavuelta', '15,5k', ''],
     ['cr-mayuhuba', 'UY', 'Yuli Baquedano', 'Yuli', 'mayuhuba', '180k', ''],
     ['cr-marioneill', 'UY', 'Marina O\'Neill', 'Marina', 'marioneill', '101k', ''],
@@ -201,12 +202,12 @@
       LISTA.forEach(function (r) {
         if (guardados[r[0]]) return;   // ya guardado (o quitado): viene de ctx.contactos()
         var web = /^https?:\/\//.test(r[4]);
-        l.push({ id: r[0], nuevo: true, tipo: 'creador', pais: r[1], medio: r[2], persona: r[3], canal: web ? 'otro' : 'instagram', dato: web ? r[4] : '@' + r[4], seguidores: r[5], nota: r[6], perfil: r[7] || 'influencer', estado: 'pendiente' });
+        l.push({ id: r[0], nuevo: true, tipo: 'creador', pais: r[1], medio: r[2], persona: r[3], canal: web ? 'otro' : 'instagram', dato: web ? r[4] : '@' + r[4], seguidores: r[5], nota: r[6], perfil: r[7] || 'influencer', estado: r[8] || 'pendiente', fecha: r[9] || '' });
       });
       return l;
     }
     function base(c) {   // lo que se guarda la primera vez de un creador de LISTA
-      return c.nuevo ? { tipo: 'creador', medio: c.medio, persona: c.persona, canal: c.canal, dato: c.dato, pais: c.pais, seguidores: c.seguidores, nota: c.nota, perfil: c.perfil, estado: 'pendiente' } : {};
+      return c.nuevo ? { tipo: 'creador', medio: c.medio, persona: c.persona, canal: c.canal, dato: c.dato, pais: c.pais, seguidores: c.seguidores, nota: c.nota, perfil: c.perfil, estado: c.estado, fecha: c.fecha } : {};
     }
     function nombreDe(c) {
       if (c.persona) return c.persona;
