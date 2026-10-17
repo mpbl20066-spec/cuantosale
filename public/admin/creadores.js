@@ -14,9 +14,82 @@
   var ESTADO_PED = { nuevo: 'Nuevo', en_gestion: 'En gestión', confirmado: 'Confirmado', completado: 'Completado', cancelado: 'Cancelado' };
   var COMISION = 6;   // % por defecto: la mitad del margen general (15 % sobre el costo = ~13 % del precio) es ~6,5 %
 
+  /* Lista para contactar: los creadores del plan (CS_MKT.contactos, todos uruguayos) mas estos, que se guardan como
+     contacto la primera vez que se toca uno. [id, pais, nombre, persona, @instagram, seguidores, nota].
+     Seguidores de HypeAuditor (oct 2026) y Feedspot; los sin dato, verificalos en el perfil.
+     8º campo opcional: el perfil (PERFILES), si no es influencer. Si el 5º es una URL, va sin Instagram (canal otro). */
+  var LISTA = [
+    ['cr-viajealavuelta', 'UY', 'A la Vuelta · Viajes por el mundo', '', 'viajealavuelta', '15,5k', ''],
+    ['cr-mayuhuba', 'UY', 'Yuli Baquedano', 'Yuli', 'mayuhuba', '180k', ''],
+    ['cr-marioneill', 'UY', 'Marina O\'Neill', 'Marina', 'marioneill', '101k', ''],
+    ['cr-elcaminoeslarecompensa', 'UY', 'El camino es la recompensa', '', 'el.camino_es.la.recompensa', '137k', ''],
+    ['cr-dementeconmochila', 'UY', 'Franca Levin · Demente con mochila', 'Franca', 'dementeconmochila', '146k', ''],
+    ['cr-romimochileando', 'UY', 'Romi Graña · Mochileando', 'Romi', 'romimochileando', '191k', ''],
+    ['cr-pastoreuy', 'UY', 'Guille Pastorini', 'Guille', 'pastore_uy', '6,9k', 'Cineasta y creador de viajes (Heepsy). Verificá el usuario antes de escribir.'],
+    ['cr-agusvarela', 'UY', 'Agus Varela', 'Agus', 'agusvarela', '', 'Aparecía en el ranking de viajes de Uruguay de HypeAuditor (2022). Verificá que siga activo y que sea de viajes.'],
+    ['cr-guruguay', 'UY', 'Guru\'Guay', '', 'guruguay1', '45,5k', 'Guía de Uruguay, mucho público extranjero. Sirve más para alianza que para Brasil.'],
+    ['cr-tickyyoga', 'UY', 'Mariana Vega · Viajes y retiros', 'Mariana', 'ticky_yoga', '95k', 'Viajes y retiros: probá con un paseo tranqui (Pipa, Jeri).'],
+    ['cr-turistaenuruguay', 'UY', 'Nacho · Turista en Uruguay', 'Nacho', 'turistaenuruguay', '101k', ''],
+    ['cr-cosasdelpaisito', 'UY', 'Luis Molina · Cosas del paisito', 'Luis', 'cosasdelpaisito', '181k', 'Humor y cultura uruguaya, no solo viajes: proponé algo tipo «el uruguayo en Floripa».'],
+    ['cr-uruguaycreadores', 'UY', 'Selección Uruguaya de Creadores', '', 'uruguaycreadores', '', 'Comunidad de creadores uruguayos: pediles que compartan la propuesta con su gente.'],
+    ['cr-viajeydescubra', 'AR', 'Flor Zaccagnino · Viaje y descubra', 'Flor', 'viajeydescubra', '108k','Tiene una guía de Florianópolis y compara Floripa, Bombinhas y Camboriú en su blog: la más afín. Empezá por ella.'],
+    ['cr-viajandovivamos', 'AR', 'Juliana Alvarez Curetti · Viajando Vivamos', 'Juliana', 'viajandovivamos', '', 'Viajera sola y nómade digital; colabora con marcas de viajes.'],
+    ['cr-timetotravelarg', 'AR', 'Chiava · Time to travel', 'Chiava', 'timetotravel_arg', '10,5k', 'Viajera de Córdoba.'],
+    ['cr-turistearelmundo', 'AR', 'Janice · Turistear el mundo', 'Janice', 'turistearelmundo', '16,4k', 'Comunicadora de viajes y arma itinerarios.'],
+    ['cr-viajandoconsil', 'AR', 'Soy Sil · Viajando con Sil', 'Sil', 'viajandoconsil', '24,5k', 'Hoteles y viajes gourmet.'],
+    ['cr-modopasaje', 'AR', 'Ger Farnitano · Modo pasaje', 'Ger', 'modopasaje', '31k', 'Rutas y recomendaciones prácticas.'],
+    ['cr-chelotravels', 'AR', 'Chelo Travels', 'Chelo', 'chelotravels', '32k', 'Viajar barato con voluntariados.'],
+    ['cr-tramandoviajes', 'AR', 'Florencia Pagano · Tramando viajes', 'Florencia', 'tramandoviajes', '41,7k', ''],
+    ['cr-salviajando', 'AR', 'Celes y Salvi · Salviajando', 'Celes', 'salviajando', '51k', 'Pareja, trekking.'],
+    ['cr-andreamodoturista', 'AR', 'María Andrea · Modo turista', 'Andrea', 'andreamodoturista', '63k', ''],
+    ['cr-camitalpone', 'AR', 'Camila Talpone', 'Camila', 'camitalpone', '66k', 'Trabaja con Despegar.'],
+    ['cr-alwaystravelera', 'AR', 'Rocío Ruiz · Always travelera', 'Rocío', 'alwaystravelera', '72,5k', 'Nómade digital, viaja sola.'],
+    ['cr-respiroviajes', 'AR', 'Leo Hoop · Respiro viajes', 'Leo', 'respiroviajes', '94k', 'Promos y descuentos de viajes: su público acaba de comprar el vuelo.', 'ofertas'],
+    ['cr-valexunviaje', 'AR', 'Vale Orioli · Vale x un viaje', 'Vale', 'valexunviaje', '103k', 'Tips de viaje.'],
+    ['cr-myalmundo', 'AR', 'Milagros y Ariel · My al mundo', 'Milagros', 'myalmundo', '124k', 'Datos de destinos, hoteles y experiencias.'],
+    ['cr-soyalexrivas', 'AR', 'Alex Rivas', 'Alex', 'soyalexrivas', '176k', ''],
+    ['cr-floxie10', 'AR', 'Floxie', '', 'floxie10', '200k', ''],
+    ['cr-tanviajeros', 'AR', 'Rodri y Eze · Tan viajeros', 'Rodri', 'tanviajeros', '210k', ''],
+    ['cr-viajeracompulsiva', 'AR', 'Mica · Viajera compulsiva', 'Mica', 'viajera.compulsiva', '212k', 'Tips, itinerarios y destinos.'],
+    ['cr-gui10road', 'AR', 'Gui · 10 road', 'Gui', 'gui10road', '246k', 'Viaja en van.'],
+    ['cr-boletoalafelicidad', 'AR', 'Aye · Boleto a la felicidad', 'Aye', 'boletoalafelicidad', '274k', 'De Rosario, playas e info práctica: muy afín a Brasil.'],
+    ['cr-argentinayelmundo', 'AR', 'Fede y Sol · Argentina y el mundo', 'Fede', 'argentinayelmundo', '391k', 'Pareja bloguera de viajes.'],
+    ['cr-cadaviajeunmundo', 'AR', 'Caro y Vero Avigliano · Cada viaje un mundo', 'Caro', 'cadaviajeunmundo', '268k', ''],
+    ['cr-recomiendoviajar', 'AR', 'Rodri Morales · Recomiendo viajar', 'Rodri', 'recomiendoviajar', '276k', 'Tips y recomendaciones de viaje.'],
+    ['cr-panditaonroad', 'AR', 'Sofía Lugón · Pandita on road', 'Sofía', 'panditaonroad', '351k', ''],
+    ['cr-tupisaravia', 'AR', 'Martina Saravia Alemán', 'Martina', 'tupisaravia', '419k', ''],
+    ['cr-viajarenfoco', 'AR', 'María Laura Vazquez · Viajar en foco', 'María Laura', 'viajarenfoco', '680k', ''],
+    ['cr-isaporahi', 'AR', 'Isa por ahí', 'Isa', 'isa_porahi', '682k', ''],
+    ['cr-hakunamatataxelmundo', 'AR', 'Caro y Santi · Hakuna Matata x el mundo', 'Caro', 'hakunamatataxelmundo', '685k', 'Motorhome y vanlife.'],
+    ['cr-pasajeenmano', 'AR', 'Agus López · Pasaje en mano', 'Agus', 'pasaje.en.mano', '1,1M', 'Periodista de viajes, ofertas de pasajes: su público acaba de comprar el vuelo.', 'ofertas'],
+    /* Otros perfiles: viven en Brasil, escuelas que viajan. Los que no tienen Instagram conocido van con su web. */
+    ['cr-alojamientofloripa', 'AR', 'Alojamiento Floripa', '', 'alojamientofloripa', '52k', 'Cuenta en español: todo sobre Floripa y alquiler de casas por temporada. Sus huéspedes necesitan traslado y paseos.', 'vivebr'],
+    ['cr-comunidadfloripa', 'AR', 'Comunidad Floripa (Pablo y Fernanda)', '', 'https://comunidadfloripa.com/', '', 'Pareja argentina que vive en Floripa: web, Instagram, TikTok y YouTube. Buscá su Instagram en la web y cargalo con ✎.', 'vivebr'],
+    ['cr-argentinosenbuzios', 'AR', 'Argentinos en Búzios', '', 'argentinosenbuzios', '5k', 'Comunidad de argentinos en Búzios, con tips y recomendaciones.', 'vivebr'],
+    ['cr-giulopez', 'AR', 'Giu López (TikTok)', 'Giu', 'https://www.tiktok.com/@giulopez_', '', 'Entrevista a argentinos que viven y trabajan en Floripa.', 'vivebr'],
+    ['cr-kitesurfuruguay', 'UY', 'Kitesurf Uruguay · Samudra (José Ignacio)', '', 'https://www.kitesurfuruguay.com/', '', 'Escuela de kite que hace kitetrips y downwinds por Brasil: sus alumnos van a Jeri y al Nordeste.', 'escuela'],
+    ['cr-yobuceo', 'UY', 'YoBuceo (Montevideo)', '', 'https://yobuceo.com.uy/', '', 'Escuela PADI: el director organiza viajes de buceo en grupo, con Brasil entre los destinos.', 'escuela'],
+    ['cr-montevideodiving', 'UY', 'Montevideo Diving School', '', 'https://www.montevideodiving.com/', '', 'El instructor buceó en Noronha y Bombinhas: proponé un viaje del grupo con traslados y paseos.', 'escuela'],
+    ['cr-bbravekite', 'AR', 'Bbrave Kite School', '', 'https://bbravekiteschool.com.ar/viajes/', '', 'Hace viajes de kite a Jericoacoara y al Nordeste.', 'escuela'],
+    ['cr-oceanicabuceo', 'AR', 'Oceánica Buceo', '', 'https://www.oceanicabuceo.com.ar/salidas-buceo/', '', 'Viajes de buceo a Brasil, Noronha incluido.', 'escuela'],
+    ['cr-argentinabuceo', 'AR', 'Escuela Argentina de Buceo', '', 'https://argentinabuceo.com/', '', 'Viajes de buceo, Noronha incluido.', 'escuela']
+  ];
+  var PERFILES = { influencer: 'Influencer de viajes', ofertas: 'Ofertas de vuelos', vivebr: 'Vive en Brasil', escuela: 'Escuela que viaja', grupo: 'Organiza viajes en grupo', familia: 'Familias / lunas de miel' };
+  var PAIS = { UY: 'Uruguay', AR: 'Argentina' };
+  var MSJ_BASE = '¡Hola {nombre}! ¿Cómo estás? Te escribimos de Cuánto Sale (cuantosale.uy), una app uruguaya y gratis que calcula cuánto sale de verdad un viaje a Brasil: vuelo, traslado, alojamiento y paseos, todo sumado.\n\n' +
+    'Nos encanta tu contenido y queríamos proponerte algo: te damos un link propio y te llevás el ' + COMISION + ' % de cada traslado o paseo que reserve tu gente. Sin costo ni compromiso.\n\n' +
+    'Si te interesa, te armamos tu próximo viaje en la app con números reales para que lo muestres. ¿Te copa?';
+  var MSJ_OTROS = '¡Hola {nombre}! ¿Cómo están? Les escribimos de Cuánto Sale (cuantosale.uy), una app uruguaya que vende traslados y paseos en Brasil, con precios claros y reserva con seña.\n\n' +
+    'Vimos que tienen gente que viaja a Brasil y queríamos proponerles algo: les damos un link propio y se llevan el ' + COMISION + ' % de cada traslado o paseo que reserve su gente. Sin costo ni compromiso, y a ustedes no les suma trabajo.\n\n' +
+    'Si les sirve, les pasamos los precios de los destinos a los que van. ¿Les interesa?';
+  var LS_MSJ = 'cs-creadores-msj', LS_MSJ_OTROS = 'cs-creadores-msj-otros';
+  function leerLS(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function guardarLS(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* modo privado */ } }
+
   window.CSCreadoresPanel = function (ctx) {
     var S = ctx.S, esc = ctx.esc, usd = ctx.usd;
-    var st = { abierto: {}, pagando: '', mensajes: {} };
+    var st = { abierto: {}, pagando: '', mensajes: {}, filtro: 'todos', editando: '', msj: null };
+    var ESTADO_CT = { escrito: 'Le escribiste', seguimiento: 'Seguimiento mandado', respondio: 'Respondió', acepto: 'Socio', publico: 'Publicó', no: 'No le interesa' };
 
     function r2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
     function estado() { return S.mkt.estado; }
@@ -116,6 +189,102 @@
       return h + '</article>';
     }
 
+    /* ---------- Lista para contactar (como la de Motus): mensaje editable, filtro por pais y un boton por canal ---------- */
+    function arroba(c) {
+      var d = String(c.dato || '').trim();
+      if (c.canal && c.canal !== 'instagram') return '';
+      return d.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/^@/, '').replace(/\/.*$/, '');
+    }
+    function filasLista() {
+      var guardados = estado().contactos || {}, l = [];
+      ctx.contactos().forEach(function (c) { if (c.tipo === 'creador') l.push(Object.assign({ pais: 'UY' }, c, { perfil: c.perfil || 'influencer' })); });
+      LISTA.forEach(function (r) {
+        if (guardados[r[0]]) return;   // ya guardado (o quitado): viene de ctx.contactos()
+        var web = /^https?:\/\//.test(r[4]);
+        l.push({ id: r[0], nuevo: true, tipo: 'creador', pais: r[1], medio: r[2], persona: r[3], canal: web ? 'otro' : 'instagram', dato: web ? r[4] : '@' + r[4], seguidores: r[5], nota: r[6], perfil: r[7] || 'influencer', estado: 'pendiente' });
+      });
+      return l;
+    }
+    function base(c) {   // lo que se guarda la primera vez de un creador de LISTA
+      return c.nuevo ? { tipo: 'creador', medio: c.medio, persona: c.persona, canal: c.canal, dato: c.dato, pais: c.pais, seguidores: c.seguidores, nota: c.nota, perfil: c.perfil, estado: 'pendiente' } : {};
+    }
+    function nombreDe(c) {
+      if (c.persona) return c.persona;
+      var par = /\(([^)]+)\)/.exec(c.medio || ''); if (par) return par[1];
+      return String(c.medio || '').split(' · ')[0];
+    }
+    /* Dos mensajes: a los influencers se los tutea y se les habla de su contenido; al resto (escuelas, gente en
+       Brasil, ofertas) se les habla de ustedes y de su gente. */
+    function plantilla(k) {
+      if (k === 'otros') return st.msjOtros != null ? st.msjOtros : (leerLS(LS_MSJ_OTROS) || MSJ_OTROS);
+      return st.msj != null ? st.msj : (leerLS(LS_MSJ) || MSJ_BASE);
+    }
+    function mensajeDe(c) { return plantilla(c.perfil === 'influencer' ? 'inf' : 'otros').split('{nombre}').join(nombreDe(c)); }
+    function waNum(c) { var n = String(c.wa || '').replace(/\D/g, ''); if (/^0?9\d{7}$/.test(n)) n = '598' + n.replace(/^0/, ''); return n; }
+    function hrefDe(c, canal) {
+      if (canal === 'ig') return 'https://ig.me/m/' + encodeURIComponent(arroba(c));
+      if (canal === 'wa') return 'https://wa.me/' + waNum(c) + '?text=' + encodeURIComponent(mensajeDe(c));
+      if (canal === 'mail') return 'mailto:' + encodeURIComponent(c.mail) + '?subject=' + encodeURIComponent('Propuesta de Cuánto Sale') + '&body=' + encodeURIComponent(mensajeDe(c));
+      return /^https?:\/\//.test(String(c.dato || '')) ? c.dato : '';
+    }
+    function filaLista(c) {
+      var ig = arroba(c), hecho = c.estado !== 'pendiente', otro = !ig && hrefDe(c, 'otro');
+      var meta = [c.perfil !== 'influencer' ? PERFILES[c.perfil] || c.perfil : '', ig ? '@' + ig : (/tiktok/i.test(c.dato || '') ? 'TikTok' : c.canal === 'otro' ? 'sin Instagram' : ''), c.seguidores ? c.seguidores + ' seg.' : '', c.ronda ? 'ronda ' + c.ronda : ''].filter(Boolean).join(' · ');
+      var b = function (canal, txt, cls) { return '<a class="btn btn--sm crl__btn' + (cls || '') + '" href="' + esc(hrefDe(c, canal)) + '" target="_blank" rel="noopener" data-crl-enviar="' + canal + ':' + esc(c.id) + '">' + txt + '</a>'; };
+      var h = '<li class="crl__fila' + (hecho ? ' is-hecho' : '') + '"><span class="crl__tick" aria-hidden="true">' + (hecho ? '✓' : '') + '</span>' +
+        '<div class="crl__info"><b>' + esc(c.medio || ig || 'Creador') + '</b><small>' + esc(meta) +
+        (hecho ? ' · <span class="crl__est">' + esc(ESTADO_CT[c.estado] || c.estado) + (c.fecha ? ' ' + esc(fechaCorta(c.fecha)) : '') + '</span>' : '') + '</small>' +
+        (c.nota ? '<small class="crl__nota">' + esc(c.nota) + '</small>' : '') + '</div><div class="crl__acc">' +
+        (ig ? b('ig', 'Instagram', ' crl__btn--ig') : '') + (otro ? b('otro', /tiktok/i.test(c.dato || '') ? 'Abrir TikTok' : 'Abrir web') : '') +
+        (waNum(c) ? b('wa', 'WhatsApp', ' crl__btn--wa') : '') + (c.mail ? b('mail', 'Email') : '') +
+        '<button class="crl__edit" data-crl-editar="' + esc(c.id) + '" title="Agregar email, WhatsApp o país" aria-label="Editar">✎</button></div>';
+      if (st.editando === c.id) {
+        h += '<form class="crl__form" data-crl-form="' + esc(c.id) + '"><label class="f">Email<input name="mail" type="email" value="' + esc(c.mail || '') + '" placeholder="contacto@…"></label>' +
+          '<label class="f">WhatsApp<input name="wa" inputmode="tel" value="' + esc(c.wa || '') + '" placeholder="099 123 456 o +54 9 11…"></label>' +
+          '<label class="f">País<select name="pais">' + Object.keys(PAIS).map(function (k) { return '<option value="' + k + '"' + (c.pais === k ? ' selected' : '') + '>' + PAIS[k] + '</option>'; }).join('') + '</select></label>' +
+          '<label class="f">Perfil<select name="perfil">' + Object.keys(PERFILES).map(function (k) { return '<option value="' + k + '"' + (c.perfil === k ? ' selected' : '') + '>' + PERFILES[k] + '</option>'; }).join('') + '</select></label>' +
+          '<label class="f">Instagram<input name="ig" value="' + esc(ig ? '@' + ig : '') + '" placeholder="@usuario"></label>' +
+          '<label class="f">Seguidores<input name="seguidores" value="' + esc(c.seguidores || '') + '" placeholder="ej. 45k" maxlength="20"></label>' +
+          '<div class="crl__form-acc"><button class="btn btn--pri btn--sm" type="submit">Guardar</button><button class="btn btn--sm" type="button" data-crl-editar="">Cancelar</button>' +
+          (hecho ? '<button class="btn btn--sm" type="button" data-crl-desmarcar="' + esc(c.id) + '">Volver a «sin escribir»</button>' : '') + '</div></form>';
+      }
+      return h + '</li>';
+    }
+    function vistaLista() {
+      var todas = filasLista(), f = st.filtro || 'todos', pf = st.perfil || 'todos';
+      var dePerfil = todas.filter(function (c) { return pf === 'todos' || c.perfil === pf; });
+      var ver = dePerfil.filter(function (c) { return f === 'todos' || (f === 'pend' ? c.estado === 'pendiente' : c.pais === f); });
+      var escritos = todas.filter(function (c) { return c.estado !== 'pendiente'; }).length;
+      var h = '<section class="sec crl"><div class="crl__cab"><div><h3>Creadores para contactar</h3><p class="sub">' + escritos + ' de ' + todas.length + ' escritos. Mandalos de a 5 por día: Instagram limita los mensajes a cuentas que no te siguen.</p></div></div>' +
+        '<div class="crl__tpl"><div class="crl__tpls"><label class="f">Mensaje para influencers<textarea data-crl-msj="inf" rows="8">' + esc(plantilla('inf')) + '</textarea></label>' +
+        '<label class="f">Mensaje para escuelas, gente en Brasil y ofertas<textarea data-crl-msj="otros" rows="8">' + esc(plantilla('otros')) + '</textarea></label></div>' +
+        '<p class="sub">Donde dice <b>{nombre}</b> va el nombre de cada uno. Instagram no deja precargar el texto: al tocar el botón se copia el mensaje y se abre el chat, pegalo y mandalo. WhatsApp y email lo llevan ya escrito. ' +
+        (leerLS(LS_MSJ) || leerLS(LS_MSJ_OTROS) ? '<button class="crl__link" data-crl-reset>Volver a los originales</button>' : '') + '</p></div>' +
+        '<div class="crl__chips">' + [['todos', 'Todos los perfiles']].concat(Object.keys(PERFILES).map(function (k) { return [k, PERFILES[k]]; })).map(function (o) {
+          var n = o[0] === 'todos' ? todas.length : todas.filter(function (c) { return c.perfil === o[0]; }).length;
+          return n ? '<button class="crl__chip" data-crl-perfil="' + o[0] + '" aria-pressed="' + (pf === o[0]) + '">' + o[1] + ' <span>' + n + '</span></button>' : '';
+        }).join('') + '</div>' +
+        '<div class="crl__chips">' + [['todos', 'Todos'], ['UY', 'Uruguay'], ['AR', 'Argentina'], ['pend', 'Sin escribir']].map(function (o) {
+          var n = o[0] === 'todos' ? dePerfil.length : dePerfil.filter(function (c) { return o[0] === 'pend' ? c.estado === 'pendiente' : c.pais === o[0]; }).length;
+          return '<button class="crl__chip" data-crl-filtro="' + o[0] + '" aria-pressed="' + (f === o[0]) + '">' + o[1] + ' <span>' + n + '</span></button>';
+        }).join('') + '</div>';
+      ['UY', 'AR'].forEach(function (p) {
+        var rows = ver.filter(function (c) { return c.pais === p; });
+        if (!rows.length) return;
+        rows.sort(function (a, b) { return (a.estado !== 'pendiente') - (b.estado !== 'pendiente') || (a.ronda || 9) - (b.ronda || 9); });
+        var hechos = rows.filter(function (c) { return c.estado !== 'pendiente'; }).length;
+        h += '<h4 class="crl__pais">' + PAIS[p] + ' <span>' + hechos + '/' + rows.length + '</span></h4><ul class="crl__lista">' + rows.map(filaLista).join('') + '</ul>';
+      });
+      if (!ver.length) h += '<p class="sub">No hay ninguno con ese filtro.</p>';
+      return h + '</section>';
+    }
+    function marcarEscrito(c) {
+      var campos = Object.assign(base(c), c.estado === 'pendiente' ? { estado: 'escrito', fecha: ctx.hoy() } : {});
+      if (!Object.keys(campos).length) return;
+      guardar({ contacto: { id: c.id, campos: campos } });
+    }
+    function filaPorId(id) { return filasLista().filter(function (c) { return c.id === id; })[0]; }
+
     function vista() {
       var xs = cuentas(), sum = function (k) { return r2(xs.reduce(function (t, x) { return t + x[k]; }, 0)); };
       st.mensajes = {}; xs.forEach(function (x) { if (x.c.codigo) st.mensajes[x.c.id] = { link: link(x.c), msj: bienvenida(x.c) }; });
@@ -134,9 +303,9 @@
         }).join('') + '</ul></section>';
       }
       if (!xs.length) {
-        return h + '<div class="cr-vacio"><b>Todavía no hay socios.</b><p>Cuando un creador acepte, marcalo arriba con «Aceptó · hacer socio» (o en Contactos, con el estado «Aceptó · socio»). Le armamos el link, el código y el mensaje para mandarle.</p></div>';
+        return h + '<div class="cr-vacio"><b>Todavía no hay socios.</b><p>Cuando un creador acepte, marcalo arriba con «Aceptó · hacer socio» (o en Contactos, con el estado «Aceptó · socio»). Le armamos el link, el código y el mensaje para mandarle.</p></div>' + vistaLista();
       }
-      h += '<div class="cr-grid">' + xs.map(tarjeta).join('') + '</div>';
+      h += '<div class="cr-grid">' + xs.map(tarjeta).join('') + '</div>' + vistaLista();
 
       /* Asignar a mano: pedidos sin link de creador. */
       var asig = estado().asignados || {}, conLink = function (p) { return /^web:creador-/.test(p.origen || ''); };
@@ -200,6 +369,42 @@
       guardar({ contacto: { id: id, campos: campos } });
     });
 
+    /* Lista para contactar: enviar (deja navegar el enlace), editar, filtrar y el mensaje. */
+    document.addEventListener('click', function (e) {
+      if (!aqui()) return;
+      var t = e.target.closest('[data-crl-enviar],[data-crl-editar],[data-crl-filtro],[data-crl-perfil],[data-crl-reset],[data-crl-desmarcar]');
+      if (!t) return;
+      if (t.hasAttribute('data-crl-enviar')) {
+        var p = t.getAttribute('data-crl-enviar').split(':'), c = filaPorId(p.slice(1).join(':'));
+        if (!c) return;
+        t.href = hrefDe(c, p[0]);   // con el mensaje como esta ahora
+        if (p[0] === 'ig' || p[0] === 'otro') ctx.copiar(mensajeDe(c));
+        marcarEscrito(c);
+        return;   // sin preventDefault: abre el chat
+      }
+      e.preventDefault();
+      if (t.hasAttribute('data-crl-editar')) { var id = t.getAttribute('data-crl-editar'); st.editando = st.editando === id ? '' : id; ctx.pintar(); return; }
+      if (t.hasAttribute('data-crl-filtro')) { st.filtro = t.getAttribute('data-crl-filtro'); ctx.pintar(); return; }
+      if (t.hasAttribute('data-crl-perfil')) { st.perfil = t.getAttribute('data-crl-perfil'); ctx.pintar(); return; }
+      if (t.hasAttribute('data-crl-reset')) { guardarLS(LS_MSJ, null); guardarLS(LS_MSJ_OTROS, null); st.msj = null; st.msjOtros = null; ctx.pintar(); return; }
+      if (t.hasAttribute('data-crl-desmarcar')) { var d = filaPorId(t.getAttribute('data-crl-desmarcar')); if (d) { st.editando = ''; guardar({ contacto: { id: d.id, campos: { estado: 'pendiente', fecha: '' } } }); } }
+    });
+    document.addEventListener('input', function (e) {
+      if (!aqui() || !e.target.hasAttribute || !e.target.hasAttribute('data-crl-msj')) return;
+      var v = e.target.value;
+      if (e.target.getAttribute('data-crl-msj') === 'otros') { st.msjOtros = v; guardarLS(LS_MSJ_OTROS, v === MSJ_OTROS ? null : v); }
+      else { st.msj = v; guardarLS(LS_MSJ, v === MSJ_BASE ? null : v); }
+    });
+    document.addEventListener('submit', function (e) {
+      if (!aqui() || !e.target.hasAttribute('data-crl-form')) return;
+      e.preventDefault();
+      var f = e.target, c = filaPorId(f.getAttribute('data-crl-form')); if (!c) return;
+      var campos = Object.assign(base(c), { mail: f.mail.value.trim(), wa: f.wa.value.trim(), pais: f.pais.value, seguidores: f.seguidores.value.trim(), perfil: f.perfil.value });
+      var nuevoIg = f.ig.value.trim().replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/^@/, '').replace(/\/.*$/, '');
+      if (nuevoIg && nuevoIg !== arroba(c)) { campos.canal = 'instagram'; campos.dato = '@' + nuevoIg; }
+      ctx.guardarMkt({ contacto: { id: c.id, campos: campos } }).then(function () { st.editando = ''; ctx.pintar(); });
+    });
+
     /* estilos propios de la pestana */
     if (!document.getElementById('cr-css')) {
       var css = document.createElement('style'); css.id = 'cr-css';
@@ -236,6 +441,27 @@
         '.cr-resp li{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;padding:6px 6px 6px 8px}.cr-resp__nom{flex:1;font-weight:600;min-width:120px}' +
         '.cr-vacio{margin-top:18px;border:2px dashed var(--line);border-radius:18px;padding:28px;text-align:center;color:var(--muted)}.cr-vacio b{color:var(--ink);font-size:16px}' +
         '.cr-asig__f{display:flex;gap:8px;flex-wrap:wrap}.cr-asig__f select{flex:1 1 220px;width:auto}' +
+        '.crl{margin-top:22px}.crl__cab h3{margin:0}.crl__cab .sub{margin:2px 0 0}' +
+        '.crl__tpls{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:10px}' +
+        '.crl__tpl{margin:12px 0}.crl__tpl textarea{width:100%;resize:vertical;font:inherit;font-size:14px}.crl__tpl .sub{margin:6px 0 0}' +
+        '.crl__link{background:none;border:0;padding:0;color:var(--info);text-decoration:underline;cursor:pointer;font:inherit}' +
+        '.crl__chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}' +
+        '.crl__chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 12px;cursor:pointer}' +
+        '.crl__chip span{color:var(--muted)}.crl__chip[aria-pressed=true]{background:var(--ink);color:var(--card);border-color:var(--ink)}.crl__chip[aria-pressed=true] span{color:inherit;opacity:.7}' +
+        '.crl__pais{margin:16px 0 8px;font-size:15px}.crl__pais span{color:var(--muted);font-weight:500;font-size:13px;font-variant-numeric:tabular-nums}' +
+        '.crl__lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}' +
+        '.crl__fila{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}' +
+        '.crl__fila.is-hecho{background:var(--okbg)}.crl__fila.is-hecho .crl__info b{color:var(--muted)}' +
+        '.crl__tick{flex:none;width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--ok)}' +
+        '.crl__fila.is-hecho .crl__tick{border-color:var(--ok)}' +
+        '.crl__info{flex:1;min-width:180px}.crl__info b{display:block;font-size:14.5px}.crl__info small{display:block;color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums}' +
+        '.crl__nota{margin-top:2px;line-height:1.35}.crl__est{color:var(--ok);font-weight:700}' +
+        '.crl__acc{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.crl__btn{text-decoration:none;white-space:nowrap}' +
+        '.crl__btn--ig{background:var(--ink);color:var(--card);border-color:var(--ink)}.crl__btn--wa{background:var(--ok);color:#fff;border-color:var(--ok)}' +
+        '.crl__edit{background:none;border:0;color:var(--muted);font-size:16px;cursor:pointer;padding:4px 6px}.crl__edit:hover{color:var(--ink)}' +
+        '.crl__form{flex-basis:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end;border-top:1px solid var(--line);padding-top:10px}' +
+        '.crl__form-acc{display:flex;gap:6px;flex-wrap:wrap;grid-column:1/-1}' +
+        '@media (max-width:560px){.crl__acc{width:100%}.crl__acc .crl__btn{flex:1;text-align:center}}' +
         '@media (max-width:560px){.cr{padding:14px}.cr__stats{grid-template-columns:repeat(2,1fr)}.cr__plata{flex-wrap:wrap}.cr__plata .btn{width:100%}.cr-resp li{flex-wrap:wrap}.cr-resp li .btn{width:100%}}';
       document.head.appendChild(css);
     }
