@@ -109,6 +109,7 @@
         '</div><div class="pzl__acc">' +
         (canal ? b(canal, 'Enviar mensaje · ' + { wa: 'WhatsApp', ig: 'Instagram', mail: 'Email' }[canal], { wa: ' pzl__btn--wa', ig: ' pzl__btn--ig', mail: ' btn--pri' }[canal])
           : '<button class="btn btn--sm btn--pri" data-pzl-copiar="' + esc(p.id) + '">Copiar mensaje</button>') +
+        (p.mail && canal !== 'mail' ? b('mail', 'Enviar email') : '') +
         b('buscar', canal ? 'Maps' : 'Buscar contacto') +
         (p.estado === 'pendiente' ? '<button class="btn btn--sm" data-pzl-escribi="' + esc(p.id) + '">Ya le escribí</button>'
           : p.estado === 'escrito' ? '<button class="pzl__link pzl__desh" data-pzl-deshacer="' + esc(p.id) + '">Deshacer</button>' : '') +
