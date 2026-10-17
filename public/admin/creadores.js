@@ -19,7 +19,7 @@
      Seguidores de HypeAuditor (oct 2026) y Feedspot; los sin dato, verificalos en el perfil.
      8º campo opcional: el perfil (PERFILES), si no es influencer; 9º y 10º: estado y fecha, si ya se habló. Si el 5º es una URL, va sin Instagram (canal otro). */
   var LISTA = [
-    ['cr-camilatecheira', 'UY', 'Camila Techeira', 'Camila', 'camilatecheira7', '', 'Respondió por Instagram el 17/10/2026: cobra 5000 pesos por mes, 1 publicación por semana. No trabaja a comisión. Averiguá si son pesos uruguayos o argentinos.', 'influencer', 'no', '2026-10-17'],
+    ['cr-camilatecheira', 'UY', 'Camila Techeira', 'Camila', 'camilatecheira7', '', 'Respondió por Instagram el 17/10/2026: cobra $ 5.000 uruguayos por mes (unos US$ 125), 1 publicación por semana. No trabaja a comisión.', 'influencer', 'no', '2026-10-17'],
     ['cr-viajealavuelta', 'UY', 'A la Vuelta · Viajes por el mundo', '', 'viajealavuelta', '15,5k', ''],
     ['cr-mayuhuba', 'UY', 'Yuli Baquedano', 'Yuli', 'mayuhuba', '180k', ''],
     ['cr-marioneill', 'UY', 'Marina O\'Neill', 'Marina', 'marioneill', '101k', ''],
