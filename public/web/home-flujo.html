@@ -1976,7 +1976,9 @@
       (ninos && VUELOS.length ? '<p class="f-sub">Vuelos cotizados para ' + pax + ' pasajeros a tarifa de adulto. Los niños de 2 a 11 años suelen tener descuento: la aerolínea lo confirma al reservar.</p>' : '') +
       (S.cargandoV ? cargandoVuelos() : '') +
       (!S.cargandoV && !VUELOS.length ? '<div class="fl-vacio" role="status"><b>' + esc(S.avisoV || 'No encontramos vuelos para estas fechas.') + '</b>' +
-        '<a class="g-btn g-btn--main" href="' + esc(cambiarFechas) + '">Cambiar fechas</a></div>' : '') +
+        '<span class="f-sub" style="margin:0">Te los cotizamos nosotros por WhatsApp, sin compromiso.</span>' +
+        '<button type="button" class="g-btn g-btn--main" data-wa-vuelos="1">' + ic(iWa, 22) + 'Pedir cotización por WhatsApp</button>' +
+        '<a class="g-btn" href="' + esc(cambiarFechas) + '">Cambiar fechas</a></div>' : '') +
       (VUELOS.length > 1 ? chips([['rec', 'Recomendados'], ['precio', 'Mejores precios'], ['directo', 'Más directo']], S.fVuelo, 'vuelo') : '') +
       (visibles.length ? '<div class="fc-list">' + visibles.map(function (v) { return tarjetaVuelo(v, idBarato, esRec); }).join('') + '</div>' + fuenteVuelos() + cajaAlerta() : '') +
       (!esRec && vs.length > 3 ? '<button type="button" class="f-more" data-mas="vuelos">' + (S.verMasVuelos ? 'Ver menos' : 'Ver más opciones de vuelos') + '</button>' : '') +
@@ -3682,13 +3684,20 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa-vuelos],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
     if (t.dataset.parada) { usarParada(+t.dataset.parada); track('flujo_parada', { parada: PA + 1, via: 'pestana' }); if (!S.hotelesListos) cargarHoteles(); render(true); return; }
     if (t.dataset.entre) { S.entre = !S.entre; track('flujo_traslado_entre_paradas', { activo: S.entre, precio: Math.round(PAR ? PAR.tramo.pp * pax : 0) }); render(false); $('main').scrollTop = y; return; }
     if (t.dataset.cambioCs) { S.avisoCs = ''; S.avisoCambio = ''; reservar('cs:' + (t.dataset.cambioCs === 'tras' ? 'traslado' : 'tours')); return; }
+    /* Sin vuelos (Ignav fallo o no hubo para esas fechas): la consulta va por WhatsApp con el viaje ya escrito, para
+       que el error no sea el final de la visita. */
+    if (t.dataset.waVuelos) {
+      track('flujo_wa_sin_vuelos', { destino: destKey, error: S.avisoV.indexOf('No pudimos') === 0 });
+      window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Hola CuántoSale! Quiero cotizar vuelos *Montevideo → ' + DEST1 + '*.\n\n*Fechas:* ' + fdc(IDA) + ' → ' + fdc(VUELTA) + '\n*Personas:* ' + personasTxt() + '\n\nEn la web no me aparecieron vuelos para esas fechas.\nRef: ' + window.CS_VIAJE_ID), '_blank', 'noopener');
+      return;
+    }
     if (t.dataset.wa) {
       var lista = serviciosCs(S.csK), total = sum(lista, function (x) { return x.precio; }), dt = S.datos || {};
       S.sol = S.sol || {};
