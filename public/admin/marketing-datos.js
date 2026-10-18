@@ -19,7 +19,7 @@ window.CS_MKT = {
    "meta": 40
   }
  ],
- "generado": "2026-10-16",
+ "generado": "2026-10-18",
  "estrategia": [
   {
    "id": "resumen",
@@ -31,7 +31,7 @@ window.CS_MKT = {
     "- **De qué vivimos:** traslados y paseos. Todo el contenido termina ahí; los vuelos son solo el gancho.",
     "- **A quién le hablamos primero:** a los que ya tienen pasaje para el verano y les falta resolver lo de allá.",
     "- **Qué cambiar ya:** la bio de Instagram y TikTok, el link de la bio y una destacada \"Reservas\" (día 1).",
-    "- **Plata:** US$ 21 para promocionar del 24 al 30/10 el reel con más clics de las semanas 1 y 2; US$ 28 más desde el 4/11 solo si eso trajo algún pedido. Máximo US$ 50.",
+    "- **Plata:** US$ 21 para promocionar del 25 al 31/10 el reel con más clics de las semanas 1 y 2; US$ 28 más desde el 5/11 solo si eso trajo algún pedido. Máximo US$ 50.",
     "- **Cada martes:** 30 minutos en Tablero semanal para decidir qué repetir, qué cambiar y qué dejar.",
     "> **Criterio para aprobar cada pieza:** si alguien la ve, ¿qué queremos que haga después y cómo lo acercamos a una reserva? Si el día no lo responde, no se publica así. Cada día del calendario lo dice en \"Grilla comercial\".",
     "## Qué hay en cada botón",
@@ -97,10 +97,10 @@ window.CS_MKT = {
    "txt": [
     "## Urgente (esta semana)",
     "- [urg-bio] Bio y link con utm en Instagram y TikTok (día 1).",
-    "- [urg-fijados] Fijados: \"¿Qué es?\" el 14/10, \"¿Cómo funciona?\" el 16/10 y \"Cómo reservar un tour\" el 19/10 (hay que grabarlo antes del 17/10).",
+    "- [urg-fijados] Fijados: \"¿Qué es?\" el 14/10, \"¿Cómo funciona?\" el 16/10 y \"Cómo reservar un tour\" el 20/10 (hay que grabarlo antes del 17/10).",
     "- [urg-campana] Elegir los 3 a 5 tours o traslados de la primera campaña. Propuesta: piscinas de Galés (Maragogi), jangada (Porto de Galinhas), Cristo + Pan de Azúcar (Río), traslado a Jericoacoara y traslado a Ilha Grande. Revisar en Catálogo que tengan precio, fotos e inclusiones.",
     "- [urg-medicion] Poder medir del clic del reel a la reserva confirmada: hecho el 14/10: la web recuerda 30 días el link con el que llegó la persona y el pedido lo guarda (Tablero > Pedidos por fuente). Solo falta usar siempre los links con utm.",
-    "- [urg-destacada] Destacada nueva \"Reservas\": cómo se reserva, seña, cancelación, número oficial (14/10, y se suma la historia del 19/10).",
+    "- [urg-destacada] Destacada nueva \"Reservas\": cómo se reserva, seña, cancelación, número oficial (14/10, y se suma la historia del 20/10).",
     "- [urg-origen] Respuesta rápida en WhatsApp con \"¿Cómo nos conociste?\" (día 1).",
     "- [urg-creadores] Primeros 15 creadores identificados y 10 contactados (días 2 a 9).",
     "- [urg-grupos] Responder en 3 grupos de viajeros, sin spam (desde el día 3).",
@@ -113,7 +113,7 @@ window.CS_MKT = {
     "- **Anuncios: US$ 50 como máximo** para todo el mes (ver Estrategia > Anuncios).",
     "- **Margen:** el que asignás en Catálogo. La comisión a creadores y alianzas sale de ahí: hasta la mitad del margen de cada servicio.",
     "- **Nadie de la marca figura con nombre.** Todo se firma \"Cuánto Sale\"; la confianza sale del proceso claro, el número oficial y clientes reales.",
-    "- **Calendario comercial (14/10):** reemplaza al anterior. Los fijados salen el 14, 16 y 19/10; el 3 pasa a ser \"Cómo reservar un tour\" (\"Viajá más barato\" queda sin publicar por ahora).",
+    "- **Calendario comercial (14/10):** reemplaza al anterior. Los fijados salen el 14, 16 y 20/10; el 3 pasa a ser \"Cómo reservar un tour\" (\"Viajá más barato\" queda sin publicar por ahora).",
     "- **Creadores:** comisión solo por reservas atribuibles (su código) y concretadas, sin anticipos.",
     "- Pendiente: ¿los 44 destinos van a estar en la web? Mientras tanto se comunica 40."
    ]
@@ -173,9 +173,9 @@ window.CS_MKT = {
     "- 3. **Historia:** cómo se llega desde el aeropuerto y qué traslado hace falta, con horas y precio (resolver).",
     "- 4. **Historia o publicación:** un paseo concreto de ese destino: qué incluye, precio y seña (convertir).",
     "- 5. **Acción:** entrar a la app o escribir TRASLADO.",
-    "- En el calendario: Río (15/10 presupuesto → 26/10 Cristo + Pan de Azúcar), Ilha Grande (22/10 traslado en historias → 30/10 dos paseos), Porto de Galinhas (23/10 jangada → 31/10 qué hacer), Maragogi (21/10 Galés → 3/11 buggy).",
+    "- En el calendario: Río (15/10 presupuesto → 27/10 Cristo + Pan de Azúcar), Ilha Grande (23/10 traslado en historias → 31/10 dos paseos), Porto de Galinhas (24/10 jangada → 1/11 qué hacer), Maragogi (22/10 Galés → 4/11 buggy).",
     "## Tours y traslados desde la primera semana",
-    "- Son lo que genera ingresos: no quedan para el final. Primera semana: 16/10 (jeep 4x4 en Pipa), 17/10 (encuesta + tour real), 19/10 (cómo reservar un tour), 21/10 (Galés).",
+    "- Son lo que genera ingresos: no quedan para el final. Primera semana: 16/10 (jeep 4x4 en Pipa), 17/10 (encuesta + tour real), 20/10 (cómo reservar un tour), 22/10 (Galés).",
     "- **Solo productos reales:** tours y traslados que están en el catálogo, con el precio vigente de la app el día que se arma la pieza. Nada de descuentos ni \"últimos lugares\" inventados.",
     "## Reglas para el resto de las piezas",
     "- Tres historias útiles con un enlace bien elegido valen más que una secuencia larga sin objetivo.",
@@ -202,8 +202,8 @@ window.CS_MKT = {
     "- **Qué:** compartido o privado, horas de traslado, cómo se reserva, paseos que hay que reservar antes, un paseo concreto con precio y seña.",
     "- **Resultado:** consultas (\"TRASLADO\"), pedidos y señas. Es lo que paga todo lo demás.",
     "## Cómo quedó el calendario",
-    "- **Primeros 15 días:** Destinos 3 (20 %) · La app 6 (40 %) · Experiencias, tours y traslados 6 (40 %)",
-    "- **Los 30 días:** Destinos 8 (27 %) · La app 9 (30 %) · Experiencias, tours y traslados 13 (43 %)"
+    "- **Primeros 15 días:** Destinos 2 (13 %) · La app 6 (40 %) · Experiencias, tours y traslados 7 (47 %)",
+    "- **Los 30 días:** Destinos 8 (26 %) · La app 9 (29 %) · Experiencias, tours y traslados 14 (45 %)"
    ]
   },
   {
@@ -273,8 +273,8 @@ window.CS_MKT = {
    "txt": [
     "> Tope: US$ 50 en el mes. Se promociona desde el botón \"Promocionar\" de Instagram, sin Administrador de anuncios. TikTok, no.",
     "## Qué promocionar y cuándo",
-    "- [ads-f1] **Fase 1 · del 24/10 al 30/10 · US$ 21:** el reel de las semanas 1 y 2 con más clics en el enlace. Si no hay uno claro: **\"¿Cuánto cuesta viajar a Río desde Montevideo?\"** (15/10): tiene un número, un destino concreto y muestra la app.",
-    "- [ads-f2] **Fase 2 · del 4/11 al 17/11 · US$ 28 · solo si la Fase 1 trajo al menos un pedido o una consulta de traslado:** el reel de experiencia o traslado con más consultas (por ejemplo \"Este tour puede ser la mejor parte de tu viaje\", 25/10), con el objetivo \"Más mensajes\": la gente te escribe por Instagram para preguntar por ese paseo.",
+    "- [ads-f1] **Fase 1 · del 25/10 al 31/10 · US$ 21:** el reel de las semanas 1 y 2 con más clics en el enlace. Si no hay uno claro: **\"¿Cuánto cuesta viajar a Río desde Montevideo?\"** (15/10): tiene un número, un destino concreto y muestra la app.",
+    "- [ads-f2] **Fase 2 · del 5/11 al 18/11 · US$ 28 · solo si la Fase 1 trajo al menos un pedido o una consulta de traslado:** el reel de experiencia o traslado con más consultas (por ejemplo \"Este tour puede ser la mejor parte de tu viaje\", 22/10), con el objetivo \"Más mensajes\": la gente te escribe por Instagram para preguntar por ese paseo.",
     "- **No promociones:** los 3 fijados (son para quien ya entró al perfil), el conversor ni el de ahorro: no llevan a una reserva.",
     "## Paso a paso · Fase 1 (desde el celular)",
     "- 1. Abrí el reel elegido en tu perfil y tocá **Promocionar**.",
@@ -290,7 +290,7 @@ window.CS_MKT = {
     "- En Instagram: el reel > Ver estadísticas de la promoción: alcance, clics en el enlace y costo por clic.",
     "- En el panel: Tablero > Web > Llegadas por fuente (meta_ads) y Tablero > Pedidos de esa semana. Anotá el gasto y los clics en \"Cargá a mano > Anuncios\".",
     "## Cuándo cortar (pausar la promoción)",
-    "- **Al 3er día (26/10):** si los clics en el enlace por cada 100 personas alcanzadas son menos que en el mismo reel sin promocionar (en orgánico: clics en el enlace de la bio / cuentas alcanzadas de esa semana).",
+    "- **Al 3er día (27/10):** si los clics en el enlace por cada 100 personas alcanzadas son menos que en el mismo reel sin promocionar (en orgánico: clics en el enlace de la bio / cuentas alcanzadas de esa semana).",
     "- **Si llegaron 50 visitas de meta_ads** y ninguna llegó a \"Tu presupuesto\": el problema es la página, no el anuncio. Pausá y avisame.",
     "## Cuándo seguir",
     "- Solo pasás a la Fase 2 si en la Fase 1 hubo al menos un pedido o una consulta de traslado que diga que te vio en Instagram.",
@@ -346,7 +346,7 @@ window.CS_MKT = {
  ],
  "fijados": {
   "intro": [
-   "> Salen el 14/10 (1), el 16/10 (2) y el 19/10 (3). El 19/10, después de publicar el 3, desfijá y volvé a fijar en orden 3 → 2 → 1: Instagram muestra primero el último que fijaste, así \"¿Qué es Cuánto Sale?\" queda primero.",
+   "> Salen el 14/10 (1), el 16/10 (2) y el 20/10 (3). El 20/10, después de publicar el 3, desfijá y volvé a fijar en orden 3 → 2 → 1: Instagram muestra primero el último que fijaste, así \"¿Qué es Cuánto Sale?\" queda primero.",
    "- **1 · ¿Qué es Cuánto Sale?** Rehecho el 14/10: una promesa y tres pruebas, y termina en \"lo de allá lo reservás acá\" (traslados y paseos). La versión vieja quedó en la carpeta _anterior.",
    "- **2 · ¿Cómo funciona?** Queda como estaba.",
    "- **3 · Cómo reservar un tour.** Nuevo (calendario comercial): hay que grabarlo antes del 17/10. Reemplaza a \"Viajá más barato\", que queda guardado sin publicar.",
@@ -771,6 +771,45 @@ window.CS_MKT = {
   {
    "f": "2026-10-19",
    "obj": "convertir",
+   "cat": "experiencias",
+   "tema": "Bucear en Fernando de Noronha: cuánto sale y cómo se reserva",
+   "com": {
+    "prod": "Tour \"Bautismo de buceo\" en Fernando de Noronha, con EmNoronha (unas 2 h, sin experiencia)",
+    "cta": "Elegí tu paseo en Cuánto Sale",
+    "reserva": "Paseo real del catálogo con precio por persona, y el reel muestra cómo se reserva con seña.",
+    "mide": "Consultas y pedidos del buceo en Noronha"
+   },
+   "ig": {
+    "tipo": "Reel",
+    "pieza": "Buceo en Noronha: US$ 94 por persona",
+    "carpeta": "reel-11-buceo-noronha → reel-buceo-noronha-VISTA-PREVIA.mp4 (portada: PORTADA-grilla.png)",
+    "estado": "Ya armado con el video de EmNoronha. Precio al 18/10: US$ 94 por persona. Si cambió, pedile a Claude que lo actualice.",
+    "gancho": "¿Cuánto sale bucear en Fernando de Noronha?",
+    "guion": [
+     "Ya armado."
+    ],
+    "cta": "Elegí tu paseo en cuantosale.uy",
+    "copy": "¿Cuánto sale bucear en Fernando de Noronha? 🐢 Y cómo se reserva 👇\n\nBautismo de buceo desde la playa, con EmNoronha:\n🤿 Sin experiencia: un instructor cada 2 personas\n⏱️ Unas 2 horas (30 a 40 minutos bajo el agua)\n📍 Encuentro en la Praia do Porto\n💵 US$ 94 por persona, con todo el equipo\n\nCómo se reserva en Cuánto Sale:\n1️⃣ Elegís Fernando de Noronha y el paseo: ves qué incluye, cuánto dura y el precio.\n2️⃣ Tocás \"Confirmar reserva\". No se cobra nada en la web.\n3️⃣ Confirmamos con el operador local y te escribimos por WhatsApp.\n4️⃣ Recién ahí, una seña del 25 % (Prex o Pix sin recargo).\n5️⃣ Este paseo se cancela gratis hasta 48 h antes, y si el mar no deja bucear se devuelve todo.\n\n⚠️ Nuestro único número oficial es el +598 98 529 851.\n\nElegí tu paseo en cuantosale.uy (link en la bio).\n\n[Precio por persona al 18/10/2026. Hay que reservar con al menos 48 h. Video: @emnoronha]\n\n#fernandodenoronha #noronha #buceo #viajarabrasil #uruguay #cuantosale\n\n---\nTikTok:\n¿Cuánto sale bucear en Fernando de Noronha? 🐢 US$ 94 por persona, sin experiencia. Y cómo se reserva 👇\n\nCalculá el tuyo: link en el perfil.\n\n#noronha #buceo #viajarabrasil #uruguay #cuantosale"
+   },
+   "tt": {
+    "tipo": "Reel (el mismo video)",
+    "pieza": "Buceo en Noronha: US$ 94 por persona",
+    "carpeta": "reel-11-buceo-noronha → reel-buceo-noronha-VISTA-PREVIA.mp4 (portada: PORTADA-grilla.png)",
+    "igual": true,
+    "copy": "¿Cuánto sale bucear en Fernando de Noronha? 🐢 Y cómo se reserva 👇\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
+   },
+   "hist": [
+    "Compartí el reel en historias con el sticker de enlace a cuantosale.uy/destino/fernando-de-noronha?utm_source=ig_historia (texto del sticker: \"Ver el paseo\").",
+    "Encuesta: \"¿Te animás a bucear sin experiencia?\" 🤿 Sí, de una / 😅 Me da miedo. A la noche: \"Vas con un instructor cada 2 personas y se cancela gratis hasta 48 h antes\"."
+   ],
+   "acc": [
+    "Respondé cada consulta el mismo día con el precio del catálogo. Anotala en el Tablero (consultas)."
+   ],
+   "n": 6
+  },
+  {
+   "f": "2026-10-20",
+   "obj": "convertir",
    "cat": "app",
    "tema": "Reel fijado 3: Cómo reservar un tour en Cuánto Sale",
    "com": {
@@ -810,10 +849,10 @@ window.CS_MKT = {
    "acc": [
     "Publicalo y fijalo. Después desfijá los 3 y volvé a fijarlos en orden 3 → 2 → 1, así \"¿Qué es Cuánto Sale?\" queda primero."
    ],
-   "n": 6
+   "n": 7
   },
   {
-   "f": "2026-10-20",
+   "f": "2026-10-21",
    "obj": "atraer",
    "cat": "destinos",
    "tema": "Floripa es mucho más que playa",
@@ -852,10 +891,10 @@ window.CS_MKT = {
    "acc": [
     "**Revisión semanal #1** (Tablero, 30 min). Línea de base: visitas al sitio, \"Reservá tu viaje\", pedidos. Anotá también cuántos mensajes llegaron preguntando por un tour."
    ],
-   "n": 7
+   "n": 8
   },
   {
-   "f": "2026-10-21",
+   "f": "2026-10-22",
    "obj": "convertir",
    "cat": "experiencias",
    "tema": "Este tour puede ser la mejor parte de tu viaje",
@@ -868,7 +907,7 @@ window.CS_MKT = {
    "ig": {
     "tipo": "Reel comercial (a producir)",
     "pieza": "Las piscinas de Galés",
-    "estado": "Pedíselo a Claude: fotos reales del tour (las de su ficha en la app) + texto grande, sin voz. Portada estilo grilla (chip de categoría + título corto + flecha): pedísela a Claude, o usá la de la carpeta si dice PORTADA-grilla. Precio: el vigente en la app (Catálogo > Servicios) el día que se arma. Inclusiones: las de la ficha del tour.",
+    "estado": "Pedíselo a Claude: fotos reales del tour (las de su ficha en la app) + texto grande, sin voz. Portada estilo grilla (chip de categoría + título corto + flecha): pedísela a Claude, o usá la de la carpeta si dice PORTADA-grilla. Precio: el vigente en la app (Catálogo > Servicios) el día que se arma. Inclusiones: las de la ficha del tour. Al 16/10: US$ 41 por persona (antes 35).",
     "gancho": "Este paseo puede ser la mejor parte de tu viaje",
     "guion": [
      "0–2 s: \"Este paseo puede ser la mejor parte de tu viaje 🐠\".",
@@ -893,10 +932,10 @@ window.CS_MKT = {
    "acc": [
     "Seguimiento de creadores: a los activos, preguntales cuándo publican."
    ],
-   "n": 8
+   "n": 9
   },
   {
-   "f": "2026-10-22",
+   "f": "2026-10-23",
    "obj": "resolver",
    "cat": "experiencias",
    "tema": "Historias: ¿cómo llegás a la isla?",
@@ -923,10 +962,10 @@ window.CS_MKT = {
     "Respondé cada \"TRASLADO\" el mismo día con el precio del catálogo.",
     "A los creadores que respondieron: Brief para creadores, su link con utm y su código."
    ],
-   "n": 9
+   "n": 10
   },
   {
-   "f": "2026-10-23",
+   "f": "2026-10-24",
    "obj": "demostrar",
    "cat": "app",
    "tema": "¿Cuánto tenés que ahorrar por mes para irte a Brasil?",
@@ -963,54 +1002,54 @@ window.CS_MKT = {
    "acc": [
     "Escribile a 2 negocios para alianzas (Mensaje Alianza): tienda de artículos de viaje y academia de portugués."
    ],
-   "n": 10
-  },
-  {
-   "f": "2026-10-24",
-   "obj": "atraer",
-   "cat": "destinos",
-   "tema": "6 playas de Pipa que no te podés perder",
-   "com": {
-    "prod": "La guía de Pipa en la app (mareas, playas y precios) y sus paseos",
-    "cta": "Guardalo para tu viaje",
-    "reserva": "Baía dos Golfinhos y las piscinas dependen de la marea: la guía de la app tiene la tabla.",
-    "mide": "Guardados, compartidos y visitas a la guía de Pipa"
-   },
-   "ig": {
-    "tipo": "Carrusel",
-    "pieza": "6 playas de Pipa",
-    "carpeta": "carrusel-07-playas-pipa",
-    "gancho": "6 playas de Pipa",
-    "estado": "Ya armado. Portada estilo grilla (chip de categoría + título corto + flecha): pedísela a Claude, o usá la de la carpeta si dice PORTADA-grilla. La portada del carrusel es la primera imagen (4:5): pedile a Claude la versión grilla en ese formato.",
-    "guion": [
-     "Ya armado."
-    ],
-    "cta": "Guardalo para tu viaje",
-    "copy": "6 playas de Pipa que no te podés perder 🌊🐬\n\n🏘️ Praia do Centro: la del pueblo, con piscinas naturales en el arrecife. Mejor de mañana.\n❤️ Praia do Amor: el acantilado con forma de corazón. De tarde, para el surf.\n🌅 Chapadão: el mirador sobre los acantilados. Es el atardecer de Pipa.\n🐬 Baía dos Golfinhos: los delfines nadan cerca de la gente. Solo con marea baja.\n🏄 Madeiro: olas suaves para aprender surf, y a veces tortugas.\n🏜️ Cacimbinhas: acantilados rojos y casi sin construcciones.\n\n📌 Guardalo y mandáselo a quien se va con vos.\nLa guía completa de Pipa (13 playas, mareas y clima mes por mes) está en cuantosale.uy (link en la bio).\n\nFotos de Wikimedia Commons: Bjørn Christian Tørrissen (CC BY-SA 4.0), MTur Destinos (dominio público), Marinelson Almeida (CC BY 2.0), Leandro Neumann Ciuffo (CC BY 2.0), Rafael Vianna Croffi (CC BY 2.0).\n\n#pipa #praiadapipa #riograndedonorte #nordeste #viajarabrasil #uruguay #cuantosale"
-   },
-   "tt": {
-    "tipo": "Carrusel en modo foto",
-    "pieza": "Las mismas imágenes",
-    "copy": "6 playas de Pipa que no te podés perder 🌊🐬\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
-   },
-   "hist": [
-    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
-    "Historia: \"La tabla de mareas de Pipa está en la guía 👇\" + sticker de enlace a la guía de Pipa."
-   ],
-   "acc": [
-    "**Anuncios, Fase 1:** promocioná el reel con más clics de estas dos semanas (si no hay uno claro: \"¿Cuánto cuesta viajar a Río?\"). Paso a paso en Estrategia > Anuncios."
-   ],
    "n": 11
   },
   {
    "f": "2026-10-25",
+   "obj": "atraer",
+   "cat": "destinos",
+   "tema": "¿Río o Floripa? Cuál rinde más en enero",
+   "com": {
+    "prod": "El presupuesto de la app para los dos destinos: vuelo, traslado, alojamiento y gastos por día",
+    "cta": "Armá los dos con tus fechas en Cuánto Sale",
+    "reserva": "La comparación pasa por el traslado de cada destino: ahí se ve que se reserva.",
+    "mide": "Comentarios (RÍO / FLORIPA), guardados y visitas a la app"
+   },
+   "ig": {
+    "tipo": "Carrusel",
+    "pieza": "¿Río o Floripa?",
+    "carpeta": "carrusel-04-rio-vs-floripa (portada: 1-portada-grilla.png)",
+    "gancho": "¿Río o Floripa?",
+    "estado": "Ya armado. Usá 1-portada-grilla.png como primera imagen (en lugar de 1-portada.png). Los precios son del 12/10 (el texto lo aclara): si querés actualizarlos, pedíselo a Claude antes de publicar.",
+    "guion": [
+     "Ya armado."
+    ],
+    "cta": "Armá los dos con tus fechas en cuantosale.uy",
+    "copy": "¿Río o Floripa? 🥊 Los pusimos a competir con precios reales para enero.\n\n✈️ Vuelo: gana Río (US$ 338 contra US$ 415)\n🚐 Traslado del aeropuerto: gana Floripa (US$ 12 contra US$ 21)\n🏠 Dónde dormir: gana Río, por poco (US$ 56 contra US$ 60 la noche, para 2)\n🍽️ Comer y moverte: gana Río (US$ 32–72 contra US$ 34–82 por día)\n\nTotal de la semana, ahorrando: Río US$ 778 y Floripa US$ 876 por persona.\nPero a Floripa también podés ir en ómnibus o en auto 🚌🚗\n\n💬 ¿Vos cuál elegís? Comentá RÍO o FLORIPA 👇\nArmá los dos con tus fechas en cuantosale.uy (link en la bio).\n\nPrecios consultados el 12/10/2026, por persona, viajando de a 2, 7 noches en enero de 2027. Vuelos: la salida más barata entre el 4 y el 14 de enero, ida y vuelta. Alojamiento: lo más barato con nota 9 o más en Booking. Sin paseos. Los precios cambian todos los días.\nFotos (Unsplash): Marcos Paulo Prado, Thales Botelho de Sousa, gustavo nacht, Krys Amon, Kseniia Lobko, Carlos Henrique, Paulo Kopzinski y Bruno Soares.\n\n#riodejaneiro #florianopolis #viajarabrasil #brasil #uruguay #vacaciones2027 #cuantosale"
+   },
+   "tt": {
+    "tipo": "Carrusel en modo foto",
+    "pieza": "Las mismas imágenes",
+    "copy": "¿Río o Floripa? 🥊 Los pusimos a competir con precios reales para enero.\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
+   },
+   "hist": [
+    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
+    "Encuesta: \"¿Río o Floripa?\" 🏙️ Río / 🏝️ Floripa."
+   ],
+   "acc": [
+    "**Anuncios, Fase 1:** promocioná el reel con más clics de estas dos semanas (si no hay uno claro: \"¿Cuánto cuesta viajar a Río?\"). Paso a paso en Estrategia > Anuncios."
+   ],
+   "n": 12
+  },
+  {
+   "f": "2026-10-26",
    "obj": "resolver",
    "cat": "experiencias",
    "tema": "Historias: ¿qué te frena para reservar una excursión?",
    "com": {
     "prod": "Respuestas sobre tours y reservas",
     "cta": "Dejanos tu duda y te ayudamos a encontrar la información",
-    "reserva": "Cada duda respondida saca un freno. Las más repetidas van al reel del 5/11.",
+    "reserva": "Cada duda respondida saca un freno. Las más repetidas van al reel del 6/11.",
     "mide": "Respuestas a la caja y mensajes"
    },
    "ig": {
@@ -1027,12 +1066,12 @@ window.CS_MKT = {
    ],
    "acc": [
     "Mirá la promoción: alcance, clics y costo por clic. Si corresponde cortar, pausala (reglas en Estrategia > Anuncios).",
-    "Anotá las dudas en la nota de la semana: son el guion del reel del 5/11."
+    "Anotá las dudas en la nota de la semana: son el guion del reel del 6/11."
    ],
-   "n": 12
+   "n": 13
   },
   {
-   "f": "2026-10-26",
+   "f": "2026-10-27",
    "obj": "convertir",
    "cat": "experiencias",
    "tema": "Una experiencia para sumar a tu viaje a Río",
@@ -1068,12 +1107,12 @@ window.CS_MKT = {
     "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
    ],
    "acc": [
-    "Respondé 3 dudas de la caja del 25/10 en historias."
+    "Respondé 3 dudas de la caja del 26/10 en historias."
    ],
-   "n": 13
+   "n": 14
   },
   {
-   "f": "2026-10-27",
+   "f": "2026-10-28",
    "obj": "demostrar",
    "cat": "app",
    "tema": "¿Quién le debe a quién? Dividí los gastos del viaje",
@@ -1108,10 +1147,10 @@ window.CS_MKT = {
    "acc": [
     "**Revisión semanal #2.** ¿Qué pieza trajo más clics al sitio? ¿Alguna trajo mensajes por un tour o traslado? ¿La grilla por columnas sigue en orden? Decidí 1 cosa que repetís, 1 que cambiás y 1 que dejás."
    ],
-   "n": 14
+   "n": 15
   },
   {
-   "f": "2026-10-28",
+   "f": "2026-10-29",
    "obj": "atraer",
    "cat": "destinos",
    "tema": "¿Cuánto sale Jeri para 2?",
@@ -1148,10 +1187,10 @@ window.CS_MKT = {
     "Mandá el Mensaje A a 5 creadores nuevos: la ronda 3 de Contactos."
    ],
    "ctRonda": 3,
-   "n": 15
+   "n": 16
   },
   {
-   "f": "2026-10-29",
+   "f": "2026-10-30",
    "obj": "resolver",
    "cat": "experiencias",
    "tema": "Historias: tour o traslado, ¿qué primero?",
@@ -1177,10 +1216,10 @@ window.CS_MKT = {
    "acc": [
     "Respondé 3 preguntas en grupos."
    ],
-   "n": 16
+   "n": 17
   },
   {
-   "f": "2026-10-30",
+   "f": "2026-10-31",
    "obj": "convertir",
    "cat": "experiencias",
    "tema": "Historias: elegí entre estas dos experiencias",
@@ -1206,10 +1245,10 @@ window.CS_MKT = {
    "acc": [
     "Hoy termina la Fase 1 de anuncios: anotá gasto y clics en el Tablero y fijate si entró algún pedido que diga que te vio en Instagram."
    ],
-   "n": 17
+   "n": 18
   },
   {
-   "f": "2026-10-31",
+   "f": "2026-11-01",
    "obj": "resolver",
    "cat": "destinos",
    "tema": "Qué hacer en Porto de Galinhas",
@@ -1246,10 +1285,10 @@ window.CS_MKT = {
    "acc": [
     "Pedile a Claude los precios del día de las piezas de la semana 4 (traslado de Jeri, Búzios, Florianópolis)."
    ],
-   "n": 18
+   "n": 19
   },
   {
-   "f": "2026-11-01",
+   "f": "2026-11-02",
    "obj": "convertir",
    "cat": "experiencias",
    "tema": "¿Vale la pena reservar esta excursión?",
@@ -1287,10 +1326,10 @@ window.CS_MKT = {
    "acc": [
     "A los clientes con pedido confirmado que viajan pronto: mensaje para pedir foto y reseña a la vuelta."
    ],
-   "n": 19
+   "n": 20
   },
   {
-   "f": "2026-11-02",
+   "f": "2026-11-03",
    "obj": "resolver",
    "cat": "experiencias",
    "tema": "Historias: cómo elegir un tour sin llevarte sorpresas",
@@ -1317,10 +1356,10 @@ window.CS_MKT = {
    "acc": [
     "Respondé 3 preguntas en grupos."
    ],
-   "n": 20
+   "n": 21
   },
   {
-   "f": "2026-11-03",
+   "f": "2026-11-04",
    "obj": "atraer",
    "cat": "destinos",
    "tema": "Maragogi: una experiencia que tenés que conocer",
@@ -1355,12 +1394,12 @@ window.CS_MKT = {
     "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
    ],
    "acc": [
-    "**Revisión semanal #3.** Decidí el formato ganador (más clics cualificados o reservas) para repetir el 11/11."
+    "**Revisión semanal #3.** Decidí el formato ganador (más clics cualificados o reservas) para repetir el 12/11."
    ],
-   "n": 21
+   "n": 22
   },
   {
-   "f": "2026-11-04",
+   "f": "2026-11-05",
    "obj": "convertir",
    "cat": "experiencias",
    "tema": "No te olvides de organizar el traslado",
@@ -1398,15 +1437,15 @@ window.CS_MKT = {
    "acc": [
     "**Anuncios, Fase 2 (solo si la Fase 1 trajo algún pedido o consulta):** promocioná el reel de experiencia con más consultas, objetivo \"Más mensajes\". Si no trajo nada, no gastes más."
    ],
-   "n": 22
+   "n": 23
   },
   {
-   "f": "2026-11-05",
+   "f": "2026-11-06",
    "obj": "convertir",
    "cat": "app",
    "tema": "Así se reserva una experiencia, paso a paso",
    "com": {
-    "prod": "El recorrido de reserva, respondiendo las dudas de la caja del 26/10",
+    "prod": "El recorrido de reserva, respondiendo las dudas de la caja del 27/10",
     "cta": "Elegí tu experiencia y reservá",
     "reserva": "Repite el tutorial atacando las dudas reales que frenaron a la gente.",
     "mide": "\"Reservá tu viaje\" y pedidos nuevos"
@@ -1414,7 +1453,7 @@ window.CS_MKT = {
    "ig": {
     "tipo": "Reel (a producir)",
     "pieza": "Reserva paso a paso, con las dudas de la gente",
-    "estado": "Grabación nueva (no se reusan tomas del fijado 3): el recorrido de reserva mostrando justo las pantallas que responden las 3 dudas más repetidas del 26/10. Mandala y Claude la edita con las dudas y sus respuestas.",
+    "estado": "Grabación nueva (no se reusan tomas del fijado 3): el recorrido de reserva mostrando justo las pantallas que responden las 3 dudas más repetidas del 27/10. Mandala y Claude la edita con las dudas y sus respuestas.",
     "gancho": "Las 3 dudas que más nos hicieron para reservar",
     "guion": [
      "0–2 s: \"Las 3 dudas que más nos hicieron para reservar un paseo\".",
@@ -1434,10 +1473,10 @@ window.CS_MKT = {
    "acc": [
     "Respondé 3 preguntas en grupos del Nordeste."
    ],
-   "n": 23
+   "n": 24
   },
   {
-   "f": "2026-11-06",
+   "f": "2026-11-07",
    "obj": "convertir",
    "cat": "experiencias",
    "tema": "Historias: la experiencia del fin de semana",
@@ -1463,10 +1502,10 @@ window.CS_MKT = {
    "acc": [
     "Creadores: mandale a cada uno activo su resumen (visitas de su link, del Tablero > Web) y, si hubo reservas con su código, la comisión."
    ],
-   "n": 24
+   "n": 25
   },
   {
-   "f": "2026-11-07",
+   "f": "2026-11-08",
    "obj": "atraer",
    "cat": "destinos",
    "tema": "3 experiencias para descubrir en Floripa",
@@ -1503,10 +1542,10 @@ window.CS_MKT = {
    "acc": [
     "Respondé cada comentario."
    ],
-   "n": 25
+   "n": 26
   },
   {
-   "f": "2026-11-08",
+   "f": "2026-11-09",
    "obj": "atraer",
    "cat": "destinos",
    "tema": "Un destino, dos formas de vivirlo",
@@ -1543,10 +1582,10 @@ window.CS_MKT = {
    "acc": [
     "Repasá en Pedidos los que quedaron sin seña: un mensaje a cada uno (\"¿Te quedó alguna duda para confirmar?\"). Anotá por qué se cayeron."
    ],
-   "n": 26
+   "n": 27
   },
   {
-   "f": "2026-11-09",
+   "f": "2026-11-10",
    "obj": "convertir",
    "cat": "experiencias",
    "tema": "Historias: ¿ya encontraste tu próximo tour?",
@@ -1572,10 +1611,10 @@ window.CS_MKT = {
    "acc": [
     "Respondé 3 preguntas en grupos."
    ],
-   "n": 27
+   "n": 28
   },
   {
-   "f": "2026-11-10",
+   "f": "2026-11-11",
    "obj": "convertir",
    "cat": "app",
    "tema": "Qué incluye esta experiencia y cómo reservarla",
@@ -1610,10 +1649,10 @@ window.CS_MKT = {
    "acc": [
     "**Revisión semanal #4.** Anuncios: ¿seguir o cortar? Pedile a Claude el plan del mes siguiente con lo que aprendiste."
    ],
-   "n": 28
+   "n": 29
   },
   {
-   "f": "2026-11-11",
+   "f": "2026-11-12",
    "obj": "atraer",
    "cat": "destinos",
    "tema": "El formato ganador del mes",
@@ -1626,7 +1665,7 @@ window.CS_MKT = {
    "ig": {
     "tipo": "Reel (a producir)",
     "pieza": "Parte 2 del formato con más clics cualificados o reservas",
-    "estado": "Se decide en la revisión del 3/11. Mismo formato, otro destino o tour del catálogo.",
+    "estado": "Se decide en la revisión del 4/11. Mismo formato, otro destino o tour del catálogo.",
     "gancho": "El mismo gancho del ganador",
     "guion": [
      "Mismo formato y ritmo que el ganador.",
@@ -1645,10 +1684,10 @@ window.CS_MKT = {
    "acc": [
     "Respondé a todos los comentarios del día en la primera hora."
    ],
-   "n": 29
+   "n": 30
   },
   {
-   "f": "2026-11-12",
+   "f": "2026-11-13",
    "obj": "convertir",
    "cat": "app",
    "tema": "Cierre: ¿ya organizaste qué vas a hacer en tu viaje?",
@@ -1684,7 +1723,7 @@ window.CS_MKT = {
    "acc": [
     "Cerrá el mes: completá el Tablero y anotá los 3 aprendizajes principales."
    ],
-   "n": 30
+   "n": 31
   }
  ],
  "rutina": [
