@@ -3,7 +3,7 @@
    pousadas-datos.js; aca se guarda solo lo que cambia de cada una (estado, WhatsApp, Instagram, email y nota), como
    contacto de Marketing de tipo 'pousada' (lib/marketing.js). Los mensajes van en portugues. */
 (function () {
-  var DESTINOS = { arraial: 'Arraial do Cabo', fln: 'Florianópolis', rio: 'Rio de Janeiro', porto: 'Porto de Galinhas' };
+  var DESTINOS = { arraial: 'Arraial do Cabo', fln: 'Florianópolis', rio: 'Rio de Janeiro', porto: 'Porto de Galinhas', pip: 'Pipa' };
   var CATS = { economico: 'Económico', intermedio: 'Equilibrado', confort: 'Cómodo' };
   var ESTADOS = { pendiente: 'Sin escribir', escrito: 'Le escribiste', respondio: 'Respondió', acepto: 'Aceptó', no: 'No le interesa' };
   var MSJ_WA = 'Olá, {nombre}! Tudo bem? Somos a CuántoSale (cuantosale.uy), do Uruguai. Ajudamos uruguaios e argentinos a planejar viagens ao Brasil e gostaríamos de indicar a pousada de vocês aos nossos clientes que vão para {destino}.\n\n' +
@@ -23,6 +23,9 @@
     '2. A política de cancelamento.\n' +
     '3. Algumas fotos que possamos usar para apresentar a pousada.\n\n' +
     'Muito obrigado!\nEquipe CuántoSale\ncuantosale.uy';
+  /* La cuenta de Gmail desde la que se escribe. Va por email y no por numero (/mail/u/N/): el numero depende del orden en
+     que se entro a cada cuenta en ese navegador, y si no coincide Gmail cae en la /0. */
+  var GMAIL_CUENTA = 'admin@cuantosale.uy';
   var LS_WA = 'cs-pousadas-msj-wa', LS_MAIL = 'cs-pousadas-msj-mail';
   function leerLS(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function guardarLS(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* modo privado */ } }
@@ -65,7 +68,7 @@
     function waNum(p) { var n = String(p.wa || '').replace(/\D/g, ''); if (n.length === 10 || n.length === 11) n = '55' + n; return n.length >= 12 ? n : ''; }
     /* El email se escribe en Gmail web (mailto abre el programa de correo de la computadora, que no se usa). */
     function gmail(para, asunto, cuerpo) {
-      return 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(para) + '&su=' + encodeURIComponent(asunto) + '&body=' + encodeURIComponent(cuerpo);
+      return 'https://mail.google.com/mail/u/' + GMAIL_CUENTA + '/?authuser=' + encodeURIComponent(GMAIL_CUENTA) + '&view=cm&fs=1&to=' + encodeURIComponent(para) + '&su=' + encodeURIComponent(asunto) + '&body=' + encodeURIComponent(cuerpo);
     }
     function hrefDe(p, canal) {
       if (canal === 'wa') return 'https://wa.me/' + waNum(p) + '?text=' + encodeURIComponent(mensajeDe(p, 'wa'));
