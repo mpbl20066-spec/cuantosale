@@ -1578,11 +1578,14 @@
     { id: 'tras3', cat: 'tras', nom: 'Traslado a Praia do Rosa', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 140 }
   ] : []).filter(function (e) { return e.nom.indexOf(DEST) < 0; });
   var tourItem = function (pre) { return function (t, i) { return { id: pre + i, cat: 'tours', nom: t.titulo, dur: t.duracion, grupo: t.grupo, precio: t.precio, pp: true, foto: t.foto, autor: t.autor, real: true, info: t }; }; };
-  var EXTRAS = [
-    { cat: 'tours', sec: 'Tours y actividades', sub: 'Viví experiencias únicas en tu destino.', ico: 'palm', items: TOURS.map(tourItem('t')).concat(TRAS_X) },
-    /* Con dos paradas, los paseos de la segunda van en su propia seccion (ids u0, u1...). */
-    { cat: 'tours2', sec: 'Tours y actividades', ico: 'palm', items: PAR ? ((window.MOCK_TOURS || {})[PAR.l[1].k] || []).map(tourItem('u')) : [] }
-  ].filter(function (g) { return g.items.length; });
+  var armarExtras = function (t1, t2) {
+    return [
+      { cat: 'tours', sec: 'Tours y actividades', sub: 'Viví experiencias únicas en tu destino.', ico: 'palm', items: t1.map(tourItem('t')).concat(TRAS_X) },
+      /* Con dos paradas, los paseos de la segunda van en su propia seccion (ids u0, u1...). */
+      { cat: 'tours2', sec: 'Tours y actividades', ico: 'palm', items: PAR ? t2.map(tourItem('u')) : [] }
+    ].filter(function (g) { return g.items.length; });
+  };
+  var EXTRAS = armarExtras(TOURS, PAR ? ((window.MOCK_TOURS || {})[PAR.l[1].k] || []) : []);
   HOTELES.forEach(function (h) { h.ejemplo = true; });
   /* Comidas y transporte local: por persona y por dia, de la misma tabla que la app (daily-costs.js, por destino).
      Se eligen en Extras con las cajas Economico / Medio / Confort (o Gourmet) / Personalizado. S.dia guarda la eleccion;
@@ -1630,6 +1633,26 @@
     fetch('/api/disponibilidad?' + new URLSearchParams({ dest: destKey, dest2: PAR ? PAR.l[1].k : '', ida: IDA, vuelta: VUELTA || IDA, pax: pax }).toString())
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
       .then(function (j) { if (j) setTimeout(function () { aplicarReglas(j); }, 0); });
+  }
+  /* Los tours del catalogo real (/api/tours-destino). Hasta que responde se ven los de extras-data.js, y si falla se
+     quedan esos. Lo ya elegido se conserva por nombre, porque los ids (t0, t1...) cambian con la lista nueva. */
+  if (/^https?:$/.test(location.protocol)) {
+    fetch('/api/tours-destino?' + new URLSearchParams({ dest: destKey, dest2: PAR ? PAR.l[1].k : '' }).toString())
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+      .then(function (j) {
+        if (!j || !Array.isArray(j.dest)) return;
+        setTimeout(function () {
+          var antes = {}, sel = {};
+          todosExtras.forEach(function (e) { if (S.extras[e.id]) antes[e.nom] = 1; });
+          Object.keys(S.extras).forEach(function (id) { if (!/^[tu]\d+$/.test(id)) sel[id] = S.extras[id]; });
+          EXTRAS = armarExtras(j.dest, PAR ? (Array.isArray(j.dest2) ? j.dest2 : ((window.MOCK_TOURS || {})[PAR.l[1].k] || [])) : []);
+          todosExtras = [].concat.apply([], EXTRAS.map(function (s) { return s.items; }));
+          todosExtras.forEach(function (e) { if (antes[e.nom]) sel[e.id] = true; });
+          S.extras = sel;
+          if (REGLAS) aplicarReglas(REGLAS);
+          else if ($('main')) { var y = $('main').scrollTop; render(false); $('main').scrollTop = y; }
+        }, 0);
+      });
   }
   /* El mejor combo para lo elegido en todo el viaje (no solo en la parte que se reserva ahora). */
   function comboActual(lista) {

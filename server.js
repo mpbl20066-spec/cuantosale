@@ -3691,6 +3691,28 @@ function handleRequest(req, res) {
       if (limited('disponibilidad:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas consultas.' });
       return require('./lib/reglas').apiPublica(req, res, url, { sendJson: sendJson }).catch(function (e) { sendJson(res, 500, { error: e.message }); });
     }
+    /* Los tours de Extras en /web (home-flujo.html), del mismo catalogo que el sitio (lib/tours.js). Antes salian solo
+       de public/web/extras-data.js, una copia de data/tours.json que no ve lo cargado en el panel: los paseos de
+       EmNoronha no aparecian. Mismo shape que esa copia, que queda de respaldo. Las reglas (bloqueos, temporada) las
+       sigue aplicando la pagina con /api/disponibilidad. */
+    if (url.pathname === '/api/tours-destino' && req.method === 'GET') {
+      if (limited('tours-destino:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas consultas.' });
+      const claves = ['dest', 'dest2'].map(function (p) { const k = String(url.searchParams.get(p) || '').toLowerCase(); return model.DEST[k] ? k : ''; });
+      if (!claves[0]) return sendJson(res, 400, { error: 'Destino no válido.' });
+      const comoExtra = function (t) {
+        const credito = t.foto && t.foto.url ? t.foto : null;
+        const fila = { titulo: t.title, precio: t.price, duracion: t.duracion || '', grupo: t.grupo || '',
+          foto: credito ? credito.url : (t.image || (t.images && t.images[0]) || ''), autor: credito ? (credito.autor || 'Wikimedia Commons') : '',
+          licencia: credito ? (credito.licencia || '') : '', descripcion: t.description || '', detalle: t.details || '',
+          incluye: t.incluye || [], noIncluye: t.noIncluye || [], llevar: t.llevar || [], edad: t.edad || '', cancelacion: t.cancelacion || '' };
+        if (t.etiqueta) fila.etiqueta = t.etiqueta;
+        if (Array.isArray(t.images) && t.images.length) fila.imagenes = t.images.slice(0, 3);
+        return fila;
+      };
+      return Promise.all(claves.map(function (k) { return k ? tours.destino(k).then(function (l) { return l.map(comoExtra); }) : Promise.resolve(null); }))
+        .then(function (r) { sendJson(res, 200, { dest: r[0], dest2: r[1] }); })
+        .catch(function (e) { sendJson(res, 500, { error: e.message }); });
+    }
     /* Estado de un pedido para la pagina del cliente: solo el estado (sin nombre, telefono ni montos). El id es un uuid
        que solo tiene el navegador que hizo el pedido. Cuando el asesor confirma en /admin, aca aparece "confirmado". */
     if (url.pathname === '/api/reserva-estado' && req.method === 'GET') {
