@@ -97,7 +97,7 @@ window.CS_MKT = {
    "txt": [
     "## Urgente (esta semana)",
     "- [urg-bio] Bio y link con utm en Instagram y TikTok (día 1).",
-    "- [urg-fijados] Fijados: \"¿Qué es?\" el 14/10, \"¿Cómo funciona?\" el 16/10 y \"Cómo reservar un tour\" el 20/10 (hay que grabarlo antes del 17/10).",
+    "- [urg-fijados] Fijados: \"¿Qué es?\" el 14/10, \"¿Cómo funciona?\" el 16/10 y el buceo en Noronha (cómo se reserva) el 20/10, ya armado.",
     "- [urg-campana] Elegir los 3 a 5 tours o traslados de la primera campaña. Propuesta: piscinas de Galés (Maragogi), jangada (Porto de Galinhas), Cristo + Pan de Azúcar (Río), traslado a Jericoacoara y traslado a Ilha Grande. Revisar en Catálogo que tengan precio, fotos e inclusiones.",
     "- [urg-medicion] Poder medir del clic del reel a la reserva confirmada: hecho el 14/10: la web recuerda 30 días el link con el que llegó la persona y el pedido lo guarda (Tablero > Pedidos por fuente). Solo falta usar siempre los links con utm.",
     "- [urg-destacada] Destacada nueva \"Reservas\": cómo se reserva, seña, cancelación, número oficial (14/10, y se suma la historia del 20/10).",
@@ -113,7 +113,7 @@ window.CS_MKT = {
     "- **Anuncios: US$ 50 como máximo** para todo el mes (ver Estrategia > Anuncios).",
     "- **Margen:** el que asignás en Catálogo. La comisión a creadores y alianzas sale de ahí: hasta la mitad del margen de cada servicio.",
     "- **Nadie de la marca figura con nombre.** Todo se firma \"Cuánto Sale\"; la confianza sale del proceso claro, el número oficial y clientes reales.",
-    "- **Calendario comercial (14/10):** reemplaza al anterior. Los fijados salen el 14, 16 y 20/10; el 3 pasa a ser \"Cómo reservar un tour\" (\"Viajá más barato\" queda sin publicar por ahora).",
+    "- **Calendario comercial (14/10):** reemplaza al anterior. Los fijados salen el 14, 16 y 20/10; el 3 es el buceo en Noronha, que muestra cómo se reserva (\"Viajá más barato\" queda sin publicar por ahora).",
     "- **Creadores:** comisión solo por reservas atribuibles (su código) y concretadas, sin anticipos.",
     "- Pendiente: ¿los 44 destinos van a estar en la web? Mientras tanto se comunica 40."
    ]
@@ -173,9 +173,9 @@ window.CS_MKT = {
     "- 3. **Historia:** cómo se llega desde el aeropuerto y qué traslado hace falta, con horas y precio (resolver).",
     "- 4. **Historia o publicación:** un paseo concreto de ese destino: qué incluye, precio y seña (convertir).",
     "- 5. **Acción:** entrar a la app o escribir TRASLADO.",
-    "- En el calendario: Río (15/10 presupuesto → 27/10 Cristo + Pan de Azúcar), Ilha Grande (23/10 traslado en historias → 31/10 dos paseos), Porto de Galinhas (24/10 jangada → 1/11 qué hacer), Maragogi (22/10 Galés → 4/11 buggy).",
+    "- En el calendario: Floripa (19/10 en ómnibus → 29/10 ¿Río o Floripa?), Noronha (20/10 buceo fijado → 23/10 dudas en historias), Arraial do Cabo (21/10 barco), Maceió (27/10 9 Ilhas).",
     "## Tours y traslados desde la primera semana",
-    "- Son lo que genera ingresos: no quedan para el final. Primera semana: 16/10 (jeep 4x4 en Pipa), 17/10 (encuesta + tour real), 20/10 (cómo reservar un tour), 22/10 (Galés).",
+    "- Son lo que genera ingresos: no quedan para el final. Primera semana: 16/10 (jeep 4x4 en Pipa), 17/10 (encuesta + tour real), 20/10 (buceo en Noronha y cómo se reserva), 21/10 (barco en Arraial do Cabo). Solo tours con operador acordado.",
     "- **Solo productos reales:** tours y traslados que están en el catálogo, con el precio vigente de la app el día que se arma la pieza. Nada de descuentos ni \"últimos lugares\" inventados.",
     "## Reglas para el resto de las piezas",
     "- Tres historias útiles con un enlace bien elegido valen más que una secuencia larga sin objetivo.",
@@ -202,8 +202,8 @@ window.CS_MKT = {
     "- **Qué:** compartido o privado, horas de traslado, cómo se reserva, paseos que hay que reservar antes, un paseo concreto con precio y seña.",
     "- **Resultado:** consultas (\"TRASLADO\"), pedidos y señas. Es lo que paga todo lo demás.",
     "## Cómo quedó el calendario",
-    "- **Primeros 15 días:** Destinos 2 (13 %) · La app 6 (40 %) · Experiencias, tours y traslados 7 (47 %)",
-    "- **Los 30 días:** Destinos 8 (26 %) · La app 9 (29 %) · Experiencias, tours y traslados 14 (45 %)"
+    "- **Primeros 15 días:** Destinos 3 (20 %) · La app 5 (33 %) · Experiencias, tours y traslados 7 (47 %)",
+    "- **Los 30 días:** Destinos 8 (26 %) · La app 8 (26 %) · Experiencias, tours y traslados 15 (48 %)"
    ]
   },
   {
@@ -349,7 +349,7 @@ window.CS_MKT = {
    "> Salen el 14/10 (1), el 16/10 (2) y el 20/10 (3). El 20/10, después de publicar el 3, desfijá y volvé a fijar en orden 3 → 2 → 1: Instagram muestra primero el último que fijaste, así \"¿Qué es Cuánto Sale?\" queda primero.",
    "- **1 · ¿Qué es Cuánto Sale?** Rehecho el 14/10: una promesa y tres pruebas, y termina en \"lo de allá lo reservás acá\" (traslados y paseos). La versión vieja quedó en la carpeta _anterior.",
    "- **2 · ¿Cómo funciona?** Queda como estaba.",
-   "- **3 · Cómo reservar un tour.** Nuevo (calendario comercial): hay que grabarlo antes del 17/10. Reemplaza a \"Viajá más barato\", que queda guardado sin publicar.",
+   "- **3 · Buceo en Noronha y cómo se reserva.** Ya armado (18/10), sale el 20/10. Reemplaza a \"Viajá más barato\", que queda guardado sin publicar.",
    "- **Voz:** sin cámara y sin tu voz. El texto en pantalla ya está en los videos; la voz sintética es opcional."
   ],
   "reels": [
@@ -439,51 +439,35 @@ window.CS_MKT = {
    },
    {
     "n": 3,
-    "t": "Cómo reservar un tour",
-    "dur": "25–27 s",
-    "estado": "Hay que grabar (antes del 17/10)",
-    "carpeta": "(nueva) reel-00e-como-reservar",
-    "grabar": "Grabá en el celular, sin tu cuenta ni datos personales a la vista: elegir un destino → paso de paseos → abrir un tour (qué incluye, duración, precio) → agregarlo → pantalla de reserva → \"Confirmar reserva\" (sin completar datos reales).",
+    "t": "Buceo en Noronha y cómo se reserva",
+    "dur": "34 s",
+    "estado": "Listo (18/10). Sale el 20/10",
+    "carpeta": "reel-11-buceo-noronha → reel-buceo-noronha.mp4",
     "escenas": [
      [
-      "0–2 s",
-      "Home",
-      "¿Cómo reservo un paseo? Te lo muestro"
+      "0–4 s",
+      "Video de EmNoronha: avión sobre los Dois Irmãos",
+      "¿Cuánto sale bucear en Fernando de Noronha? Y cómo se reserva"
      ],
      [
-      "2–8 s",
-      "Destino → paseos",
-      "Elegís tu destino y vas a los paseos"
+      "4–17 s",
+      "Buceo: barcos hundidos, tortugas, rayas",
+      "Sin experiencia · Unas 2 horas · US$ 94 por persona"
      ],
      [
-      "8–12 s",
-      "Ficha del tour",
-      "Qué incluye, cuánto dura, cuánto sale"
+      "17–28 s",
+      "Grabación de la app (datos difuminados)",
+      "Elegís el paseo · Ves qué incluye · Reservar mi viaje · Confirmás con tu WhatsApp · Queda solicitado"
      ],
      [
-      "12–16 s",
-      "Agregar → Confirmar reserva",
-      "No se cobra nada en la web"
-     ],
-     [
-      "16–21 s",
-      "Texto sobre la grabación",
-      "Confirmamos con el operador y te escribimos por WhatsApp (+598 98 529 851)"
-     ],
-     [
-      "21–25 s",
-      "Texto",
-      "Seña: 25 % paseos, 50 % traslados · cancelás gratis hasta 72 h antes en la mayoría"
-     ],
-     [
-      "25–27 s",
-      "Cierre",
-      "Elegí tu tour · cuantosale.uy"
+      "28–34 s",
+      "Placas oscuras",
+      "Te escribimos por WhatsApp (+598 98 529 851, seña del 25 %) · Cancelás gratis hasta 48 h antes"
      ]
     ],
-    "voz": "Así se reserva un paseo. Elegís tu destino, mirás qué incluye cada paseo y cuánto sale, y tocás confirmar reserva. No se cobra nada en la web: confirmamos con el operador y te escribimos por WhatsApp. Recién ahí pagás una seña.",
-    "cta": "Elegí tu tour y reservá desde la app",
-    "copy": "¿Cómo se reserva un paseo en Cuánto Sale? 👇\n\n1️⃣ Elegís tu destino y el paseo: ves qué incluye, cuánto dura y el precio.\n2️⃣ Tocás \"Confirmar reserva\". No se cobra nada en la web.\n3️⃣ Confirmamos con el operador local y te escribimos por WhatsApp.\n4️⃣ Recién ahí, una seña: 25 % en paseos, 50 % en traslados (Prex o Pix sin recargo).\n5️⃣ En la mayoría de los servicios cancelás gratis hasta 72 h antes.\n\n⚠️ Nuestro único número oficial es el +598 98 529 851.\n\nElegí tu tour en cuantosale.uy (link en la bio).\n\n#viajarabrasil #uruguay #tipsdeviaje #cuantosale"
+    "voz": "Sin voz: el texto va en pantalla y la música se elige en Instagram.",
+    "cta": "Elegí tu paseo en cuantosale.uy",
+    "copy": "¿Cuánto sale bucear en Fernando de Noronha? 🐢 Y cómo se reserva 👇\n\nBautismo de buceo desde la playa, con EmNoronha:\n🤿 Sin experiencia: un instructor cada 2 personas\n⏱️ Unas 2 horas (30 a 40 minutos bajo el agua)\n📍 Encuentro en la Praia do Porto\n💵 US$ 94 por persona, con todo el equipo\n\nCómo se reserva en Cuánto Sale:\n1️⃣ Elegís Fernando de Noronha y el paseo: ves qué incluye, cuánto dura y el precio.\n2️⃣ Tocás \"Confirmar reserva\". No se cobra nada en la web.\n3️⃣ Confirmamos con el operador local y te escribimos por WhatsApp.\n4️⃣ Recién ahí, una seña del 25 % (Prex o Pix sin recargo).\n5️⃣ Este paseo se cancela gratis hasta 48 h antes, y si el mar no deja bucear se devuelve todo.\n\n⚠️ Nuestro único número oficial es el +598 98 529 851.\n\nElegí tu paseo en cuantosale.uy (link en la bio).\n\n[Precio por persona al 18/10/2026. Hay que reservar con al menos 48 h. Video: @emnoronha]\n\n#fernandodenoronha #noronha #buceo #viajarabrasil #uruguay #cuantosale\n\n---\nTikTok:\n¿Cuánto sale bucear en Fernando de Noronha? 🐢 US$ 94 por persona, sin experiencia. Y cómo se reserva 👇\n\nCalculá el tuyo: link en el perfil.\n\n#noronha #buceo #viajarabrasil #uruguay #cuantosale"
    },
    {
     "n": 5,
@@ -636,7 +620,7 @@ window.CS_MKT = {
      "Ya armado con la grabación de la app. En la portada y los primeros 2 s: \"¿Cuánto cuesta viajar a Río desde Montevideo?\"."
     ],
     "cta": "Calculá tu viaje en cuantosale.uy",
-    "copy": "¿Cuánto cuesta viajar a Río desde Montevideo? Una semana de a 2: US$ 608 por persona ✈️\n\nAsí se arma en cuantosale.uy:\n✈️ Vuelo Gol directo: US$ 500 ida y vuelta, los 2\n📊 Te muestra si saliendo otro día te sale menos\n🚐 Traslado: privado US$ 42 o compartido US$ 120\n🏠 Alojamiento con opciones de Booking: desde US$ 174 las 7 noches\n🎟️ Paseos: sumás solo los que quieras\nY al final, todo desglosado para compartir o dividir con tu grupo.\n\n¿A dónde te vas vos? Armalo con tus fechas en cuantosale.uy (link en la bio).\n\nGrabado en la app el 12/10/2026, viaje del 25/10 al 1/11/2026, 2 personas. Los precios cambian todos los días.\n\n#riodejaneiro #viajarabrasil #brasil #uruguay #vacaciones #cuantosale"
+    "copy": "(Falta el archivo reel-04-rio-armado/TEXTO-REEL.txt)"
    },
    "tt": {
     "tipo": "Reel (el mismo video)",
@@ -644,7 +628,7 @@ window.CS_MKT = {
     "carpeta": "reel-04-rio-armado → reel-rio-armado-CELULAR.mp4",
     "igual": true,
     "cambio": "Gancho fuerte en el primer segundo: \"¿Cuánto cuesta Río desde Montevideo? Te muestro el total\".",
-    "copy": "¿Cuánto cuesta viajar a Río desde Montevideo? Una semana de a 2: US$ 608 por persona ✈️\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
+    "copy": "(Falta el archivo reel-04-rio-armado/TEXTO-REEL.txt)\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
     "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
@@ -742,19 +726,19 @@ window.CS_MKT = {
    "ig": {
     "tipo": "Reel",
     "pieza": "¿Cuánto son 100 dólares? (conversor)",
-    "carpeta": "reel-08-conversor → reel-conversor-CELULAR.mp4",
+    "carpeta": "18-10/18-10 → reel-conversor-CELULAR.mp4 (portada: PORTADA-grilla.png)",
     "gancho": "¿Cuánto son 100 dólares en Brasil?",
     "estado": "Ya armado con la grabación real. Portada estilo grilla (chip de categoría + título corto + flecha): pedísela a Claude, o usá la de la carpeta si dice PORTADA-grilla. La cotización del texto es la del día de la grabación: si cambió, pedile a Claude que actualice el texto.",
     "guion": [
      "Ya armado."
     ],
     "cta": "Probá el conversor en cuantosale.uy",
-    "copy": "¿Cuánto son 100 dólares en Brasil? 💵➡️🇧🇷\n\nHoy, 100 dólares son R$ 499 (y $ 4.022 en pesos uruguayos).\nAl revés: 100 reales son unos US$ 20.\n\nLo sacás en segundos con el conversor de cuantosale.uy, y todo tu viaje lo ves en la moneda que quieras.\nOjo: es la cotización de referencia del día. Bancos y casas de cambio cobran distinto.\n\n📌 Guardalo para cuando estés allá.\ncuantosale.uy (link en la bio)\n\nCotización del 12/10/2026 (US$ 1 = R$ 4,99 = $ 40,22).\nFondo: foto de Mayumi Maciel (Unsplash).\n\n#viajarabrasil #reales #dolar #tipsdeviaje #uruguay #cuantosale"
+    "copy": "¿Cuánto son 100 dólares en Brasil? 💵➡️🇧🇷\n\nHoy, 100 dólares son R$ 509 (y $ 4.020 en pesos uruguayos).\nAl revés: 100 reales son unos US$ 20.\n\nLo sacás en segundos con el conversor de cuantosale.uy, y todo tu viaje lo ves en la moneda que quieras.\nOjo: es la cotización de referencia del día. Bancos y casas de cambio cobran distinto.\n\n📌 Guardalo para cuando estés allá.\ncuantosale.uy (link en la bio)\n\nCotización del 18/10/2026 (US$ 1 = R$ 5,09 = $ 40,20).\nFondo: foto de Mayumi Maciel (Unsplash).\n\n#viajarabrasil #reales #dolar #tipsdeviaje #uruguay #cuantosale"
    },
    "tt": {
     "tipo": "Reel (el mismo video)",
     "pieza": "¿Cuánto son 100 dólares? (conversor)",
-    "carpeta": "reel-08-conversor → reel-conversor-CELULAR.mp4",
+    "carpeta": "18-10/18-10 → reel-conversor-CELULAR.mp4 (portada: PORTADA-grilla.png)",
     "igual": true,
     "copy": "¿Cuánto son 100 dólares en Brasil? 💵➡️🇧🇷\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
@@ -772,7 +756,7 @@ window.CS_MKT = {
    "f": "2026-10-19",
    "obj": "convertir",
    "cat": "experiencias",
-   "tema": "Bucear en Fernando de Noronha: cuánto sale y cómo se reserva",
+   "tema": "Reel fijado 3: bucear en Noronha y cómo se reserva",
    "com": {
     "prod": "Tour \"Bautismo de buceo\" en Fernando de Noronha, con EmNoronha (unas 2 h, sin experiencia)",
     "cta": "Elegí tu paseo en Cuánto Sale",
@@ -780,10 +764,10 @@ window.CS_MKT = {
     "mide": "Consultas y pedidos del buceo en Noronha"
    },
    "ig": {
-    "tipo": "Reel",
-    "pieza": "Buceo en Noronha: US$ 94 por persona",
-    "carpeta": "reel-11-buceo-noronha → reel-buceo-noronha-VISTA-PREVIA.mp4 (portada: PORTADA-grilla.png)",
-    "estado": "Ya armado con el video de EmNoronha. Precio al 18/10: US$ 94 por persona. Si cambió, pedile a Claude que lo actualice.",
+    "tipo": "Reel fijado",
+    "pieza": "Buceo en Noronha: US$ 94 por persona (fijado 3, reemplaza a \"Viajá más barato\")",
+    "carpeta": "18-10/19-10 → reel-buceo-noronha.mp4 (portada: PORTADA-grilla.png)",
+    "estado": "Ya armado con el video de EmNoronha y la grabación de la app (tus datos van difuminados). Subí reel-buceo-noronha.mp4, NO la VISTA-PREVIA. Precio al 18/10: US$ 94 por persona. Si cambió, pedile a Claude que lo actualice.",
     "gancho": "¿Cuánto sale bucear en Fernando de Noronha?",
     "guion": [
      "Ya armado."
@@ -792,180 +776,101 @@ window.CS_MKT = {
     "copy": "¿Cuánto sale bucear en Fernando de Noronha? 🐢 Y cómo se reserva 👇\n\nBautismo de buceo desde la playa, con EmNoronha:\n🤿 Sin experiencia: un instructor cada 2 personas\n⏱️ Unas 2 horas (30 a 40 minutos bajo el agua)\n📍 Encuentro en la Praia do Porto\n💵 US$ 94 por persona, con todo el equipo\n\nCómo se reserva en Cuánto Sale:\n1️⃣ Elegís Fernando de Noronha y el paseo: ves qué incluye, cuánto dura y el precio.\n2️⃣ Tocás \"Confirmar reserva\". No se cobra nada en la web.\n3️⃣ Confirmamos con el operador local y te escribimos por WhatsApp.\n4️⃣ Recién ahí, una seña del 25 % (Prex o Pix sin recargo).\n5️⃣ Este paseo se cancela gratis hasta 48 h antes, y si el mar no deja bucear se devuelve todo.\n\n⚠️ Nuestro único número oficial es el +598 98 529 851.\n\nElegí tu paseo en cuantosale.uy (link en la bio).\n\n[Precio por persona al 18/10/2026. Hay que reservar con al menos 48 h. Video: @emnoronha]\n\n#fernandodenoronha #noronha #buceo #viajarabrasil #uruguay #cuantosale\n\n---\nTikTok:\n¿Cuánto sale bucear en Fernando de Noronha? 🐢 US$ 94 por persona, sin experiencia. Y cómo se reserva 👇\n\nCalculá el tuyo: link en el perfil.\n\n#noronha #buceo #viajarabrasil #uruguay #cuantosale"
    },
    "tt": {
-    "tipo": "Reel (el mismo video)",
-    "pieza": "Buceo en Noronha: US$ 94 por persona",
-    "carpeta": "reel-11-buceo-noronha → reel-buceo-noronha-VISTA-PREVIA.mp4 (portada: PORTADA-grilla.png)",
+    "tipo": "Reel fijado (el mismo video)",
+    "pieza": "Buceo en Noronha: US$ 94 por persona (fijado 3, reemplaza a \"Viajá más barato\")",
+    "carpeta": "18-10/19-10 → reel-buceo-noronha.mp4 (portada: PORTADA-grilla.png)",
     "igual": true,
     "copy": "¿Cuánto sale bucear en Fernando de Noronha? 🐢 Y cómo se reserva 👇\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
     "Compartí el reel en historias con el sticker de enlace a cuantosale.uy/destino/fernando-de-noronha?utm_source=ig_historia (texto del sticker: \"Ver el paseo\").",
-    "Encuesta: \"¿Te animás a bucear sin experiencia?\" 🤿 Sí, de una / 😅 Me da miedo. A la noche: \"Vas con un instructor cada 2 personas y se cancela gratis hasta 48 h antes\"."
+    "Encuesta: \"¿Te animás a bucear sin experiencia?\" 🤿 Sí, de una / 😅 Me da miedo. A la noche: \"Vas con un instructor cada 2 personas y se cancela gratis hasta 48 h antes\".",
+    "Guardá la historia del reel en la destacada \"Reservas\"."
    ],
    "acc": [
-    "Respondé cada consulta el mismo día con el precio del catálogo. Anotala en el Tablero (consultas)."
+    "Publicalo y fijalo. Después desfijá los 3 y volvé a fijarlos en orden 3 → 2 → 1, así \"¿Qué es Cuánto Sale?\" queda primero.",
+    "Respondé cada consulta el mismo día con el precio del catálogo. Anotala en el Tablero (consultas).",
+    "Borrá en el panel el pedido de prueba del bautismo (15 al 22/5/2027, US$ 188) que quedó de la grabación."
    ],
    "n": 6
   },
   {
    "f": "2026-10-20",
-   "obj": "convertir",
-   "cat": "app",
-   "tema": "Reel fijado 3: Cómo reservar un tour en Cuánto Sale",
+   "obj": "atraer",
+   "cat": "destinos",
+   "tema": "Floripa desde Montevideo, en ómnibus",
    "com": {
-    "prod": "El recorrido de reserva: elegir el paseo, \"Confirmar reserva\", qué pasa después",
-    "cta": "Elegí tu tour y reservá desde la app",
-    "reserva": "Es la pieza que saca el miedo a reservar. Queda fijada para siempre.",
-    "mide": "Pantalla \"Reservá tu viaje\" y pedidos nuevos"
+    "prod": "La guía y el presupuesto de Florianópolis en la app: en ómnibus, en avión o en auto",
+    "cta": "Armá tu viaje a Floripa en Cuánto Sale",
+    "reserva": "Desde el presupuesto se suman el traslado y los paseos de Floripa.",
+    "mide": "Visitas a la página de Florianópolis y presupuestos empezados"
    },
    "ig": {
-    "tipo": "Reel fijado (a grabar)",
-    "pieza": "Cómo reservar un tour (fijado 3, reemplaza a \"Viajá más barato\")",
-    "estado": "Grabación nueva, sin tu cuenta ni datos personales a la vista: elegir un destino → paso de paseos → agregar un tour → pantalla de reserva → \"Confirmar reserva\" (sin completar datos reales). Mandala hasta el 17/10 y Claude la edita.",
-    "gancho": "¿Cómo se reserva un paseo en Cuánto Sale?",
+    "tipo": "Carrusel",
+    "pieza": "Floripa en ómnibus: US$ 145 la ida",
+    "carpeta": "18-10/20-10 (carrusel Floripa en ómnibus; portada: 1-portada-grilla.png)",
+    "gancho": "Floripa desde Montevideo, en ómnibus",
+    "estado": "Ya armado. Precio: EGA semicama Montevideo → Florianópolis, $ 5.845 la ida (tarifa de septiembre a diciembre de 2026 en ega.com.uy) = US$ 145 a $ 40,22. Si cambió, pedile a Claude que lo actualice.",
     "guion": [
-     "0–2 s: \"¿Cómo reservo un paseo? Te lo muestro\".",
-     "2–8 s: elegís el destino y vas a los paseos.",
-     "8–12 s: tocás un tour: qué incluye, duración, precio.",
-     "12–16 s: lo agregás y tocás \"Confirmar reserva\". No se cobra nada en la web.",
-     "16–21 s: texto: \"Confirmamos con el operador y te escribimos por WhatsApp desde el +598 98 529 851\".",
-     "21–25 s: texto: \"Recién ahí, seña: 25 % paseos, 50 % traslados. En la mayoría cancelás gratis hasta 72 h antes\".",
-     "25–27 s: \"Elegí tu tour en cuantosale.uy\"."
+     "Ya armado."
     ],
-    "copy": "¿Cómo se reserva un paseo en Cuánto Sale? 👇\n\n1️⃣ Elegís tu destino y el paseo: ves qué incluye, cuánto dura y el precio.\n2️⃣ Tocás \"Confirmar reserva\". No se cobra nada en la web.\n3️⃣ Confirmamos con el operador local y te escribimos por WhatsApp.\n4️⃣ Recién ahí, una seña: 25 % en paseos, 50 % en traslados (Prex o Pix sin recargo).\n5️⃣ En la mayoría de los servicios cancelás gratis hasta 72 h antes.\n\n⚠️ Nuestro único número oficial es el +598 98 529 851.\n\nElegí tu tour en cuantosale.uy (link en la bio).\n\n#viajarabrasil #uruguay #tipsdeviaje #cuantosale",
-    "cta": "Elegí tu tour y reservá desde la app"
+    "cta": "Armá tu viaje a Floripa en cuantosale.uy",
+    "copy": "¿Floripa en ómnibus? 🚌 Desde Montevideo, US$ 145 la ida.\n\nEGA sale de Tres Cruces y te deja en el centro de Florianópolis en 18 a 20 horas:\n🚌 Semicama: $ 5.845 la ida (US$ 145)\n🛏️ Cama: $ 7.195 la ida (US$ 179)\n\n¿Y si vas en avión o en auto? Ida y vuelta, por persona:\n🚌 Ómnibus: US$ 290\n✈️ Avión: US$ 415 (lo más barato de enero, unas 6 h con escala)\n🚗 Auto: US$ 146 de a 2 (nafta y peajes, 15 a 17 h de manejo)\n\nEn cuantosale.uy elegís cómo ir y ves el viaje entero: pasaje, alojamiento, comidas y el traslado de allá.\n💬 ¿Vos cómo te vas? Comentá 🚌, ✈️ o 🚗 👇\n\nÓmnibus: tarifa de EGA de septiembre a diciembre de 2026, consultada el 18/10/2026 ($ 40,22 por dólar). Avión: la salida más barata entre el 4 y el 14 de enero, consultada el 12/10/2026. Auto: la estimación de nafta y peajes de la app. Los precios cambian.\nFotos (Unsplash): Bruno Soares y Carlos Henrique.\n\n#florianopolis #floripa #viajarabrasil #omnibus #uruguay #vacaciones2027 #cuantosale\n\n---\nTikTok (modo foto):\n¿Floripa en ómnibus? 🚌 Desde Montevideo, US$ 145 la ida.\n\nCalculá el tuyo: link en el perfil.\n\n#floripa #viajarabrasil #uruguay #cuantosale"
    },
    "tt": {
-    "tipo": "Reel fijado (a grabar) (el mismo video)",
-    "pieza": "Cómo reservar un tour (fijado 3, reemplaza a \"Viajá más barato\")",
-    "igual": true,
-    "cambio": "Formato tutorial paso a paso, con números en pantalla.",
-    "copy": "¿Cómo se reserva un paseo en Cuánto Sale? 👇\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
+    "tipo": "Carrusel en modo foto",
+    "pieza": "Las mismas imágenes",
+    "copy": "¿Floripa en ómnibus? 🚌 Desde Montevideo, US$ 145 la ida.\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
-    "Historia: \"¿Tengo que registrarme para reservar? No: podés explorar y pedir la reserva sin cuenta. La cuenta sirve para guardar tu viaje y compartirlo\". Sticker de enlace.",
-    "Guardá esta historia en la destacada \"Reservas\"."
+    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
+    "Encuesta: \"¿Cómo te vas a Floripa?\" 🚌 Ómnibus / ✈️ Avión / 🚗 Auto. A la noche: \"En la app ves los tres con tus fechas\" + sticker de enlace a cuantosale.uy/destino/florianopolis?utm_source=ig_historia (texto: \"Ver Floripa\")."
    ],
    "acc": [
-    "Publicalo y fijalo. Después desfijá los 3 y volvé a fijarlos en orden 3 → 2 → 1, así \"¿Qué es Cuánto Sale?\" queda primero."
+    "Respondé cada consulta el mismo día. Anotala en el Tablero (consultas)."
    ],
    "n": 7
   },
   {
    "f": "2026-10-21",
-   "obj": "atraer",
-   "cat": "destinos",
-   "tema": "Floripa es mucho más que playa",
+   "obj": "convertir",
+   "cat": "experiencias",
+   "tema": "Piscinas naturales de Brasil, de la más barata a la más cara",
    "com": {
-    "prod": "Tour \"Isla Campeche en barco\" (Florianópolis, 6 h)",
-    "cta": "Encontrá esta experiencia en Cuánto Sale",
-    "reserva": "Presenta un tour concreto con qué incluye y precio: el que lo quiere, lo pide.",
-    "mide": "Clics en el enlace de la historia y pedidos con tour de Florianópolis"
+    "prod": "Los paseos a piscinas naturales del catálogo: 7 destinos con precio por persona, de US$ 19 a US$ 43",
+    "cta": "Guardalo y elegí tu paseo en Cuánto Sale",
+    "reserva": "Cada piscina es un paseo real del catálogo con precio: el que se decide, lo reserva con seña.",
+    "mide": "Guardados, clics al sitio y pedidos con paseo a piscinas naturales"
    },
    "ig": {
-    "tipo": "Reel (a producir)",
-    "pieza": "Floripa es mucho más que playa: Isla Campeche",
-    "estado": "Pedíselo a Claude: fotos reales del tour (las de su ficha en la app) + texto grande, sin voz. Portada estilo grilla (chip de categoría + título corto + flecha): pedísela a Claude, o usá la de la carpeta si dice PORTADA-grilla. Precio: el vigente en la app (Catálogo > Servicios) el día que se arma. Inclusiones: las de la ficha del tour.",
-    "gancho": "Floripa es mucho más que playa",
+    "tipo": "Carrusel",
+    "pieza": "Piscinas naturales de Brasil, de la más barata a la más cara",
+    "carpeta": "18-10/21-10 (carrusel de piscinas naturales; portada: 1-portada-grilla.png, con el chip EXPERIENCIAS)",
+    "gancho": "Piscinas naturales: de la más barata a la más cara",
+    "estado": "Ya armado. Usá 1-portada-grilla.png como primera imagen. Precios del catálogo al 16/10 (al 18/10, Galés seguía igual): si querés actualizarlos, pedíselo a Claude antes de publicar.",
     "guion": [
-     "0–2 s: \"Floripa es mucho más que playa\".",
-     "2–7 s: Isla Campeche: agua transparente, a 6 h de paseo en barco.",
-     "7–12 s: Qué incluye: ticket de embarcación ida y vuelta autorizada y acceso a la playa de la isla.",
-     "12–15 s: Precio por persona (de la app).",
-     "15–18 s: \"Encontrá esta experiencia en cuantosale.uy\"."
+     "Ya armado."
     ],
-    "copy": "Floripa es mucho más que playa 🏝️\n\nIsla Campeche: un paseo en barco de 6 horas a una de las playas más lindas del sur de Brasil.\n\n✅ Incluye: embarcación autorizada ida y vuelta y acceso a la playa de la isla\n💵 US$ [precio de la app] por persona\n\nSe reserva con una seña del 25 % y no se cobra nada en la web.\nEncontrá esta experiencia en cuantosale.uy (link en la bio).\n\n[Precio al __/__. Puede cambiar.]\n\n#florianopolis #floripa #ilhadocampeche #viajarabrasil #uruguay #cuantosale",
-    "cta": "Encontrá esta experiencia en Cuánto Sale"
+    "cta": "Elegí tu paseo en cuantosale.uy",
+    "copy": "Piscinas naturales de Brasil 🐠 de la más barata a la más cara.\n\n1️⃣ Porto de Galinhas, en jangada: US$ 19\n2️⃣ Pajuçara, Maceió: US$ 22\n3️⃣ Papagaio, Praia do Forte: US$ 28\n4️⃣ Maracajaú, Natal (con day-use en un club de playa): US$ 39\n5️⃣ Galés, Maragogi: US$ 41\n6️⃣ Garapuá, Morro de São Paulo: US$ 41\n7️⃣ Recife de Fora, Porto Seguro: US$ 43\n\n💡 El secreto: solo se ven con marea baja. Salí una hora antes de la hora de la marea más baja (la tabla de mareas está en las guías del Nordeste de cuantosale.uy).\n\n📌 Guardalo para tu próximo viaje al Nordeste.\n💬 ¿Cuál ya conocés? 👇\nSumá los paseos a tu viaje en cuantosale.uy (link en la bio).\n\nPrecios por persona del catálogo de paseos de cuantosale.uy al 16/10/2026. Pueden cambiar.\nFotos: Cleferson Comarela (CC BY-SA 3.0), Mariordo (CC BY-SA 4.0), Elvis Boaventura (CC BY 3.0), Vangelis Medina (CC BY 3.0) en Wikimedia Commons; Pedro Menezes (Unsplash); y fotos propias.\n\n#piscinasnaturales #nordeste #portodegalinhas #maragogi #maceio #viajarabrasil #uruguay #cuantosale"
    },
    "tt": {
-    "tipo": "Reel (a producir) (el mismo video)",
-    "pieza": "Floripa es mucho más que playa: Isla Campeche",
-    "igual": true,
-    "copy": "Floripa es mucho más que playa 🏝️\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
+    "tipo": "Carrusel en modo foto",
+    "pieza": "Las mismas imágenes",
+    "copy": "Piscinas naturales de Brasil 🐠 de la más barata a la más cara.\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
     "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
-    "Historia: foto del tour + \"Isla Campeche · 6 h · US$ [precio]\" + sticker de enlace a la página de Florianópolis en la app.",
-    "Encuesta (sticker de 3 opciones): \"¿A dónde nos vamos? Río / Porto de Galinhas / Maragogi\". A la noche: resultado + enlace a la página del más votado."
+    "Historia 1: \"¿Ya armaste tu viaje? Mandanos captura y te decimos cómo bajarlo 👇\" + sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
+    "Historia 2 (al día siguiente): elegí una captura (con permiso y sin nombre) y respondé en 2 o 3 historias dónde se ahorra: otra fecha, otro alojamiento, ómnibus en vez de avión."
    ],
    "acc": [
-    "**Revisión semanal #1** (Tablero, 30 min). Línea de base: visitas al sitio, \"Reservá tu viaje\", pedidos. Anotá también cuántos mensajes llegaron preguntando por un tour."
+    "Seguimiento de creadores: a los activos, preguntales cuándo publican."
    ],
    "n": 8
   },
   {
    "f": "2026-10-22",
-   "obj": "convertir",
-   "cat": "experiencias",
-   "tema": "Este tour puede ser la mejor parte de tu viaje",
-   "com": {
-    "prod": "Tour \"Excursión a las Piscinas Naturales de Maragogi (Galés)\" (3 h)",
-    "cta": "Mirá los detalles y reservá tu lugar",
-    "reserva": "Experiencia concreta: para quién es, cuánto dura, qué incluye y cuánto sale.",
-    "mide": "Clics al sitio y pedidos con tour de Maragogi"
-   },
-   "ig": {
-    "tipo": "Reel comercial (a producir)",
-    "pieza": "Las piscinas de Galés",
-    "estado": "Pedíselo a Claude: fotos reales del tour (las de su ficha en la app) + texto grande, sin voz. Portada estilo grilla (chip de categoría + título corto + flecha): pedísela a Claude, o usá la de la carpeta si dice PORTADA-grilla. Precio: el vigente en la app (Catálogo > Servicios) el día que se arma. Inclusiones: las de la ficha del tour. Al 16/10: US$ 41 por persona (antes 35).",
-    "gancho": "Este paseo puede ser la mejor parte de tu viaje",
-    "guion": [
-     "0–2 s: \"Este paseo puede ser la mejor parte de tu viaje 🐠\".",
-     "2–6 s: Piscinas naturales de Galés, en Maragogi: agua turquesa en el medio del mar.",
-     "6–10 s: Para quién: parejas y familias que quieren snorkel sin experiencia.",
-     "10–14 s: 3 h · catamarán o lancha autorizada · guía biólogo marino · chalecos.",
-     "14–17 s: \"Sale según la marea: en enero, reservalo antes\" · US$ [ ].",
-     "17–20 s: \"Mirá los detalles y reservá en cuantosale.uy\"."
-    ],
-    "copy": "Este paseo puede ser la mejor parte de tu viaje 🐠\n\nLas piscinas naturales de Galés, en Maragogi.\n\n👥 Para parejas y familias, sin experiencia en snorkel\n⏱️ 3 horas\n✅ Catamarán o lancha autorizada, guía biólogo marino y chalecos\n💵 US$ [ ] por persona\n\nSale según la marea, así que el horario cambia cada día. En enero, conviene reservarlo antes.\n\nMirá los detalles y reservá tu lugar en cuantosale.uy (link en la bio).\n\n[Precio al __/__. Puede cambiar.]\n\n#maragogi #piscinasnaturales #alagoas #viajarabrasil #uruguay #cuantosale",
-    "cta": "Mirá los detalles y reservá tu lugar"
-   },
-   "tt": {
-    "tipo": "Reel comercial (a producir) (el mismo video)",
-    "pieza": "Las piscinas de Galés",
-    "igual": true,
-    "copy": "Este paseo puede ser la mejor parte de tu viaje 🐠\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
-   },
-   "hist": [
-    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
-   ],
-   "acc": [
-    "Seguimiento de creadores: a los activos, preguntales cuándo publican."
-   ],
-   "n": 9
-  },
-  {
-   "f": "2026-10-23",
-   "obj": "resolver",
-   "cat": "experiencias",
-   "tema": "Historias: ¿cómo llegás a la isla?",
-   "com": {
-    "prod": "Traslado aeropuerto de Río → Ilha Grande (auto + barco). Compartido por persona o privado por vehículo",
-    "cta": "Escribinos TRASLADO",
-    "reserva": "Ilha Grande no tiene autos: el que va, necesita sí o sí este traslado.",
-    "mide": "Mensajes \"TRASLADO\""
-   },
-   "ig": {
-    "tipo": "Solo historias",
-    "pieza": "Sin publicación en el feed"
-   },
-   "tt": {
-    "tipo": "Sin publicación",
-    "pieza": "—"
-   },
-   "hist": [
-    "Historia 1: foto de Ilha Grande + \"Del aeropuerto de Río a Ilha Grande: auto hasta el puerto y barco hasta la isla\".",
-    "Historia 2: \"Compartido: US$ [ ] por persona. Lo reservás con una seña del 50 %\". Precio: el vigente en la app (Catálogo > Servicios) el día que se arma. Inclusiones: las de la ficha del tour.",
-    "Historia 3: \"¿Vas a una isla? Escribinos TRASLADO 🚐⛴️\"."
-   ],
-   "acc": [
-    "Respondé cada \"TRASLADO\" el mismo día con el precio del catálogo.",
-    "A los creadores que respondieron: Brief para creadores, su link con utm y su código."
-   ],
-   "n": 10
-  },
-  {
-   "f": "2026-10-24",
    "obj": "demostrar",
    "cat": "app",
    "tema": "¿Cuánto tenés que ahorrar por mes para irte a Brasil?",
@@ -978,7 +883,7 @@ window.CS_MKT = {
    "ig": {
     "tipo": "Reel",
     "pieza": "¿Cuánto ahorrar por mes?",
-    "carpeta": "reel-05-ahorro → reel-ahorro-CELULAR.mp4",
+    "carpeta": "18-10/22-10 → reel-ahorro-CELULAR.mp4 (portada: PORTADA-grilla.png)",
     "gancho": "¿Cuánto tenés que ahorrar por mes para irte a Brasil?",
     "estado": "Ya armado con la grabación real. Portada estilo grilla (chip de categoría + título corto + flecha): pedísela a Claude, o usá la de la carpeta si dice PORTADA-grilla. Precios del 12/10: si cambiaron mucho, pedile a Claude que actualice el texto.",
     "guion": [
@@ -990,22 +895,21 @@ window.CS_MKT = {
    "tt": {
     "tipo": "Reel (el mismo video)",
     "pieza": "¿Cuánto ahorrar por mes?",
-    "carpeta": "reel-05-ahorro → reel-ahorro-CELULAR.mp4",
+    "carpeta": "18-10/22-10 → reel-ahorro-CELULAR.mp4 (portada: PORTADA-grilla.png)",
     "igual": true,
     "copy": "¿Cuánto tenés que ahorrar por mes para irte a Brasil? 🐷\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
     "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
-    "Historia: foto de la jangada + quiz: \"¿Cuánto sale el paseo en jangada a las piscinas de Porto de Galinhas?\" (3 opciones, una es el precio real de la app).",
-    "Historia: la respuesta + qué incluye (jangada, chalecos y guía; 1 h) + sticker de enlace a Porto de Galinhas: \"Ver detalles y reservar\". Precio: el vigente en la app (Catálogo > Servicios) el día que se arma. Inclusiones: las de la ficha del tour."
+    "Encuesta: \"¿Para qué viaje estás juntando?\" 🏝️ Floripa / 🌴 Nordeste / 🏙️ Río. A la noche: \"Calculá cuánto ahorrar por mes para ese viaje\" + sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
    ],
    "acc": [
     "Escribile a 2 negocios para alianzas (Mensaje Alianza): tienda de artículos de viaje y academia de portugués."
    ],
-   "n": 11
+   "n": 9
   },
   {
-   "f": "2026-10-25",
+   "f": "2026-10-23",
    "obj": "atraer",
    "cat": "destinos",
    "tema": "¿Río o Floripa? Cuál rinde más en enero",
@@ -1018,7 +922,7 @@ window.CS_MKT = {
    "ig": {
     "tipo": "Carrusel",
     "pieza": "¿Río o Floripa?",
-    "carpeta": "carrusel-04-rio-vs-floripa (portada: 1-portada-grilla.png)",
+    "carpeta": "18-10/23-10 (carrusel ¿Río o Floripa?; portada: 1-portada-grilla.png)",
     "gancho": "¿Río o Floripa?",
     "estado": "Ya armado. Usá 1-portada-grilla.png como primera imagen (en lugar de 1-portada.png). Los precios son del 12/10 (el texto lo aclara): si querés actualizarlos, pedíselo a Claude antes de publicar.",
     "guion": [
@@ -1037,82 +941,54 @@ window.CS_MKT = {
     "Encuesta: \"¿Río o Floripa?\" 🏙️ Río / 🏝️ Floripa."
    ],
    "acc": [
-    "**Anuncios, Fase 1:** promocioná el reel con más clics de estas dos semanas (si no hay uno claro: \"¿Cuánto cuesta viajar a Río?\"). Paso a paso en Estrategia > Anuncios."
+    "Mandá el Mensaje A a 5 creadores nuevos: la ronda 3 de Contactos."
    ],
-   "n": 12
+   "ctRonda": 3,
+   "n": 10
   },
   {
-   "f": "2026-10-26",
-   "obj": "resolver",
-   "cat": "experiencias",
-   "tema": "Historias: ¿qué te frena para reservar una excursión?",
-   "com": {
-    "prod": "Respuestas sobre tours y reservas",
-    "cta": "Dejanos tu duda y te ayudamos a encontrar la información",
-    "reserva": "Cada duda respondida saca un freno. Las más repetidas van al reel del 6/11.",
-    "mide": "Respuestas a la caja y mensajes"
-   },
-   "ig": {
-    "tipo": "Solo historias",
-    "pieza": "Sin publicación en el feed"
-   },
-   "tt": {
-    "tipo": "Sin publicación",
-    "pieza": "—"
-   },
-   "hist": [
-    "Caja de preguntas: \"¿Qué te frena para reservar una excursión? Precio, horarios, qué incluye, cómo se reserva… 👇\".",
-    "Al día siguiente, respondé 3 en historias, con la información real (ficha del tour, seña, cancelación)."
-   ],
-   "acc": [
-    "Mirá la promoción: alcance, clics y costo por clic. Si corresponde cortar, pausala (reglas en Estrategia > Anuncios).",
-    "Anotá las dudas en la nota de la semana: son el guion del reel del 6/11."
-   ],
-   "n": 13
-  },
-  {
-   "f": "2026-10-27",
+   "f": "2026-10-24",
    "obj": "convertir",
    "cat": "experiencias",
-   "tema": "Una experiencia para sumar a tu viaje a Río",
+   "tema": "Paseo en barco en Arraial do Cabo",
    "com": {
-    "prod": "Tour \"City tour completo: Cristo Redentor + Pan de Azúcar\" (Río, 8 h)",
-    "cta": "Entrá a ver la experiencia en Cuánto Sale",
-    "reserva": "La experiencia de principio a fin: de dónde sale, qué ves, qué incluye y cuánto sale.",
-    "mide": "Clics al sitio y pedidos con tour de Río"
+    "prod": "Tour \"Paseo en Barco\" en Arraial do Cabo, con Arraial Caribe Turismo (unas 4 h 30)",
+    "cta": "Encontrá esta experiencia en Cuánto Sale",
+    "reserva": "Paseo real del catálogo, con operador y precio por persona: el que va a Arraial lo reserva con seña.",
+    "mide": "Clics al sitio y pedidos con tour de Arraial do Cabo"
    },
    "ig": {
     "tipo": "Reel (a producir)",
-    "pieza": "Cristo + Pan de Azúcar en un día",
-    "estado": "Pedíselo a Claude: fotos reales del tour (las de su ficha en la app) + texto grande, sin voz. Portada estilo grilla (chip de categoría + título corto + flecha): pedísela a Claude, o usá la de la carpeta si dice PORTADA-grilla. Precio: el vigente en la app (Catálogo > Servicios) el día que se arma. Inclusiones: las de la ficha del tour.",
-    "gancho": "Cristo y Pan de Azúcar en un solo día",
+    "pieza": "Barco en Arraial do Cabo: US$ 11 por persona",
+    "estado": "Pedíselo a Claude: fotos reales del tour (las de su ficha en la app) + texto grande, sin voz. Portada estilo grilla (chip de categoría + título corto + flecha): pedísela a Claude, o usá la de la carpeta si dice PORTADA-grilla. Precio: el vigente en la app (Catálogo > Servicios) el día que se arma. Inclusiones: las de la ficha del tour. Al 18/10: US$ 11,18 por persona, sin la tasa municipal de embarque (R$ 15, solo Pix o efectivo). Si Arraial Caribe tiene videos del paseo, pediles permiso: queda mucho mejor, como el jeep de Pipa.",
+    "gancho": "¿Cuánto sale el paseo en barco por el Caribe brasileño?",
     "guion": [
-     "0–2 s: \"Cristo Redentor y Pan de Azúcar en un solo día\".",
-     "2–6 s: Te buscan en el hotel (zona sur: Copacabana, Ipanema, Leblon).",
-     "6–10 s: Cristo Redentor.",
-     "10–14 s: Pan de Azúcar.",
-     "14–17 s: 8 h · guía bilingüe español/portugués · US$ [ ].",
-     "17–20 s: \"Entrá a ver la experiencia en cuantosale.uy\"."
+     "0–2 s: \"¿Cuánto sale el paseo en barco en Arraial do Cabo?\".",
+     "2–7 s: el agua turquesa y las playas a las que se llega en barco.",
+     "7–11 s: unas 4 h 30 · tobogán, piscina flotante, bote para bajar a las playas.",
+     "11–14 s: US$ [ ] por persona (más la tasa de embarque de R$ 15).",
+     "14–17 s: \"Encontrá esta experiencia en cuantosale.uy\"."
     ],
-    "copy": "Cristo Redentor y Pan de Azúcar en un solo día 🇧🇷\n\n🚐 Te buscan en tu hotel de zona sur (Copacabana, Ipanema, Leblon)\n🗣️ Guía bilingüe español/portugués\n⏱️ 8 horas\n💵 US$ [ ] por persona\n\nEntrá a ver la experiencia en cuantosale.uy (link en la bio).\n\n[Precio al __/__. Puede cambiar. Inclusiones: las de la ficha del tour.]\n\n#riodejaneiro #cristoredentor #paodeacucar #viajarabrasil #uruguay #cuantosale",
-    "cta": "Entrá a ver la experiencia en Cuánto Sale"
+    "copy": "¿Cuánto sale el paseo en barco por el Caribe brasileño? 🚤\n\nArraial do Cabo, unas 4 h 30 en barco por las playas de agua turquesa.\n\n✅ Incluye: tobogán, piscina flotante, bote auxiliar para bajar a las playas, agua y equipo de seguridad\n💵 US$ [ ] por persona\n➕ Aparte: la tasa municipal de embarque (R$ 15, en Pix o efectivo)\n\nSe reserva con una seña del 25 % y no se cobra nada en la web.\nEncontrá esta experiencia en cuantosale.uy (link en la bio).\n\n[Precio al __/__. Puede cambiar.]\n\n#arraialdocabo #riodejaneiro #viajarabrasil #uruguay #cuantosale",
+    "cta": "Encontrá esta experiencia en Cuánto Sale"
    },
    "tt": {
     "tipo": "Reel (a producir) (el mismo video)",
-    "pieza": "Cristo + Pan de Azúcar en un día",
+    "pieza": "Barco en Arraial do Cabo: US$ 11 por persona",
     "igual": true,
-    "copy": "Cristo Redentor y Pan de Azúcar en un solo día 🇧🇷\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
+    "copy": "¿Cuánto sale el paseo en barco por el Caribe brasileño? 🚤\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
    },
    "hist": [
-    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
+    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia.",
+    "Historia: foto del paseo + \"Arraial do Cabo · barco 4 h 30 · US$ [precio]\" + sticker de enlace a cuantosale.uy/destino/arraial-do-cabo?utm_source=ig_historia (texto: \"Ver el paseo\")."
    ],
    "acc": [
-    "Respondé 3 dudas de la caja del 26/10 en historias."
+    "**Revisión semanal #1** (Tablero, 30 min). Línea de base: visitas al sitio, \"Reservá tu viaje\", pedidos. Anotá también cuántos mensajes llegaron preguntando por un tour."
    ],
-   "n": 14
+   "n": 11
   },
   {
-   "f": "2026-10-28",
+   "f": "2026-10-25",
    "obj": "demostrar",
    "cat": "app",
    "tema": "¿Quién le debe a quién? Dividí los gastos del viaje",
@@ -1147,10 +1023,10 @@ window.CS_MKT = {
    "acc": [
     "**Revisión semanal #2.** ¿Qué pieza trajo más clics al sitio? ¿Alguna trajo mensajes por un tour o traslado? ¿La grilla por columnas sigue en orden? Decidí 1 cosa que repetís, 1 que cambiás y 1 que dejás."
    ],
-   "n": 15
+   "n": 12
   },
   {
-   "f": "2026-10-29",
+   "f": "2026-10-26",
    "obj": "atraer",
    "cat": "destinos",
    "tema": "¿Cuánto sale Jeri para 2?",
@@ -1184,9 +1060,105 @@ window.CS_MKT = {
     "Historia: \"¿Tenés que registrarte para reservar? No: explorás y pedís la reserva sin cuenta. La cuenta es para guardar tu viaje\". Sticker de enlace."
    ],
    "acc": [
-    "Mandá el Mensaje A a 5 creadores nuevos: la ronda 3 de Contactos."
+    "**Anuncios, Fase 1:** promocioná el reel con más clics de estas dos semanas (si no hay uno claro: \"¿Cuánto cuesta viajar a Río?\"). Paso a paso en Estrategia > Anuncios."
    ],
-   "ctRonda": 3,
+   "n": 13
+  },
+  {
+   "f": "2026-10-27",
+   "obj": "convertir",
+   "cat": "experiencias",
+   "tema": "Maceió: 9 islas y lagunas en un día",
+   "com": {
+    "prod": "Tour \"Maceió 9 Ilhas – Rota das Lagoas\", con AVB Agência de Turismo en Alagoas (de 11:00 a 18:00)",
+    "cta": "Entrá a ver la experiencia en Cuánto Sale",
+    "reserva": "La experiencia de principio a fin: te buscan, catamarán por las islas, almuerzo y cuánto sale.",
+    "mide": "Clics al sitio y pedidos con tour de Maceió"
+   },
+   "ig": {
+    "tipo": "Reel (a producir)",
+    "pieza": "Las 9 islas de Maceió",
+    "estado": "Pedíselo a Claude: fotos reales del tour (las de su ficha en la app) + texto grande, sin voz. Portada estilo grilla (chip de categoría + título corto + flecha): pedísela a Claude, o usá la de la carpeta si dice PORTADA-grilla. Precio: el vigente en la app (Catálogo > Servicios) el día que se arma. Inclusiones: las de la ficha del tour. Al 18/10: US$ 26,84 por persona. Ojo: AVB solo acepta cancelaciones con 12 h de anticipación.",
+    "gancho": "9 islas en un día, con almuerzo incluido",
+    "guion": [
+     "0–2 s: \"9 islas en un día, con almuerzo incluido\".",
+     "2–6 s: catamarán por la Rota das Lagoas, en Maceió.",
+     "6–10 s: incluye traslado ida y vuelta, catamarán, almuerzo y guía.",
+     "10–14 s: de 11:00 a 18:00 · US$ [ ] por persona.",
+     "14–17 s: \"Entrá a ver la experiencia en cuantosale.uy\"."
+    ],
+    "copy": "9 islas en un día, con almuerzo incluido 🏝️\n\nMaceió 9 Ilhas: catamarán por la Rota das Lagoas.\n\n✅ Incluye: traslado ida y vuelta, catamarán por las 9 islas, almuerzo y guía acreditado\n⏱️ De 11:00 a 18:00\n💵 US$ [ ] por persona\n\nSe reserva con una seña del 25 % y no se cobra nada en la web.\nEntrá a ver la experiencia en cuantosale.uy (link en la bio).\n\n[Precio al __/__. Puede cambiar. Inclusiones: las de la ficha del tour.]\n\n#maceio #alagoas #nordeste #viajarabrasil #uruguay #cuantosale",
+    "cta": "Entrá a ver la experiencia en Cuánto Sale"
+   },
+   "tt": {
+    "tipo": "Reel (a producir) (el mismo video)",
+    "pieza": "Las 9 islas de Maceió",
+    "igual": true,
+    "copy": "9 islas en un día, con almuerzo incluido 🏝️\n\nCalculá el tuyo: link en el perfil.\n\n#viajarabrasil #brasil #uruguay #cuantosale"
+   },
+   "hist": [
+    "Compartí la publicación del día en historias con el sticker de enlace a cuantosale.uy/?utm_source=ig_historia."
+   ],
+   "acc": [
+    "Respondé 3 dudas de la caja del 26/10 en historias."
+   ],
+   "n": 14
+  },
+  {
+   "f": "2026-10-28",
+   "obj": "resolver",
+   "cat": "experiencias",
+   "tema": "Historias: bucear sin experiencia, tus dudas",
+   "com": {
+    "prod": "Tour \"Bautismo de buceo con tanque desde la playa\" en Fernando de Noronha, con EmNoronha",
+    "cta": "Dejanos tu duda sobre el buceo",
+    "reserva": "Cada duda respondida saca un freno del reel fijado.",
+    "mide": "Respuestas a la caja y mensajes"
+   },
+   "ig": {
+    "tipo": "Solo historias",
+    "pieza": "Sin publicación en el feed"
+   },
+   "tt": {
+    "tipo": "Sin publicación",
+    "pieza": "—"
+   },
+   "hist": [
+    "Caja de preguntas: \"¿Qué te frena para bucear? Nadar, la edad, el miedo, el precio… 👇\".",
+    "Al día siguiente, respondé 3 en historias con la ficha del tour en la app (requisitos, qué incluye, cancelación gratis hasta 48 h antes) y el sticker de enlace a cuantosale.uy/destino/fernando-de-noronha?utm_source=ig_historia."
+   ],
+   "acc": [
+    "A los creadores que respondieron: Brief para creadores, su link con utm y su código."
+   ],
+   "n": 15
+  },
+  {
+   "f": "2026-10-29",
+   "obj": "resolver",
+   "cat": "experiencias",
+   "tema": "Historias: ¿qué te frena para reservar una excursión?",
+   "com": {
+    "prod": "Respuestas sobre tours y reservas",
+    "cta": "Dejanos tu duda y te ayudamos a encontrar la información",
+    "reserva": "Cada duda respondida saca un freno. Las más repetidas van al reel del 6/11.",
+    "mide": "Respuestas a la caja y mensajes"
+   },
+   "ig": {
+    "tipo": "Solo historias",
+    "pieza": "Sin publicación en el feed"
+   },
+   "tt": {
+    "tipo": "Sin publicación",
+    "pieza": "—"
+   },
+   "hist": [
+    "Caja de preguntas: \"¿Qué te frena para reservar una excursión? Precio, horarios, qué incluye, cómo se reserva… 👇\".",
+    "Al día siguiente, respondé 3 en historias, con la información real (ficha del tour, seña, cancelación)."
+   ],
+   "acc": [
+    "Mirá la promoción: alcance, clics y costo por clic. Si corresponde cortar, pausala (reglas en Estrategia > Anuncios).",
+    "Anotá las dudas en la nota de la semana: son el guion del reel del 6/11."
+   ],
    "n": 16
   },
   {
