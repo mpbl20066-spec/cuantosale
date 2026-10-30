@@ -126,6 +126,11 @@
   .hc-fbtn[aria-expanded="true"]{background:var(--cel-soft);color:var(--azul)}
   .hc-fbtn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .hc-n{position:absolute;top:3px;right:3px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#F5C518;color:#0F1B2D;font:800 10px/16px var(--fb);font-style:normal;text-align:center}
+  .hq{position:relative;margin:12px 0 0}
+  .hq svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ink2);pointer-events:none}
+  .hq input{width:100%;box-sizing:border-box;min-height:46px;padding:0 44px;border:1px solid var(--card-border,var(--line));border-radius:14px;background:var(--card-bg,var(--surface));color:var(--ink);font:600 14.5px var(--fb)}
+  .hq input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .hq button{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;border-radius:10px;background:transparent;color:var(--ink2);font-size:20px;cursor:pointer}
   .hc[hidden]{display:none}
   .hc{margin:8px 0 14px;padding:14px;border:1px solid var(--card-border,var(--line));border-radius:16px;background:var(--card-bg,var(--surface))}
   .hc-cat{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
@@ -1681,14 +1686,14 @@
      y el estado de hoteles de S (lista, elegido, habitacion, categoria...). usarParada() guarda ese estado en su parada
      y trae el de la otra; enParada() corre algo en otra parada y vuelve. Sin PAR siempre es la unica. */
   var PA = 0, HK = destKey, HN = DEST1, HIDA = IDA, HVUELTA = VUELTA, HNOCHES = NOCHES;
-  var CAMPOS_H = ['hotel', 'habitacion', 'catH', 'playaSel', 'sinAloj', 'hotelesListos', 'cargandoH', 'aiListo', 'avisoH', 'nH', 'filtrosH', 'promH'];
+  var CAMPOS_H = ['hotel', 'habitacion', 'catH', 'playaSel', 'sinAloj', 'qH', 'hotelesListos', 'cargandoH', 'aiListo', 'avisoH', 'nH', 'filtrosH', 'promH'];
   function usarParada(i) {
     if (!PAR || i === PA) return;
     var g = PAR.l[PA].h = { HOTELES: HOTELES }; CAMPOS_H.forEach(function (c) { g[c] = S[c]; });
     var p = PAR.l[i]; PA = i; HK = p.k; HN = p.nom; HIDA = p.ida; HVUELTA = p.vuelta; HNOCHES = p.noches;
     if (p.h) { HOTELES = p.h.HOTELES; CAMPOS_H.forEach(function (c) { S[c] = p.h[c]; }); return; }
     HOTELES = []; CAMPOS_H.forEach(function (c) { S[c] = undefined; });
-    S.catH = PAR.l[0].h ? PAR.l[0].h.catH : 'economico'; S.playaSel = 'todas'; S.nH = MAX_HOTELES; S.hotel = ''; S.habitacion = null; S.sinAloj = false;
+    S.catH = PAR.l[0].h ? PAR.l[0].h.catH : 'economico'; S.playaSel = 'todas'; S.nH = MAX_HOTELES; S.hotel = ''; S.habitacion = null; S.sinAloj = false; S.qH = '';
   }
   function enParada(i, fn) { if (!PAR || i === PA) return fn(); var a = PA; usarParada(i); try { return fn(); } finally { usarParada(a); } }
   /* Lo de cada parada para el presupuesto: hotel elegido, habitacion y precio estimado. */
@@ -2201,8 +2206,11 @@
     var playas = playasDe(), todos = ordenarHoteles().filter(function (h) { return !h.tipo || h.tipo === S.catH; });
     if (S.playaSel !== 'todas' && !playas.some(function (x) { return x[0] === S.playaSel; })) S.playaSel = 'todas';
     var lista = todos.filter(function (h) { return S.playaSel === 'todas' || h.zona === S.playaSel; });
+    /* Buscar por nombre: mira todos los alojamientos de la parada (sin importar categoria ni zona) y los muestra todos. */
+    var qH = normT(S.qH), buscando = qH.length > 0;
+    if (buscando) lista = ordenarHoteles().filter(function (h) { return normT(h.nom).indexOf(qH) >= 0; });
     /* Las socias van siempre a la vista, arriba; los 4 por razon distinta se eligen entre los de Booking. */
-    var socias = lista.filter(function (h) { return h.socia; }), mostrados = socias.concat(cuatroHoteles(lista.filter(function (h) { return !h.socia; })));
+    var socias = lista.filter(function (h) { return h.socia; }), mostrados = buscando ? lista.slice(0, 20) : socias.concat(cuatroHoteles(lista.filter(function (h) { return !h.socia; })));
     /* En una ciudad sin playa (Sao Paulo, Gramado...) las zonas son barrios: se titula "Zona" y llevan el pin. */
     var ciudad = HOTELES.some(function (h) { return h.barrio; });
     var zchip = function (val, txt) { return '<button type="button" class="hc-chip' + (S.playaSel === val ? ' is-on' : '') + '" data-zona="' + esc(val) + '" aria-pressed="' + (S.playaSel === val) + '">' + (val === 'todas' ? '' : '<span aria-hidden="true">' + (val === 'Otras zonas' || ciudad ? '📍' : '🏖️') + '</span> ') + esc(txt) + '</button>'; };
@@ -2223,8 +2231,11 @@
     var filtros = categoria || selector ? '<div class="hc-bar"><div class="hc-res"><span>Filtros</span><b>' + esc([categoria ? catTxt : '', selector ? (S.playaSel === 'todas' ? 'Todas las zonas' : S.playaSel) : ''].filter(Boolean).join(' · ')) + '</b></div>' +
       '<button type="button" class="hc-fbtn" data-filtros-h="1" aria-expanded="' + !!S.filtrosH + '" aria-controls="hcPanel" aria-label="Filtrar alojamiento por categoría y zona">' + ic(iFil, 24) + (nFil ? '<i class="hc-n">' + nFil + '</i>' : '') + '</button></div>' +
       '<div class="hc" id="hcPanel"' + (S.filtrosH ? '' : ' hidden') + '>' + categoria + selector + '</div>' : '';
-    var vacio = !lista.length ? '<div class="hp-vacio"><p>No encontramos alojamientos ' + (S.catH === 'all-inclusive' ? 'All Inclusive' : 'de esta categoría') + ' para estas fechas.</p></div>' : '';
-    return cab + aviso + filtros + vacio +
+    var buscador = '<div class="hq">' + ic('<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>', 20) +
+      '<input id="hq" type="search" inputmode="search" autocomplete="off" enterkeyhint="search" placeholder="Buscar alojamiento por nombre" value="' + esc(S.qH || '') + '" aria-label="Buscar alojamiento por nombre">' +
+      (buscando ? '<button type="button" data-hq-borrar="1" aria-label="Borrar búsqueda">×</button>' : '') + '</div>';
+    var vacio = buscando && !lista.length ? '<div class="hp-vacio"><p>No encontramos ningún alojamiento con “' + esc(S.qH) + '”.</p></div>' : !lista.length ? '<div class="hp-vacio"><p>No encontramos alojamientos ' + (S.catH === 'all-inclusive' ? 'All Inclusive' : 'de esta categoría') + ' para estas fechas.</p></div>' : '';
+    return cab + aviso + buscador + (buscando ? '' : filtros) + vacio +
       mostrados.map(function (h, i) {
         var on = !S.sinAloj && S.hotel === h.id, ins = h.socia ? 'Recomendada' : h.ejemplo ? '' : (POR_QUE_H[h.id] || ''), feats = h.serv.filter(Boolean).map(function (x) { return String(x).split(/[·•]/)[0].trim(); }).filter(Boolean).slice(0, 2);
         return '<div class="opt ho' + sel(on) + '" role="button" tabindex="0" data-sel="hotel:' + h.id + '" aria-pressed="' + on + '">' + tick +
@@ -2239,7 +2250,8 @@
           '<div class="ho__p"><div><b>' + f(precioHotel(h)) + '</b><small>total · ' + nochesTxt(HNOCHES) + ' · ' + personas + '</small></div>' +
           (h.ejemplo ? '' : '<button type="button" class="ho__ver" data-habs="' + esc(h.id) + '">' + (S.habitacion && S.habitacion.hotelId === h.id ? 'Cambiar habitación' : 'Elegir habitación') + '</button>') + '</div></div>';
       }).join('') +
-      (lista.length > mostrados.length ? '<p class="f-sub" style="text-align:center;margin-top:8px">Elegimos ' + (mostrados.length - socias.length) + ' opciones distintas entre ' + (lista.length - socias.length) + ' alojamientos' + (S.playaSel === 'todas' ? '' : ' en ' + esc(S.playaSel)) + '.</p>' : '') + sinAlojBtn;
+      (buscando && lista.length > mostrados.length ? '<p class="f-sub" style="text-align:center;margin-top:8px">Mostramos los primeros ' + mostrados.length + ' de ' + lista.length + '. Escribí más del nombre para afinar.</p>' : '') +
+      (!buscando && lista.length > mostrados.length ? '<p class="f-sub" style="text-align:center;margin-top:8px">Elegimos ' + (mostrados.length - socias.length) + ' opciones distintas entre ' + (lista.length - socias.length) + ' alojamientos' + (S.playaSel === 'todas' ? '' : ' en ' + esc(S.playaSel)) + '.</p>' : '') + sinAlojBtn;
   }
   /* Dos paradas: una pestana por parada con su hotel elegido; se elige el alojamiento de cada una por separado. */
   function tabsParadas() {
@@ -2560,6 +2572,7 @@
         '<button type="button" class="ls-cta" data-ir="6" data-evento="flujo_listo_ver_opciones">' + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 24) + '<span><b>Continuar organizando mi viaje</b><small>Ver vuelos, alojamiento y experiencias</small></span></button>' +
         (guardado ? ''
           : '<button type="button" class="ls-sec" data-guardar-ahora="1">' + ic('<path d="M6 3h12v18l-6-4.500L6 21z"/>', 22) + 'Guardar mi viaje</button>') +
+        '<button type="button" class="ls-sec" data-compartir="1">' + ic('<circle cx="17.5" cy="6" r="2.6"/><circle cx="6.5" cy="12" r="2.6"/><circle cx="17.5" cy="18" r="2.6"/><path d="m8.8 10.8 6.4-3.5M8.8 13.2l6.4 3.5"/>', 22) + (S.compMsg || 'Compartir mi viaje') + '</button>' +
       '</div>' +
       (S.avisoGuardado ? '<p class="g-p g-p--s">' + esc(S.avisoGuardado) + '</p>' : '') +
       (guardado ? '' : '<div class="ls-accs">' +
@@ -3231,7 +3244,7 @@
     var d = datosFinal(), txt = resumenTexto(d);
     track("flujo_compartir", { total: Math.round(d.total) });
     if (window.CS_GAME) CS_GAME.evento("compartir", refViaje());
-    var avisar = function (m) { S.compMsg = m; render(false); if (m && m.indexOf("Preparando") < 0) setTimeout(function () { S.compMsg = ""; if (S.paso === 4) render(false); }, 2500); };
+    var avisar = function (m) { S.compMsg = m; render(false); if (m && m.indexOf("Preparando") < 0) setTimeout(function () { S.compMsg = ""; if (S.paso === 4 || S.paso === 5) render(false); }, 2500); };
     var soloTexto = function () {
       if (navigator.share) { navigator.share({ title: "Mi viaje a " + DEST, text: txt }).catch(function () {}); return; }
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { avisar("¡Copiado!"); }).catch(function () {});
@@ -3333,7 +3346,7 @@
   function render(scrollTop) {
     if (ultimoRes || S.res.vuelo || S.res.aloj) guardarReservados();
     pintarPasos(); pintarTotal();
-    if (S.paso === 4 && window.CSTarjeta) CSTarjeta.precalentar(datosTarjeta());
+    if ((S.paso === 4 || S.paso === 5) && window.CSTarjeta) CSTarjeta.precalentar(datosTarjeta());
     $('main').dataset.paso = S.paso;
     /* Abriendo un viaje guardado: hasta tener vuelos y hoteles se muestra solo un aviso (no el paso de vuelos) */
     $('main').innerHTML = S.abriendo ? '<div class="cal-cargando" role="status" style="justify-content:center;padding:48px 16px"><span class="fl-spin" aria-hidden="true"></span>Abriendo tu viaje…</div>' : [null, pantalla1, pantalla2, pantalla3, pantalla4, pantalla5, pantalla6, pantalla7, pantalla8, pantalla9, pantalla10, pantalla11, pantalla12, pantalla13][S.paso]();
@@ -3645,6 +3658,13 @@
   $('main').addEventListener('keydown', function (e) {
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][data-sel],[role=button][data-extra],[role=button][data-entre]')) { e.preventDefault(); e.target.click(); }
   });
+  $('main').addEventListener('input', function (e) {
+    if (e.target.id !== 'hq') return;
+    var pos = e.target.selectionStart;
+    S.qH = e.target.value; S.nH = MAX_HOTELES; track('flujo_hotel_buscar', { largo: S.qH.length });
+    var y = $('main').scrollTop; render(false); $('main').scrollTop = y;
+    var i = $('hq'); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (x) {} }
+  });
   $('main').addEventListener('change', function (e) {
     if (e.target.dataset.diaIn) {
       var q = e.target.dataset.diaIn, v = parseFloat(e.target.value), tasa = window.CSMoneda && CSMoneda.tasa ? CSMoneda.tasa() : 1;
@@ -3753,7 +3773,7 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa-vuelos],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa-vuelos],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-hq-borrar],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
@@ -3811,6 +3831,7 @@
       elegirMasBarato();
     }
     else if (t.dataset.zona) { S.playaSel = t.dataset.zona; S.nH = MAX_HOTELES; elegirMasBarato(); track('flujo_playa', { playa: S.playaSel, via: 'chip' }); }
+    else if (t.dataset.hqBorrar) { S.qH = ''; track('flujo_hotel_buscar_borrar', {}); render(false); var hq = $('hq'); if (hq) hq.focus(); return; }
     else if (t.dataset.filtrosH) { S.filtrosH = !S.filtrosH; track('flujo_filtros_hotel', { abierto: S.filtrosH }); }
     else if (t.dataset.menoshoteles) {
       S.nH = MAX_HOTELES; track('flujo_ver_menos', { lista: 'hoteles' }); render(false);
