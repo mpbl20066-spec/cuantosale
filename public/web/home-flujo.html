@@ -1092,6 +1092,15 @@
   .f-tr__i:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .f-h3.is-tr{box-shadow:0 2px 0 #F5C518}
   .rt-m{font-size:8.5px}
+  .trc__img--none{display:grid;place-items:center;color:var(--ink2)}
+  .f-tr__q{margin-left:10px;padding:2px 0;border:0;background:transparent;color:var(--ink2);font:700 12px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .f-tr__q:hover{color:var(--ink)}
+  .f-tr__n{background:#2A3A55!important;color:#fff!important}
+  .f-tr__i.is-on .f-tr__n{background:#F5C518!important;color:#0B1F3A!important}
+  .f-ruta{margin:14px 0 16px!important}
+  .f-tr__hint{margin:12px 2px 6px!important}
+  .f-tr__res{margin:16px 0 22px!important}
+  .f-ruta .f-tr{gap:10px!important}
   .rt-m--p{fill:var(--ink);font-weight:800}
   .f-tr__i{position:relative}
   .f-tr__i>span:nth-child(2){flex:1;min-width:0}
@@ -2164,7 +2173,7 @@
       '<ol class="f-tr" aria-label="Tramos del viaje combinado">' + datos.map(function (d) {
         return '<li class="f-tr__i' + (sel === d.n ? ' is-on' : '') + '" data-tr="' + d.n + '" role="button" tabindex="0" aria-pressed="' + (sel === d.n) + '"><span class="f-tr__n">' + d.n + '</span><span><b>' + esc(d.de) + ' → ' + esc(d.a) + '</b><small>' + fdc(d.fecha) + ' · ' + d.txt + '</small></span><em class="f-tr__a">' + (sel === d.n ? 'Editando' : 'Cambiar') + '</em></li>';
       }).join('') + '</ol></details>' +
-      '<p class="f-tr__res"><span>Transfers: <b>' + activos + ' de 3 tramos</b></span><span>Subtotal <b>' + f(trTotal() + entreTotal()) + '</b></span></p>';
+      '<p class="f-tr__res"><span>Transfers: <b>' + activos + ' de 3 tramos</b></span><span>Subtotal <b>' + f(trTotal() + entreTotal()) + '</b>' + (activos ? ' <button type="button" class="f-tr__q" data-quitar-tr="1">Quitar todos</button>' : '') + '</span></p>';
   }
   /* Tarjeta de un transfer del aeropuerto para el tramo 1 o el 3, con el precio de ESE tramo. */
   function trCard(t, n) {
@@ -2182,11 +2191,13 @@
     var tSel = n === 1 ? trasl() : (n === 3 ? trasl3() : null), durTr = tSel && tSel.dur ? tSel.dur : '';
     var cab = '<h2 class="f-h3 is-tr" data-trb="' + n + '">' + ic(I.van, 22) + 'Tramo ' + n + ' · ' + esc(r[0]) + ' → ' + esc(r[1]) + '</h2><p class="f-sub">' + fdc(r[2]) + (n === 2 ? ' · ' + PAR.tramo.km + ' km · unas ' + horasTxt(PAR.tramo.horas) + (ferry ? ' con el cruce en barco' : '') : (durTr ? ' · ' + esc(durTr) : '')) + ' · precio de este tramo</p>';
     var tiene = n === 1 ? !!S.traslado : (n === 3 ? !!S.t3 : !!S.entre);
-    var no = '<button type="button" class="f-sin f-sin--tr' + (!tiene ? ' is-on' : '') + '" data-notr="' + n + '">No necesito transfer en este tramo (voy por mi cuenta)' + (!tiene ? ' ✓' : '') + '</button>';
-    if (n === 2) return cab + cardEntre(true) + no + '<button type="button" class="f-sin" data-sin-transfer="1">Continuar sin transfer</button>';
-    return cab + chips([['todos', 'Todos'], ['priv', 'Privado'], ['comp', 'Compartido']], S.fTras, 'tras') +
-      TRASLADOS.filter(function (t) { return S.fTras === 'todos' || S.fTras === t.tipo; }).map(function (t) { return trCard(t, n); }).join('') +
-      no + '<button type="button" class="f-sin" data-sin-transfer="1">Continuar sin transfer</button>';
+    /* "Por mi cuenta" es una tarjeta mas del tramo (mismo diseno que las otras): $ 0, y se marca igual cuando es la elegida. */
+    var no = '<div class="opt trc' + sel(!tiene) + '" role="button" tabindex="0" data-notr="' + n + '" aria-pressed="' + !tiene + '">' + tick +
+      '<div class="trc__img trc__img--none" role="img" aria-label="Por mi cuenta">' + ic('<circle cx="12" cy="5" r="2"/><path d="M12 8v6m0 0-3 6m3-6 3 6M8.500 11.500 12 10l3.500 1.500"/>', 38) + '</div>' +
+      '<div class="trc__b"><b>Por mi cuenta / Sin transfer</b><small>Traslado por cuenta propia</small></div>' +
+      '<div class="trc__p"><b>' + f(0) + '</b><small>Tramo ' + n + '</small></div></div>';
+    if (n === 2) return cab + cardEntre(true) + no;
+    return cab + TRASLADOS.map(function (t) { return trCard(t, n); }).join('') + no;
   }
   function bloqueCombinar() {
     if (MODO !== 'avion' || NOCHES < 2 || !combDefecto(PAR ? PAR.l[0].k : destKey)) return '';
@@ -4051,9 +4062,10 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-sel3],[data-notr],[data-tr],[data-vdet],[data-vdet-elegir],[data-comb],[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa-vuelos],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-hq-borrar],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-quitar-tr],[data-sel3],[data-notr],[data-tr],[data-vdet],[data-vdet-elegir],[data-comb],[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa-vuelos],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-hq-borrar],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
+    if (t.dataset.quitarTr) { S.traslado = null; S.t3 = null; S.entre = false; track('flujo_transfer_quitar_todos', {}); render(false); $('main').scrollTop = y; return; }
     if (t.dataset.sel3) { S.t3 = S.t3 === t.dataset.sel3 ? null : t.dataset.sel3; track('flujo_transfer_tramo', { tramo: 3, opcion: S.t3 || 'ninguno' }); render(false); $('main').scrollTop = y; return; }
     if (t.dataset.notr) { var nt = t.dataset.notr; if (nt === '1') S.traslado = null; else if (nt === '3') S.t3 = null; else S.entre = false; track('flujo_transfer_tramo', { tramo: +nt, opcion: 'ninguno' }); render(false); $('main').scrollTop = y; return; }
     if (t.dataset.tr) { var tn = +t.dataset.tr; S.tramoSel = tn; track('flujo_tramo', { tramo: tn }); render(false); $('main').scrollTop = y; if (S.tramoSel) { var tb = $('main').querySelector('[data-trb~="' + tn + '"]'); if (tb && tb.scrollIntoView) tb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } return; }
