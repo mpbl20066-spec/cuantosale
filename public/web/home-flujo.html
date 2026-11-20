@@ -177,7 +177,7 @@
   .ho__mas span{flex:1;font-weight:600}
   .ho__mas b{display:block;font-size:13px;color:var(--ink)}
   .ho__masbtn{flex:0 0 auto;padding:9px 11px;border:1.5px solid var(--ink);border-radius:99px;background:transparent;color:var(--ink);font-size:12px;font-weight:800;cursor:pointer;max-width:92px;line-height:1.15}
-  .x-h3{align-items:center;gap:10px;margin:18px 0 8px}
+  .x-h3{align-items:center;gap:10px;margin:30px 0 10px}
   .x-h3 span:last-child{display:block;line-height:1.2}
   .x-h3 small,.x-otros__h small{display:block;font-family:var(--fb);font-size:12px;font-weight:600;color:var(--ink2)}
   .x-ico{flex:0 0 38px;height:38px;border-radius:50%;background:var(--cel-soft);display:grid;place-items:center;color:var(--azul)}
@@ -198,10 +198,13 @@
   .x-add{flex:0 0 auto;padding:8px 10px;border:1.5px solid var(--control-border);border-radius:99px;background:var(--surface);color:var(--ink);font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
   .x-add.is-on{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
   /* Paso Extras: "+ Agregar" / "✓ Agregado" (acento amarillo), "Ver detalles" discreto, "No incluir" y barra de resumen */
-  .x-add--main{padding:9px 14px;border-color:#F5C518;background:transparent;color:var(--ink)}
-  .x-add--main.is-on{background:#F5C518;border-color:#F5C518;color:#111}
-  .x-tit{cursor:pointer}.x-tit:hover{text-decoration:underline;text-underline-offset:3px}
-  .x-link{display:block;margin:6px 0 0;padding:0;border:0;background:transparent;color:var(--ink2);font:600 12px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .x-add--main{padding:9px 14px;border:1.5px solid var(--line);background:transparent;color:var(--ink2)}
+  .x-add--main:hover{border-color:var(--ink2);color:var(--ink)}
+  .x-add--main.is-on{border-color:#F5C518;background:rgba(245,197,24,.12);color:var(--ink)}
+  .x-tit{cursor:pointer}
+  .x-link{display:block;margin:6px 0 0;padding:0;border:0;background:transparent;color:var(--ink2);font:500 12px var(--fb);text-decoration:none;opacity:.8;cursor:pointer}
+  .x-link:hover{opacity:1;color:var(--ink)}
+  html[data-pagina="flujo"] .f-scroll[data-paso="3"]{padding-bottom:230px!important}
   .dd-none{padding:6px 10px;border:1.5px solid var(--line);border-radius:99px;background:transparent;color:var(--ink2);font:700 11.5px var(--fb);cursor:pointer;white-space:nowrap}
   .dd-none.is-sel{border-color:#F5C518;background:rgba(245,197,24,.12);color:var(--ink)}
   .dd-o{cursor:pointer}.dd-o.is-sel{cursor:pointer}
@@ -1156,7 +1159,7 @@
   [data-theme="night"] .pv-bar u{background:#4C9BE8!important}
   /* Monto editable de comidas y transporte local */
   /* Comidas y transporte local en Extras: cajas 2x2 como en la app */
-  .dd{margin:22px 0 4px}
+  .dd{margin:34px 0 4px}
   .dd-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 8px}
   .dd-h h2{margin:0;font-family:var(--fh);font-size:17px;font-weight:800;color:var(--ink)}
   .dd-h small{font-size:11.5px;font-weight:700;color:var(--ink2)}
@@ -2546,7 +2549,7 @@
       (e.real ? '' : '<span class="x-ej">Precio de ejemplo</span>') +
       (esTour ? '<button type="button" class="x-link" data-tdet="' + e.id + '">Ver detalles</button>' : '') + '</div>' +
       '<div class="xr__r"><div class="x-p"><b>' + f(e.precio) + '</b><small>' + unidad.replace(/^ \/ /, '/ ') + '</small>' + (e.temporada ? '<span class="x-temp">' + esc(e.temporada) + '</span>' : '') + '</div>' +
-      (esTour ? '<button type="button" class="x-add x-add--main' + (on ? ' is-on' : '') + '" data-extra="' + e.id + '" aria-pressed="' + on + '">' + (on ? '✓ Agregado' : '+ Agregar') + '</button>' : '') + '</div></div>';
+      (esTour ? '<button type="button" class="x-add x-add--main' + (on ? ' is-on' : '') + '" data-extra="' + e.id + '" aria-pressed="' + on + '">' + (on ? '✓ Agregado' : '+ Sumar') + '</button>' : '') + '</div></div>';
   }
   var MAS_TXT = { tours: 'Ver más tours', tours2: 'Ver más tours', tras: 'Ver más traslados' };
   var TITULO_X = { tours: ['🌴', PAR ? 'Tours en ' + DEST1 : 'Tours y actividades', 'Experiencias y traslados en '], tours2: ['🌴', PAR ? 'Tours en ' + PAR.l[1].nom : '', ''] };
