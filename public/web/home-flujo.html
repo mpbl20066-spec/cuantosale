@@ -1740,7 +1740,7 @@
   /* Lo de cada parada para el presupuesto: hotel elegido, habitacion y precio estimado. */
   function alojParadas() {
     return (PAR ? PAR.l : [{ k: destKey, nom: DEST1, noches: NOCHES, ida: IDA, vuelta: VUELTA }]).map(function (p, i) {
-      return enParada(i, function () { var h = hotel(); return { p: p, i: i, h: h, hab: S.habitacion && S.habitacion.hotelId === h.id ? S.habitacion.nombre : '', est: h.sin ? 0 : precioHotelEstimado(h) }; });
+      return enParada(i, function () { var h = hotel(); return { p: p, i: i, h: h, no: !!S.sinAloj, hab: S.habitacion && S.habitacion.hotelId === h.id ? S.habitacion.nombre : '', est: h.sin ? 0 : precioHotelEstimado(h) }; });
     });
   }
   /* Total del alojamiento: con dos paradas, la suma de las dos (o lo que la persona dijo que pago por todo). */
@@ -2348,7 +2348,7 @@
     return '<div class="f-par" role="group" aria-label="Alojamiento de cada parada">' + alojParadas().map(function (x) {
       var on = x.i === PA;
       return '<button type="button" class="f-par__b' + (on ? ' is-on' : '') + '" data-parada="' + x.i + '" aria-pressed="' + on + '"><b>' + esc(x.p.nom) + ' · ' + nochesTxt(x.p.noches) + '</b>' +
-        '<small>' + (x.h.sin ? (on && S.cargandoH ? 'Buscando…' : 'Sin elegir') : esc(x.h.nom) + ' · ' + f(x.est)) + '</small></button>';
+        '<small>' + (x.h.sin ? (on && S.cargandoH ? 'Buscando…' : (x.no ? 'Sin alojamiento' : 'Sin elegir')) : esc(x.h.nom) + ' · ' + f(x.est)) + '</small></button>';
     }).join('') + '</div>';
   }
   /* Para no abrumar: hasta 4 alojamientos, cada uno por una razon distinta (la que se ve en la etiqueta de la foto):
@@ -3512,7 +3512,7 @@
          como si fuera real. El viaje sigue sin alojamiento y la persona lo puede reintentar. */
       enParada(pi, function () {
         HOTELES = []; S.sinAloj = true; S.habitacion = null;
-        S.avisoH = 'No pudimos consultar Booking ahora (' + (e.message || 'error') + '). Podés seguir sin alojamiento y sumarlo después.';
+        S.avisoH = 'Por ahora podés armar este tramo sin alojamiento y sumarlo más adelante.'; track('flujo_hoteles_error', { motivo: String(e && e.message || 'error').slice(0, 80), parada: pi + 1 });
       });
     }).then(function () {
       enParada(pi, function () { S.cargandoH = false; track('flujo_hoteles', { reales: !!HOTELES.length && !HOTELES[0].ejemplo, cantidad: HOTELES.length, parada: pi + 1 }); });
@@ -3783,6 +3783,8 @@
   $('cta').addEventListener('click', function () {
     track('flujo_continuar', { desde: S.paso, total: Math.round(totalHastaAhora()) });
     if (MODO === 'avion' && S.paso === 1 && S.sub !== 't') { ir(2, 'continuar'); return; }
+    /* Seguir sin elegir hotel deja el tramo resuelto como "Sin alojamiento" (no queda en blanco ni suma un hotel de ejemplo). */
+    if (S.paso === 2 && hotel().sin && !S.cargandoH) S.sinAloj = true;
     if (S.paso === 2 && PAR && PA === 0) { usarParada(1); track('flujo_parada', { parada: 2, via: 'continuar' }); if (!S.hotelesListos) cargarHoteles(); render(true); return; }
     if (MODO === 'avion' && S.paso === 2) { ir(1, 'continuar', 't'); return; }
     if (MODO === 'avion' && S.paso === 1) { ir(3, 'continuar'); return; }
