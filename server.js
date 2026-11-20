@@ -1851,7 +1851,7 @@ function registrarTransferencia(req, res, body) {
  * El browse quedó en un paso y cuesta un crédito.
  */
 async function buscarVuelos(req, res, body) {
-  if (!flightProviders.isLive()) return sendJson(res, 503, { provider: 'serpapi', offers: [], error: 'La búsqueda de vuelos no está disponible en este momento.' });
+  if (!flightProviders.isLive()) return sendJson(res, 503, { provider: flightProviders.providerName(), offers: [], error: 'La búsqueda de vuelos no está disponible en este momento.' });
   if (limited('vuelos:' + clientIp(req))) return sendJson(res, 429, { error: 'Demasiadas búsquedas seguidas. Esperá un minuto y probá de nuevo.' });
   body = body && typeof body === 'object' ? body : {};
   const origin = String(body.origen || '').toUpperCase();
