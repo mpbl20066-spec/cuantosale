@@ -397,7 +397,7 @@
 
   /* Hero con foto: panoramica de playa con un degradado oscuro (78 % arriba, 70 % al medio, 88 % abajo) para que el titulo
      blanco y los botones amarillos se lean perfecto. En celular va la version liviana de la foto. */
-  .q-hero{position:relative;overflow:hidden;margin:12px 0 26px;border-radius:24px;background:#0A101A url(home-portada-mob.jpg) 50% 45%/cover no-repeat}
+  .q-hero{position:relative;overflow:hidden;margin:12px 0 26px;border-radius:24px;background:#0A101A url(home-portada-mob.jpg) center/cover no-repeat}
   .q-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,13,24,.78) 0%,rgba(7,13,24,.7) 45%,rgba(7,13,24,.88) 100%)}
   .q-hero__in{position:relative;padding:12px 14px 18px}
   .q-hero .q-h{margin:0 0 18px;color:#fff;text-shadow:0 2px 16px rgba(0,0,0,.4)}
@@ -854,13 +854,30 @@
     var op = function (d) { return '<option value="' + escH(d.k) + '">' + escH(d.name) + '</option>'; };
     selDest.innerHTML = '<option value="">Elegí un destino</option><optgroup label="Más buscados">' + pops.map(op).join('') + '</optgroup><optgroup label="Todos los destinos">' + l.map(op).join('') + '</optgroup>';
   })();
-  var tabs = Array.prototype.slice.call(document.querySelectorAll('.q-camino button'));
-  function setTab(n) {
-    MODOP = n; todos = false;
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.q-camino button')), hero = document.querySelector('.q-hero'), tmIgualar = null;
+  /* Lo que cambia de un panel al otro: pestaña activa, paneles y titulo. No toca los datos. */
+  function vista(n) {
     var d = n === 'destino';
     tabs.forEach(function (b) { var on = b.dataset.tab === n; b.setAttribute('aria-selected', String(on)); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-panel]'), function (el) { el.hidden = el.dataset.panel !== n; });
     document.getElementById('q-h').innerHTML = d ? '¿A dónde querés ir? <em>Te decimos cuánto sale.</em>' : '¿Con cuánta plata contás? <em>Te decimos a dónde llegás.</em>';
+  }
+  /* Los dos paneles no miden lo mismo. El hero mide los dos (sin pintar entre medio) y se queda con el alto del mas alto:
+     asi, al cambiar de pestaña, el bloque no cambia de alto y la foto de fondo (cover, centrada) no se reescala ni se mueve.
+     Se vuelve a medir cuando cambia el ancho, cargan las fuentes o aparecen las busquedas recientes. */
+  function igualarHero() {
+    var activo = MODOP, max = 0;
+    hero.style.minHeight = '';
+    ['presupuesto', 'destino'].forEach(function (m) { vista(m); max = Math.max(max, hero.offsetHeight); });
+    vista(activo);
+    hero.style.minHeight = max + 'px';
+  }
+  window.addEventListener('resize', function () { clearTimeout(tmIgualar); tmIgualar = setTimeout(igualarHero, 120); });
+  window.addEventListener('load', igualarHero);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(igualarHero);
+  function setTab(n) {
+    MODOP = n; todos = false;
+    vista(n);
     lista.dataset.modo = n;
     errEl.hidden = true;
     pintarVuelta(); pintar(false); ordenar();
@@ -878,6 +895,7 @@
   });
   pintar(false); nota(); cargar();
   if (/[?&]camino=destino/.test(location.search)) setTab('destino');
+  igualarHero();
   document.getElementById('q-rap').addEventListener('click', function (e) {
     var c = e.target.closest('button'); if (!c || c.disabled) return;
     rango.value = String(c.dataset.monto / tasaAct()); pintar(true); ordenar();
@@ -892,7 +910,7 @@
   function recientes() {
     var sec = document.getElementById('q-rec'), R = window.CSCuenta && CSCuenta.recientes;
     var l = R ? R.leer().filter(function (b) { return NOMBRE[b.dest]; }) : [];
-    if (!l.length) { sec.hidden = true; sec.innerHTML = ''; return; }
+    if (!l.length) { sec.hidden = true; sec.innerHTML = ''; igualarHero(); return; }
     var m = new Date(); m.setDate(m.getDate() + 1);
     var manana = m.getFullYear() + '-' + String(m.getMonth() + 1).padStart(2, '0') + '-' + String(m.getDate()).padStart(2, '0');
     sec.innerHTML = '<div class="q-rec__h"><h2 id="q-rec-t">Recientes</h2><button type="button" data-rec-borrar>Borrar</button></div><ul>' + l.slice(0, 6).map(function (b) {
@@ -902,6 +920,7 @@
       return '<li><a href="home-destino.html?' + new URLSearchParams(q).toString() + '"><img src="' + fotoDe(b.dest) + '" width="30" height="30" loading="lazy" decoding="async" alt="">' + escH(NOMBRE[b.dest]) + (vale ? '<small>' + fc(b.dep) + '</small>' : '') + '</a></li>';
     }).join('') + '</ul>';
     sec.hidden = false;
+    igualarHero();
   }
   document.getElementById('q-rec').addEventListener('click', function (e) {
     if (!e.target.closest('[data-rec-borrar]')) return;
