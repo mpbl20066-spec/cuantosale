@@ -29,7 +29,8 @@
   .f-logo small{display:block;font-family:var(--fb);font-weight:500;font-size:10.5px;color:var(--ink2)}
 
   /* Indicador de progreso */
-  .f-steps{flex:0 0 auto;display:flex;padding:8px 14px 6px;margin:0;list-style:none}
+  .f-steps{flex:0 0 auto;display:flex;min-height:52px;padding:8px 14px 6px;margin:0;list-style:none;position:relative;z-index:5;background:var(--bg);box-sizing:border-box}
+  .f-bar{position:relative;z-index:5;background:var(--bg)}
   .f-step{flex:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:transparent;padding:0;color:var(--ink2);font-size:10.5px;font-weight:600;text-align:center;line-height:1.15;cursor:default}
   .f-step::before{content:"";position:absolute;top:13px;right:50%;width:100%;height:2px;background:var(--line)}
   .f-step:first-child::before{display:none}
@@ -1738,9 +1739,10 @@
     var out = [];
     if (MODO === 'avion' && VUELOS.length && S.vuelo && S.reales.vuelo == null) {
       var minV = Math.min.apply(null, VUELOS.map(precioVuelo)), dv = precioVuelo(vuelo()) - minV;
-      if (dv >= 1) out.push({ k: 'vuelo', txt: 'el vuelo más barato', v: dv });
       var df = datosFechas();
+      /* La fecha se compara contra el vuelo elegido: ya incluye la diferencia con el mas barato, no se suma aparte. */
       if (df && df.alts.length) out.push({ k: 'fecha', txt: 'saliendo el ' + diaLargo(df.alts[0].dep), v: df.base - df.alts[0].pp * pax });
+      else if (dv >= 1) out.push({ k: 'vuelo', txt: 'el vuelo más barato', v: dv });
     }
     if (MODO === 'avion' && trasl()) {
       var minT = Math.min.apply(null, TRASLADOS.map(trPrecio)), dt = trPrecio(trasl()) - minT;
@@ -2056,11 +2058,12 @@
   }
   /* Fechas mas baratas del calendario: base = lo mas barato de TU fecha (mismo calendario; sin ese punto, el vuelo mas
      barato de la lista) y hasta 3 dias mas baratos, al menos 1 % menos. null si no se consulto o no hubo precios. */
+  /* Base unica de "Tu fecha": el precio del vuelo ELEGIDO (el mismo de la tarjeta). Las otras fechas muestran lo mas barato de cada dia. */
+  function baseVuelo() { var v = S.vuelo && vuelo(); return v && precioVuelo(v) > 0 ? precioVuelo(v) : Math.min.apply(null, VUELOS.map(precioVuelo)); }
   function datosFechas() {
     var c = S.cmp; if (!c || c.estado !== 'ok' || !VUELOS.length) return null;
     var tot = function (x) { return x.pp * pax; };
-    var p0 = c.puntos.filter(function (x) { return x.shift === 0; })[0];
-    var base = p0 ? tot(p0) : Math.min.apply(null, VUELOS.map(precioVuelo));
+    var base = baseVuelo();
     /* Mismos 10 dias que muestra el widget: el aviso de arriba y las barras dicen lo mismo. */
     var alts = c.puntos.filter(function (x) { return x.shift !== 0 && enVentana(x.shift) && base - tot(x) >= Math.max(1, base * 0.01); })
       .sort(function (a, b) { return tot(a) - tot(b); }).slice(0, 3);
@@ -2101,9 +2104,9 @@
     var tot = function (x) { return x.pp * pax; };
     var por = {}; c.puntos.forEach(function (x) { por[x.dep] = x; });
     var vis = dias.map(function (iso) { return por[iso] || null; }), con = vis.filter(Boolean);
-    var tuyo = por[IDA], base = tuyo ? tot(tuyo) : Math.min.apply(null, VUELOS.map(precioVuelo));
-    var vals = con.map(tot), min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
-    var barata = con.filter(function (x) { return tot(x) === min; })[0], ahorro = barata ? base - tot(barata) : 0;
+    var base = baseVuelo(), tv = function (x) { return x.dep === IDA ? base : tot(x); };
+    var vals = con.map(tv), min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+    var barata = con.filter(function (x) { return tv(x) === min; })[0], ahorro = barata ? base - tv(barata) : 0;
     var hayAhorro = barata && barata.dep !== IDA && ahorro >= 1;
     /* Arriba de las barras, la mejor fecha en una tarjeta: el ahorro grande en amarillo, el dia y "Usar estas fechas". */
     var titulo;
@@ -2116,7 +2119,7 @@
     var barras = dias.map(function (iso, k) {
       var x = por[iso];
       if (!x) return '<span class="af3-b is-vacia" title="Sin precio para ese día"><span class="af3-t">—</span>' + lbl(iso) + '</span>';
-      var v = tot(x), dif = base - v, d = new Date(iso + 'T12:00:00');
+      var v = tv(x), dif = base - v, d = new Date(iso + 'T12:00:00');
       var esTuya = iso === IDA, esBarata = x === barata && !esTuya;
       /* Escala desde el 75% del minimo: se notan las diferencias sin exagerarlas (antes US$ 130 parecia la mitad) */
       var piso = min * 0.75, h = max > min ? 100 * (v - piso) / (max - piso) : 64;
@@ -2127,8 +2130,8 @@
     }).join('');
     var sel = S.cmpSel && por[S.cmpSel] && S.cmpSel !== IDA ? por[S.cmpSel] : null, det = '';
     if (sel) {
-      var dsel = base - tot(sel);
-      det = '<div class="af2-det"><p>Saliendo el <b>' + dia(sel.dep).toLowerCase() + ' ' + fdc(sel.dep).replace(/^\d+ /, '') + '</b> (vuelta ' + fdc(sumarDias(sel.dep, NOCHES)) + '): <b>' + f(tot(sel)) + '</b>' +
+      var dsel = base - tv(sel);
+      det = '<div class="af2-det"><p>Saliendo el <b>' + dia(sel.dep).toLowerCase() + ' ' + fdc(sel.dep).replace(/^\d+ /, '') + '</b> (vuelta ' + fdc(sumarDias(sel.dep, NOCHES)) + '): <b>' + f(tv(sel)) + '</b>' +
         (Math.round(dsel) ? ' · <span class="' + (dsel > 0 ? 'af2-menos' : 'af2-mas') + '">' + (dsel > 0 ? 'ahorrás ' + f(dsel) : f(-dsel) + ' más') + '</span>' : '') + '</p>' +
         '<div class="af2-acc"><button type="button" class="af2-usar" data-usar-fecha="' + sel.dep + '">Usar estas fechas</button></div></div>';
     }
