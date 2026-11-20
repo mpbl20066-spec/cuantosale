@@ -941,6 +941,15 @@
   .fc-b--mejor{border-color:rgba(245,197,24,.55);background:rgba(245,197,24,.12);color:var(--ink)}
   [data-theme="night"] .fc-b{border-color:rgba(255,255,255,.14)}
   [data-theme="night"] .fc-b--mejor{border-color:rgba(245,197,24,.45);color:#F5C518}
+  .fc-det{align-self:flex-start;margin:2px 0 0;padding:4px 0;border:0;background:transparent;color:var(--ink2);font:700 12px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .fc-det:hover{color:var(--ink)}
+  .vd-l{display:grid;margin:8px 0 4px;padding:0;list-style:none}
+  .vd-l li{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px}
+  .vd-l li:first-child{border-top:0}
+  .vd-l li>span{flex:none;color:var(--ink2)}
+  .vd-l b{font-weight:700;text-align:right}
+  .vd-l small{display:block;margin-top:3px;font-size:11.5px;font-weight:500;color:var(--ink2)}
+  .vd-na{font-weight:600;color:var(--ink2)}
   .fc-por{margin:-6px 0 0;font-size:12.5px;font-weight:600;line-height:1.4;color:var(--ink2)}
   .fc-ruta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px}
   .fc-pt b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
@@ -1964,7 +1973,7 @@
     var rapido = VUELOS.length > 1 && !barato && v === masRapido() && v.dur < masBarato().dur;
     var badges = VUELOS.length < 2 ? '' : v.mejor ? '<span class="fc-b fc-b--mejor">' + (barato ? 'Mejor y más barato' : (rapido ? 'Mejor y más rápido' : 'Mejor opción')) + '</span>' : (barato ? '<span class="fc-b">Más barato</span>' : (rapido ? '<span class="fc-b">Más rápido</span>' : ''));
     return '<div class="fc' + (on ? ' is-sel' : '') + '" role="button" tabindex="0" data-sel="vuelo:' + esc(v.id) + '" aria-pressed="' + on + '" aria-label="' + esc(v.air) + ', sale ' + v.sal + ', llega ' + v.lle + ', ' + esc(v.escT) + ', ' + f(precioVuelo(v)) + (on ? ', elegido' : '') + '">' + tick +
-      '<div class="fc-air"><span class="fc-logo" aria-hidden="true">' + esc(v.ab) + (v.logo ? '<img class="fc-logo__img" src="' + esc(v.logo) + '" alt="" loading="lazy" decoding="async">' : '') + '</span><span class="fc-air__t"><b>' + esc(v.air) + '</b>' + (badges ? '<span class="fc-bs">' + badges + '</span>' : '') + '</span></div>' +
+      '<div class="fc-air"><span class="fc-logo" aria-hidden="true">' + esc(v.ab) + (v.logo ? '<img class="fc-logo__img" src="' + esc(v.logo) + '" alt="" loading="lazy" decoding="async">' : '') + '</span><span class="fc-air__t"><b>' + esc(v.air) + '</b>' + (badges ? '<span class="fc-bs">' + badges + '</span>' : '') + (v.id && /^off_/.test(v.id) ? '<button type="button" class="fc-det" data-vdet="' + esc(v.id) + '">Ver detalles</button>' : '') + '</span></div>' +
       (conPorQue && VUELOS.length > 1 ? '<p class="fc-por">' + esc(porQue(v)) + '</p>' : '') +
       '<div class="fc-ruta"><div class="fc-pt"><b>' + v.sal + '</b><small>MVD</small></div>' +
         '<div class="fc-mid"><small>' + esc(v.durT) + '</small><i aria-hidden="true"></i><small class="' + (v.esc === 0 ? 'is-dir' : '') + '">' + esc(v.escT) + '</small></div>' +
@@ -3602,6 +3611,37 @@
     track('flujo_calendario_usar_fechas', { fecha_nueva: dep, desde: desde });
     location.href = RUTA0 + '?' + nq.toString();
   }
+  /* ---- "Ver detalles" de un vuelo: tarifa, equipaje, cambios y reembolso (informativo; lo confirma la aerolinea) ---- */
+  var VDET = {};
+  function abrirDetalleVuelo(id) {
+    S.modal = { tipo: 'vuelo_det', id: id }; pintarModal();
+    track('flujo_vuelo_detalle', { vuelo: id });
+    if (VDET[id] && VDET[id].estado !== 'error') return;
+    VDET[id] = { estado: 'cargando' };
+    fetch('/api/vuelos/detalle?id=' + encodeURIComponent(id))
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'error'); return j; }); })
+      .then(function (j) { VDET[id] = { estado: 'ok', d: j }; }, function (e) { VDET[id] = { estado: 'error', msg: e && e.message }; })
+      .then(function () { if (S.modal && S.modal.tipo === 'vuelo_det' && S.modal.id === id) pintarModal(); });
+  }
+  function vueloDetHoja(m) {
+    var v = VUELOS.filter(function (x) { return x.id === m.id; })[0], e = VDET[m.id] || { estado: 'cargando' }, d = e.d || {};
+    var consulta = '<span class="vd-na">Consultalo con la aerolínea</span>';
+    var cant = function (n, uno, varios) { return n == null ? consulta : (n === 0 ? 'No incluido' : n + ' ' + (n === 1 ? uno : varios)); };
+    var cond = function (c) { return !c ? consulta : (!c.permitido ? 'No permitido' : (c.costo_usd > 0 ? 'Permitido, con costo de ' + f(c.costo_usd) + ' por persona' : 'Permitido sin costo adicional')); };
+    var fila = function (k, val) { return '<li><span>' + k + '</span><b>' + val + '</b></li>'; };
+    var cuerpo = e.estado === 'cargando' ? '<div class="cal-cargando" role="status" style="justify-content:center;padding:28px 0"><span class="fl-spin" aria-hidden="true"></span>Trayendo el detalle…</div>'
+      : (e.estado === 'error' ? '<p class="td-p">' + esc(e.msg || 'No pudimos traer el detalle de esta tarifa.') + '</p>'
+      : '<ul class="vd-l">' +
+          fila('Tarifa', d.tarifa ? esc(d.tarifa) : consulta) + fila('Clase', d.cabina ? esc(d.cabina) : 'Económica') +
+          fila('Equipaje de mano', cant(d.equipaje && d.equipaje.mano, 'pieza incluida', 'piezas incluidas')) +
+          fila('Valija despachada', cant(d.equipaje && d.equipaje.despachado, 'incluida', 'incluidas') + (d.valija_extra ? '<small>Extra desde ' + f(d.valija_extra.usd) + (d.valija_extra.kg ? ' (hasta ' + d.valija_extra.kg + ' kg)' : '') + ' por persona y tramo. Se compra en la aerolínea.</small>' : '')) +
+          fila('Cambios de fecha', cond(d.cambios)) + fila('Cancelación con reembolso', cond(d.reembolso)) + '</ul>');
+    return '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet" role="dialog" aria-modal="true" aria-label="Detalle de la tarifa">' +
+      '<div class="f-modal__top"><div><small>DETALLE DE LA TARIFA</small><h2>' + esc(v ? v.air : 'Vuelo') + '</h2></div><button type="button" class="f-modal__x" data-cerrar="1" aria-label="Cerrar">✕</button></div>' +
+      (v ? '<p class="td-p">' + v.sal + ' → ' + v.lle + ' · ' + esc(v.escT) + ' · ' + f(precioVuelo(v)) + ' ida y vuelta, ' + personasTxt() + '</p>' : '') + cuerpo +
+      '<p class="td-c">Información de la aerolínea a través de nuestro buscador. Puede cambiar: ella confirma las condiciones y el precio final al reservar.</p>' +
+      (v ? '<button type="button" class="g-btn ' + (S.vuelo === v.id ? '' : 'g-btn--main') + '" data-vdet-elegir="' + esc(v.id) + '">' + (S.vuelo === v.id ? 'Seguir con este vuelo' : 'Elegir este vuelo') + '</button>' : '') + '</div>';
+  }
   function cerrarModal() { S.modal = null; pintarModal(); }
   function pintarModal() {
     var el = $('modal'), m = S.modal;
@@ -3610,6 +3650,7 @@
     el.classList.toggle('is-center', m.tipo === 'vuelo_ir' || m.tipo === 'alojamiento_ir');
     if (m.tipo === 'calendario') { el.hidden = false; el.innerHTML = calendarioHoja(m); return; }
     if (m.tipo === 'tour_det') { el.hidden = false; el.innerHTML = tourDetHoja(m); return; }
+    if (m.tipo === 'vuelo_det') { el.hidden = false; el.innerHTML = vueloDetHoja(m); return; }
     if (m.tipo === 'guardar') {
       el.hidden = false; el.innerHTML = guardarHoja(m); var inp = el.querySelector('#g-mail'); if (inp) inp.focus();
       /* Boton oficial de Google (sin salir de la pagina). Al entrar, CSCuenta.alCambiar -> restaurarPendiente guarda el viaje. */
@@ -3841,9 +3882,11 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-comb],[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa-vuelos],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-hq-borrar],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-vdet],[data-vdet-elegir],[data-comb],[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa-vuelos],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-hq-borrar],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
+    if (t.dataset.vdet) { abrirDetalleVuelo(t.dataset.vdet); return; }
+    if (t.dataset.vdetElegir) { S.vuelo = t.dataset.vdetElegir; S.modal = null; pintarModal(); render(false); $('main').scrollTop = y; return; }
     if (t.dataset.comb) { combinar(t.dataset.comb); return; }
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
     if (t.dataset.parada) { usarParada(+t.dataset.parada); track('flujo_parada', { parada: PA + 1, via: 'pestana' }); if (!S.hotelesListos) cargarHoteles(); render(true); return; }

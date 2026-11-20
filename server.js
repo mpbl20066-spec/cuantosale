@@ -3597,6 +3597,16 @@ function handleRequest(req, res) {
     if (url.pathname.indexOf('/api/') === 0 && url.pathname.indexOf('/api/admin') !== 0 && !PRELAUNCH_PUBLIC_API.has(url.pathname) && !PRELAUNCH_EXEMPT.has(url.pathname)) {
       if (!prelaunchAuthorized(req)) return denyPrelaunchJson(res);
     }
+    if (req.method === 'GET' && url.pathname === '/api/vuelos/detalle') {
+      if (!flightProviders.isLive()) return sendJson(res, 503, { error: 'El detalle de la tarifa no está disponible ahora.' });
+      return flightProviders.detalleOferta(url.searchParams.get('id')).then(function (d) {
+        if (!d) return sendJson(res, 404, { error: 'Sin detalle para esta tarifa.' });
+        res.setHeader('Cache-Control', 'private, max-age=300');
+        sendJson(res, 200, d);
+      }).catch(function (e) {
+        sendJson(res, e.status === 404 || e.httpStatus === 404 ? 404 : (e.status || 502), { error: e.status === 400 ? e.message : 'No pudimos traer el detalle de esta tarifa. Puede haber vencido: volvé a buscar.' });
+      });
+    }
     if (req.method === 'POST' && url.pathname === '/api/vuelos/buscar') {
       return readJson(req).then(function (body) { return buscarVuelos(req, res, body); }).catch(function (e) {
         sendJson(res, e.status || 400, { error: e.message || 'No pudimos leer la búsqueda.' });
