@@ -927,7 +927,7 @@
   .fc-list{display:grid;gap:12px;margin:0 0 6px}
   /* Misma tarjeta que las demas opciones del flujo (.opt, p. ej. el transfer): mismos colores, borde y radio; seleccionada,
      borde amarillo de 2px, fondo tenido, brillo y tilde (regla comun en web.css). */
-  .fc{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding:16px;border:1.5px solid var(--card-border,var(--line));border-radius:var(--card-radius,18px);background:var(--card-bg,var(--surface));color:var(--ink);cursor:pointer;box-shadow:0 3px 10px rgba(16,35,62,.08);transition:border-color .15s,box-shadow .15s,transform .15s}
+  .fc{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 12px;padding:14px 44px 14px 14px;border:1.5px solid var(--card-border,var(--line));border-radius:var(--card-radius,18px);background:var(--card-bg,var(--surface));color:var(--ink);cursor:pointer;box-shadow:0 3px 10px rgba(16,35,62,.08);transition:border-color .15s,box-shadow .15s,transform .15s}
   .fc:hover{border-color:var(--ink2)}
   .fc-air{display:flex;align-items:center;gap:12px;min-width:0}
   .fc-logo{flex:0 0 40px;display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--cel-soft);color:var(--ink);font-family:var(--fh);font-size:13px;font-weight:800;letter-spacing:.02em}
@@ -968,7 +968,8 @@
   .fc-mid i::before,.fc-mid i::after{content:"";position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;box-sizing:border-box;border:2px solid var(--ink2);background:var(--surface)}
   [data-theme="night"] .fc-mid i::before{background:#111A28}
   .fc-mid i::before{left:0}.fc-mid i::after{right:0;border-color:#F5C518;background:#F5C518}
-  .fc-pr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .fc-ruta{grid-column:1/-1;grid-row:2}
+  .fc-pr{grid-column:2;grid-row:1;display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:0;border-top:0;text-align:right}
   [data-theme="night"] .fc-pr{border-top-color:rgba(255,255,255,.08)}
   .fc-pr__v b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
   .fc-pr__v small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
@@ -977,7 +978,8 @@
   .fc.is-sel .opt__tick{opacity:1;transform:none}
   .fc:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   @media (min-width:640px){
-    .fc{grid-template-columns:190px minmax(0,1fr) auto;align-items:center;gap:22px;padding:18px 20px}
+    .fc{grid-template-columns:190px minmax(0,1fr) auto;align-items:center;gap:22px;padding:16px 20px}
+    .fc-ruta,.fc-pr{grid-column:auto;grid-row:auto}
     .fc{padding-right:46px}
     .fc-pr{flex-direction:column;align-items:flex-end;gap:8px;padding:0 0 0 20px;border-top:0;border-left:1px solid var(--line);text-align:right}
     [data-theme="night"] .fc-pr{border-left-color:rgba(255,255,255,.08)}
@@ -1978,8 +1980,7 @@
     var rapido = VUELOS.length > 1 && !barato && v === masRapido() && v.dur < masBarato().dur;
     var badges = VUELOS.length < 2 ? '' : v.mejor ? '<span class="fc-b fc-b--mejor">' + (barato ? 'Mejor y más barato' : (rapido ? 'Mejor y más rápido' : 'Mejor opción')) + '</span>' : (barato ? '<span class="fc-b">Más barato</span>' : (rapido ? '<span class="fc-b">Más rápido</span>' : ''));
     return '<div class="fc' + (on ? ' is-sel' : '') + '" role="button" tabindex="0" data-sel="vuelo:' + esc(v.id) + '" aria-pressed="' + on + '" aria-label="' + esc(v.air) + ', sale ' + v.sal + ', llega ' + v.lle + ', ' + esc(v.escT) + ', ' + f(precioVuelo(v)) + (on ? ', elegido' : '') + '">' + tick +
-      '<div class="fc-air"><span class="fc-logo" aria-hidden="true">' + esc(v.ab) + (v.logo ? '<img class="fc-logo__img" src="' + esc(v.logo) + '" alt="" loading="lazy" decoding="async">' : '') + '</span><span class="fc-air__t"><b>' + esc(v.air) + '</b>' + (badges ? '<span class="fc-bs">' + badges + '</span>' : '') + (v.id && /^off_/.test(v.id) ? '<button type="button" class="fc-det" data-vdet="' + esc(v.id) + '">Ver detalles</button>' : '') + '</span></div>' +
-      (conPorQue && VUELOS.length > 1 ? '<p class="fc-por">' + esc(porQue(v)) + '</p>' : '') +
+      '<div class="fc-air"><span class="fc-logo" aria-hidden="true">' + esc(v.ab) + (v.logo ? '<img class="fc-logo__img" src="' + esc(v.logo) + '" alt="" loading="lazy" decoding="async">' : '') + '</span><span class="fc-air__t"><b>' + esc(v.air) + '</b>' + (v.id && /^off_/.test(v.id) ? '<button type="button" class="fc-det" data-vdet="' + esc(v.id) + '">Ver detalles</button>' : '') + '</span></div>' +
       '<div class="fc-ruta"><div class="fc-pt"><b>' + v.sal + '</b><small>MVD</small></div>' +
         '<div class="fc-mid"><small>' + esc(v.durT) + '</small><i aria-hidden="true"></i><small class="' + (v.esc === 0 ? 'is-dir' : '') + '">' + esc(v.escT) + '</small></div>' +
         '<div class="fc-pt fc-pt--d"><b>' + v.lle + '</b><small>' + esc(AEROPUERTO[destKey] || '') + '</small></div></div>' +
@@ -2073,6 +2074,8 @@
     var vSel = VUELOS.filter(function (v) { return v.id === S.vuelo; })[0];
     if (vSel && visibles.indexOf(vSel) < 0) visibles = visibles.concat(vSel);
     var idBarato = VUELOS.length > 1 ? masBarato().id : '';
+    /* Con una sola opcion recomendada no se muestran las pestanas (ocupan alto y confunden): se ofrece "ver mas". */
+    var soloUno = esRec && visibles.length <= 1 && vs.length > 1;
     var cambiarFechas = 'home-destino.html' + BUSQ0 + (BUSQ0 ? '&' : '?') + 'editar=1';
     var html = '<h1 class="f-h">Vuelos</h1><p class="f-sub">Montevideo → ' + esc(DEST1) + '<br>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personasTxt() + '</p>' +
       (PAR ? '<p class="f-sub">Viaje de dos paradas: ' + nochesTxt(PAR.l[0].noches) + ' en ' + esc(DEST1) + ' y ' + nochesTxt(PAR.l[1].noches) + ' en ' + esc(PAR.l[1].nom) + '. El vuelo va y vuelve de ' + esc(DEST1) + '.</p>' : '') +
@@ -2082,8 +2085,9 @@
         '<span class="f-sub" style="margin:0">Te los cotizamos nosotros por WhatsApp, sin compromiso.</span>' +
         '<button type="button" class="g-btn g-btn--main" data-wa-vuelos="1">' + ic(iWa, 22) + 'Pedir cotización por WhatsApp</button>' +
         '<a class="g-btn" href="' + esc(cambiarFechas) + '">Cambiar fechas</a></div>' : '') +
-      (VUELOS.length > 1 ? chips([['rec', 'Recomendados'], ['precio', 'Mejores precios'], ['directo', 'Más directo']], S.fVuelo, 'vuelo') : '') +
+      (VUELOS.length > 1 && !soloUno ? chips([['rec', 'Recomendados'], ['precio', 'Mejores precios'], ['directo', 'Más directo']], S.fVuelo, 'vuelo') : '') +
       (visibles.length ? '<div class="fc-list">' + visibles.map(function (v) { return tarjetaVuelo(v, idBarato, esRec); }).join('') + '</div>' + fuenteVuelos() : '') +
+      (soloUno ? '<button type="button" class="f-more" data-filtro="vuelo:precio">Ver más opciones de vuelos</button>' : '') +
       (!esRec && vs.length > 3 ? '<button type="button" class="f-more" data-mas="vuelos">' + (S.verMasVuelos ? 'Ver menos' : 'Ver más opciones de vuelos') + '</button>' : '') +
       ahorroFechas() +
       '<h2 class="f-h3">' + ic(I.van, 22) + 'Transfer</h2><p class="f-sub">' + (PAR ? 'Del aeropuerto a ' + esc(DEST1) + ' y de ' + esc(PAR.l[1].nom) + ' al aeropuerto' : 'Aeropuerto ⇄ alojamiento · ida y vuelta incluida') + ' · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>' +
@@ -3634,7 +3638,7 @@
     var v = VUELOS.filter(function (x) { return x.id === m.id; })[0], e = VDET[m.id] || { estado: 'cargando' }, d = e.d || {};
     var consulta = '<span class="vd-na">Consultalo con la aerolínea</span>';
     var cant = function (n, uno, varios) { return n == null ? consulta : (n === 0 ? 'No incluido' : n + ' ' + (n === 1 ? uno : varios)); };
-    var cond = function (c) { return !c ? consulta : (!c.permitido ? 'No permitido' : (c.costo_usd > 0 ? 'Permitido, con costo de ' + f(c.costo_usd) + ' por persona' : 'Permitido sin costo adicional')); };
+    var cond = function (c) { return !c ? consulta : (!c.permitido ? 'No permitido' : (c.costo_usd > 0 ? 'Permitido, con costo de ' + f(c.costo_usd) : 'Permitido sin costo adicional')); };
     var TRAD = { basic: 'Básica', classic: 'Clásica', standard: 'Estándar', light: 'Light', flex: 'Flex', economy: 'Económica', 'economy basic': 'Económica básica', 'economy classic': 'Económica clásica', 'economy flex': 'Económica flex', 'premium economy': 'Premium Economy', business: 'Ejecutiva', first: 'Primera clase' };
     var tr = function (t) { var k = String(t || '').trim().toLowerCase(); return TRAD[k] || String(t || '').trim().replace(/\bbasic\b/ig, 'Básica').replace(/\beconomy\b/ig, 'Económica'); };
     var nDesp = d.equipaje && d.equipaje.despachado;
@@ -3652,7 +3656,7 @@
       (e.estado === 'ok' && d.precio_actual_usd > 0 && v && Math.abs(d.precio_actual_usd - precioVuelo(v)) >= 1 ? '<p class="td-c">Esta tarifa se volvió a consultar: hoy cuesta ' + f(d.precio_actual_usd) + ' (antes ' + f(precioVuelo(v)) + ').</p>' : '') +
       (v ? '<p class="td-p">' + v.sal + ' → ' + v.lle + ' · ' + esc(v.escT) + ' · ' + f(precioVuelo(v)) + ' ida y vuelta, ' + personasTxt() + '</p>' : '') + cuerpo +
       '<p class="td-c">Información de la aerolínea a través de nuestro buscador. Puede cambiar: ella confirma las condiciones y el precio final al reservar.</p>' +
-      (v ? '<button type="button" class="g-btn vd-ok" data-vdet-elegir=""' + esc(v.id) + '">' + (S.vuelo === v.id ? 'Seguir con este vuelo' : 'Elegir este vuelo') + '</button>' : '') + '</div>';
+      (v ? '<button type="button" class="g-btn vd-ok" data-vdet-elegir=""' + esc(v.id) + '">' + 'Seguir con este vuelo' + '</button>' : '') + '</div>';
   }
   function cerrarModal() { S.modal = null; pintarModal(); }
   function pintarModal() {
@@ -3898,7 +3902,7 @@
     if (!t) return;
     var y = $('main').scrollTop;
     if (t.dataset.vdet) { abrirDetalleVuelo(t.dataset.vdet); return; }
-    if (t.dataset.vdetElegir) { S.vuelo = t.dataset.vdetElegir; S.modal = null; pintarModal(); render(false); $('main').scrollTop = y; return; }
+    if (t.dataset.vdetElegir) { S.vuelo = t.dataset.vdetElegir; S.modal = null; pintarModal(); track('flujo_vuelo_detalle_seguir', {}); if (MODO === 'avion' && S.paso === 1 && S.sub !== 't') { ir(2, 'continuar'); return; } render(false); $('main').scrollTop = y; return; }
     if (t.dataset.comb) { combinar(t.dataset.comb); return; }
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
     if (t.dataset.parada) { usarParada(+t.dataset.parada); track('flujo_parada', { parada: PA + 1, via: 'pestana' }); if (!S.hotelesListos) cargarHoteles(); render(true); return; }
