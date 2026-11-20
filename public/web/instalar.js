@@ -23,20 +23,23 @@
 
   var css = document.createElement('style');
   css.textContent =
-    '.cs-inst{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:80;display:flex;align-items:center;gap:12px;max-width:460px;margin:0 auto;padding:12px 12px 12px 14px;border:1px solid var(--line,#d0d7e2);border-radius:16px;background:var(--surface,#fff);color:var(--ink,#101828);box-shadow:0 14px 34px rgba(10,16,26,.24);font-family:var(--fb,inherit)}' +
+    '.cs-inst{position:fixed;left:12px;right:12px;bottom:calc(88px + var(--cs-wa-sube,0px) + env(safe-area-inset-bottom,0px));z-index:80;display:flex;align-items:center;gap:12px;max-width:460px;margin:0 auto;padding:12px 12px 12px 14px;border:1px solid var(--line,#d0d7e2);border-radius:16px;background:var(--surface,#fff);color:var(--ink,#101828);box-shadow:0 14px 34px rgba(10,16,26,.24);font-family:var(--fb,inherit)}' +
     '.cs-inst img{flex:0 0 40px;width:40px;height:40px;border-radius:10px}' +
     '.cs-inst p{flex:1;min-width:0;margin:0;font-size:13px;font-weight:600;line-height:1.35;color:var(--ink2,#48566a)}' +
     '.cs-inst p b{display:block;font-size:14px;font-weight:800;color:var(--ink,#101828)}' +
     '.cs-inst__si{flex:0 0 auto;min-height:40px;padding:0 16px;border:0;border-radius:12px;background:#F5C518;color:#0B1F3A;font:800 14px var(--fb,inherit);cursor:pointer}' +
     '.cs-inst__no{flex:0 0 auto;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:var(--ink2,#48566a);font-size:18px;line-height:1;cursor:pointer}' +
     '.cs-inst button:focus-visible{outline:3px solid var(--focus,#F7C325);outline-offset:2px}' +
-    '@media (min-width:1024px){.cs-inst{left:auto;right:24px;bottom:24px}}';
+    '@media (min-width:1024px){.cs-inst{left:auto;right:24px}}';
   document.head.appendChild(css);
 
+  var esperaCookies = false;
   function cerrarAviso() { if (aviso) { aviso.remove(); aviso = null; } }
   function mostrar(forzado) {
     if (aviso || (!forzado && callado())) return;
     if (!evento && !ios && !samsung) return;
+    /* Con el aviso de cookies abierto no se muestra: ese pide una decision y los dos juntos tapaban el contenido. */
+    if (!forzado && document.getElementById('cs-consent')) { if (!esperaCookies) { esperaCookies = true; setTimeout(function () { esperaCookies = false; mostrar(false); }, 1500); } return; }
     aviso = document.createElement('div');
     aviso.className = 'cs-inst'; aviso.setAttribute('role', 'dialog'); aviso.setAttribute('aria-label', 'Instalar CuántoSale');
     aviso.innerHTML = '<img src="/icons/icon-192.png" alt="">' +

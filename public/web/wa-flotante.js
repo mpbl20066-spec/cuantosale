@@ -70,6 +70,7 @@
       rects.forEach(function (r) { if (r.bottom >= alto - sube - 2 && alto - r.top > sube) { sube = alto - r.top; cambio = true; } });
     }
     a.style.setProperty('--cs-wa-sube', Math.round(sube) + 'px');
+    document.documentElement.style.setProperty('--cs-wa-sube', Math.round(sube) + 'px');   /* el aviso de instalar se apoya en este valor */
   }
   function pedir() { if (!pend) { pend = true; (window.requestAnimationFrame || setTimeout)(ubicar); } }
 

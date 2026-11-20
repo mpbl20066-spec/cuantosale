@@ -31,6 +31,8 @@
 <script src="moneda.js"></script>
 <link rel="stylesheet" href="../style.css">
 <link rel="stylesheet" href="cuenta.css">
+<link rel="preload" as="image" href="home-portada-mob.jpg" fetchpriority="high" media="(max-width: 767px)">
+<link rel="preload" as="image" href="home-portada2.jpg" fetchpriority="high" media="(min-width: 768px)">
 <style>
   /* Home con dos caminos. Las tarjetas van superpuestas sobre la foto,
      con margen negativo, para que entren junto con los destinos. */
@@ -354,13 +356,18 @@
 
   /* ---- Home "tu plata manda": un solo control, los destinos reaccionan ---- */
   .q{max-width:640px;margin:0 auto;padding:4px 0 24px}
-  .q-eye{margin:14px 0 8px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#B8860B}
   .q-h{margin:0 0 18px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.2;letter-spacing:-.02em;color:var(--hx-navy)}
   .q-h em{font-style:normal;background:linear-gradient(transparent 62%,#F5C518 62% 92%,transparent 92%)}
   .q-caja{margin:0 0 14px;padding:16px 16px 12px;border-radius:18px;background:var(--surface,#fff);border:2px solid #0B1F3A;box-shadow:5px 5px 0 #0B1F3A}
   .q-monto{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
   .q-monto b{font-family:var(--fh);font-size:40px;font-weight:800;letter-spacing:-.03em;color:var(--hx-navy);line-height:1}
   .q-monto small{font-size:13px;font-weight:600;color:var(--ink2)}
+  .q-rap{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+  .q-rap button{min-height:38px;padding:0 14px;border:2px solid var(--line);border-radius:99px;background:transparent;color:var(--hx-navy);font:800 14px var(--fb);font-variant-numeric:tabular-nums;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .q-rap button:hover:not(:disabled){border-color:#F5C518}
+  .q-rap button[aria-pressed="true"]{background:#F5C518;border-color:#F5C518;color:#0B1F3A}
+  .q-rap button:disabled{opacity:.4;cursor:default}
+  .q-rap button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .q-slide{position:relative;padding:10px 0}
   /* La pista va en el contenedor y el input ocupa los 34px del pulgar: con el input de 12px de alto, tocar la barra
      fuera del pulgar fallaba seguido en el celular. --p lo actualiza pintar() en los dos elementos. */
@@ -374,91 +381,127 @@
   .q-slide input::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#F5C518;border:3px solid #0B1F3A;box-shadow:0 3px 0 #0B1F3A;cursor:grab}
   .q-slide input:active::-webkit-slider-thumb{transform:scale(1.12);cursor:grabbing}
   .q-slide input:focus-visible{outline:3px solid var(--focus);outline-offset:6px}
-  .q-ejes{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--ink2)}
-  .q-params{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:12px;border-top:2px dashed var(--line)}
+  .q-params{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
   .q-step{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:var(--ink2)}
   .q-step div{display:flex;align-items:center;justify-content:space-between;gap:6px}
-  .q-step b{min-width:2ch;text-align:center;font-family:var(--fh);font-size:22px;font-weight:800;color:var(--hx-navy)}
-  .q-step button{width:40px;height:40px;border-radius:50%;border:2px solid #0B1F3A;background:#F5C518;color:#0B1F3A;font-size:22px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 2px 0 #0B1F3A;-webkit-tap-highlight-color:transparent}
+  .q-step b{min-width:2ch;text-align:center;font-family:var(--fh);font-size:18px;font-weight:800;color:var(--hx-navy)}
+  .q-step button{width:36px;height:36px;border-radius:50%;border:2px solid #0B1F3A;background:#F5C518;color:#0B1F3A;font-size:20px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 2px 0 #0B1F3A;-webkit-tap-highlight-color:transparent}
   .q-step button:active{transform:translateY(2px);box-shadow:none}
   .q-step button:disabled{opacity:.35;cursor:default;box-shadow:none}
   .q-step button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .q-lista.is-cargando{opacity:.6;transition:opacity .2s}
   .q-cuenta{display:flex;flex-direction:column;gap:2px;margin:0 0 12px}
+  .q-cuenta span:empty{display:none}
   .q-cuenta b{font-family:var(--fh);font-size:19px;font-weight:800;color:var(--hx-navy)}
   .q-cuenta span{font-size:13px;color:var(--ink2)}
-  .q-lista{display:flex;flex-direction:column;gap:10px;margin:0 0 12px;padding:0;list-style:none}
-  .q-fila{position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--surface,#fff);border:2px solid var(--line);color:var(--ink);text-decoration:none;transition:opacity .3s,filter .3s,border-color .3s,background-color .3s,box-shadow .3s,transform .1s}
+
+  /* Hero con foto: panoramica de playa con un degradado oscuro (78 % arriba, 70 % al medio, 88 % abajo) para que el titulo
+     blanco y los botones amarillos se lean perfecto. En celular va la version liviana de la foto. */
+  .q-hero{position:relative;overflow:hidden;margin:12px 0 26px;border-radius:24px;background:#0A101A url(home-portada-mob.jpg) 50% 45%/cover no-repeat}
+  .q-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,13,24,.78) 0%,rgba(7,13,24,.7) 45%,rgba(7,13,24,.88) 100%)}
+  .q-hero__in{position:relative;padding:12px 14px 18px}
+  .q-hero .q-h{margin:0 0 18px;color:#fff;text-shadow:0 2px 16px rgba(0,0,0,.4)}
+  .q-hero .q-h em{background:none;color:#F5C518}
+  .q-hero .q-caja{margin:0}
+  [data-panel][hidden]{display:none!important}
+  /* Panel "Ya sé a dónde voy": destino, salida y el boton. Personas y noches son los mismos del otro panel. */
+  .q-campo{display:block;margin:0 0 12px}
+  .q-campo>span{display:block;margin:0 0 6px;font-size:12px;font-weight:700;color:var(--ink2)}
+  .q-campo select,.q-campo input[type="date"]{display:block;width:100%;min-height:48px;padding:0 14px;box-sizing:border-box;border:2px solid var(--line);border-radius:12px;background:transparent;color:var(--hx-navy);font:600 16px var(--fb);color-scheme:light}
+  :root[data-theme="night"] .q-campo select,:root[data-theme="night"] .q-campo input[type="date"]{color-scheme:dark}
+  .q-campo select{-webkit-appearance:none;appearance:none;padding-right:38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' viewBox='0 0 14 8' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m1 1 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+  .q-campo select option,.q-campo select optgroup{color:#101828;background:#fff}
+  .q-campo select:focus-visible,.q-campo input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .q-vuelta{margin:-4px 0 4px;font-size:13px;font-weight:600;color:var(--ink2)}
+  .q-err{margin:12px 0 0;font-size:13px;font-weight:700;color:#C0392B}
+  :root[data-theme="night"] .q-err{color:#FF8A80}
+  .q-cta{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:16px;border:2px solid #0B1F3A;border-radius:14px;background:#F5C518;color:#070B14;font:800 16px var(--fb);box-shadow:0 3px 0 #0B1F3A;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .q-cta:active{transform:translateY(3px);box-shadow:none}
+  .q-cta:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+  .q-desde{display:none}
+  .q-lista[data-modo="destino"] .q-desde{display:block}
+  /* Selector de pestañas (segmented control): un solo contenedor con dos opciones. Activa: amarillo solido con texto
+     #070B14; inactiva: transparente con texto blanco suave y fondo claro al pasar el mouse. */
+  .q-camino{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:0 0 18px;padding:4px;border-radius:16px;background:rgba(7,11,20,.72);border:1px solid rgba(255,255,255,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .q-camino button,.q-camino a{display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 10px;border:0;border-radius:12px;background:transparent;color:rgba(255,255,255,.82);font:inherit;text-align:center;text-decoration:none;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s,color .15s}
+  .q-camino button:hover,.q-camino a:hover{background:rgba(255,255,255,.14);color:#fff}
+  .q-camino button:active,.q-camino a:active{transform:scale(.98)}
+  .q-camino button:focus-visible,.q-camino a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .q-camino b{display:flex;align-items:center;gap:7px;font-family:var(--fh);font-size:14.5px;font-weight:800;line-height:1.2;color:inherit}
+  .q-camino b svg{flex:none;width:18px;height:18px}
+  .q-camino button[aria-current="true"],.q-camino button[aria-current="true"]:hover{background:#F5C518;color:#070B14;cursor:default}
+  .q-camino button[aria-current="true"] b,.q-camino button[aria-current="true"] svg{color:#070B14!important}
+  .q-camino button[aria-current="true"] svg{stroke:#070B14!important}
+  @media (max-width:420px){.q-camino b{font-size:13.5px}.q-camino b svg{display:none}}
+  @media (min-width:1024px){.q-camino{max-width:460px;margin-bottom:22px}.q-camino button,.q-camino a{min-height:46px}.q-camino b{font-size:15.5px}}
+  /* Montos redondos y recientes en una fila de chips: lo importante son los destinos, no el historial. */
+  .q-rec{margin:16px 0 0}
+  .q-rec__h{display:flex;align-items:center;gap:12px;margin:0 0 8px}
+  .q-rec__h h2{margin:0;font:800 12px var(--fb);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.78)}
+  .q-rec__h button{padding:6px 2px;border:0;background:none;color:rgba(255,255,255,.78);font:700 12px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .q-rec ul{display:flex;gap:8px;margin:0;padding:2px 0 4px;list-style:none;overflow-x:auto;scrollbar-width:none}
+  .q-rec ul::-webkit-scrollbar{display:none}
+  .q-rec li{flex:none}
+  .q-rec a{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:4px 14px 4px 5px;border-radius:99px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);color:#fff;font:700 13px var(--fb);text-decoration:none;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .q-rec a:hover{background:rgba(255,255,255,.22)}
+  .q-rec a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .q-rec img{flex:none;width:30px;height:30px;border-radius:50%;object-fit:cover}
+  .q-rec small{font-size:12px;font-weight:600;color:rgba(255,255,255,.78)}
+
+  /* Destinos: grilla de tarjetas verticales. La foto ocupa casi la mitad de la tarjeta. */
+  .q-lista{display:grid;grid-template-columns:1fr;gap:16px;margin:0 0 14px;padding:0;list-style:none}
+  .q-fila{position:relative;display:flex;flex-direction:column;height:100%;overflow:hidden;border-radius:20px;background:var(--surface,#fff);border:2px solid #0B1F3A;box-shadow:4px 4px 0 #0B1F3A;color:var(--ink);text-decoration:none;transition:opacity .3s,filter .3s,transform .15s}
   .q-fila:active{transform:scale(.98)}
   .q-fila:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
-  .q-fila img{flex:none;width:54px;height:54px;border-radius:50%;object-fit:cover;transition:filter .3s}
-  .q-nom{flex:1;min-width:0;font-family:var(--fh);font-size:16px;font-weight:800;line-height:1.2;color:var(--hx-navy)}
-  .q-nom small{display:block;margin-top:2px;font-family:var(--fb);font-size:12px;font-weight:500;color:var(--ink2)}
-  .q-est{flex:none;padding:5px 11px;border-radius:99px;border:2px solid var(--line);font-size:12px;font-weight:800;color:var(--ink2);white-space:nowrap}
-  .q-fila[data-est="ok"]{border-color:#0B1F3A;box-shadow:3px 3px 0 #0B1F3A}
-  .q-fila[data-est="ok"] .q-est{background:#F5C518;border-color:#F5C518;color:#0B1F3A}
-  .q-fila[data-est="justo"]{border-color:#F5C518}
-  .q-fila[data-est="justo"] .q-est{border-color:#F5C518;color:var(--ink)}
+  .q-fila img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;transition:filter .3s}
+  .q-nom{display:flex;flex-direction:column;gap:8px;padding:20px 20px 0}
+  .q-nom b{font-family:var(--fh);font-size:19px;font-weight:800;line-height:1.2;color:var(--hx-navy)}
+  .q-inc{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .q-inc span{display:inline-flex;align-items:center;gap:5px}
+  .q-inc svg{flex:none;width:15px;height:15px;fill:currentColor}
+  .q-der{display:flex;flex-direction:column;gap:14px;margin-top:auto;padding:16px 20px 20px}
+  .q-der>span:first-child{display:flex;flex-direction:column}
+  .q-pp{font-family:var(--fh);font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-.02em;color:var(--hx-navy);font-variant-numeric:tabular-nums}
+  .q-der small{font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .q-ver{display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;border-radius:12px;background:#F5C518;color:#0B1F3A;font-size:15px;font-weight:800}
+  @media (min-width:768px){
+    .q{max-width:none}
+    .q-lista{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .q-hero{background-image:url(home-portada2.jpg)}
+    .q-hero__in{padding:26px 28px 26px}
+  }
+  @media (min-width:1024px){
+    .q-hero{margin-top:20px}
+    .q-hero__in{padding:26px 40px 36px}
+    .q-hero .q-h{margin-bottom:26px;font-size:40px}
+    .q-hero .q-caja{max-width:620px;padding:24px 24px 18px}
+    .q-monto b{font-size:52px}
+    .q{padding:4px 0 40px}
+  }
   .q-fila[data-est="casi"],.q-fila[data-est="no"]{opacity:.55}
   .q-fila[data-est="casi"] img,.q-fila[data-est="no"] img{filter:grayscale(1)}
-  .q-fila[data-est="x"] .q-est{border-style:dashed}
   .q-fila{will-change:transform}
   .q-mas{display:block;width:100%;margin:0 0 12px;padding:12px;border-radius:14px;border:2px dashed var(--line);background:transparent;color:var(--hx-navy);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
   .q-mas:hover{border-color:#F5C518}
   .q-mas:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
   /* ---- Tus busquedas recientes: en el celular una fila que se desliza; en la PC debajo de la calculadora ---- */
-  .q-rec{margin:0 0 18px}
-  .q-rec__h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
-  .q-rec__h h2{margin:0;font-family:var(--fh);font-size:16px;font-weight:800;color:var(--hx-navy)}
-  .q-rec__h button{padding:4px 2px;border:0;background:none;color:var(--ink2);font:inherit;font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-  .q-rec ul{display:flex;gap:10px;margin:0 -16px;padding:2px 16px 6px;list-style:none;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
-  .q-rec ul::-webkit-scrollbar{display:none}
-  .q-rec li{flex:none;width:min(78%,260px);scroll-snap-align:start}
-  .q-rec a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:14px;border:2px solid var(--line);background:var(--surface,#fff);color:var(--ink);text-decoration:none;transition:border-color .2s}
-  .q-rec a:hover{border-color:#F5C518}
-  .q-rec a:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
-  .q-rec img{flex:none;width:40px;height:40px;border-radius:10px;object-fit:cover}
-  .q-rec span{flex:1;min-width:0;font-family:var(--fh);font-size:14px;font-weight:800;line-height:1.2;color:var(--hx-navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .q-rec small{display:block;margin-top:2px;font-family:var(--fb);font-size:12px;font-weight:500;color:var(--ink2);overflow:hidden;text-overflow:ellipsis}
-  .q-rec i{flex:none;font-style:normal;font-weight:800;color:var(--hx-navy)}
-  .q-nota{margin:0 0 12px;font-size:12px;line-height:1.5;color:var(--ink2)}
+  .q-nota{margin:8px 0 0;font-size:12px;line-height:1.5;color:var(--ink2)}
+  .q-nota-d{margin:0 0 12px;font-size:13px;font-weight:700;color:var(--ink2)}
+  .q-nota-d summary{display:flex;align-items:center;min-height:40px;cursor:pointer}
+  .q-nota-d summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .q-incl{margin:8px 0 0;padding:18px;border-radius:18px;border:2px solid var(--line);background:var(--surface,#fff)}
+  .q-incl h2{margin:0 0 12px;font-family:var(--fh);font-size:16px;font-weight:800;color:var(--hx-navy)}
+  .q-incl ul{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin:0 0 14px;padding:0;list-style:none}
+  .q-incl li{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;line-height:1.3;color:var(--ink)}
+  .q-incl li svg{flex:none;width:26px;height:26px;padding:5px;box-sizing:border-box;border-radius:50%;background:#F5C518;fill:#0B1F3A}
+  .q-conf{margin:0;padding-top:12px;border-top:1px solid var(--line);font-size:13px;line-height:1.5;color:var(--ink2)}
+  .q-conf b{color:var(--hx-navy)}
+  @media (min-width:768px){.q-incl ul{grid-template-columns:repeat(4,1fr)}}
   .q-alt{display:block;margin-top:0;padding:12px 0;text-align:center;font-size:14px;font-weight:700;color:var(--hx-navy);text-decoration:underline;text-underline-offset:3px}
   .q-alt:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
   .g-bote{animation:g-check .35s ease}
-  /* Escritorio: la columna de 640px del celular dejaba media pantalla vacia. Titulo a todo el ancho y debajo dos
-     columnas: la calculadora a la izquierda y los destinos que se encienden a la derecha, asi se ve el efecto de
-     mover la plata sin hacer scroll. */
-  @media (min-width:1024px){
-    .q{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:56px;align-items:start;max-width:1120px;padding:28px 0 40px}
-    .q-eye,.q-h{grid-column:1/-1}
-    .q-h{margin-bottom:28px;font-size:40px}
-    .q-izq{grid-column:1;grid-row:3/span 5;position:sticky;top:16px}
-    .q-caja{margin:0;padding:24px 24px 18px}
-    .q-rec{margin:24px 0 0}
-    .q-rec ul{flex-direction:column;margin:0;padding:0;overflow:visible}
-    .q-rec li{width:auto}
-    .q-monto b{font-size:52px}
-    .q-cuenta{grid-column:2;grid-row:3}
-    .q-lista{grid-column:2;grid-row:4}
-    .q-mas{grid-column:2;grid-row:5}
-    .q-nota{grid-column:2;grid-row:6}
-  }
   /* ---- Dos caminos al mismo nivel: por la plata o eligiendo el destino ---- */
-  .q-camino{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:640px;margin:14px auto 4px}
-  .q-camino button,.q-camino a{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:12px 12px 11px;border-radius:16px;border:2px solid var(--line);background:var(--surface,#fff);color:var(--hx-navy);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background-color .2s,border-color .2s,box-shadow .2s,transform .1s}
-  .q-camino button:active,.q-camino a:active{transform:scale(.97)}
-  .q-camino button:focus-visible,.q-camino a:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
-  .q-camino a{text-decoration:none}
-  .q-camino b{display:flex;align-items:center;gap:6px;font-family:var(--fh);font-size:15px;font-weight:800;line-height:1.2}
-  .q-camino b svg{flex:none;width:20px;height:20px}
-  .q-camino small{font-size:12px;font-weight:500;line-height:1.3;color:var(--ink2)}
-  .q-camino button[aria-current="true"]{background:#F5C518;border-color:#0B1F3A;box-shadow:4px 4px 0 #0B1F3A;color:#0B1F3A}
-  .q-camino button[aria-current="true"] small{color:#0B1F3A}
   @media (min-width:1024px){
-    .q-camino{max-width:1120px;margin-top:28px;gap:16px}
-    .q-camino button,.q-camino a{padding:16px 20px;flex-direction:row;align-items:center;gap:14px}
-    .q-camino b{font-size:18px}
-    .q-camino small{font-size:13.5px}
     .q{padding-top:20px}
   }
   @media (prefers-reduced-motion:reduce){
@@ -491,35 +534,61 @@
     </header>
 
     <main>
-    <div class="q-camino">
-      <button type="button" aria-current="true"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/></svg>Tengo un presupuesto</b><small>Te decimos a dónde llegás</small></button>
-      <a href="home-destino.html?fuente=home_ya_se"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Ya sé a dónde voy</b><small>Elegí el destino y te decimos cuánto sale</small></a>
+    <section class="q-hero" aria-labelledby="q-h">
+      <div class="q-hero__in">
+    <div class="q-camino" role="tablist" aria-label="Cómo querés empezar">
+      <button type="button" role="tab" data-tab="presupuesto" aria-selected="true" aria-current="true"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/></svg>Tengo un presupuesto</b></button>
+      <button type="button" role="tab" data-tab="destino" aria-selected="false"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Ya sé a dónde voy</b></button>
     </div>
 
-    <section class="q" id="q">
-      <p class="q-eye">Primero la plata, después el viaje</p>
-      <h1 class="q-h">¿Con cuánta plata contás? <em>Te decimos a dónde llegás.</em></h1>
+      <h1 class="q-h" id="q-h">¿Con cuánta plata contás? <em>Te decimos a dónde llegás.</em></h1>
 
       <div class="q-izq">
         <div class="q-caja">
-          <div class="q-monto"><b id="q-monto" aria-live="polite">—</b><small>por persona</small></div>
+          <div data-panel="presupuesto">
+          <div class="q-monto"><b id="q-monto" aria-live="polite">—</b><small id="q-monto-sub">por persona</small></div>
+          <div class="q-rap" id="q-rap" role="group" aria-label="Montos rápidos"><button type="button" data-usd="600"></button><button type="button" data-usd="1000"></button><button type="button" data-usd="1500"></button></div>
           <div class="q-slide">
-            <input type="range" id="q-rango" min="300" max="3000" step="50" value="900" aria-label="Cuánta plata tenés por persona" disabled>
+            <input type="range" id="q-rango" min="300" max="3000" step="any" value="900" aria-label="Cuánta plata tenés por persona" disabled>
           </div>
-          <div class="q-ejes" aria-hidden="true"><span>poco</span><span>mucho</span></div>
+          </div>
+          <div data-panel="destino" hidden>
+            <label class="q-campo"><span>Destino</span><select id="q-dest" aria-label="Destino"></select></label>
+            <label class="q-campo"><span>Salida</span><input type="date" id="q-ida" aria-label="Fecha de salida"></label>
+            <p class="q-vuelta" id="q-vuelta"></p>
+          </div>
           <div class="q-params">
             <div class="q-step" role="group" aria-label="Cantidad de personas"><span>Personas</span><div><button type="button" data-p="pax" data-d="-1" aria-label="Una persona menos">−</button><b id="q-pax" aria-live="polite">2</b><button type="button" data-p="pax" data-d="1" aria-label="Una persona más">+</button></div></div>
             <div class="q-step" role="group" aria-label="Cantidad de noches"><span>Noches</span><div><button type="button" data-p="noches" data-d="-1" aria-label="Una noche menos">−</button><b id="q-noches" aria-live="polite">7</b><button type="button" data-p="noches" data-d="1" aria-label="Una noche más">+</button></div></div>
+          </div>
+          <div data-panel="destino" hidden>
+            <p class="q-err" id="q-err" role="alert" hidden></p>
+            <button type="button" class="q-cta" id="q-cta">Calcular mi viaje →</button>
           </div>
         </div>
         <section class="q-rec" id="q-rec" aria-labelledby="q-rec-t" hidden></section>
       </div>
 
-      <div class="q-cuenta"><b id="q-n">Calculando…</b><span id="q-sub">Armando tu mapa de posibilidades</span></div>
+      </div>
+    </section>
+
+    <section class="q" id="q">
+      <div class="q-cuenta" id="q-cuenta"><b id="q-n">Calculando…</b><span id="q-sub"></span></div>
 
       <ol class="q-lista" id="q-lista"></ol>
       <button type="button" class="q-mas" id="q-mas" hidden></button>
-      <p class="q-nota" id="q-nota"></p>
+      <details class="q-nota-d"><summary>Cómo calculamos</summary><p class="q-nota" id="q-nota"></p></details>
+
+      <section class="q-incl" aria-labelledby="q-incl-t">
+        <h2 id="q-incl-t">Qué incluye el cálculo</h2>
+        <ul>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>Transporte desde Montevideo</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>Alojamiento</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11v6h-2v-2H7v2H5zm2.2 0h9.6l-1-3H8.2zM8 14.2a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4zm8 0a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4z"/></svg>Traslados</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v8a2 2 0 0 0 1 1.7V22h2V11.7A2 2 0 0 0 11 10V2H9.5v6H9V2H8v6h-.5V2zm9 0c-1.7 1.2-3 3.8-3 6.5 0 1.7.9 3 2 3.4V22h2z"/></svg>Comidas y transporte local</li>
+        </ul>
+        <p class="q-conf">Pagás con <b>Prex o Pix, sin recargo</b>, o con tarjeta por Mercado Pago (+5 %). Un asesor te manda los datos de pago y confirma tu reserva. <b>Los precios de las tarjetas son estimados y no incluyen ese recargo del 5 % por tarjeta.</b></p>
+      </section>
     </section>
 
     </main>
@@ -604,39 +673,68 @@
   /* Los 40 destinos de la app (destinos-datos.js). Se ven primero los que llegan, ordenados por relevancia
      (recomendar.js: los mas buscados y despues los que mejor aprovechan la plata), y el resto queda detras de
      "Ver mas destinos", asi la lista no se hace eterna. */
-  var DESTS = window.CS_DESTS || [], VISIBLES = 6, todos = false;
+  var DESTS = window.CS_DESTS || [], VISIBLES = 3, todos = false;
   var CHICAS = { rio: 1, fln: 1, buz: 1, bcm: 1, bombinhas: 1 };   /* las que tienen miniatura de 120 px */
-  function fotoDe(k) { return CHICAS[k] ? 'dest/' + k + '-120.jpg' : '../fotos/' + k + '.jpg'; }
+  function fotoDe(k) { return CHICAS[k] ? 'dest/' + k + '-400.jpg' : '../fotos/' + k + '.jpg'; }
   function escH(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   var REGION = {};
   lista.innerHTML = DESTS.map(function (d) {
     REGION[d.k] = d.region || 'Brasil';
-    return '<li><a class="q-fila" data-destino="' + escH(d.k) + '" href="home-destino.html?destino=' + encodeURIComponent(d.k) + '&fuente=home_plata"><img src="' + fotoDe(d.k) + '" width="54" height="54" loading="lazy" decoding="async" alt=""><span class="q-nom">' + escH(d.name) + '<small>' + escH(REGION[d.k]) + '</small></span><span class="q-est">…</span></a></li>';
+    return '<li><a class="q-fila" data-destino="' + escH(d.k) + '" href="home-destino.html?destino=' + encodeURIComponent(d.k) + '&fuente=home_plata"><img src="' + fotoDe(d.k) + '" width="88" height="88" loading="lazy" decoding="async" alt=""><span class="q-nom"><b>' + escH(d.name) + '</b><span class="q-inc"></span></span><span class="q-der"><span><small class="q-desde">Desde</small><b class="q-pp">…</b><small>por persona</small></span><span class="q-ver">Ver viaje <i aria-hidden="true" style="font-style:normal">→</i></span></span></a></li>';
   }).join('');
   var filas = Array.prototype.slice.call(lista.querySelectorAll('.q-fila'));
   var mas = document.getElementById('q-mas');
   mas.addEventListener('click', function () { todos = !todos; ordenar(); if (!todos) document.getElementById('q').scrollIntoView({ block: 'start', behavior: quieto ? 'auto' : 'smooth' }); });
   /* Antes ordenaba del mas barato al mas caro: con US$ 2.750 la lista arrancaba por viajes de US$ 400 en auto.
      Ahora: primero los que llegan, por relevancia; despues los que no, del mas cercano; los sin precio al final. */
+  var MODOP = 'presupuesto';   /* panel activo del hero: 'presupuesto' o 'destino' */
+  var POPS = ['rio', 'fln', 'buz', 'bcm', 'bombinhas', 'porto'];   /* los mas buscados, en este orden, para el modo destino */
   function ordenar() {
-    var b = +rango.value, R = window.CSRecomendar;
+    var b = +rango.value, R = window.CSRecomendar, hay = Object.keys(PP).length > 0, orden, mostrables;
     var llega = function (k) { return PP[k] > 0 && PP[k] <= b; };
-    var orden = filas.slice().sort(function (x, y) {
-      var a = x.dataset.destino, c = y.dataset.destino;
-      if (llega(a) !== llega(c)) return llega(a) ? -1 : 1;
-      if (llega(a)) return R.relevancia(c, PP[c], b) - R.relevancia(a, PP[a], b);
-      return (PP[a] || 1e9) - (PP[c] || 1e9);
-    });
-    orden.forEach(function (fi, i) { var li = fi.parentNode; li.hidden = !todos && i >= VISIBLES; lista.appendChild(li); });
-    mas.hidden = filas.length <= VISIBLES;
+    if (MODOP === 'destino') {
+      /* "Ya sé a dónde voy": destinos populares, sin filtrar por plata. */
+      var pop = function (fi) { var i = POPS.indexOf(fi.dataset.destino); return i < 0 ? 99 : i; };
+      orden = filas.slice().sort(function (x, y) { return pop(x) - pop(y) || (PP[x.dataset.destino] || 1e9) - (PP[y.dataset.destino] || 1e9); });
+      mostrables = hay ? orden.filter(function (x) { return PP[x.dataset.destino] > 0; }) : orden;
+    } else {
+      orden = filas.slice().sort(function (x, y) {
+        var a = x.dataset.destino, c = y.dataset.destino;
+        if (llega(a) !== llega(c)) return llega(a) ? -1 : 1;
+        if (llega(a)) return R.relevancia(c, PP[c], b) - R.relevancia(a, PP[a], b);
+        return (PP[a] || 1e9) - (PP[c] || 1e9);
+      });
+      /* Sin etiquetas "Llegás / Justo": se muestran solo los destinos que entran en la plata. Si ninguno entra, los 3 mas
+         cercanos, para que la lista no quede vacia. Sin datos todavia (cargando), todos. */
+      var entran = orden.filter(function (x) { return llega(x.dataset.destino); });
+      mostrables = !hay ? orden : (entran.length ? entran : orden.slice(0, VISIBLES));
+    }
+    orden.forEach(function (fi) { var li = fi.parentNode, idx = mostrables.indexOf(fi); li.hidden = idx < 0 || (!todos && idx >= VISIBLES); lista.appendChild(li); });
+    mas.hidden = mostrables.length <= VISIBLES;
     if (FECHAS) enlaces(FECHAS.ida, FECHAS.vuelta);
-    mas.textContent = todos ? 'Ver menos' : 'Ver más destinos';
+    mas.textContent = todos ? 'Ver menos' : 'Ver todos los destinos (' + mostrables.length + ')';
     mas.setAttribute('aria-expanded', String(todos));
   }
   var fm = function (n) { return window.CSMoneda ? CSMoneda.fmt(n) : 'US$ ' + Math.round(n).toLocaleString('es-UY'); };
   function estado(pp, b) { return pp <= b * 0.85 ? 'ok' : (pp <= b ? 'justo' : (pp <= b * 1.2 ? 'casi' : 'no')); }
-  var TXT = { ok: 'Llegás', justo: 'Justo', casi: 'Casi', no: 'Todavía no' };
-  var EN = { auto: 'en auto', bus: 'en bus', ferry: 'en ferry', avion_mvd: 'en vuelo', avion_ba: 'en vuelo' };
+  var ICO = {
+    avion: '<path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/>',
+    bus: '<path d="M4 16V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10h-1.5v2a1 1 0 0 1-1 1H16a1 1 0 0 1-1-1v-2H9v2a1 1 0 0 1-1 1H6.5a1 1 0 0 1-1-1v-2zm3-9v4h10V7zm1 8.5a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4zm8 0a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4z"/>',
+    auto: '<path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11v6h-2v-2H7v2H5zm2.2 0h9.6l-1-3H8.2zM8 14.2a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4zm8 0a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4z"/>',
+    cama: '<path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/>',
+    comida: '<path d="M7 2v8a2 2 0 0 0 1 1.7V22h2V11.7A2 2 0 0 0 11 10V2H9.5v6H9V2H8v6h-.5V2zm9 0c-1.7 1.2-3 3.8-3 6.5 0 1.7.9 3 2 3.4V22h2z"/>'
+  };
+  var MEDIO = { auto: ['auto', 'Auto'], bus: ['bus', 'Bus'], ferry: ['bus', 'Ferry'], avion_mvd: ['avion', 'Vuelo'], avion_ba: ['avion', 'Vuelo'] };
+  function icono(n) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICO[n] + '</svg>'; }
+  /* Que incluye el precio de cada destino: el transporte que salio (el mas conveniente), alojamiento, y traslados y comidas estimados. */
+  function incluye(modo) {
+    var m = MEDIO[modo] || ['avion', 'Transporte'];
+    return '<span>' + icono(m[0]) + m[1] + '</span><span>' + icono('cama') + 'Alojamiento</span><span>' + icono('comida') + 'Comidas</span>';
+  }
+  var nochesTxt = function () { return P.noches + (P.noches === 1 ? ' noche' : ' noches'); };
+  /* Montos rapidos redondos en la moneda elegida; el slider (en dolares, sin saltos) se pone en el equivalente exacto. */
+  var CHIPS = { UYU: [25000, 40000, 60000], USD: [600, 1000, 1500], BRL: [3000, 5000, 8000] };
+  var tasaAct = function () { return window.CSMoneda && CSMoneda.tasa() > 0 ? CSMoneda.tasa() : 1; };
   function chispasEn(el) {
     var cols = ['#F5C518', '#0B1F3A', '#06B6D4', '#F59E0B'];
     for (var i = 0; i < 12; i++) {
@@ -657,18 +755,21 @@
     var pct = ((b - rango.min) / (rango.max - rango.min) * 100) + '%';
     rango.style.setProperty('--p', pct); rango.parentNode.style.setProperty('--p', pct);
     document.getElementById('q-monto').textContent = fm(b);
+    var tm = tasaAct(), cm = CHIPS[window.CSMoneda ? CSMoneda.code() : 'USD'] || CHIPS.USD;
+    Array.prototype.forEach.call(document.querySelectorAll('#q-rap button'), function (c, i) { var m = cm[i]; c.dataset.monto = m; c.textContent = fm(m / tm); c.disabled = rango.disabled; c.setAttribute('aria-pressed', String(Math.round(b * tm) === m)); });
     filas.forEach(function (fi) {
-      var k = fi.dataset.destino, pp = PP[k], e = fi.querySelector('.q-est');
-      if (!(pp > 0)) { fi.dataset.est = hay ? 'no' : 'x'; e.textContent = hay ? 'Sin datos' : '…'; return; }
-      var st = estado(pp, b); fi.dataset.est = st; e.textContent = TXT[st];
-      var sub = fi.querySelector('.q-nom small'); if (sub && EN[MODO[k]]) sub.textContent = REGION[k] + ' · ' + EN[MODO[k]];
+      var k = fi.dataset.destino, pp = PP[k], pr = fi.querySelector('.q-pp'), inc = fi.querySelector('.q-inc');
+      if (!(pp > 0)) { fi.dataset.est = hay ? 'no' : 'x'; pr.textContent = hay ? 'Sin datos' : '…'; inc.innerHTML = ''; return; }
+      var st = MODOP === 'destino' ? 'ok' : estado(pp, b); fi.dataset.est = st;
+      pr.textContent = fm(pp); inc.innerHTML = incluye(MODO[k]);
       if (st === 'ok' || st === 'justo') n++;
-      if (celebrar && !quieto && (st === 'ok') && antes[k] !== 'ok') { fi.classList.remove('g-bote'); void fi.offsetWidth; fi.classList.add('g-bote'); chispasEn(fi); }
+      if (celebrar && !quieto && MODOP === 'presupuesto' && (st === 'ok') && antes[k] !== 'ok') { fi.classList.remove('g-bote'); void fi.offsetWidth; fi.classList.add('g-bote'); chispasEn(fi); }
       antes[k] = st;
     });
     if (!hay) { ordenar(); return; }
+    if (MODOP === 'destino') { document.getElementById('q-n').textContent = 'Destinos populares'; document.getElementById('q-sub').textContent = ''; return; }
+    document.getElementById('q-sub').textContent = n === 0 ? 'Subí el monto para ver opciones.' : '';
     document.getElementById('q-n').textContent = n === 0 ? 'Con esa plata todavía no llegás' : (n === filas.length ? 'Con tu plata llegás a todos los destinos' : 'Con tu plata llegás a ' + n + (n === 1 ? ' destino' : ' destinos'));
-    document.getElementById('q-sub').textContent = n === 0 ? 'Subí el monto para ver opciones.' : (n === filas.length ? 'Recomendados para tu presupuesto.' : 'Recomendados para tu presupuesto. Subí el monto para ver más.');
   }
   rango.addEventListener('input', function () { pintar(true); });
   /* El orden cambia al soltar la barra, no mientras se arrastra: si no, la lista salta bajo el dedo. */
@@ -676,6 +777,8 @@
   if (window.CSMoneda) CSMoneda.alCambiar(function () { pintar(false); });
   var P = { pax: 2, noches: 7 }, LIM = { pax: [1, 8], noches: [2, 21] }, gen = 0, deb = null;
   function nota() {
+    document.getElementById('q-monto-sub').textContent = 'por persona · ' + nochesTxt();
+    pintarVuelta();
     document.getElementById('q-pax').textContent = P.pax; document.getElementById('q-noches').textContent = P.noches;
     document.getElementById('q-nota').textContent = 'Cuenta ' + P.noches + ' noches para ' + (P.pax === 1 ? '1 persona' : P.pax + ' personas') + ', saliendo de Montevideo, con el transporte que más conviene (auto, bus o vuelo, según precio y horas de viaje), alojamiento, traslados, comidas y transporte local. La plata es por persona.';
     document.querySelectorAll('.q-step button').forEach(function (b) { var k = b.dataset.p, d = +b.dataset.d; b.disabled = (P[k] + d < LIM[k][0] || P[k] + d > LIM[k][1]); });
@@ -683,7 +786,7 @@
   function cargar() {
     var mia = ++gen;
     var iso = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
-    var dep = new Date(); dep.setDate(dep.getDate() + 45); var ret = new Date(dep); ret.setDate(ret.getDate() + P.noches);
+    var dep = idaDe(); var ret = new Date(dep); ret.setDate(ret.getDate() + P.noches);
     var items = filas.map(function (fi) { return fi.dataset.destino + '~' + iso(dep) + '~' + iso(ret) + '~economico'; }).join(',');
     var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 12000);
     document.getElementById('q-lista').classList.add('is-cargando');
@@ -705,7 +808,7 @@
         if (Object.keys(PP).length) return; /* si ya habia datos, quedan los anteriores */
         document.getElementById('q-n').textContent = 'No pudimos calcular ahora';
         document.getElementById('q-sub').textContent = 'Igual podés elegir un destino y ver el viaje completo.';
-        filas.forEach(function (fi) { fi.dataset.est = 'x'; fi.querySelector('.q-est').textContent = 'Ver'; });
+        filas.forEach(function (fi) { fi.dataset.est = 'x'; fi.querySelector('.q-pp').textContent = 'Ver'; });
       })
       .then(function () { clearTimeout(tm); if (mia === gen) document.getElementById('q-lista').classList.remove('is-cargando'); });
   }
@@ -726,7 +829,53 @@
       fi.href = 'home-destino.html?' + new URLSearchParams(q).toString();
     });
   }
+  /* ---- Panel "Ya sé a dónde voy" (en la misma vista, sobre la foto) ---- */
+  var selDest = document.getElementById('q-dest'), inIda = document.getElementById('q-ida'), cta = document.getElementById('q-cta'), errEl = document.getElementById('q-err');
+  var isoD = function (d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  var sumaDias = function (d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; };
+  var hoy12 = function () { var d = new Date(); d.setHours(12, 0, 0, 0); return d; };
+  inIda.min = isoD(sumaDias(hoy12(), 1)); inIda.max = isoD(sumaDias(hoy12(), 300)); inIda.value = isoD(sumaDias(hoy12(), 45));
+  /* La fecha de salida elegida (o, sin elegir, dentro de 45 dias) es la que se usa para los precios de las tarjetas y para el viaje. */
+  function idaDe() { return /^\d{4}-\d{2}-\d{2}$/.test(inIda.value) ? new Date(inIda.value + 'T12:00:00') : sumaDias(hoy12(), 45); }
+  var MESES_V = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
+  function pintarVuelta() {
+    var v = sumaDias(idaDe(), P.noches);
+    document.getElementById('q-vuelta').textContent = 'Vuelta el ' + v.getDate() + ' ' + MESES_V[v.getMonth()] + ' · ' + nochesTxt();
+  }
+  (function () {   /* destinos: los mas buscados primero, despues todos por nombre */
+    var l = DESTS.slice().sort(function (a, b) { return a.name.localeCompare(b.name, 'es'); });
+    var pops = POPS.map(function (k) { return DESTS.filter(function (d) { return d.k === k; })[0]; }).filter(Boolean);
+    var op = function (d) { return '<option value="' + escH(d.k) + '">' + escH(d.name) + '</option>'; };
+    selDest.innerHTML = '<option value="">Elegí un destino</option><optgroup label="Más buscados">' + pops.map(op).join('') + '</optgroup><optgroup label="Todos los destinos">' + l.map(op).join('') + '</optgroup>';
+  })();
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.q-camino button'));
+  function setTab(n) {
+    MODOP = n; todos = false;
+    var d = n === 'destino';
+    tabs.forEach(function (b) { var on = b.dataset.tab === n; b.setAttribute('aria-selected', String(on)); if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-panel]'), function (el) { el.hidden = el.dataset.panel !== n; });
+    document.getElementById('q-h').innerHTML = d ? '¿A dónde querés ir? <em>Te decimos cuánto sale.</em>' : '¿Con cuánta plata contás? <em>Te decimos a dónde llegás.</em>';
+    lista.dataset.modo = n;
+    errEl.hidden = true;
+    pintarVuelta(); pintar(false); ordenar();
+  }
+  tabs.forEach(function (b) { b.addEventListener('click', function () { if (b.dataset.tab !== MODOP) setTab(b.dataset.tab); }); });
+  inIda.addEventListener('change', function () { errEl.hidden = true; nota(); clearTimeout(deb); deb = setTimeout(cargar, 350); });
+  selDest.addEventListener('change', function () { errEl.hidden = true; });
+  cta.addEventListener('click', function () {
+    var falla = function (t) { errEl.textContent = t; errEl.hidden = false; };
+    var k = selDest.value, ida = idaDe();
+    if (!k) { falla('Elegí un destino.'); selDest.focus(); return; }
+    if (!(inIda.value >= inIda.min && inIda.value <= inIda.max)) { falla('Elegí una fecha de salida entre mañana y ' + (+inIda.max.slice(8)) + ' ' + MESES_V[+inIda.max.slice(5, 7) - 1] + ' ' + inIda.max.slice(0, 4) + '.'); inIda.focus(); return; }
+    var q = new URLSearchParams({ destino: k, pax: P.pax, ninos: 0, ida: isoD(ida), vuelta: isoD(sumaDias(ida, P.noches)), fuente: 'home_ya_se' });
+    location.href = 'home-destino.html?' + q.toString();   /* ahi se decide: derecho al presupuesto, o "Como ir" si el destino tiene auto o bus */
+  });
   pintar(false); nota(); cargar();
+  if (/[?&]camino=destino/.test(location.search)) setTab('destino');
+  document.getElementById('q-rap').addEventListener('click', function (e) {
+    var c = e.target.closest('button'); if (!c || c.disabled) return;
+    rango.value = String(c.dataset.monto / tasaAct()); pintar(true); ordenar();
+  });
 
   /* Tus busquedas recientes: las que se hicieron eligiendo destino y fechas (cuenta.js las guarda en el navegador y,
      con sesion, en la cuenta). Tocar una vuelve a esa busqueda; si las fechas ya pasaron, abre el destino para elegir otras. */
@@ -740,12 +889,11 @@
     if (!l.length) { sec.hidden = true; sec.innerHTML = ''; return; }
     var m = new Date(); m.setDate(m.getDate() + 1);
     var manana = m.getFullYear() + '-' + String(m.getMonth() + 1).padStart(2, '0') + '-' + String(m.getDate()).padStart(2, '0');
-    sec.innerHTML = '<div class="q-rec__h"><h2 id="q-rec-t">Tus búsquedas recientes</h2><button type="button" data-rec-borrar>Borrar</button></div><ul>' + l.map(function (b) {
+    sec.innerHTML = '<div class="q-rec__h"><h2 id="q-rec-t">Recientes</h2><button type="button" data-rec-borrar>Borrar</button></div><ul>' + l.slice(0, 6).map(function (b) {
       var vale = b.dep >= manana && b.ret > b.dep, pax = +b.pax || 2;
       var q = vale ? { destino: b.dest, ida: b.dep, vuelta: b.ret, pax: pax, fuente: 'home_reciente' } : { destino: b.dest, fuente: 'home_reciente' };
       if (vale && MODOQ[b.transport]) q.modo = MODOQ[b.transport];
-      var det = (vale ? fc(b.dep) + ' – ' + fc(b.ret) : 'Elegí nuevas fechas') + ' · ' + pax + (pax === 1 ? ' persona' : ' personas');
-      return '<li><a href="home-destino.html?' + new URLSearchParams(q).toString() + '"><img src="' + fotoDe(b.dest) + '" width="40" height="40" loading="lazy" decoding="async" alt=""><span>' + escH(NOMBRE[b.dest]) + '<small>' + escH(det) + '</small></span><i aria-hidden="true">→</i></a></li>';
+      return '<li><a href="home-destino.html?' + new URLSearchParams(q).toString() + '"><img src="' + fotoDe(b.dest) + '" width="30" height="30" loading="lazy" decoding="async" alt="">' + escH(NOMBRE[b.dest]) + (vale ? '<small>' + fc(b.dep) + '</small>' : '') + '</a></li>';
     }).join('') + '</ul>';
     sec.hidden = false;
   }

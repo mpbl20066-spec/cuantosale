@@ -47,15 +47,22 @@
   .d-mas{border:0;background:transparent;color:var(--azul);font:800 13px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px}
   /* Grilla de destinos: dos columnas en celular, con la foto de arriba y el nombre
      debajo, igual que en la maqueta. */
-  .d-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .d-card{display:block;padding:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);text-align:left;overflow:hidden;cursor:pointer}
+  .d-grid{display:grid;grid-template-columns:1fr;gap:16px}
+  @media (min-width:640px){.d-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (min-width:1024px){html[data-pagina="destino"] .d-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}}
+  .d-card{display:flex;flex-direction:column;padding:0;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink);text-align:left;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}
   .d-card:hover{border-color:var(--ink2)}
+  .d-card:active{transform:scale(.98)}
+  .d-card__img{display:block;flex:none;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+  .d-card__b{display:flex;flex-direction:column;gap:10px;flex:1;padding:18px 20px 20px}
+  .d-card__n{font-family:var(--fh);font-size:19px;font-weight:800;line-height:1.2}
+  .d-card__inc{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+  .d-card__inc span{display:inline-flex;align-items:center;gap:5px}
+  .d-card__inc svg{flex:none;width:15px;height:15px;fill:currentColor}
+  .d-card__pp{margin-top:auto;padding-top:4px;font-family:var(--fh);font-size:26px;font-weight:800;line-height:1.1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .d-card__pp small{font-family:var(--fb);font-size:12.5px;font-weight:600;letter-spacing:0;color:var(--ink2)}
+  .d-card__cta{display:flex;align-items:center;justify-content:center;min-height:46px;margin-top:6px;border-radius:12px;background:#F5C518;color:#1A2B4A;font-size:15px;font-weight:800}
   .d-card.is-on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(247,195,37,.35)}
-  .d-card__f{position:relative;height:96px;background:var(--cel-soft) center/cover}
-  .d-card__f::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(10,16,26,.5))}
-  .d-card__t{padding:9px 11px 11px}
-  .d-card__t b{display:block;font-family:var(--fh);font-size:15px;font-weight:700;line-height:1.2}
-  .d-card__t small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--ink2)}
   /* Pantalla 3: tarjetas de medio de transporte */
   .d-modos{display:grid;gap:10px;margin-top:14px}
   .d-modo{display:flex;align-items:center;gap:14px;width:100%;box-sizing:border-box;padding:14px 16px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font-family:var(--fb);text-align:left;cursor:pointer}
@@ -69,8 +76,6 @@
   .d-modo__t small{display:block;margin-top:2px;font-size:13px;font-weight:500;color:var(--ink2);line-height:1.4}
   .d-modo__c{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-size:14px;font-weight:800}
   .d-modo__c:empty{background:transparent;border:1.5px solid var(--line)}
-  .d-card__t em{display:block;margin-top:3px;font-style:normal;font-size:12px;font-weight:800;color:var(--accent)}
-  .d-grid--pop .d-card:nth-child(5){display:none}   /* en celular y tablet se ven cuatro, como en la portada */
   .d-vacio{padding:22px 4px;text-align:center;font-size:14px;font-weight:600;color:var(--ink2)}
   /* Pantalla 2: fechas y personas */
 
@@ -239,10 +244,6 @@
     html[data-pagina="destino"] .d-split--f .d-limite{margin:6px 2px 0}
     html[data-pagina="destino"] .d-split--f .d-cont{margin-top:14px;padding:13px 20px;position:sticky;bottom:12px;z-index:3;box-shadow:0 0 0 10px var(--bg)}
     html[data-pagina="destino"] .d-split--f .d-foto{min-height:0}
-    html[data-pagina="destino"] .d-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:20px}
-    html[data-pagina="destino"] .d-grid--pop .d-card:nth-child(5){display:block}
-    html[data-pagina="destino"] .d-card{position:relative;border:0;border-radius:16px;background:var(--cel-soft)}
-    html[data-pagina="destino"] .d-card__f{height:150px;aspect-ratio:auto;background-size:cover;background-position:center}
     html[data-pagina="destino"] .d-card__f::after{background:linear-gradient(180deg,transparent 40%,rgba(10,16,26,.82))}
     html[data-pagina="destino"] .d-card__t{position:absolute;left:0;right:0;bottom:0;padding:12px 14px;color:#fff}
     html[data-pagina="destino"] .d-card__t b{color:#fff;font-size:15px;text-shadow:0 1px 5px rgba(0,0,0,.45)}
@@ -287,8 +288,6 @@
     /* Destinos: los nombres largos ("Arraial d’Ajuda", "Fernando de Noronha", "Balneário Camboriú") se ven
        enteros, en hasta dos renglones parejos; nunca se cortan ni se parten con guion. La grilla de "todos" se
        acomoda al ancho (4 columnas a 1024px, 5 a 1200px) en vez de apretar 5 columnas en cualquier pantalla. */
-    html[data-pagina="destino"] .d-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
-    html[data-pagina="destino"] .d-grid--pop{grid-template-columns:repeat(5,minmax(0,1fr))}
     html[data-pagina="destino"] .d-card{min-width:0;box-shadow:0 6px 22px rgba(10,30,70,.08)}
     html[data-pagina="destino"] .d-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(10,30,70,.14)}
     html[data-pagina="destino"] .d-card{transition:transform .15s,box-shadow .15s}
@@ -339,7 +338,7 @@
     var rt = (window.RT_DATA || {})[d.k];
     return [d.k, d.name, 'Brasil', rt ? rt.distanceKm : 0, d.region, d.medios || []];
   });
-  var POPULARES = ['rio', 'fln', 'buz', 'bcm', 'bombinhas'];   /* los mismos cinco, y en el mismo orden, que "Destinos populares" de la portada */
+  var POPULARES = ['rio', 'fln', 'buz', 'bcm', 'bombinhas', 'porto'];   /* los mismos cinco, y en el mismo orden, que "Destinos populares" de la portada */
   var PRECIOS = {};
   if (window.CSMoneda) CSMoneda.alCambiar(function () { if (S.pant === 1) actualizar(); });   /* precio real "Desde US$ X" por persona, de /api/destinos-destacados (el mismo endpoint de la portada) */
   var HOY = new Date();
@@ -380,6 +379,12 @@
     if (pal.every(function (w) { return n.indexOf(w) >= 0; })) return 2;
     return 3;
   };
+  /* Que incluye el precio, en tres iconos compactos (como en las tarjetas de la portada). */
+  var INCLUYE = '<span class="d-card__inc"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>Vuelo</span>' +
+    '<span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>Alojamiento</span>' +
+    '<span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v8a2 2 0 0 0 1 1.7V22h2V11.7A2 2 0 0 0 11 10V2H9.5v6H9V2H8v6h-.5V2zm9 0c-1.7 1.2-3 3.8-3 6.5 0 1.7.9 3 2 3.4V22h2z"/></svg>Comidas</span></span>';
+  /* Foto grande de la tarjeta: las de 400 px de dest/ donde existen (la miniatura de 120 se veria borrosa). */
+  function fotoGrande(k) { return (['rio', 'fln', 'buz', 'bcm', 'bombinhas'].indexOf(k) >= 0 ? 'dest/' + k + '-400.jpg' : '../fotos/' + k + '.jpg'); }
   function grilla() {
     /* Con texto escrito se busca en los 40 destinos; sin texto, solo los populares (o todos si se pidio). */
     var lista = DESTS.filter(function (d) {
@@ -393,42 +398,21 @@
     if (window.CSDemanda) CSDemanda.buscado(qn(), lista.length > 0);   /* destino que no tenemos: Sistema > Demanda */
     if (!lista.length) return '<p class="d-vacio">No encontramos destinos con ese nombre.<br>Probá con otro.</p>';
     return '<div class="d-grid' + (!qn() && !S.todos ? ' d-grid--pop' : '') + '">' + lista.map(function (d) {
+      var pp = PRECIOS[d[0]] > 0 ? '<span class="d-card__pp"><small>Desde</small> ' + (window.CSMoneda ? CSMoneda.fmt(PRECIOS[d[0]]) : 'US$ ' + Math.round(PRECIOS[d[0]]).toLocaleString('es-UY')) + ' <small>por persona</small></span>' : '';
       return '<button type="button" class="d-card" data-dest="' + d[0] + '" data-evento="destino_elegido" data-destino="' + d[0] + '">' +
-        '<span class="d-card__f" style="background-image:url(' + fotoDe(d[0]) + ')" aria-hidden="true"></span>' +
-        '<span class="d-card__t"><b>' + esc(d[1]) + '</b><small>' + esc(d[2]) + '</small>' + (PRECIOS[d[0]] > 0 ? '<em>Desde ' + (window.CSMoneda ? CSMoneda.fmt(PRECIOS[d[0]]) : 'US$ ' + Math.round(PRECIOS[d[0]]).toLocaleString('es-UY')) + '</em>' : '') + '</span></button>';
+        '<img class="d-card__img" src="' + fotoGrande(d[0]) + '" alt="" loading="lazy" decoding="async">' +
+        '<span class="d-card__b"><span class="d-card__n">' + esc(d[1]) + '</span>' + INCLUYE + pp + '<span class="d-card__cta">Ver viaje →</span></span></button>';
     }).join('') + '</div>';
   }
 
-  /* Destino que se muestra en la tarjeta grande (solo desktop): el que se toco en las sugerencias, o el primero
-     que coincide con lo que se escribe. Por defecto, el primero de los populares. */
   function destPrevia() {
     var hit = qn() ? DESTS.filter(function (d) { return coincide(d, S.q); }).sort(function (a, b) { return puntaje(a, S.q) - puntaje(b, S.q); })[0] : null;
     if (hit) return hit;
     if (qn()) return null;   /* escribio algo que no existe: no se ofrece otro destino en su lugar */
     return DESTS.filter(function (d) { return d[0] === S.sel; })[0] || DESTS.filter(function (d) { return d[0] === POPULARES[0]; })[0] || null;
   }
-  /* Con mas de un medio posible (Santa Catarina y Rio Grande do Sul: avion, auto y a veces bus) se agrega "Como ir", y el paso del
-     transporte se llama Vuelos, Auto o Bus segun lo elegido. En el resto de los destinos solo hay avion y no se pregunta. */
-  function pasosDe() {
-    var d = destInfo(), m = mediosDe(d), t = { avion: 'Vuelos', auto: 'Auto', bus: 'Bus' }[S.medio] || 'Vuelos';
-    return m.length > 1 ? ['Destino', 'Fechas y personas', 'Cómo ir', t, 'Alojamiento', 'Extras', 'Presupuesto'] : ['Destino', 'Fechas y personas', 'Vuelos', 'Alojamiento', 'Extras', 'Presupuesto'];
-  }
-  function migas(activo) {
-    return '<nav class="d-crumb" aria-label="Pasos del viaje"><ol>' + pasosDe().map(function (n, i) {
-      return '<li' + (i === activo ? ' class="is-on" aria-current="step"' : '') + '><span>' + (i + 1) + '</span>' + n + '</li>';
-    }).join('') + '</ol></nav>';
-  }
   /* Partes de la pantalla que cambian al escribir. El <input> no se vuelve a crear: asi no pierde el foco,
      el cursor ni los espacios que se escriben. */
-  function chipsHtml(prev) {
-    return POPULARES.map(function (k) {
-      var d = DESTS.filter(function (x) { return x[0] === k; })[0]; if (!d) return '';
-      return '<button type="button" class="d-chip' + (prev && prev[0] === k ? ' is-on' : '') + '" data-sel="' + k + '" aria-pressed="' + !!(prev && prev[0] === k) + '">' + esc(d[1]) + '</button>';
-    }).join('');
-  }
-  function prevHtml(prev) {
-    return prev ? '<button type="button" class="d-prev" data-continuar="1" style="background-image:url(' + fotoDe(prev[0]) + ')" aria-label="Elegir ' + esc(prev[1]) + '"><span><b>' + esc(prev[1]) + '</b><small>' + esc(prev[2]) + '</small></span></button>' : '';
-  }
   function listadoHtml() {
     var q = qn();
     return '<div class="d-h2"><h2>' + (q ? 'Resultados' : (S.todos ? 'Todos los destinos' : 'Destinos populares')) + '</h2>' +
@@ -436,23 +420,16 @@
   }
   function xHtml() { return S.q ? '<button type="button" class="d-x" data-limpiar="1" aria-label="Borrar búsqueda">' + ic('<path d="M6 6l12 12M18 6 6 18"/>', 16) + '</button>' : ''; }
   function actualizar() {
-    var prev = destPrevia();
     $('d-xs').innerHTML = xHtml();
-    $('d-chips').innerHTML = chipsHtml(prev);
-    $('d-pv').innerHTML = prevHtml(prev);
-    var c = document.querySelector('.d-cont'); if (c) c.disabled = !prev;
     $('d-lst').innerHTML = listadoHtml();
   }
+  /* Elegir destino: un buscador y las tarjetas. Tocar una tarjeta (o dar Enter sobre lo escrito) pasa a fechas y personas, y de
+     ahi se va derecho al presupuesto. Sin barra de pasos, sin chips repetidos y sin vista previa. */
   function pant1() {
     $('main').dataset.pant = '1';
-    var prev = destPrevia();
-    $('main').innerHTML = migas(0) +
-      '<div class="d-split"><div class="d-left"><h1>¿A dónde querés ir?</h1><p class="d-sub">Buscá o seleccioná el destino de tu próximo viaje.</p>' +
-      '<label class="d-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="Ej: Río de Janeiro, Florianópolis..." value="' + esc(S.q) + '" autocomplete="off" spellcheck="false">' +
-      '<span id="d-xs" style="display:contents">' + xHtml() + '</span></label>' +
-      '<div class="d-sug"><h2>Sugerencias populares</h2><div class="d-chips" id="d-chips">' + chipsHtml(prev) + '</div></div>' +
-      '<button type="button" class="d-cont" data-continuar="1" data-evento="destino_continuar_desde_busqueda"' + (prev ? '' : ' disabled') + '>Continuar ' + ic('<path d="M5 12h14M13 6l6 6-6 6"/>', 20) + '</button></div>' +
-      '<div id="d-pv" style="display:contents">' + prevHtml(prev) + '</div></div>' +
+    $('main').innerHTML = '<div class="d-left"><h1>¿A dónde querés ir?</h1><p class="d-sub">Buscá o seleccioná el destino de tu próximo viaje.</p>' +
+      '<label class="d-bus" for="bus">' + ic(I.lupa) + '<input id="bus" type="search" placeholder="Ej: Río de Janeiro, Florianópolis..." value="' + esc(S.q) + '" autocomplete="off" spellcheck="false" enterkeyhint="go">' +
+      '<span id="d-xs" style="display:contents">' + xHtml() + '</span></label></div>' +
       '<div id="d-lst">' + listadoHtml() + '</div>';
     $('foot').innerHTML = '';
     $('foot').hidden = true;
@@ -574,7 +551,7 @@
     var RO = TACTIL ? ' readonly inputmode="none"' : '';
     $("main").dataset.pant = "2";
     var fv = d ? (d[0] === 'rio' ? 'dest/rio-vertical.jpg' : fotoDe(d[0])) : '';   /* foto vertical del destino (solo Rio tiene una propia) */
-    $("main").innerHTML = migas(1) + "<div class=\"d-split d-split--f\"><div class=\"d-left\"><h1>¿Cuándo querés viajar?</h1><p class=\"d-sub\">Elegí tus fechas y quiénes viajan.</p>" +
+    $("main").innerHTML = "<div class=\"d-split d-split--f\"><div class=\"d-left\"><h1>¿Cuándo querés viajar?</h1><p class=\"d-sub\">Elegí tus fechas y quiénes viajan.</p>" +
       "<button type=\"button\" class=\"d-elegido\" data-cambiar=\"1\" data-evento=\"destino_cambiar\" aria-label=\"Cambiar destino: " + esc(d ? d[1] : "") + "\">" + (d ? "<span class=\"d-elegido__f\" style=\"background-image:url(" + fotoDe(d[0]) + ")\" aria-hidden=\"true\"></span>" : ic(I.pin, 20)) +
       "<span class=\"d-elegido__t\"><b>" + esc(d ? d[1] + ", " + d[2] : "") + "</b><small>Origen: Montevideo, Uruguay</small></span>" +
       "<span class=\"d-elegido__c\">Cambiar " + ic(I.chev, 14) + "</span></button>" +
@@ -615,7 +592,7 @@
     var d = destInfo(), m = ['avion', 'auto', 'bus'].filter(function (k) { return mediosDe(d).indexOf(k) >= 0; }); if (m.indexOf(S.medio) < 0) S.medio = 'avion';
     var fv = d ? (d[0] === 'rio' ? 'dest/rio-vertical.jpg' : fotoDe(d[0])) : '';
     $("main").dataset.pant = "3";
-    $("main").innerHTML = migas(2) + '<div class="d-split d-split--f"><div class="d-left"><h1>¿Cómo querés ir?</h1><p class="d-sub">Elegí cómo viajar de Montevideo a ' + esc(d ? d[1] : '') + '.</p>' +
+    $("main").innerHTML = '<div class="d-split d-split--f"><div class="d-left"><h1>¿Cómo querés ir?</h1><p class="d-sub">Elegí cómo viajar de Montevideo a ' + esc(d ? d[1] : '') + '.</p>' +
       '<div class="d-modos" role="group" aria-label="Medio de transporte">' + m.map(function (k) {
         var on = S.medio === k;
         return '<button type="button" class="d-modo' + (on ? ' is-on' : '') + '" data-medio="' + k + '" aria-pressed="' + on + '" data-evento="destino_medio">' +
@@ -636,7 +613,7 @@
   /* Ir a los resultados pasando destino, fechas, personas y medio de transporte. */
   function aResultados() {
     /* Con las fechas elegidas se va derecho a elegir el vuelo (paso 1 del flujo de reserva). */
-    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: S.ninos, ida: S.ida, vuelta: S.vuelta, fuente: 'destino_vuelos', origen_home: fuente });
+    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: S.ninos, ida: S.ida, vuelta: S.vuelta, fuente: 'destino_vuelos', origen_home: fuente, directo: '1' });
     var par = parElegido(); if (par && nochesViaje() >= 2) { q.set('segundo', par.k); q.set('noches1', noches1()); } else par = null;
     /* Avion: elegir vuelo. Auto: datos del auto, combustible, peajes y mapa. Bus: resultado del bus. */
     var m = mediosDe(destInfo()).indexOf(S.medio) >= 0 ? S.medio : 'avion';
@@ -747,6 +724,13 @@
   $('main').addEventListener('input', alCambiarFecha);
   $('main').addEventListener('input', function (e) {
     if (e.target.id === 'bus') { S.q = e.target.value; actualizar(); }
+  });
+  $('main').addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.target.id !== 'bus' || !qn()) return;
+    var pv = destPrevia(); if (!pv) return;
+    e.preventDefault();
+    if (S.dest !== pv[0]) { S.seg = ''; S.n1 = 0; }
+    S.dest = pv[0]; track('destino_pasa_a_fechas', { destino: S.dest, via: 'enter' }); ir(2);
   });
   /* Si entran con ?destino= y ?pax=, son datos que la pantalla anterior ya recogio:
      se va derecho a resultados. Con solo ?destino=, todavia hay que elegir fechas. */
