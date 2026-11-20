@@ -197,6 +197,21 @@
   .x-p small{display:block;font-size:10.5px;font-weight:600;color:var(--ink2)}
   .x-add{flex:0 0 auto;padding:8px 10px;border:1.5px solid var(--control-border);border-radius:99px;background:var(--surface);color:var(--ink);font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
   .x-add.is-on{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
+  /* Paso Extras: "+ Agregar" / "✓ Agregado" (acento amarillo), "Ver detalles" discreto, "No incluir" y barra de resumen */
+  .x-add--main{padding:9px 14px;border-color:#F5C518;background:transparent;color:var(--ink)}
+  .x-add--main.is-on{background:#F5C518;border-color:#F5C518;color:#111}
+  .x-tit{cursor:pointer}.x-tit:hover{text-decoration:underline;text-underline-offset:3px}
+  .x-link{display:block;margin:6px 0 0;padding:0;border:0;background:transparent;color:var(--ink2);font:600 12px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  .dd-none{padding:6px 10px;border:1.5px solid var(--line);border-radius:99px;background:transparent;color:var(--ink2);font:700 11.5px var(--fb);cursor:pointer;white-space:nowrap}
+  .dd-none.is-sel{border-color:#F5C518;background:rgba(245,197,24,.12);color:var(--ink)}
+  .dd-o{cursor:pointer}.dd-o.is-sel{cursor:pointer}
+  .dd-g{padding:12px}
+  .dd-tot{margin:10px 2px 0;padding:0 6px;line-height:1.5}
+  .f-sum{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px;padding:10px 12px;border:1.5px solid var(--card-border,var(--line));border-radius:12px;background:var(--card-bg,var(--surface));font-size:12.5px;color:var(--ink2)}
+  .f-sum[hidden]{display:none}
+  .f-sum__l{display:flex;flex-direction:column;gap:2px;min-width:0}.f-sum__l b{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .f-sum__l span{font-weight:600}
+  .f-sum strong{flex:0 0 auto;font-family:var(--fh);font-size:18px;font-weight:800;color:#F5C518;font-variant-numeric:tabular-nums}
   .x-add:focus-visible,.x-otros__h:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .x-note{margin:0 0 4px;font-size:11px;font-weight:600;color:var(--ink2)}
   .x-ej{display:inline-block;margin-top:4px;padding:1px 8px;border-radius:99px;background:var(--cel-soft);color:var(--ink2);font-size:10.5px;font-weight:700}
@@ -1518,7 +1533,7 @@
   <div class="f-total" id="total" aria-live="polite"></div>
   <div class="f-scroll" id="main"></div>
   <div class="f-modal" id="modal" hidden></div>
-  <div class="f-foot" id="foot"><button type="button" class="f-cta" id="cta"></button></div>
+  <div class="f-foot" id="foot"><div class="f-sum" id="fsum" hidden></div><button type="button" class="f-cta" id="cta"></button></div>
 </div>
 <script src="../transfer-precios.js"></script>
 <script src="extras-data.js"></script>
@@ -1659,9 +1674,21 @@
     { id: 'beto', cat: 'tras', nom: 'Traslado a Beto Carrero', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 120 },
     { id: 'camb', cat: 'tras', nom: 'Traslado a Balneário Camboriú', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 85 },
     { id: 'tras3', cat: 'tras', nom: 'Traslado a Praia do Rosa', dur: 'Ida y vuelta', grupo: 'Privado · 1 a 4 personas', precio: 140 }
-  ] : []).filter(function (e) { return e.nom.indexOf(DEST) < 0; });
+  ] : []).filter(function (e) { return e.nom.indexOf(DEST) < 0 && !(PAR && e.nom.indexOf(PAR.l[1].nom) >= 0); });
   var tourItem = function (pre) { return function (t, i) { return { id: pre + i, cat: 'tours', nom: t.titulo, dur: t.duracion, grupo: t.grupo, precio: t.precio, pp: true, foto: t.foto, autor: t.autor, real: true, info: t }; }; };
+  /* Con dos paradas, los paseos de dia completo de la primera hacia la segunda ("Full Day Arraial do Cabo (desde Río)")
+     no se ofrecen: ya se duerme en ese destino y quedaria duplicado. */
+  var sinHaciaSegundo = function (lista) {
+    if (!PAR) return lista;
+    var n = function (s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); };
+    var d2 = n(PAR.l[1].nom);
+    return lista.filter(function (t) {
+      var x = n(t.titulo || t.nom);
+      return !(d2 && x.indexOf(d2) >= 0 && /\b(full day|dia completo|day trip|excursion|desde)\b/.test(x));
+    });
+  };
   var armarExtras = function (t1, t2) {
+    t1 = sinHaciaSegundo(t1);
     return [
       { cat: 'tours', sec: 'Tours y actividades', sub: 'Viví experiencias únicas en tu destino.', ico: 'palm', items: t1.map(tourItem('t')).concat(TRAS_X) },
       /* Con dos paradas, los paseos de la segunda van en su propia seccion (ids u0, u1...). */
@@ -1687,7 +1714,7 @@
     local: { t: 'Transporte local', base: 'transport', o: [['eco', 'Económico', 'Ómnibus y líneas urbanas'], ['medio', 'Medio', 'Mixto: algo de ómnibus y algo de app'], ['confort', 'Confort', 'Taxis y transporte privado por app']] },
     comidas: { t: 'Comidas', base: 'food', o: [['casual', 'Económico', 'Supermercado, panaderías y puestos.'], ['moderado', 'Medio (Recomendado)', 'Buffets por kilo y restaurantes.'], ['gourmet', 'Gourmet', 'Restaurantes top y paradores de playa.']] }
   };
-  var porDia = function (q) { var e = S.dia[q]; return e.k === 'custom' ? (e.monto || 0) : (COSTO_DIA[OPC_DIA[q].base][e.k] || 0); };
+  var porDia = function (q) { var e = S.dia[q]; return e.k === 'none' ? 0 : e.k === 'custom' ? (e.monto || 0) : (COSTO_DIA[OPC_DIA[q].base][e.k] || 0); };
   var gastoDia = function (q) { return porDia(q) * pax * NOCHES; };
   var comidasTotal = function () { return gastoDia('comidas') + gastoDia('local'); };
   var comidasParte = function () { return gastoDia('comidas'); };
@@ -2499,14 +2526,16 @@
     if (e.agotado) return '<div class="opt xr is-agotado" aria-disabled="true">' +
       '<div class="xr__img"' + (e.foto ? ' style="background-image:url(\'' + esc(e.foto) + '\')"' : '') + ' role="img" aria-label="' + esc(e.nom) + '">' + (e.foto ? '' : ic(iImg, 26)) + '</div>' +
       '<div class="xr__b"><b>' + esc(e.nom) + '</b><span class="x-agot">Sin lugar en tus fechas · ' + esc(e.agotado) + '</span></div><div class="xr__r"></div></div>';
+    var esTour = e.cat === 'tours';
     return '<div class="opt xr' + sel(on) + '" role="button" tabindex="0" data-extra="' + e.id + '" aria-pressed="' + on + '">' + tick +
       (e.cat === 'tours' ? '<div class="xr__img"' + (e.foto ? ' style="background-image:url(\'' + esc(e.foto) + '\')" title="Foto: ' + esc(e.autor || 'Wikimedia Commons') + '"' : '') + ' role="img" aria-label="' + esc(e.nom) + '">' + (e.foto ? '' : ic(iImg, 26)) + '</div>'
         : '<div class="xr__img is-veh" style="background-image:url(\'' + (e.cat === 'tras' && /compart|bus|van/i.test(e.nom) ? 'traslado-van.png' : 'traslado-auto.png') + '\')" role="img" aria-label="' + esc(e.nom) + '"></div>') +
-      '<div class="xr__b">' + (tag ? '<span class="cs-pill xr__pill">' + tag + '</span>' : '') + '<b>' + esc(e.nom) + '</b>' +
+      '<div class="xr__b">' + (tag ? '<span class="cs-pill xr__pill">' + tag + '</span>' : '') + (esTour ? '<b class="x-tit" data-tdet="' + e.id + '">' + esc(e.nom) + '</b>' : '<b>' + esc(e.nom) + '</b>') +
       '<small>' + ic(iClock, 13) + (e.cat === 'tours' ? esc(jornada(e.dur)) : esc(e.dur || 'Duración a confirmar') + (e.grupo ? ' · ' + esc(e.grupo) : '')) + '</small>' +
-      (e.real ? '' : '<span class="x-ej">Precio de ejemplo</span>') + '</div>' +
+      (e.real ? '' : '<span class="x-ej">Precio de ejemplo</span>') +
+      (esTour ? '<button type="button" class="x-link" data-tdet="' + e.id + '">Ver detalles</button>' : '') + '</div>' +
       '<div class="xr__r"><div class="x-p"><b>' + f(e.precio) + '</b><small>' + unidad.replace(/^ \/ /, '/ ') + '</small>' + (e.temporada ? '<span class="x-temp">' + esc(e.temporada) + '</span>' : '') + '</div>' +
-      (e.cat === 'tours' ? '<button type="button" class="x-add" data-tdet="' + e.id + '">Ver detalles</button>' : '') + '</div></div>';
+      (esTour ? '<button type="button" class="x-add x-add--main' + (on ? ' is-on' : '') + '" data-extra="' + e.id + '" aria-pressed="' + on + '">' + (on ? '✓ Agregado' : '+ Agregar') + '</button>' : '') + '</div></div>';
   }
   var MAS_TXT = { tours: 'Ver más tours', tours2: 'Ver más tours', tras: 'Ver más traslados' };
   var TITULO_X = { tours: ['🌴', PAR ? 'Tours en ' + DEST1 : 'Tours y actividades', 'Experiencias y traslados en '], tours2: ['🌴', PAR ? 'Tours en ' + PAR.l[1].nom : '', ''] };
@@ -2569,9 +2598,11 @@
     var custom = e.k === 'custom'
       ? '<div class="dd-o is-sel">' + tick + '<b>Personalizado</b><label for="dd-in-' + q + '">Monto planeado</label><span class="dd-in"><span>' + esc(sim) + '</span><input id="dd-in-' + q + '" data-dia-in="' + q + '" type="number" min="0" step="1" inputmode="decimal" value="' + (e.monto ? Math.round(e.monto * tasa) : '') + '"></span>' + unidad + '</div>'
       : '<button type="button" class="dd-o" data-dia="' + q + ':custom" aria-pressed="false"><b>Personalizado</b><span>Definí tu propio presupuesto</span><strong class="dd-o__ing">' + ic('<path d="M4 20h4L19 9l-4-4L4 16z"/>', 16) + 'Ingresar monto</strong></button>';
-    return '<section class="dd" aria-labelledby="dd-h-' + q + '"><div class="dd-h"><h2 id="dd-h-' + q + '">' + c.t + '</h2><small>Valores estimados</small></div>' +
+    var ninguno = e.k === 'none';
+    return '<section class="dd" aria-labelledby="dd-h-' + q + '"><div class="dd-h"><h2 id="dd-h-' + q + '">' + c.t + '</h2>' +
+      '<button type="button" class="dd-none' + (ninguno ? ' is-sel' : '') + '" data-dia="' + q + ':none" aria-pressed="' + ninguno + '">' + (ninguno ? '✓ ' : '') + 'No incluir (' + f(0) + ')</button></div>' +
       '<div class="dd-g">' + cajas + custom + '</div>' +
-      '<p class="dd-tot">' + f(gastoDia(q)) + ' en total · ' + personasTxt() + ' · ' + NOCHES + (NOCHES === 1 ? ' día' : ' días') + '</p></section>';
+      '<p class="dd-tot">' + (ninguno ? 'No incluido · ' + f(0) + ' en el presupuesto' : f(gastoDia(q)) + ' en total · ' + personasTxt() + ' · ' + NOCHES + (NOCHES === 1 ? ' día' : ' días')) + '</p></section>';
   }
   function datosFinal() {
     /* hs: el alojamiento de cada parada (uno solo sin PAR). h es el de la primera parada que tiene uno elegido. */
@@ -3533,6 +3564,14 @@
     S.alojReservado = g.aloj && g.alojReservado ? g.alojReservado : null;
     ultimoRes = estadoRes();
   }
+  /* Barra sobre "Continuar a Tu presupuesto": Extras = tours elegidos + gastos estimados en destino (comidas y transporte local). */
+  function pintarResumenExtras() {
+    var el = $('fsum'); if (!el) return;
+    if (S.paso !== 3 || S.abriendo) { el.hidden = true; return; }
+    var ex = extrasSel(), tTours = sum(ex, precioExtra), tDest = comidasTotal();
+    el.hidden = false;
+    el.innerHTML = '<span class="f-sum__l"><b>Total de Extras</b><span>Tours ' + f(tTours) + (ex.length ? ' (' + ex.length + ')' : '') + ' + Gastos en destino ' + f(tDest) + '</span></span><strong>' + f(tTours + tDest) + '</strong>';
+  }
   function render(scrollTop) {
     if (ultimoRes || S.res.vuelo || S.res.aloj) guardarReservados();
     pintarPasos(); pintarTotal();
@@ -3548,6 +3587,7 @@
     document.documentElement.classList.toggle('cs-oscuro', S.paso === 5);
     $('steps').hidden = S.paso >= 5 || !!S.abriendo;
     $('foot').hidden = S.paso >= 5 || !!S.abriendo;
+    pintarResumenExtras();
     if (S.paso < 5) { $('cta').textContent = S.paso === 2 && PAR && PA === 0 ? 'Continuar a ' + PAR.l[1].nom + ' →' : (MODO === 'avion' ? (S.paso === 1 ? (S.sub === 't' ? 'Continuar a Extras →' : 'Continuar a Alojamiento →') : (S.paso === 2 ? 'Continuar a Transfer →' : CTAS[S.paso])) : CTAS[S.paso]); $('cta').disabled = (S.paso === 2 && S.cargandoH) || (MODO === 'bus' && S.paso === 1 && !BUS) || (MODO === 'avion' && S.paso === 1 && !S.vuelo); $('cta').style.opacity = $('cta').disabled ? .5 : 1; }
     if (scrollTop) $('main').scrollTop = 0;
     marcarHistoria();
@@ -4105,7 +4145,8 @@
     else if (t.dataset.sinTransfer) { S.traslado = null; if (PAR) { S.t3 = null; S.entre = false; } track('flujo_sin_transfer', {}); ir(MODO === 'avion' ? 3 : 2, 'sin_transfer'); return; }
     else if (t.dataset.dia) {
       var dq = t.dataset.dia.split(':'), prev = S.dia[dq[0]];
-      S.dia[dq[0]] = dq[1] === 'custom' ? { k: 'custom', monto: prev.k === 'custom' ? prev.monto : porDia(dq[0]) } : { k: dq[1] };
+      /* Tocar de nuevo la opcion activa la quita ($ 0), igual que "No incluir". */
+      S.dia[dq[0]] = dq[1] === 'custom' ? { k: 'custom', monto: prev.k === 'custom' ? prev.monto : (prev.k === 'none' ? 0 : porDia(dq[0])) } : { k: prev.k === dq[1] ? 'none' : dq[1] };
       track('flujo_dia_nivel', { rubro: dq[0], nivel: dq[1] });
       if (dq[1] === 'custom') { render(false); $('main').scrollTop = y; var din = $('dd-in-' + dq[0]); if (din) { din.focus({ preventScroll: true }); din.select(); } return; }
     }
