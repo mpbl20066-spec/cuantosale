@@ -1068,6 +1068,9 @@
   .f-comb__s button{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
   .f-comb__s button:disabled{opacity:.35;cursor:default}
   .f-comb__s output,.f-comb__n{min-width:22px;text-align:center;font-size:16px;font-weight:800}
+  .f-comb__sel{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2)}
+  .f-comb__sel select{min-width:0;max-width:60%;min-height:38px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:700 13.5px var(--fb)}
+  .f-comb__sel select:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .f-comb__a{display:flex;gap:16px;margin:6px 0 0}
   .f-comb__a button{padding:6px 0;border:0;background:transparent;color:var(--ink);font:700 13px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
   .f-sin{display:block;margin:6px auto 0;padding:10px 14px;border:0;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
@@ -2034,13 +2037,18 @@
   /* ---- Viaje combinado Rio + Buzios (mismo aeropuerto, GIG): un solo vuelo, las noches se reparten entre los dos ----
      El reparto recarga el planificador con segundo= y noches1= (la misma mecanica que "segunda parada" de la pantalla de fechas):
      transfer, alojamiento por tramo y presupuesto ya se arman solos desde PAR. */
-  var COMB = { rio: 'buz', buz: 'rio' };
-  function combinar(acc) {
+  /* Destinos compatibles (mismo aeropuerto) de cualquier destino principal: salen de paradas-datos.js. El mas habitual de cada
+     uno va primero al activar; Rio y Buzios se eligen entre si. */
+  var COMB_HAB = { rio: 'buz', buz: 'rio' };
+  function combOpciones(k) { return ((window.CS_PARADAS || {})[k] || []).filter(function (p) { return DESTS[p.k]; }).map(function (p) { return p.k; }); }
+  function combDefecto(k) { var o = combOpciones(k); return o.indexOf(COMB_HAB[k]) >= 0 ? COMB_HAB[k] : (o[0] || ''); }
+  function combinar(acc, val) {
     var q = new URLSearchParams(location.search);
     ['paso', 'directo', 'sel', 'mant', 'conf', 'codigo'].forEach(function (k) { q.delete(k); });
-    if (acc === 'ini') { q.set('segundo', COMB[destKey]); q.set('noches1', Math.floor(NOCHES / 2)); }
+    if (acc === 'ini' && combDefecto(destKey)) { q.set('segundo', combDefecto(destKey)); q.set('noches1', Math.floor(NOCHES / 2)); }
+    else if (acc === 'seg' && PAR && combOpciones(destKey).indexOf(val) >= 0) { q.set('segundo', val); }
     else if (acc === 'quitar') { q.delete('segundo'); q.delete('noches1'); }
-    else if (acc === 'inv' && PAR) { q.set('destino', PAR.l[1].k); q.set('segundo', PAR.l[0].k); q.set('noches1', PAR.l[1].noches); }
+    else if (acc === 'inv' && PAR && combOpciones(PAR.l[1].k).indexOf(PAR.l[0].k) >= 0) { q.set('destino', PAR.l[1].k); q.set('segundo', PAR.l[0].k); q.set('noches1', PAR.l[1].noches); }
     else if ((acc === 'mas' || acc === 'menos') && PAR) { q.set('noches1', Math.max(1, Math.min(NOCHES - 1, PAR.l[0].noches + (acc === 'mas' ? 1 : -1)))); }
     else return;
     q.set('paso', '2');
@@ -2058,13 +2066,14 @@
       fila(3, esc(b.nom) + ' → ' + aer, fdc(b.vuelta) + ' · lo elegís abajo') + '</ol>';
   }
   function bloqueCombinar() {
-    if (MODO !== 'avion' || !COMB[destKey] || NOCHES < 2 || (PAR && PAR.l[1].k !== COMB[destKey])) return '';
-    if (!PAR) return '<div class="f-comb f-comb--ini"><span><b>¿Combinás con ' + esc(DESTS[COMB[destKey]]) + '?</b><small>Mismo vuelo, noches repartidas entre los dos destinos. Se arma el alojamiento de cada tramo.</small></span><button type="button" class="f-comb__go" data-comb="ini">Dividir noches</button></div>';
+    if (MODO !== 'avion' || NOCHES < 2 || !combDefecto(PAR ? PAR.l[0].k : destKey)) return '';
+    if (!PAR) return '<div class="f-comb f-comb--ini"><span><b>¿Querés combinar con otro destino?</b><small>Mismo vuelo, noches repartidas entre los dos destinos. Se arma el alojamiento de cada tramo.</small></span><button type="button" class="f-comb__go" data-comb="ini">Dividir noches</button></div>';
     var a = PAR.l[0], b = PAR.l[1], paso = function (acc, txt, dis, lbl) { return '<button type="button" data-comb="' + acc + '" aria-label="' + lbl + '"' + (dis ? ' disabled' : '') + '>' + txt + '</button>'; };
     return '<div class="f-comb"><p class="f-comb__t">Viaje combinado · un solo vuelo a ' + esc(AEROPUERTO[destKey] === 'RIO' ? 'Río' : (AEROPUERTO[destKey] || 'GIG')) + '</p>' +
       '<div class="f-comb__r"><span><b>' + esc(a.nom) + '</b><small>1.º · ' + nochesTxt(a.noches) + ' · ' + fdc(a.ida) + ' → ' + fdc(a.vuelta) + '</small></span><span class="f-comb__s">' + paso('menos', '−', a.noches <= 1, 'Una noche menos en ' + esc(a.nom)) + '<output>' + a.noches + '</output>' + paso('mas', '+', b.noches <= 1, 'Una noche más en ' + esc(a.nom)) + '</span></div>' +
       '<div class="f-comb__r"><span><b>' + esc(b.nom) + '</b><small>2.º · ' + nochesTxt(b.noches) + ' · ' + fdc(b.ida) + ' → ' + fdc(b.vuelta) + '</small></span><output class="f-comb__n">' + b.noches + '</output></div>' +
-      '<p class="f-comb__a"><button type="button" data-comb="inv">Invertir orden</button><button type="button" data-comb="quitar">Quitar combinación</button></p></div>';
+      '<label class="f-comb__sel"><span>Segundo destino</span><select data-comb-seg aria-label="Segundo destino">' + combOpciones(destKey).map(function (k) { return '<option value="' + k + '"' + (k === b.k ? ' selected' : '') + '>' + esc(DESTS[k]) + '</option>'; }).join('') + '</select></label>' +
+      '<p class="f-comb__a">' + (combOpciones(b.k).indexOf(a.k) >= 0 ? '<button type="button" data-comb="inv">Invertir orden</button>' : '') + '<button type="button" data-comb="quitar">Quitar combinación</button></p></div>';
   }
   function pantalla1() {
     if (MODO === 'bus') return pantallaBus();
@@ -3791,6 +3800,7 @@
     var i = $('hq'); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (x) {} }
   });
   $('main').addEventListener('change', function (e) {
+    if (e.target.hasAttribute && e.target.hasAttribute('data-comb-seg')) { combinar('seg', e.target.value); return; }
     if (e.target.dataset.diaIn) {
       var q = e.target.dataset.diaIn, v = parseFloat(e.target.value), tasa = window.CSMoneda && CSMoneda.tasa ? CSMoneda.tasa() : 1;
       S.dia[q] = { k: 'custom', monto: v >= 0 ? v / tasa : 0 }; track('flujo_dia_monto', { rubro: q, monto: Math.round(S.dia[q].monto) });
@@ -3902,7 +3912,7 @@
     if (!t) return;
     var y = $('main').scrollTop;
     if (t.dataset.vdet) { abrirDetalleVuelo(t.dataset.vdet); return; }
-    if (t.dataset.vdetElegir) { S.vuelo = t.dataset.vdetElegir; S.modal = null; pintarModal(); track('flujo_vuelo_detalle_seguir', {}); if (MODO === 'avion' && S.paso === 1 && S.sub !== 't') { ir(2, 'continuar'); return; } render(false); $('main').scrollTop = y; return; }
+    if (t.dataset.vdetElegir) { S.vuelo = t.dataset.vdetElegir; S.modal = null; pintarModal(); track('flujo_vuelo_detalle_seguir', {}); render(false); $('main').scrollTop = y; return; }
     if (t.dataset.comb) { combinar(t.dataset.comb); return; }
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
     if (t.dataset.parada) { usarParada(+t.dataset.parada); track('flujo_parada', { parada: PA + 1, via: 'pestana' }); if (!S.hotelesListos) cargarHoteles(); render(true); return; }
