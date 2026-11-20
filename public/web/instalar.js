@@ -16,6 +16,8 @@
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () { /* sin SW: la web funciona igual */ }); });
   }
+  /* Durante el armado del viaje (/planificar) no se ofrece instalar: tapa el boton de continuar y distrae. */
+  var enPlanificador = document.documentElement.getAttribute('data-pagina') === 'flujo' || /\/(planificar|home-flujo)(\.html)?\/?$/.test(location.pathname);
   if (standalone) { window.CSInstalar = { disponible: function () { return false; }, instalar: function () {} }; return; }
 
   var callado = function () { try { var t = +localStorage.getItem(KEY); return t && Date.now() - t < DIAS * 864e5; } catch (e) { return false; } };
@@ -37,7 +39,7 @@
   var esperaCookies = false;
   function cerrarAviso() { if (aviso) { aviso.remove(); aviso = null; } }
   function mostrar(forzado) {
-    if (aviso || (!forzado && callado())) return;
+    if (aviso || (!forzado && (callado() || enPlanificador))) return;
     if (!evento && !ios && !samsung) return;
     /* Con el aviso de cookies abierto no se muestra: ese pide una decision y los dos juntos tapaban el contenido. */
     if (!forzado && document.getElementById('cs-consent')) { if (!esperaCookies) { esperaCookies = true; setTimeout(function () { esperaCookies = false; mostrar(false); }, 1500); } return; }

@@ -99,6 +99,7 @@
   /* Las dos tarjetas de transfer, lado a lado, con el mismo alto: se estiran a la fila y el precio queda abajo en las dos. */
   html[data-pagina="flujo"] .f-scroll[data-paso="1"]>.opt.trc{align-self:stretch;margin-bottom:12px;min-height:172px}
   .trc__rec{position:absolute;top:12px;left:12px;z-index:1;padding:3px 9px;border-radius:99px;background:var(--action-bg);color:var(--action-ink);font-size:11px;font-weight:800}
+  [data-theme="night"] .trc__img{background-color:#2A3A55;background-blend-mode:multiply;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
   .trc__img{position:relative;grid-row:1/3;align-self:stretch;min-height:140px;border-radius:12px;background:#EEF0F3 center/contain no-repeat}
   .trc__b b{display:block;font-size:15px;line-height:1.2}
   .trc__b>small{display:block;color:var(--ink2);font-size:12px;font-weight:600;margin:1px 0 4px}
@@ -2062,7 +2063,7 @@
     var fila = function (n, t, d, extra) { return '<li><span class="f-tr__n">' + n + '</span><span><b>' + t + '</b><small>' + d + '</small></span>' + (extra || '') + '</li>'; };
     return '<ol class="f-tr" aria-label="Tramos del viaje combinado">' +
       fila(1, aer + ' → ' + esc(a.nom), fdc(a.ida) + ' · lo elegís abajo') +
-      fila(2, esc(a.nom) + ' → ' + esc(b.nom), fdc(b.ida) + ' · ' + PAR.tramo.km + ' km' + (ferry ? ' con barco' : '') + (S.entre ? ' · incluido' : ' · sin sumar')) +
+      fila(2, esc(a.nom) + ' → ' + esc(b.nom), fdc(b.ida) + ' · ' + PAR.tramo.km + ' km' + (ferry ? ' con barco' : '') + (S.entre ? ' · ' + f(entreTotal()) : ' · sin sumar')) +
       fila(3, esc(b.nom) + ' → ' + aer, fdc(b.vuelta) + ' · lo elegís abajo') + '</ol>';
   }
   function bloqueCombinar() {
