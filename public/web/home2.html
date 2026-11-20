@@ -444,8 +444,7 @@
   .q-rec__h button{min-height:36px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:#F5C518;font:700 13px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer;transition:background .15s}
   .q-rec__h button:hover{background:rgba(255,255,255,.1)}
   .q-rec__h button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-  .q-rec ul{display:flex;gap:10px;margin:0;padding:2px 0 6px;list-style:none;overflow-x:auto;scrollbar-width:none}
-  .q-rec ul::-webkit-scrollbar{display:none}
+  .q-rec ul{display:flex;flex-wrap:wrap;gap:10px;margin:0;padding:2px 0 6px;list-style:none}   /* bajan de renglon en vez de cortarse al borde */
   .q-rec li{flex:none}
   .q-rec a{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:4px 14px 4px 5px;border-radius:99px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);color:#fff;font:700 13px var(--fb);text-decoration:none;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
   .q-rec a:hover{background:rgba(255,255,255,.22)}
