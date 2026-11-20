@@ -3599,7 +3599,10 @@ function handleRequest(req, res) {
     }
     if (req.method === 'GET' && url.pathname === '/api/vuelos/detalle') {
       if (!flightProviders.isLive()) return sendJson(res, 503, { error: 'El detalle de la tarifa no está disponible ahora.' });
-      return flightProviders.detalleOferta(url.searchParams.get('id')).then(function (d) {
+      const dq = url.searchParams, dDest = AIR_DESTINATIONS[String(dq.get('destino') || '')];
+      const dCtx = dDest && /^\d{4}-\d{2}-\d{2}$/.test(dq.get('ida') || '') ? { origin: 'MVD', destination: dDest, dep: dq.get('ida'), ret: /^\d{4}-\d{2}-\d{2}$/.test(dq.get('vuelta') || '') ? dq.get('vuelta') : null,
+        pax: Math.min(9, Math.max(1, parseInt(dq.get('pax'), 10) || 1)), air: String(dq.get('air') || '').slice(0, 80), sal: String(dq.get('sal') || '').slice(0, 5), lle: String(dq.get('lle') || '').slice(0, 5) } : null;
+      return flightProviders.detalleOferta(dq.get('id'), dCtx).then(function (d) {
         if (!d) return sendJson(res, 404, { error: 'Sin detalle para esta tarifa.' });
         res.setHeader('Cache-Control', 'private, max-age=300');
         sendJson(res, 200, d);

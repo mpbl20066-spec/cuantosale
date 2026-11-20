@@ -3619,7 +3619,8 @@
     track('flujo_vuelo_detalle', { vuelo: id });
     if (VDET[id] && VDET[id].estado !== 'error') return;
     VDET[id] = { estado: 'cargando' };
-    fetch('/api/vuelos/detalle?id=' + encodeURIComponent(id))
+    var vv = VUELOS.filter(function (x) { return x.id === id; })[0] || {};
+    fetch('/api/vuelos/detalle?' + new URLSearchParams({ id: id, destino: destKey, ida: IDA, vuelta: VUELTA, pax: pax, air: vv.air || '', sal: vv.sal || '', lle: vv.lle || '' }).toString())
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'error'); return j; }); })
       .then(function (j) { VDET[id] = { estado: 'ok', d: j }; }, function (e) { VDET[id] = { estado: 'error', msg: e && e.message }; })
       .then(function () { if (S.modal && S.modal.tipo === 'vuelo_det' && S.modal.id === id) pintarModal(); });
@@ -3639,6 +3640,7 @@
           fila('Cambios de fecha', cond(d.cambios)) + fila('Cancelación con reembolso', cond(d.reembolso)) + '</ul>');
     return '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet" role="dialog" aria-modal="true" aria-label="Detalle de la tarifa">' +
       '<div class="f-modal__top"><div><small>DETALLE DE LA TARIFA</small><h2>' + esc(v ? v.air : 'Vuelo') + '</h2></div><button type="button" class="f-modal__x" data-cerrar="1" aria-label="Cerrar">✕</button></div>' +
+      (e.estado === 'ok' && d.precio_actual_usd > 0 && v && Math.abs(d.precio_actual_usd - precioVuelo(v)) >= 1 ? '<p class="td-c">Esta tarifa se volvió a consultar: hoy cuesta ' + f(d.precio_actual_usd) + ' (antes ' + f(precioVuelo(v)) + ').</p>' : '') +
       (v ? '<p class="td-p">' + v.sal + ' → ' + v.lle + ' · ' + esc(v.escT) + ' · ' + f(precioVuelo(v)) + ' ida y vuelta, ' + personasTxt() + '</p>' : '') + cuerpo +
       '<p class="td-c">Información de la aerolínea a través de nuestro buscador. Puede cambiar: ella confirma las condiciones y el precio final al reservar.</p>' +
       (v ? '<button type="button" class="g-btn ' + (S.vuelo === v.id ? '' : 'g-btn--main') + '" data-vdet-elegir="' + esc(v.id) + '">' + (S.vuelo === v.id ? 'Seguir con este vuelo' : 'Elegir este vuelo') + '</button>' : '') + '</div>';
