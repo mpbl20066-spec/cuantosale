@@ -17,6 +17,7 @@ html.cs-perfil-abierto{overflow:hidden}
 .cp-lista{display:flex;flex-direction:column}
 .cp-fila{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;padding:12px 4px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);text-align:left;font-family:var(--fb);font-size:15px;font-weight:700;cursor:pointer}
 .cp-fila:last-child{border-bottom:0}
+.cp-grupo+.cp-grupo{margin-top:16px;padding-top:4px;border-top:1px solid var(--line)}
 .cp-fila__i{flex:0 0 38px;height:38px;border-radius:12px;background:var(--cel-soft);color:#1F6FB5;display:grid;place-items:center}
 .cp-fila__t{flex:1}
 .cp-fila.is-rojo,.cp-fila.is-rojo .cp-fila__i{color:#C23A2B}

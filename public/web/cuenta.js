@@ -435,19 +435,23 @@
   function menu() {
     var u = usuario, nombre = primerNombre(u);
     var encabezado = u
-      ? '<button type="button" class="cp-head" data-editar data-foco><span class="cp-av">' + esc((nombre || '?').charAt(0).toUpperCase()) + '</span><span class="cp-head__t"><b>Hola, ' + esc(nombre || 'viajero') + '</b><small>Ver y editar tu perfil</small></span>' + ic(I.chev, 16) + '</button>'
+      ? '<button type="button" class="cp-head" data-editar data-foco><span class="cp-av">' + esc((nombre || '?').charAt(0).toUpperCase()) + '</span><span class="cp-head__t"><b>Hola, ' + esc(nombre || 'viajero') + '</b></span>' + ic(I.chev, 16) + '</button>'
       : '<button type="button" class="cp-head" data-login data-foco><span class="cp-av cp-av--v">' + ic(I.user, 24) + '</span><span class="cp-head__t"><b>Ingresá a CuántoSale</b><small>Guardá tus viajes y verlos en cualquier lado</small></span>' + ic(I.chev, 16) + '</button>';
+    /* Tres bloques cortos: viajes y ahorro, herramientas, y cuenta y preferencias. */
     return cabecera('Mi cuenta') + encabezado + '<div class="cp-lista">' +
-      (window.CS_GAME ? fila(I.pas, 'Mi pasaporte<small class="cp-fila__s">' + esc(xpResumen()) + '</small>', 'data-pasaporte') : '') +
+      '<div class="cp-grupo">' +
+      (window.CS_GAME ? fila(I.pas, 'Mi pasaporte', 'data-pasaporte') : '') +
       fila(I.alc, 'Mi ahorro de viaje<small class="cp-fila__s">' + esc(alcResumen()) + '</small>', 'data-alcancia') +
       fila(I.save, 'Viajes y destinos guardados', 'data-viajes') +
-      fila(I.bell, 'Alertas de precio', 'data-alertas') +
+      fila(I.bell, 'Alertas de precio', 'data-alertas') + '</div>' +
+      '<div class="cp-grupo">' +
       fila(I.split, 'Dividir gastos', 'data-dividir') +
-      (window.CSMoneda && CSMoneda.tasaDe ? fila(I.conv, 'Conversor de monedas', 'data-conversor') : '') +
+      (window.CSMoneda && CSMoneda.tasaDe ? fila(I.conv, 'Conversor de monedas', 'data-conversor') : '') + '</div>' +
+      '<div class="cp-grupo">' +
       interruptor() +
       fila(I.help, 'Ayuda y soporte', 'data-ayuda') +
       (u ? fila(I.cog, 'Configuración', 'data-editar') : '') +
-      (u ? fila(I.out, 'Cerrar sesión', 'data-salir', '', true) : '') + '</div>' + pie();
+      (u ? fila(I.out, 'Cerrar sesión', 'data-salir', '', true) : '') + '</div></div>' + pie();
   }
   /* Conversor de monedas: las mismas cotizaciones que usa toda la web (moneda.js, /api/tasas). Convierte mientras se escribe. */
   S.conv = { monto: '1000', de: 'USD', a: 'UYU' };
