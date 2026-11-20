@@ -1133,8 +1133,9 @@
   .af3-t{display:flex;align-items:flex-end;justify-content:center;width:100%;height:140px;padding-top:22px;box-sizing:border-box}
   .af3-t i{position:relative;display:block;width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.08);border-radius:12px 12px 0 0;background:#1E2B40;transition:height .35s ease,filter .15s}
   .af3-b:hover .af3-t i{filter:brightness(1.25)}
-  .af3-b.is-tuya .af3-t i{border:2px dashed #fff}
-  .af3-b.is-barata .af3-t i{border:2px dashed #F5C518}
+  .af3-b.is-tuya .af3-t i{border:2px solid rgba(255,255,255,.75)}
+  .af3-b.is-barata .af3-t i{border:2px solid #F5C518;background:#F5C518}
+  .af3-b.is-tuya.is-barata .af3-t i{border-color:#fff}
   .af3-b.is-sel .af3-t i{filter:brightness(1.45)}
   .af3-p{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;font-weight:700;font-style:normal;color:#C9D4E5;font-variant-numeric:tabular-nums}
   .af3-b.is-tuya .af3-p{color:#fff;font-weight:800}
@@ -1149,7 +1150,7 @@
   .af3-ley{display:flex;flex-wrap:wrap;gap:6px 16px;margin:8px 0 2px;padding:0;list-style:none;font-size:12px;font-weight:600;color:#C9D4E5}
   .af3-ley li{display:flex;align-items:center;gap:6px}
   .af3-ley i{width:11px;height:11px;border-radius:3px;background:#3A4A63}
-  .af3-ley i.is-tuya{background:#fff}
+  .af3-ley i.is-tuya{background:#1E2B40;border:2px solid rgba(255,255,255,.75);box-sizing:border-box}
   .af3-ley i.is-barata{background:#F5C518}
   /* Tarjeta de la mejor fecha (arriba de las barras) */
   .af4{display:flex;align-items:center;gap:14px;margin:12px 0 4px;padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.04)}
