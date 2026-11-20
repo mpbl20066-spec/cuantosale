@@ -390,7 +390,7 @@
   .q-step button:disabled{opacity:.35;cursor:default;box-shadow:none}
   .q-step button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .q-lista.is-cargando{opacity:.6;transition:opacity .2s}
-  .q-cuenta{display:flex;flex-direction:column;gap:2px;margin:0 0 12px}
+  .q-cuenta{display:flex;flex-direction:column;gap:2px;margin:0 0 12px;scroll-margin-top:84px}
   .q-cuenta span:empty{display:none}
   .q-cuenta b{font-family:var(--fh);font-size:19px;font-weight:800;color:var(--hx-navy)}
   .q-cuenta span{font-size:13px;color:var(--ink2)}
@@ -566,7 +566,7 @@
             <div class="q-step" role="group" aria-label="Cantidad de personas"><span>Personas</span><div><button type="button" data-p="pax" data-d="-1" aria-label="Una persona menos">−</button><b id="q-pax" aria-live="polite">2</b><button type="button" data-p="pax" data-d="1" aria-label="Una persona más">+</button></div></div>
             <div class="q-step" role="group" aria-label="Cantidad de noches"><span>Noches</span><div><button type="button" data-p="noches" data-d="-1" aria-label="Una noche menos">−</button><b id="q-noches" aria-live="polite">7</b><button type="button" data-p="noches" data-d="1" aria-label="Una noche más">+</button></div></div>
           </div>
-          <div data-panel="destino" hidden>
+          <div>
             <p class="q-err" id="q-err" role="alert" hidden></p>
             <button type="button" class="q-cta" id="q-cta">Calcular mi viaje →</button>
           </div>
@@ -885,6 +885,8 @@
   inIda.addEventListener('change', function () { errEl.hidden = true; nota(); clearTimeout(deb); deb = setTimeout(cargar, 350); });
   selDest.addEventListener('change', function () { errEl.hidden = true; });
   cta.addEventListener('click', function () {
+    /* Con presupuesto todavia no hay destino: "calcular" es mostrar a donde se llega con esa plata. */
+    if (MODOP === 'presupuesto') { document.getElementById('q-cuenta').scrollIntoView({ block: 'start', behavior: quieto ? 'auto' : 'smooth' }); return; }
     var falla = function (t) { errEl.textContent = t; errEl.hidden = false; };
     var k = selDest.value, ida = idaDe();
     if (!k) { falla('Elegí un destino.'); selDest.focus(); return; }
