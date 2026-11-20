@@ -198,7 +198,21 @@
   .x-add{flex:0 0 auto;padding:8px 10px;border:1.5px solid var(--control-border);border-radius:99px;background:var(--surface);color:var(--ink);font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
   .x-add.is-on{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
   /* Paso Extras: "+ Agregar" / "✓ Agregado" (acento amarillo), "Ver detalles" discreto, "No incluir" y barra de resumen */
-    .x-tit{cursor:pointer}
+    /* Tarjeta de tour: foto arriba y limpia (nada encima), texto debajo, precio + "+ Agregar" y "Ver detalles" aparte */
+  .xr--tour{flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;margin-bottom:14px}
+  .xr--tour.is-sel{padding:0}
+  .xr--tour .opt__tick{display:none}
+  .xr--tour .xr__img{width:100%;height:auto;aspect-ratio:16/9;border-radius:0;flex:0 0 auto}
+  .xr--tour .xr__b{padding:14px 14px 12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+  .xr--tour .x-tit{font-size:16px;line-height:1.25}
+  .xr--tour .x-val{margin:0;font-size:12.5px;line-height:1.4;color:var(--ink2)}
+  .xr--tour .x-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-top:6px}
+  .xr--tour .x-p{margin:0;display:flex;flex-direction:column;align-items:flex-start}
+  .xr--tour .x-p b{font-size:20px}
+  .xr--tour .x-link{margin:2px 0 0;padding:6px 0}
+  .x-add--main{padding:10px 16px;border:1.5px solid var(--line);background:transparent;color:var(--ink)}
+  .x-add--main:hover{border-color:var(--ink2)}
+  .x-add--main.is-on{border-color:#F5C518;background:rgba(245,197,24,.14);color:var(--ink)}
   .x-link{display:block;margin:6px 0 0;padding:0;border:0;background:transparent;color:var(--ink2);font:500 12px var(--fb);text-decoration:none;opacity:.8;cursor:pointer}
   .x-link:hover{opacity:1;color:var(--ink)}
   .dd-none{padding:6px 10px;border:1.5px solid var(--line);border-radius:99px;background:transparent;color:var(--ink2);font:700 11.5px var(--fb);cursor:pointer;white-space:nowrap}
@@ -840,7 +854,7 @@
   .xr.is-sel{background:var(--card-sel-bg,var(--surface))}
   .xr{cursor:pointer}
   /* Mismo tilde que el alojamiento (adentro, arriba a la derecha); el precio se corre para no quedar debajo */
-  .xr .x-p{margin-right:30px}
+  .xr:not(.xr--tour) .x-p{margin-right:30px}
   .td-img{height:150px;margin:12px 0 10px;border-radius:14px;background:var(--cel-soft) center/cover}
   .td-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0;font-size:12.5px;font-weight:700;color:var(--ink2)}
   .td-meta span{display:flex;align-items:center;gap:5px}.td-meta svg{color:var(--azul)}
@@ -2536,6 +2550,20 @@
       '<div class="xr__img"' + (e.foto ? ' style="background-image:url(\'' + esc(e.foto) + '\')"' : '') + ' role="img" aria-label="' + esc(e.nom) + '">' + (e.foto ? '' : ic(iImg, 26)) + '</div>' +
       '<div class="xr__b"><b>' + esc(e.nom) + '</b><span class="x-agot">Sin lugar en tus fechas · ' + esc(e.agotado) + '</span></div><div class="xr__r"></div></div>';
     var esTour = e.cat === 'tours';
+    if (esTour) {
+      var tt = e.info || {}, inc = Array.isArray(tt.incluye) ? tt.incluye : String(tt.incluye || '').split(/[\n;]/);
+      inc = inc.map(function (x) { return String(x).replace(/[.\s]+$/, '').trim(); }).filter(function (x) { return x && x.length <= 42; }).slice(0, 2);
+      var d0 = String(tt.descripcion || '').trim(), valor = inc.length ? 'Incluye: ' + inc.join(' · ') : (d0 ? (d0.length > 95 ? d0.slice(0, 92).replace(/\s+\S*$/, '') + '…' : d0) : '');
+      return '<div class="opt xr xr--tour' + sel(on) + '" role="button" tabindex="0" data-extra="' + e.id + '" aria-pressed="' + on + '">' +
+        '<div class="xr__img"' + (e.foto ? ' style="background-image:url(\'' + esc(e.foto) + '\')" title="Foto: ' + esc(e.autor || 'Wikimedia Commons') + '"' : '') + ' role="img" aria-label="' + esc(e.nom) + '">' + (e.foto ? '' : ic(iImg, 30)) + '</div>' +
+        '<div class="xr__b">' + (tag ? '<span class="cs-pill xr__pill">' + tag + '</span>' : '') + '<b class="x-tit">' + esc(e.nom) + '</b>' +
+        '<small>' + ic(iClock, 13) + esc(jornada(e.dur)) + (e.grupo ? ' · ' + esc(e.grupo) : '') + '</small>' +
+        (valor ? '<p class="x-val">' + esc(valor) + '</p>' : '') +
+        (e.real ? '' : '<span class="x-ej">Precio de ejemplo</span>') +
+        '<div class="x-foot"><div class="x-p"><b>' + f(e.precio) + '</b><small>' + unidad.replace(/^ \/ /, '/ ') + '</small>' + (e.temporada ? '<span class="x-temp">' + esc(e.temporada) + '</span>' : '') + '</div>' +
+        '<button type="button" class="x-add x-add--main' + (on ? ' is-on' : '') + '" data-extra="' + e.id + '" aria-pressed="' + on + '">' + (on ? '✓ Agregado' : '+ Agregar') + '</button></div>' +
+        '<button type="button" class="x-link" data-tdet="' + e.id + '">Ver detalles</button></div></div>';
+    }
     return '<div class="opt xr' + sel(on) + '" role="button" tabindex="0" data-extra="' + e.id + '" aria-pressed="' + on + '">' + tick +
       (e.cat === 'tours' ? '<div class="xr__img"' + (e.foto ? ' style="background-image:url(\'' + esc(e.foto) + '\')" title="Foto: ' + esc(e.autor || 'Wikimedia Commons') + '"' : '') + ' role="img" aria-label="' + esc(e.nom) + '">' + (e.foto ? '' : ic(iImg, 26)) + '</div>'
         : '<div class="xr__img is-veh" style="background-image:url(\'' + (e.cat === 'tras' && /compart|bus|van/i.test(e.nom) ? 'traslado-van.png' : 'traslado-auto.png') + '\')" role="img" aria-label="' + esc(e.nom) + '"></div>') +
