@@ -917,7 +917,7 @@
   [data-theme="night"] .f-total.f-ahorro[role=button]:hover{background:rgba(90,209,154,.1)}
   [data-theme="night"] .f-ahorro__i svg{color:#5AD19A!important}
   [data-theme="night"] .f-ahorro__v,[data-theme="night"] .f-ahorro__cal{color:#5AD19A}
-  html[data-pagina="flujo"] .f-scroll{padding-bottom:40px!important}
+  html[data-pagina="flujo"] .f-scroll{padding-bottom:120px!important}
   html[data-pagina="flujo"] .phone>.f-foot{padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))!important}
   /* Las hojas (calendario, habitaciones, tours) van por encima del boton de abajo, que es sticky con z-index 20 */
   html[data-pagina="flujo"] .f-modal{z-index:60}
@@ -1035,6 +1035,10 @@
   }
   /* Transfer: salida chica para seguir sin transfer */
   .f-comb{margin:10px 0 4px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink)}
+  .f-comb--ini{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .f-comb--ini b{display:block;font-size:14.5px}
+  .f-comb--ini small{display:block;margin-top:2px;font-size:12px;line-height:1.35;color:var(--ink2)}
+  .f-comb__go{flex:none;min-height:40px;padding:0 14px;border:2px solid #F5C518;border-radius:12px;background:transparent;color:var(--ink);font:800 13px var(--fb);cursor:pointer}
   .f-comb__t{margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
   .f-comb__r{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
   .f-comb__r:first-of-type{border-top:0}
@@ -2022,7 +2026,7 @@
   }
   function bloqueCombinar() {
     if (MODO !== 'avion' || !COMB[destKey] || NOCHES < 2 || (PAR && PAR.l[1].k !== COMB[destKey])) return '';
-    if (!PAR) return '<button type="button" class="f-sin f-comb__ini" data-comb="ini">+ Dividir noches entre ' + esc(DESTS[destKey]) + ' y ' + esc(DESTS[COMB[destKey]]) + '</button>';
+    if (!PAR) return '<div class="f-comb f-comb--ini"><span><b>¿Combinás con ' + esc(DESTS[COMB[destKey]]) + '?</b><small>Mismo vuelo, noches repartidas entre los dos destinos. Se arma el alojamiento de cada tramo.</small></span><button type="button" class="f-comb__go" data-comb="ini">Dividir noches</button></div>';
     var a = PAR.l[0], b = PAR.l[1], paso = function (acc, txt, dis, lbl) { return '<button type="button" data-comb="' + acc + '" aria-label="' + lbl + '"' + (dis ? ' disabled' : '') + '>' + txt + '</button>'; };
     return '<div class="f-comb"><p class="f-comb__t">Viaje combinado · un solo vuelo a ' + esc(AEROPUERTO[destKey] === 'RIO' ? 'Río' : (AEROPUERTO[destKey] || 'GIG')) + '</p>' +
       '<div class="f-comb__r"><span><b>' + esc(a.nom) + '</b><small>1.º · ' + nochesTxt(a.noches) + ' · ' + fdc(a.ida) + ' → ' + fdc(a.vuelta) + '</small></span><span class="f-comb__s">' + paso('menos', '−', a.noches <= 1, 'Una noche menos en ' + esc(a.nom)) + '<output>' + a.noches + '</output>' + paso('mas', '+', b.noches <= 1, 'Una noche más en ' + esc(a.nom)) + '</span></div>' +
@@ -2041,7 +2045,6 @@
     var html = '<h1 class="f-h">Vuelos</h1><p class="f-sub">Montevideo → ' + esc(DEST1) + '<br>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personasTxt() + '</p>' +
       (PAR ? '<p class="f-sub">Viaje de dos paradas: ' + nochesTxt(PAR.l[0].noches) + ' en ' + esc(DEST1) + ' y ' + nochesTxt(PAR.l[1].noches) + ' en ' + esc(PAR.l[1].nom) + '. El vuelo va y vuelve de ' + esc(DEST1) + '.</p>' : '') +
       (ninos && VUELOS.length ? '<p class="f-sub">Vuelos cotizados para ' + pax + ' pasajeros a tarifa de adulto. Los niños de 2 a 11 años suelen tener descuento: la aerolínea lo confirma al reservar.</p>' : '') +
-      (S.sub !== 't' ? bloqueCombinar() : '') +
       (S.cargandoV ? cargandoVuelos() : '') +
       (!S.cargandoV && !VUELOS.length ? '<div class="fl-vacio" role="status"><b>' + esc(S.avisoV || 'No encontramos vuelos para estas fechas.') + '</b>' +
         '<span class="f-sub" style="margin:0">Te los cotizamos nosotros por WhatsApp, sin compromiso.</span>' +
@@ -2102,7 +2105,7 @@
     var tot = function (x) { return x.pp * pax; };
     var base = baseVuelo();
     /* Mismos 10 dias que muestra el widget: el aviso de arriba y las barras dicen lo mismo. */
-    var alts = c.puntos.filter(function (x) { return x.shift !== 0 && enVentana(x.shift) && base - tot(x) >= Math.max(1, base * 0.01); })
+    var alts = c.puntos.filter(function (x) { return x.shift !== 0 && enVentana(x.shift) && base - tot(x) >= 1; })
       .sort(function (a, b) { return tot(a) - tot(b); }).slice(0, 3);
     return { base: base, alts: alts };
   }
@@ -2240,7 +2243,7 @@
   }
   function pantalla2() {
     var personas = personasTxt();
-    var cab = '<div class="ho__head"><span class="ho__headico">' + ic(iBed, 28) + '</span><div><h1 class="f-h" style="margin:0">Alojamiento</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">' + esc(HN) + ' · ' + nochesTxt(HNOCHES) + ' · ' + personas + '</p></div></div>' + tabsParadas();
+    var cab = '<div class="ho__head"><span class="ho__headico">' + ic(iBed, 28) + '</span><div><h1 class="f-h" style="margin:0">Alojamiento</h1><p class="f-sub" style="margin:2px 0 0;color:var(--azul)">' + esc(HN) + ' · ' + nochesTxt(HNOCHES) + ' · ' + personas + '</p></div></div>' + tabsParadas() + bloqueCombinar();
     var sinAlojBtn = '<button type="button" class="f-sin" data-sin-aloj="1">Continuar sin alojamiento</button>';
     if (S.cargandoH) return cab + cargandoHoteles() + sinAlojBtn;
     var aviso = S.avisoH ? '<p class="f-sub" style="padding:8px 10px;border-radius:10px;background:var(--cel-soft)">' + esc(S.avisoH) + '</p>' : '';
