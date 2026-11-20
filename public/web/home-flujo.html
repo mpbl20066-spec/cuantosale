@@ -1034,6 +1034,18 @@
     .fl-load__msgs span{animation:none}.fl-load__msgs span:first-child{opacity:1}
   }
   /* Transfer: salida chica para seguir sin transfer */
+  .f-comb{margin:10px 0 4px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink)}
+  .f-comb__t{margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .f-comb__r{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+  .f-comb__r:first-of-type{border-top:0}
+  .f-comb__r b{display:block;font-size:14.5px}
+  .f-comb__r small{display:block;font-size:12px;color:var(--ink2)}
+  .f-comb__s{display:flex;align-items:center;gap:8px;flex:none}
+  .f-comb__s button{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer}
+  .f-comb__s button:disabled{opacity:.35;cursor:default}
+  .f-comb__s output,.f-comb__n{min-width:22px;text-align:center;font-size:16px;font-weight:800}
+  .f-comb__a{display:flex;gap:16px;margin:6px 0 0}
+  .f-comb__a button{padding:6px 0;border:0;background:transparent;color:var(--ink);font:700 13px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
   .f-sin{display:block;margin:6px auto 0;padding:10px 14px;border:0;background:transparent;color:var(--ink2);font-family:var(--fb);font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
   .f-sin:hover{color:var(--ink)}
   .f-sin:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:8px}
@@ -1993,6 +2005,30 @@
         function (e) { ALERTA.estado = 'error'; ALERTA.error = e && e.message || 'No pudimos crear la alerta.'; track('alerta_precio_error', {}); })
       .then(function () { render(false); });
   }
+  /* ---- Viaje combinado Rio + Buzios (mismo aeropuerto, GIG): un solo vuelo, las noches se reparten entre los dos ----
+     El reparto recarga el planificador con segundo= y noches1= (la misma mecanica que "segunda parada" de la pantalla de fechas):
+     transfer, alojamiento por tramo y presupuesto ya se arman solos desde PAR. */
+  var COMB = { rio: 'buz', buz: 'rio' };
+  function combinar(acc) {
+    var q = new URLSearchParams(location.search);
+    ['paso', 'directo', 'sel', 'mant', 'conf', 'codigo'].forEach(function (k) { q.delete(k); });
+    if (acc === 'ini') { q.set('segundo', COMB[destKey]); q.set('noches1', Math.floor(NOCHES / 2)); }
+    else if (acc === 'quitar') { q.delete('segundo'); q.delete('noches1'); }
+    else if (acc === 'inv' && PAR) { q.set('destino', PAR.l[1].k); q.set('segundo', PAR.l[0].k); q.set('noches1', PAR.l[1].noches); }
+    else if ((acc === 'mas' || acc === 'menos') && PAR) { q.set('noches1', Math.max(1, Math.min(NOCHES - 1, PAR.l[0].noches + (acc === 'mas' ? 1 : -1)))); }
+    else return;
+    track('flujo_combinar', { accion: acc });
+    location.href = location.pathname + '?' + q.toString();
+  }
+  function bloqueCombinar() {
+    if (MODO !== 'avion' || !COMB[destKey] || NOCHES < 2 || (PAR && PAR.l[1].k !== COMB[destKey])) return '';
+    if (!PAR) return '<button type="button" class="f-sin f-comb__ini" data-comb="ini">+ Dividir noches entre ' + esc(DESTS[destKey]) + ' y ' + esc(DESTS[COMB[destKey]]) + '</button>';
+    var a = PAR.l[0], b = PAR.l[1], paso = function (acc, txt, dis, lbl) { return '<button type="button" data-comb="' + acc + '" aria-label="' + lbl + '"' + (dis ? ' disabled' : '') + '>' + txt + '</button>'; };
+    return '<div class="f-comb"><p class="f-comb__t">Viaje combinado · un solo vuelo a ' + esc(AEROPUERTO[destKey] === 'RIO' ? 'Río' : (AEROPUERTO[destKey] || 'GIG')) + '</p>' +
+      '<div class="f-comb__r"><span><b>' + esc(a.nom) + '</b><small>1.º · ' + nochesTxt(a.noches) + ' · ' + fdc(a.ida) + ' → ' + fdc(a.vuelta) + '</small></span><span class="f-comb__s">' + paso('menos', '−', a.noches <= 1, 'Una noche menos en ' + esc(a.nom)) + '<output>' + a.noches + '</output>' + paso('mas', '+', b.noches <= 1, 'Una noche más en ' + esc(a.nom)) + '</span></div>' +
+      '<div class="f-comb__r"><span><b>' + esc(b.nom) + '</b><small>2.º · ' + nochesTxt(b.noches) + ' · ' + fdc(b.ida) + ' → ' + fdc(b.vuelta) + '</small></span><output class="f-comb__n">' + b.noches + '</output></div>' +
+      '<p class="f-comb__a"><button type="button" data-comb="inv">Invertir orden</button><button type="button" data-comb="quitar">Quitar combinación</button></p></div>';
+  }
   function pantalla1() {
     if (MODO === 'bus') return pantallaBus();
     /* Recomendados: solo los que de verdad convienen (hasta 3), sin "Ver mas". Los otros filtros: 3 y "Ver mas opciones". */
@@ -2005,6 +2041,7 @@
     var html = '<h1 class="f-h">Vuelos</h1><p class="f-sub">Montevideo → ' + esc(DEST1) + '<br>' + fdc(IDA) + ' → ' + fdc(VUELTA) + ' · ' + personasTxt() + '</p>' +
       (PAR ? '<p class="f-sub">Viaje de dos paradas: ' + nochesTxt(PAR.l[0].noches) + ' en ' + esc(DEST1) + ' y ' + nochesTxt(PAR.l[1].noches) + ' en ' + esc(PAR.l[1].nom) + '. El vuelo va y vuelve de ' + esc(DEST1) + '.</p>' : '') +
       (ninos && VUELOS.length ? '<p class="f-sub">Vuelos cotizados para ' + pax + ' pasajeros a tarifa de adulto. Los niños de 2 a 11 años suelen tener descuento: la aerolínea lo confirma al reservar.</p>' : '') +
+      (S.sub !== 't' ? bloqueCombinar() : '') +
       (S.cargandoV ? cargandoVuelos() : '') +
       (!S.cargandoV && !VUELOS.length ? '<div class="fl-vacio" role="status"><b>' + esc(S.avisoV || 'No encontramos vuelos para estas fechas.') + '</b>' +
         '<span class="f-sub" style="margin:0">Te los cotizamos nosotros por WhatsApp, sin compromiso.</span>' +
@@ -3778,9 +3815,10 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa-vuelos],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-hq-borrar],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-comb],[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa-vuelos],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-hq-borrar],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
+    if (t.dataset.comb) { combinar(t.dataset.comb); return; }
     if (t.dataset.tdet) { S.modal = { tipo: 'tour_det', id: t.dataset.tdet }; pintarModal(); track('flujo_tour_detalle', { tour: t.dataset.tdet }); return; }
     if (t.dataset.parada) { usarParada(+t.dataset.parada); track('flujo_parada', { parada: PA + 1, via: 'pestana' }); if (!S.hotelesListos) cargarHoteles(); render(true); return; }
     if (t.dataset.entre) { S.entre = !S.entre; track('flujo_traslado_entre_paradas', { activo: S.entre, precio: Math.round(PAR ? PAR.tramo.pp * pax : 0) }); render(false); $('main').scrollTop = y; return; }
