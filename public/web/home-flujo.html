@@ -1832,6 +1832,7 @@
     if (S.paso >= 4 || (MODO === 'avion' && !S.vuelo) || (MODO === 'bus' && !BUS) || (S.paso === 2 && S.cargandoH) || (MODO === 'avion' && S.paso === 1 && S.sub === 't')) { el.hidden = true; ultimoAhorro = null; return; }
     var a = ahorros(), total = sum(a, function (x) { return x.v; });
     var que = MODO === 'avion' ? ((S.cmp && S.cmp.estado === 'ok' ? 'fechas, ' : '') + (S.paso >= 2 ? 'vuelos, transfer y alojamiento' : 'vuelos y transfer')) : 'alojamiento';
+    var dfx = MODO === 'avion' && a.some(function (x) { return x.k === 'fecha'; }) ? datosFechas() : null, altF = dfx && dfx.alts[0];
     var lista = a.map(function (x) { return x.txt; });
     var cmpOk = S.cmp && S.cmp.estado === 'ok';
     var det = a.length ? 'Con ' + (lista.length > 1 ? lista.slice(0, -1).join(', ') + ' y ' + lista[lista.length - 1] : lista[0]) + '.'
@@ -1842,7 +1843,7 @@
     if (MODO === 'avion') { el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', 'Dónde podés ahorrar' + (total >= 1 ? ': ' + f(total) : '') + '. ' + explica + ' Ver calendario de precios.'); }
     el.innerHTML = '<span class="f-ahorro__i">' + ic(iChancho, 18) + '</span>' +
       '<span class="f-ahorro__t"><b><span class="f-ahorro__lg">Dónde podés ahorrar</span><span class="f-ahorro__co">Podés ahorrar</span></b>' + (total >= 1 ? '<strong class="f-ahorro__v">−' + f(total) + '</strong>' + (a.length > 1 ? '<span class="f-ahorro__ok f-ahorro__lg">' + a.map(function (x) { return x.k === 'fecha' ? 'otra fecha −' + f(x.v) : x.txt.replace(/^el /, '') + ' −' + f(x.v); }).join(' · ') + '</span>' : '') : '<span class="f-ahorro__ok">' + (MODO !== 'avion' || (S.cmp && S.cmp.estado === 'ok') ? 'Ya elegiste lo más económico' : 'Elegiste lo más barato para tu fecha') + '</span>') + '</span>' +
-      (MODO === 'avion' ? '<span class="f-ahorro__cal">Ver calendario →</span>' : '');
+      (MODO === 'avion' ? (altF ? '<button type="button" class="f-ahorro__cal" data-usar-fecha="' + altF.dep + '">Usar el ' + fdc(altF.dep) + ' →</button>' : '<span class="f-ahorro__cal">Ver calendario →</span>') : '');
     if (ultimoAhorro !== null && Math.round(ultimoAhorro) !== Math.round(total)) { el.classList.remove('is-bump'); void el.offsetWidth; el.classList.add('is-bump'); }
     ultimoAhorro = total;
   }
@@ -3784,7 +3785,7 @@
     S.playaSel = e.target.value; S.nH = MAX_HOTELES; elegirMasBarato(); track('flujo_playa', { playa: S.playaSel, via: 'lista' });
     var y = $('main').scrollTop; render(false); $('main').scrollTop = y;
   });
-  $('total').addEventListener('click', function () { abrirCalendario(); });
+  $('total').addEventListener('click', function (e) { var uf = e.target.closest('[data-usar-fecha]'); if (uf) { usarFecha(uf.dataset.usarFecha, 'ahorro'); return; } abrirCalendario(); });
   $('total').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirCalendario(); } });
   $('modal').addEventListener('click', function (e) {
     var cb = e.target.closest('[data-cal-sel]'); if (cb && S.modal) { S.modal.sel = cb.dataset.calSel; pintarModal(); track('flujo_calendario_precios_fecha', { fecha: S.modal.sel }); var b2 = $('modal').querySelector('[data-cal-sel="' + S.modal.sel + '"]'); if (b2) b2.focus(); return; }
