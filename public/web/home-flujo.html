@@ -941,7 +941,6 @@
   .fc-b--mejor{border-color:rgba(245,197,24,.55);background:rgba(245,197,24,.12);color:var(--ink)}
   [data-theme="night"] .fc-b{border-color:rgba(255,255,255,.14)}
   [data-theme="night"] .fc-b--mejor{border-color:rgba(245,197,24,.45);color:#F5C518}
-  .fc-inc{margin:0;font-size:12px;line-height:1.4;color:var(--ink2)}
   .fc-por{margin:-6px 0 0;font-size:12.5px;font-weight:600;line-height:1.4;color:var(--ink2)}
   .fc-ruta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px}
   .fc-pt b{display:block;font-family:var(--fh);font-size:20px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
@@ -1970,7 +1969,6 @@
       '<div class="fc-ruta"><div class="fc-pt"><b>' + v.sal + '</b><small>MVD</small></div>' +
         '<div class="fc-mid"><small>' + esc(v.durT) + '</small><i aria-hidden="true"></i><small class="' + (v.esc === 0 ? 'is-dir' : '') + '">' + esc(v.escT) + '</small></div>' +
         '<div class="fc-pt fc-pt--d"><b>' + v.lle + '</b><small>' + esc(AEROPUERTO[destKey] || '') + '</small></div></div>' +
-      '<p class="fc-inc">Ida y vuelta, tarifa económica, ' + personasTxt() + '. Equipaje y precio final los confirma la aerolínea al reservar.</p>' +
       '<div class="fc-pr"><span class="fc-pr__v"><b>' + f(precioVuelo(v)) + '</b><small>ida y vuelta · ' + personasTxt() + '</small></span></div></div>';
   }
   /* De donde sale el precio de los vuelos (la pagina /como-calculamos lo explica). */
@@ -2163,7 +2161,7 @@
     if (c.estado !== 'ok') return '';   /* sin precios de otras fechas no se muestra la comparativa */
     var tot = function (x) { return x.pp * pax; };
     var por = {}; c.puntos.forEach(function (x) { por[x.dep] = x; });
-    var vis = dias.map(function (iso) { return por[iso] || null; }), con = vis.filter(Boolean);
+    var vis = dias.map(function (iso) { return por[iso] || null; }), con = vis.filter(function (x) { return x && isFinite(x.pp * pax) && x.pp > 0; });
     var base = baseVuelo(), tv = function (x) { return x.dep === IDA ? base : tot(x); };
     var vals = con.map(tv), min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
     var barata = con.filter(function (x) { return tv(x) === min; })[0], ahorro = barata ? base - tv(barata) : 0;
