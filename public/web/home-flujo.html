@@ -1051,6 +1051,33 @@
   }
   /* Transfer: salida chica para seguir sin transfer */
   .f-comb{margin:10px 0 4px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink)}
+  .f-ruta{margin:8px 0 6px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);overflow:hidden}
+  .f-ruta>summary{display:flex;align-items:center;min-height:42px;padding:0 14px;font-size:13px;font-weight:800;letter-spacing:.02em;cursor:pointer;list-style:none}
+  .f-ruta>summary::-webkit-details-marker{display:none}
+  .f-ruta>summary::after{content:"\25BE";margin-left:auto;color:var(--ink2);transition:transform .15s}
+  .f-ruta[open]>summary::after{transform:rotate(180deg)}
+  .f-ruta>summary:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+  .rt{display:block;width:100%;max-width:520px;height:auto;margin:0 auto;padding:0 8px;box-sizing:border-box}
+  .rt-hit{fill:none;stroke:transparent;stroke-width:22;cursor:pointer}
+  .rt-l{fill:none;stroke:var(--ink2);stroke-width:2;stroke-linecap:round;opacity:.55;pointer-events:none}
+  .rt-s.is-on .rt-l{stroke:#F5C518;stroke-width:3.5;opacity:1}
+  .rt-b{fill:#1E2B40;stroke:var(--ink2);stroke-width:1.5}
+  .rt-s.is-on .rt-b{fill:#F5C518;stroke:#F5C518}
+  .rt-n{fill:#fff;font:800 11px var(--fb);text-anchor:middle;pointer-events:none}
+  .rt-s.is-on .rt-n{fill:#0B1F3A}
+  .rt-m{fill:var(--ink2);font:600 8.5px var(--fb);text-anchor:middle;pointer-events:none}
+  .rt-p{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+  .rt-p--a{fill:#F5C518;stroke:#F5C518}
+  .rt-t{fill:var(--ink);font:700 9.5px var(--fb);text-anchor:middle}
+  .rt-s:focus-visible{outline:none}
+  .rt-s:focus-visible .rt-b{stroke:#fff;stroke-width:3}
+  .f-ruta .f-tr{margin:0;padding:4px 10px 10px}
+  .f-tr__i{cursor:pointer;transition:border-color .15s,background .15s}
+  .f-tr__i.is-on{border-color:#F5C518;background:rgba(245,197,24,.08)}
+  .f-tr__i:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .f-h3.is-tr{box-shadow:0 2px 0 #F5C518}
+  .f-sin--tr{margin:10px 0 2px;padding:12px 14px;border:1px dashed var(--line);border-radius:12px;color:var(--ink);text-decoration:none;font-weight:700;width:100%}
+  .f-sin--tr.is-on{border:1px solid #F5C518;background:rgba(245,197,24,.08)}
   .f-tr{display:grid;gap:8px;margin:10px 0 6px;padding:0;list-style:none}
   .f-tr li{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
   .f-tr__n{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#F5C518;color:#070B14;font-size:13px;font-weight:800}
@@ -1719,6 +1746,14 @@
      siempre el privado: para 1 persona en Florianopolis eran $ 7.395 contra $ 462 del compartido. */
   (function () { var l = TRASLADOS.filter(function (t) { return t.precio > 0; }).sort(function (a, b) { return trPrecio(a) - trPrecio(b); }); if (l.length) S.traslado = l[0].id; })();
   var trasl = function () { return TRASLADOS.filter(function (t) { return t.id === S.traslado; })[0]; };
+  /* Viaje combinado: cada tramo se elige o se descarta por separado. Tramo 1 = S.traslado, tramo 3 = S.t3 (null = por mi cuenta),
+     tramo 2 = S.entre. Sin dos paradas, un solo transfer de ida y vuelta como siempre. */
+  if (PAR) S.t3 = S.traslado || null;
+  var trasl3 = function () { return PAR ? (TRASLADOS.filter(function (t) { return t.id === S.t3; })[0] || null) : (S.tIV ? trasl() || null : null); };
+  var trUnid = function (t) { return t.pp ? pax : Math.ceil(pax / 4); };
+  var trTramo = function (t, n) { return t ? (n === 1 ? t.precio : precioVueltaTr(t)) * trUnid(t) : 0; };
+  /* Lo que suman los traslados del aeropuerto: solo los tramos con transfer elegido. */
+  var trTotal = function () { return PAR ? trTramo(trasl(), 1) + trTramo(trasl3(), 3) : (trasl() ? trPrecio(trasl()) : 0); };
   /* Mientras Booking no respondio, ningun hotel: los de la lista inicial son de ejemplo (de Florianopolis) y solo sirven sin servidor. */
   var hotel = function () { return S.sinAloj || (/^https?:$/.test(location.protocol) && (!S.hotelesListos || S.cargandoH)) ? SIN_HOTEL : (HOTELES.filter(function (h) { return h.id === S.hotel; })[0] || SIN_HOTEL); };
   var extrasSel = function () { return todosExtras.filter(function (e) { return S.extras[e.id]; }); };
@@ -1758,7 +1793,7 @@
   function transporteTotal() {
     if (MODO === 'auto') return AUTO.total;
     if (MODO === 'bus') return (BUS ? BUS.precio : 0) + entreTotal();
-    return vueloFinal() + (trasl() ? trPrecio(trasl()) : 0) + entreTotal();
+    return vueloFinal() + trTotal() + entreTotal();
   }
   /* Vuelo: lo que la persona dijo que pago (S.reales.vuelo) o, si no informo nada, el precio del vuelo elegido. */
   function vueloFinal() { return S.reales.vuelo != null ? S.reales.vuelo : precioVuelo(vuelo()); }
@@ -1786,7 +1821,7 @@
       if (df && df.alts.length) out.push({ k: 'fecha', txt: 'saliendo el ' + diaLargo(df.alts[0].dep), v: df.base - df.alts[0].pp * pax });
       else if (dv >= 1) out.push({ k: 'vuelo', txt: 'el vuelo más barato', v: dv });
     }
-    if (MODO === 'avion' && trasl()) {
+    if (MODO === 'avion' && trasl() && !PAR) {
       var minT = Math.min.apply(null, TRASLADOS.map(trPrecio)), dt = trPrecio(trasl()) - minT;
       if (dt >= 1) out.push({ k: 'transfer', txt: 'el transfer compartido', v: dt });
     }
@@ -1937,10 +1972,10 @@
       '<p class="f-sub">El precio es una estimación del pasaje semicama/cama de ida y vuelta. Se compra directamente con la empresa de bus.</p>' + cardEntre();
   }
   /* Traslado entre las dos paradas (solo con PAR): una tarjeta que se puede sacar, como el transfer. */
-  function cardEntre() {
+  function cardEntre(sinCab) {
     if (!PAR || MODO === 'auto') return '';
     var t = PAR.tramo, on = !!S.entre, b = PAR.l[1].nom, ferry = t.modo === 'ferry';
-    return '<h2 class="f-h3">' + ic(I.van, 22) + (MODO === 'avion' ? 'Tramo 2 · Entre destinos' : 'Entre destinos') + '</h2><p class="f-sub">' + fdc(PAR.l[1].ida) + ': ' + esc(DEST1) + ' → ' + esc(b) + ' · ' + t.km + ' km · unas ' + horasTxt(t.horas) + (ferry ? ' con el cruce en barco' : ' por ruta') + '</p>' +
+    return (sinCab ? '' : '<h2 class="f-h3' + (S.tramoSel === 2 ? ' is-tr' : '') + '" data-trb="2">' + ic(I.van, 22) + (MODO === 'avion' ? 'Tramo 2 · Entre destinos' : 'Entre destinos') + '</h2><p class="f-sub">' + fdc(PAR.l[1].ida) + ': ' + esc(DEST1) + ' → ' + esc(b) + ' · ' + t.km + ' km · unas ' + horasTxt(t.horas) + (ferry ? ' con el cruce en barco' : ' por ruta') + '</p>') +
       '<div class="opt trc' + sel(on) + '" role="button" tabindex="0" data-entre="1" aria-pressed="' + on + '">' + tick +
         '<div class="trc__img" role="img" aria-label="' + (ferry ? 'Ferry' : 'Van compartida') + '" style="background-image:url(traslado-van.png)"></div>' +
         '<div class="trc__b"><b>' + (ferry ? 'Ferry a ' : 'Traslado a ') + esc(b) + '</b><small>' + (MODO === 'avion' ? 'Tramo 2 · ' : '') + (ferry ? 'Pasaje por persona' : 'Compartido · precio por persona') + '</small>' +
@@ -2060,17 +2095,58 @@
   function tramosCombinado() {
     if (!PAR || MODO !== 'avion') return '';
     var a = PAR.l[0], b = PAR.l[1], ferry = PAR.tramo.modo === 'ferry', aer = 'Aeropuerto';
-    var fila = function (n, t, d, extra) { return '<li><span class="f-tr__n">' + n + '</span><span><b>' + t + '</b><small>' + d + '</small></span>' + (extra || '') + '</li>'; };
-    /* Los tramos 1 y 3 se eligen juntos en el bloque "Tramos 1 y 3": cada fila dice si esta incluido y cuanto suma ese tramo. */
-    var tr = trasl(), u = tr ? (tr.pp ? pax : Math.ceil(pax / 4)) : 0;
+    var sel = S.tramoSel || 1;
+    var nombreTr = function (t) { return t ? (t.tipo === 'priv' ? 'Privado' : 'Compartido') : ''; };
     var estado = function (n) {
-      if (!tr || (n === 3 && !S.tIV)) return 'sin traslado';
-      return 'incluido en traslados al aeropuerto · ' + f((n === 1 ? tr.precio : precioVueltaTr(tr)) * u);
+      if (n === 2) return S.entre ? (ferry ? 'Ferry' : 'Compartido') + ' · ' + f(entreTotal()) : 'Sin transfer · ' + f(0);
+      var t = n === 1 ? trasl() : trasl3();
+      return t ? nombreTr(t) + ' · ' + f(trTramo(t, n)) : 'Sin transfer · ' + f(0);
     };
-    return '<ol class="f-tr" aria-label="Tramos del viaje combinado">' +
-      fila(1, aer + ' → ' + esc(a.nom), fdc(a.ida) + ' · ' + estado(1)) +
-      fila(2, esc(a.nom) + ' → ' + esc(b.nom), fdc(b.ida) + ' · ' + PAR.tramo.km + ' km' + (ferry ? ' con barco' : '') + (S.entre ? ' · ' + f(entreTotal()) : ' · sin sumar')) +
-      fila(3, esc(b.nom) + ' → ' + aer, fdc(b.vuelta) + ' · ' + estado(3)) + '</ol>';
+    var datos = [
+      { n: 1, de: aer, a: a.nom, fecha: a.ida, txt: estado(1), mini: estado(1) },
+      { n: 2, de: a.nom, a: b.nom, fecha: b.ida, txt: PAR.tramo.km + ' km · ' + estado(2), mini: PAR.tramo.km + ' km · ' + horasTxt(PAR.tramo.horas) },
+      { n: 3, de: b.nom, a: aer, fecha: b.vuelta, txt: estado(3), mini: estado(3) }
+    ];
+    var corto = function (t, m) { t = String(t || ''); return esc(t.length > m ? t.slice(0, m - 1) + '…' : t); };
+    var pt = [[30, 62], [120, 36], [212, 62], [296, 36]], mids = [[75, 49], [166, 49], [254, 49]];
+    var segs = datos.map(function (d, k) {
+      var A = pt[k], B = pt[k + 1], m = mids[k], on = sel === d.n, dash = d.n === 2 && !S.entre ? ' stroke-dasharray="5 4"' : '';
+      return '<g class="rt-s' + (on ? ' is-on' : '') + '" data-tr="' + d.n + '" role="button" tabindex="0" aria-pressed="' + on + '" aria-label="Tramo ' + d.n + ': ' + esc(d.de) + ' a ' + esc(d.a) + '">' +
+        '<path d="M' + A[0] + ' ' + A[1] + ' L' + B[0] + ' ' + B[1] + '" class="rt-hit"/><path d="M' + A[0] + ' ' + A[1] + ' L' + B[0] + ' ' + B[1] + '" class="rt-l"' + dash + '/>' +
+        '<circle cx="' + m[0] + '" cy="' + m[1] + '" r="10" class="rt-b"/><text x="' + m[0] + '" y="' + (m[1] + 4) + '" class="rt-n">' + d.n + '</text>' +
+        '<text x="' + m[0] + '" y="' + (m[1] + 26) + '" class="rt-m">' + corto(d.mini, 18) + '</text></g>';
+    }).join('');
+    var nodos = [aer, a.nom, b.nom, aer].map(function (nm, k) {
+      var P = pt[k], arriba = P[1] < 50;
+      return '<circle cx="' + P[0] + '" cy="' + P[1] + '" r="5" class="rt-p' + (k === 0 || k === 3 ? ' rt-p--a' : '') + '"/><text x="' + P[0] + '" y="' + (arriba ? P[1] - 11 : P[1] + 20) + '" class="rt-t">' + corto(nm, 13) + '</text>';
+    }).join('');
+    var abierto = S.rutaAbierta == null ? window.innerWidth >= 900 : S.rutaAbierta;
+    return '<details class="f-ruta"' + (abierto ? ' open' : '') + '><summary>Mapa de ruta · 3 tramos</summary>' +
+      '<svg class="rt" viewBox="0 0 326 100" role="group" aria-label="Recorrido del viaje combinado">' + segs + nodos + '</svg>' +
+      '<ol class="f-tr" aria-label="Tramos del viaje combinado">' + datos.map(function (d) {
+        return '<li class="f-tr__i' + (sel === d.n ? ' is-on' : '') + '" data-tr="' + d.n + '" role="button" tabindex="0" aria-pressed="' + (sel === d.n) + '"><span class="f-tr__n">' + d.n + '</span><span><b>' + esc(d.de) + ' → ' + esc(d.a) + '</b><small>' + fdc(d.fecha) + ' · ' + d.txt + '</small></span></li>';
+      }).join('') + '</ol></details>';
+  }
+  /* Tarjeta de un transfer del aeropuerto para el tramo 1 o el 3, con el precio de ESE tramo. */
+  function trCard(t, n) {
+    var on = n === 1 ? S.traslado === t.id : S.t3 === t.id, sub = t.tipo === 'priv' ? 'Directo · ' + personasTxt() : t.sub;
+    return '<div class="opt trc' + sel(on) + '" role="button" tabindex="0" ' + (n === 1 ? 'data-sel="traslado:' + t.id + '"' : 'data-sel3="' + t.id + '"') + ' aria-pressed="' + on + '">' + tick +
+      '<div class="trc__img" role="img" aria-label="' + (t.tipo === 'priv' ? 'Auto privado' : 'Van compartida') + '" style="background-image:url(' + (t.tipo === 'priv' ? 'traslado-auto.png' : 'traslado-van.png') + ')"></div>' +
+      '<div class="trc__b"><b>' + esc(t.nom) + '</b><small>' + esc(sub) + '</small>' +
+      '<ul><li>' + ic('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/>', 16) + esc(t.cap) + '</li><li>' + ic('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 16) + esc(t.dur) + '</li></ul></div>' +
+      '<div class="trc__p"><b>' + f(trTramo(t, n)) + '</b><small>Tramo ' + n + (t.pp ? ' · ' + personasTxt() : ' · ' + Math.ceil(pax / 4) + (pax > 4 ? ' vehículos' : ' vehículo')) + '</small></div></div>';
+  }
+  /* Paso Transfer con dos paradas: arriba los tres tramos (mapa y lista); abajo solo las opciones del tramo elegido. */
+  function transferPar() {
+    var n = S.tramoSel || 1, a = PAR.l[0], b = PAR.l[1], aer = 'Aeropuerto', ferry = PAR.tramo.modo === 'ferry';
+    var r = [null, [aer, a.nom, a.ida], [a.nom, b.nom, b.ida], [b.nom, aer, b.vuelta]][n];
+    var cab = '<h2 class="f-h3 is-tr" data-trb="' + n + '">' + ic(I.van, 22) + 'Tramo ' + n + ' · ' + esc(r[0]) + ' → ' + esc(r[1]) + '</h2><p class="f-sub">' + fdc(r[2]) + (n === 2 ? ' · ' + PAR.tramo.km + ' km · unas ' + horasTxt(PAR.tramo.horas) + (ferry ? ' con el cruce en barco' : ' por ruta') : ' · precio de este tramo') + '</p>';
+    var tiene = n === 1 ? !!S.traslado : (n === 3 ? !!S.t3 : !!S.entre);
+    var no = '<button type="button" class="f-sin f-sin--tr' + (!tiene ? ' is-on' : '') + '" data-notr="' + n + '">No necesito transfer en este tramo (voy por mi cuenta)' + (!tiene ? ' ✓' : '') + '</button>';
+    if (n === 2) return cab + cardEntre(true) + no + '<button type="button" class="f-sin" data-sin-transfer="1">Continuar sin transfer</button>';
+    return cab + chips([['todos', 'Todos'], ['priv', 'Privado'], ['comp', 'Compartido']], S.fTras, 'tras') +
+      TRASLADOS.filter(function (t) { return S.fTras === 'todos' || S.fTras === t.tipo; }).map(function (t) { return trCard(t, n); }).join('') +
+      no + '<button type="button" class="f-sin" data-sin-transfer="1">Continuar sin transfer</button>';
   }
   function bloqueCombinar() {
     if (MODO !== 'avion' || NOCHES < 2 || !combDefecto(PAR ? PAR.l[0].k : destKey)) return '';
@@ -2107,7 +2183,7 @@
       (!esRec && vs.length > 3 ? '<button type="button" class="f-more" data-mas="vuelos">' + (S.verMasVuelos ? 'Ver menos' : 'Ver más opciones de vuelos') + '</button>' : '') +
       ahorroFechas() +
       (PAR
-        ? '<h2 class="f-h3">' + ic(I.van, 22) + 'Tramos 1 y 3 · Traslados al aeropuerto</h2><p class="f-sub">' + fdc(PAR.l[0].ida) + ': Aeropuerto → ' + esc(DEST1) + '<br>' + fdc(PAR.l[1].vuelta) + ': ' + esc(PAR.l[1].nom) + ' → Aeropuerto<br>El precio de cada opción suma los 2 traslados · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>'
+        ? '<h2 class="f-h3' + (S.tramoSel === 1 || S.tramoSel === 3 ? ' is-tr' : '') + '" data-trb="1 3">' + ic(I.van, 22) + 'Tramos 1 y 3 · Traslados al aeropuerto</h2><p class="f-sub">' + fdc(PAR.l[0].ida) + ': Aeropuerto → ' + esc(DEST1) + '<br>' + fdc(PAR.l[1].vuelta) + ': ' + esc(PAR.l[1].nom) + ' → Aeropuerto<br>El precio de cada opción suma los 2 traslados · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>'
         : '<h2 class="f-h3">' + ic(I.van, 22) + 'Transfer</h2><p class="f-sub">Aeropuerto ⇄ alojamiento · ida y vuelta incluida · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>') +
       chips([['todos', 'Todos'], ['priv', 'Privado'], ['comp', 'Compartido']], S.fTras, 'tras') +
       TRASLADOS.filter(function (t) { return S.fTras === 'todos' || S.fTras === t.tipo; }).map(function (t) {
@@ -2122,7 +2198,8 @@
     /* Vuelos y traslados van en dos pantallas: primero el vuelo, despues el traslado (mismo paso del flujo). */
     var k = html.indexOf('<h2 class="f-h3">');
     if (S.sub !== 't') return html.slice(0, k);
-    return '<h1 class="f-h">Transfer</h1>' + tramosCombinado() + (PAR ? html.slice(k) : html.slice(k).replace(/^<h2 class="f-h3">.*?<\/h2>/, ''));
+    if (PAR) return '<h1 class="f-h">Transfer</h1>' + tramosCombinado() + transferPar();
+    return '<h1 class="f-h">Transfer</h1>' + html.slice(k).replace(/^<h2 class="f-h3">.*?<\/h2>/, '');
   }
   /* ---- "¿Podés ahorrar viajando otro día?" ----
      Precios REALES de /api/vuelos/calendario (el proveedor de vuelos de la app, hoy Duffel; ver lib/providers/vuelos.js): el mismo viaje,
@@ -2485,10 +2562,10 @@
   }
   function datosFinal() {
     /* hs: el alojamiento de cada parada (uno solo sin PAR). h es el de la primera parada que tiene uno elegido. */
-    var v = vuelo(), t = trasl(), ex = extrasSel(), hs = alojParadas(), conH = hs.filter(function (x) { return !x.h.sin; });
+    var v = vuelo(), t = trasl() || (PAR ? trasl3() : null) || undefined, ex = extrasSel(), hs = alojParadas(), conH = hs.filter(function (x) { return !x.h.sin; });
     var h = PAR ? (conH[0] ? conH[0].h : SIN_HOTEL) : hs[0].h;
     if (MODO !== 'avion') t = null;
-    var tVuelo = MODO === 'avion' ? vueloFinal() : (MODO === 'auto' ? AUTO.total : (BUS ? BUS.precio : 0)), tTras = t ? trPrecio(t) : 0, tAloj = alojTotal(), tExtras = sum(ex, precioExtra), tEntre = entreTotal();
+    var tVuelo = MODO === 'avion' ? vueloFinal() : (MODO === 'auto' ? AUTO.total : (BUS ? BUS.precio : 0)), tTras = trTotal(), tAloj = alojTotal(), tExtras = sum(ex, precioExtra), tEntre = entreTotal();
     var tComidas = comidasParte(), tLocal = comidasTotal() - tComidas;
     return { v: v, h: h, hs: hs, alojNom: PAR ? conH.map(function (x) { return x.h.nom; }).join(' + ') || h.nom : h.nom, tAlojEst: PAR ? sum(hs, function (x) { return x.est; }) : precioHotelEstimado(h),
       t: t, ex: ex, tVuelo: tVuelo, tTras: tTras, tEntre: tEntre, tAloj: tAloj, tExtras: tExtras, tComidas: tComidas, tLocal: tLocal,
@@ -3162,7 +3239,7 @@
         lista.forEach(function (x) { S.sol[x.ico === 'palm' ? 'tours' : 'tras'] = true; });
         anotarPedido(j && j.pedido, S.csK || (lista[0].ico === 'palm' ? 'tours' : 'tras'));
         if (S.datos) S.datos.cupon = '';   // el cupon se usa una vez; nombre, celular y mail quedan para el otro pedido
-        try { localStorage.setItem('cs_sol_' + window.CS_VIAJE_ID, JSON.stringify({ traslado: S.traslado, tIV: S.tIV, extras: S.extras, sol: S.sol, hotel: S.hotel, habitacion: S.habitacion || null })); } catch (er) { /* modo privado */ }
+        try { localStorage.setItem('cs_sol_' + window.CS_VIAJE_ID, JSON.stringify({ traslado: S.traslado, t3: S.t3, tIV: S.tIV, extras: S.extras, sol: S.sol, hotel: S.hotel, habitacion: S.habitacion || null })); } catch (er) { /* modo privado */ }
         try { if (window.CS_GAME && CS_GAME.refrescar) CS_GAME.refrescar(); } catch (er) { /* el pasaporte no puede trabar la reserva */ }
         track('reserva_cs_solicitud', { servicios: lista.length, importe: Math.round(sum(lista, function (x) { return x.precio; })), con_traslado: !!S.sol.tras, con_tours: !!S.sol.tours, canal: 'asesor' });
         S.avisoCambio = ''; S.avisoCs = j && j.whatsapp ? 'Te enviamos un WhatsApp con tu pedido. Un asesor te lo confirma.' : 'Recibimos tu pedido. Un asesor te escribe por WhatsApp para confirmarlo.';
@@ -3239,7 +3316,7 @@
   function seleccionActual() {
     var v = vuelo();
     return { vuelo: S.vuelo || null, vueloK: v && v.id ? [v.air, v.sal, v.lle].join('|') : null,
-      toursN: extrasSel().map(function (e) { return e.nom; }), traslado: S.traslado || null, tIV: S.tIV, hotel: S.sinAloj ? null : (S.hotel || null), sinAloj: !!S.sinAloj,
+      toursN: extrasSel().map(function (e) { return e.nom; }), traslado: S.traslado || null, t3: PAR ? (S.t3 || null) : undefined, tIV: S.tIV, hotel: S.sinAloj ? null : (S.hotel || null), sinAloj: !!S.sinAloj,
       habitacion: S.sinAloj ? null : (S.habitacion || null), extras: Object.keys(S.extras || {}).filter(function (k) { return S.extras[k]; }), dia: S.dia, catH: S.catH,
       entre: S.entre, paradas: PAR ? PAR.l.map(function (p, i) { return enParada(i, function () { return { hotel: S.sinAloj ? null : (S.hotel || null), sinAloj: !!S.sinAloj, habitacion: S.sinAloj ? null : (S.habitacion || null), catH: S.catH }; }); }) : undefined };
   }
@@ -3296,6 +3373,7 @@
       if (vk) S.vuelo = vk.id; else if (!s.vueloK && VUELOS.some(function (v) { return v.id === s.vuelo; })) S.vuelo = s.vuelo;
       if (s.traslado === null || TRASLADOS.some(function (t) { return t.id === s.traslado; })) S.traslado = s.traslado;
       if (typeof s.tIV === 'boolean') S.tIV = s.tIV;
+      if (PAR && (s.t3 === null || TRASLADOS.some(function (t) { return t.id === s.t3; }))) S.t3 = s.t3;
       if (typeof s.entre === 'boolean') S.entre = s.entre;
       if (PAR && Array.isArray(s.paradas)) s.paradas.forEach(function (x, i) { if (x && PAR.l[i]) enParada(i, function () { aplicarHotel(x); }); });
       else aplicarHotel(s);
@@ -3810,6 +3888,7 @@
     var y = $('main').scrollTop; render(false); $('main').scrollTop = y;
     var i = $('hq'); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (x) {} }
   });
+  $('main').addEventListener('toggle', function (e) { if (e.target.classList && e.target.classList.contains('f-ruta')) S.rutaAbierta = e.target.open; }, true);
   $('main').addEventListener('change', function (e) {
     if (e.target.hasAttribute && e.target.hasAttribute('data-comb-seg')) { combinar('seg', e.target.value); return; }
     if (e.target.dataset.diaIn) {
@@ -3919,9 +3998,12 @@
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(ok, function () {});
   });
   $('main').addEventListener('click', function (e) {
-    var t = e.target.closest('[data-vdet],[data-vdet-elegir],[data-comb],[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa-vuelos],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-hq-borrar],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
+    var t = e.target.closest('[data-sel3],[data-notr],[data-tr],[data-vdet],[data-vdet-elegir],[data-comb],[data-parada],[data-entre],[data-tdet],[data-af-sel],[data-usar-fecha],[data-cmp],[data-res-edit],[data-res-quitar],[data-res-cancel],[data-sin-transfer],[data-sin-aloj],[data-dia],[data-ahorro-hotel],[data-ahorro-bus],[data-wa-vuelos],[data-wa],[data-cambio-cs],[data-resumen],[data-estado],[data-booking],[data-seguro],[data-reservado],[data-guardado],[data-guardar-ahora],[data-divn],[data-dividir],[data-compartir],[data-asesor],[data-comidas],[data-seg],[data-ir],[data-habs],[data-xcat],[data-xmas],[data-zona],[data-cath],[data-filtros-h],[data-hq-borrar],[data-mashoteles],[data-menoshoteles],[data-iv],[data-sel],[data-filtro],[data-extra],[data-mas],[data-reservar]');
     if (!t) return;
     var y = $('main').scrollTop;
+    if (t.dataset.sel3) { S.t3 = S.t3 === t.dataset.sel3 ? null : t.dataset.sel3; track('flujo_transfer_tramo', { tramo: 3, opcion: S.t3 || 'ninguno' }); render(false); $('main').scrollTop = y; return; }
+    if (t.dataset.notr) { var nt = t.dataset.notr; if (nt === '1') S.traslado = null; else if (nt === '3') S.t3 = null; else S.entre = false; track('flujo_transfer_tramo', { tramo: +nt, opcion: 'ninguno' }); render(false); $('main').scrollTop = y; return; }
+    if (t.dataset.tr) { var tn = +t.dataset.tr; S.tramoSel = tn; track('flujo_tramo', { tramo: tn }); render(false); $('main').scrollTop = y; if (S.tramoSel) { var tb = $('main').querySelector('[data-trb~="' + tn + '"]'); if (tb && tb.scrollIntoView) tb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } return; }
     if (t.dataset.vdet) { abrirDetalleVuelo(t.dataset.vdet); return; }
     if (t.dataset.vdetElegir) { S.vuelo = t.dataset.vdetElegir; S.modal = null; pintarModal(); track('flujo_vuelo_detalle_seguir', {}); render(false); $('main').scrollTop = y; return; }
     if (t.dataset.comb) { combinar(t.dataset.comb); return; }
@@ -3941,7 +4023,7 @@
       S.sol = S.sol || {};
       lista.forEach(function (x) { S.sol[x.ico === 'palm' ? 'tours' : 'tras'] = true; });
       /* Para Analytics solo viajan datos agregados: nunca el nombre, el telefono ni el email. */
-      try { localStorage.setItem('cs_sol_' + window.CS_VIAJE_ID, JSON.stringify({ traslado: S.traslado, tIV: S.tIV, extras: S.extras, sol: S.sol, hotel: S.hotel, habitacion: S.habitacion || null })); } catch (er) { /* modo privado */ }
+      try { localStorage.setItem('cs_sol_' + window.CS_VIAJE_ID, JSON.stringify({ traslado: S.traslado, t3: S.t3, tIV: S.tIV, extras: S.extras, sol: S.sol, hotel: S.hotel, habitacion: S.habitacion || null })); } catch (er) { /* modo privado */ }
       track('reserva_cs_solicitud', { servicios: lista.length, importe: Math.round(total), con_traslado: !!S.sol.tras, con_tours: !!S.sol.tours, pais_tel: dt.pais, canal: 'whatsapp' });
       window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(mensajeWA()), '_blank');
       enviarConfirmacion();
@@ -4007,7 +4089,7 @@
       if (PAR && PA === 0) { usarParada(1); if (!S.hotelesListos) cargarHoteles(); render(true); return; }
       if (MODO === 'avion') ir(1, 'sin_alojamiento', 't'); else ir(3, 'sin_alojamiento'); return;
     }
-    else if (t.dataset.sinTransfer) { S.traslado = null; track('flujo_sin_transfer', {}); ir(MODO === 'avion' ? 3 : 2, 'sin_transfer'); return; }
+    else if (t.dataset.sinTransfer) { S.traslado = null; if (PAR) { S.t3 = null; S.entre = false; } track('flujo_sin_transfer', {}); ir(MODO === 'avion' ? 3 : 2, 'sin_transfer'); return; }
     else if (t.dataset.dia) {
       var dq = t.dataset.dia.split(':'), prev = S.dia[dq[0]];
       S.dia[dq[0]] = dq[1] === 'custom' ? { k: 'custom', monto: prev.k === 'custom' ? prev.monto : porDia(dq[0]) } : { k: dq[1] };
@@ -4041,7 +4123,7 @@
   var cf = qs.get('conf'), cc = qs.get('codigo');
   if (cf && (cf === 'tras' || cf === 'tours')) {
     if (cc && cc === codigoConf(window.CS_VIAJE_ID, cf)) {
-      try { var g = JSON.parse(localStorage.getItem('cs_sol_' + window.CS_VIAJE_ID) || 'null'); if (g) { S.traslado = g.traslado; S.tIV = g.tIV; S.extras = g.extras || {}; S.sol = g.sol || {}; S.hotel = g.hotel || S.hotel; S.habitacion = g.habitacion; } } catch (er) { /* sin datos guardados */ }
+      try { var g = JSON.parse(localStorage.getItem('cs_sol_' + window.CS_VIAJE_ID) || 'null'); if (g) { S.traslado = g.traslado; if (PAR && g.t3 !== undefined) S.t3 = g.t3; S.tIV = g.tIV; S.extras = g.extras || {}; S.sol = g.sol || {}; S.hotel = g.hotel || S.hotel; S.habitacion = g.habitacion; } } catch (er) { /* sin datos guardados */ }
       S.res[cf] = true; S.confK = cf;
       track('reserva_cs_confirmada', { servicio: cf === 'tras' ? 'traslado' : 'tours', proveedor: 'cuantosale', via: 'enlace_asesor', partes_reservadas: partesReservadas(), partes_totales: 4 });
       ir(13, 'reserva_confirmada');
