@@ -2028,7 +2028,7 @@
     return '<h1 class="f-h">Transfer</h1>' + html.slice(k).replace(/^<h2 class="f-h3">.*?<\/h2>/, '');
   }
   /* ---- "¿Podés ahorrar viajando otro día?" ----
-     Precios REALES de /api/vuelos/calendario (el proveedor de vuelos de la app, hoy Ignav; ver lib/providers/vuelos.js): el mismo viaje,
+     Precios REALES de /api/vuelos/calendario (el proveedor de vuelos de la app, hoy Duffel; ver lib/providers/vuelos.js): el mismo viaje,
      con las mismas noches, saliendo hasta 5 dias antes o despues. Se pide solo al tocar "Comparar fechas" (cada fecha
      cuesta una consulta). Una fecha sin precio real no se muestra; si no hay ninguna, no se afirma nada y se ofrece
      Google Flights. Nunca cambia las fechas elegidas: cada alternativa abre Google Flights con ese dia. */
@@ -3263,7 +3263,7 @@
   var minutos = function (t) { var m = /(?:(\d+)\s*h)?\s*(?:(\d+)\s*min)?/.exec(t || ''); return (+m[1] || 0) * 60 + (+m[2] || 0); };
   function mapVuelo(o, i, minP) {
     var o1 = o.outbound || {}, esc = o.stops != null ? o.stops : (o1.stops || 0), air = o.airline || 'Aerolínea';
-    /* Logo: Ignav no lo manda; el codigo IATA de la aerolinea son las dos primeras letras del numero de vuelo (LA8111 -> LA). */
+    /* Logo: Duffel manda el logo de la aerolinea solo en algunas ofertas; el codigo IATA de la aerolinea son las dos primeras letras del numero de vuelo (LA8111 -> LA). */
     var cod = String(o.flight_number || o1.flight_number || '').toUpperCase().slice(0, 2), logo = o.logo || (/^[A-Z0-9]{2}$/.test(cod) ? 'https://pics.avs.io/80/80/' + cod + '.png' : '');
     var o2 = o.inbound || {}, codDe = function (n) { var c = String(n || '').toUpperCase().slice(0, 2); return /^[A-Z0-9]{2}$/.test(c) ? c : ''; };
     var gf = { ida: Array.isArray(o1.segments) ? o1.segments : null, vta: Array.isArray(o2.segments) ? o2.segments : null,
@@ -3780,7 +3780,7 @@
     if (t.dataset.parada) { usarParada(+t.dataset.parada); track('flujo_parada', { parada: PA + 1, via: 'pestana' }); if (!S.hotelesListos) cargarHoteles(); render(true); return; }
     if (t.dataset.entre) { S.entre = !S.entre; track('flujo_traslado_entre_paradas', { activo: S.entre, precio: Math.round(PAR ? PAR.tramo.pp * pax : 0) }); render(false); $('main').scrollTop = y; return; }
     if (t.dataset.cambioCs) { S.avisoCs = ''; S.avisoCambio = ''; reservar('cs:' + (t.dataset.cambioCs === 'tras' ? 'traslado' : 'tours')); return; }
-    /* Sin vuelos (Ignav fallo o no hubo para esas fechas): la consulta va por WhatsApp con el viaje ya escrito, para
+    /* Sin vuelos (Duffel fallo o no hubo para esas fechas): la consulta va por WhatsApp con el viaje ya escrito, para
        que el error no sea el final de la visita. */
     if (t.dataset.waVuelos) {
       track('flujo_wa_sin_vuelos', { destino: destKey, error: S.avisoV.indexOf('No pudimos') === 0 });

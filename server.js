@@ -1863,7 +1863,7 @@ async function buscarVuelos(req, res, body) {
   if (['MVD', 'PDP'].indexOf(origin) < 0 || !destination || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date) || (returnDate && !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(returnDate)) || !Number.isInteger(passengers) || passengers < 1 || passengers > 9) {
     return sendJson(res, 400, { error: 'Datos de búsqueda de vuelo inválidos.' });
   }
-  /* Fechas pasadas o vuelta antes de la ida: Ignav las cobra igual y termina en error. Se cortan antes. */
+  /* Fechas pasadas o vuelta antes de la ida: Duffel las puede cobrar igual y termina en error. Se cortan antes. */
   const hoyUy = new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10);
   if (date < hoyUy || (returnDate && returnDate <= date)) {
     return sendJson(res, 400, { error: 'Elegí una fecha de ida desde hoy y una vuelta posterior a la ida.' });
@@ -1886,7 +1886,7 @@ async function buscarVuelos(req, res, body) {
       // eso no hace falta una segunda etapa para conocer el total, y el browse
       // cuesta un solo crédito.
       round_trip: !!returnDate,
-      consultado: result.consultado || null,   // hora en que se consulto a Ignav (puede venir de la cache)
+      consultado: result.consultado || null,   // hora en que se consulto a Duffel (puede venir de la cache)
       offers: result.offers,
       error: result.offers.length ? null : browseVacioMsg()
     });
@@ -1910,7 +1910,7 @@ async function buscarVuelos(req, res, body) {
  */
 function browseVacioMsg() {
   if (!flightProviders.isLive()) {
-    return 'Busqueda de vuelos sin credenciales: se muestra el precio estimado del modelo. Poné IGNAV_API_KEY para precios reales de Ignav, o MOCK_FLIGHTS=1 para probar con datos falsos.';
+    return 'Busqueda de vuelos sin credenciales: se muestra el precio estimado del modelo. Poné DUFFEL_TOKEN para precios reales de Duffel, o MOCK_FLIGHTS=1 para probar con datos falsos.';
   }
   return 'No hay vuelos disponibles para esas fechas. Probá con otras fechas.';
 }
@@ -1969,7 +1969,7 @@ async function precalentarVuelos(req, res) {
    completados con PRECALENTAR_DESTINOS_DEFAULT. Deja listos los vuelos (la misma busqueda de /api/vuelos/buscar, 48 h
    de cache) y los hoteles (la misma de /api/hoteles, guardada POPULARES_HOTELES_H horas, 8 por defecto, en vez de 30 min
    para que llegue a la proxima visita). Lo que ya esta guardado no se vuelve a pedir. Gasto por destino, solo cuando
-   vence: 1 busqueda de Ignav y hasta 13 de Booking (la ciudad y sus playas). PRECALENTAR_POPULARES_MAX=0 lo apaga. */
+   vence: 1 busqueda de Duffel y hasta 13 de Booking (la ciudad y sus playas). PRECALENTAR_POPULARES_MAX=0 lo apaga. */
 const POPULARES_IDA = '2026-12-26', POPULARES_VUELTA = '2027-01-02', POPULARES_PAX = 2;
 async function destinosPopulares(max) {
   const cuenta = {};
@@ -2018,7 +2018,7 @@ async function estadoPrecarga() {
   return {
     vuelos: vuelos,
     hoteles: { destinos: factores.length, calibrados: factores.filter(function (x) { return x.factor > 0; }).length, sinDatos: factores.filter(function (x) { return x.factor === null; }).length, factores: factores },
-    ignav: { gastoHoy: st.gastoHoy || 0, topeDiario: st.topeDiario || null },
+    duffel: { gastoHoy: st.gastoHoy || 0, topeDiario: st.topeDiario || null },
     booking: { limite: uso.limite, restantes: uso.restantes, resetSeg: uso.resetSeg, at: uso.at || null, playasPorBusqueda: PLAYAS_CONSULTADAS },
     topes: { vuelosPorCorrida: Number(process.env.PRECALENTAR_GUIAS_MAX || 100), hotelesPorDia: Number(process.env.PRECALENTAR_HOTELES_MAX || 4) }
   };
@@ -2026,9 +2026,9 @@ async function estadoPrecarga() {
 
 /* Las fechas que se prueban de un mes (anio, mes 1-12) para el precio de referencia: todas las salidas de lunes a jueves
    (martes y miercoles suelen ser los mas baratos, pero un dia antes o despues a veces sale bastante menos), 7 noches,
-   que salgan desde manana y cuya vuelta entre en el rango que cotiza Ignav (IGNAV_MAX_DAYS, 355 dias). */
+   que salgan desde manana y cuya vuelta entre en el rango que cotiza Duffel (DUFFEL_MAX_DAYS, 330 dias). */
 function fechasGuiaMes(anio, mes) {
-  const hoy = model.getToday(), tope = model.addDays(hoy, Number(process.env.IGNAV_MAX_DAYS) || 355), fechas = [];
+  const hoy = model.getToday(), tope = model.addDays(hoy, Number(process.env.DUFFEL_MAX_DAYS) || 330), fechas = [];
   for (let d = new Date(anio, mes - 1, 1, 12); d.getMonth() === mes - 1; d = model.addDays(d, 1)) {
     const ret = model.addDays(d, 7);
     if (d.getDay() >= 1 && d.getDay() <= 4 && d > hoy && ret <= tope) fechas.push({ dep: model.iso(d), ret: model.iso(ret) });
@@ -4054,8 +4054,8 @@ if (require.main === module) {
     const modoVuelos = flightProviders.providerName() === 'mock'
       ? 'MOCK_FLIGHTS=1; los precios de vuelo son INVENTADOS, no los gastes en produccion'
       : (flightProviders.isLive()
-        ? 'precios de vuelo reales via Ignav'
-        : 'sin IGNAV_API_KEY; los vuelos mostraran precios estimados');
+        ? 'precios de vuelo reales via Duffel'
+        : 'sin DUFFEL_TOKEN; los vuelos mostraran precios estimados');
     console.log('CuántoSale en http://localhost:' + port + ' (' + modoVuelos + ')');
   });
 }

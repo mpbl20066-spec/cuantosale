@@ -1,6 +1,6 @@
--- Cache compartida de precios de vuelos (Ignav).
+-- Cache compartida de precios de vuelos (Duffel).
 --
--- Guarda los precios que trae Ignav (lista de vuelos, tarifa principal y cada fecha del calendario
+-- Guarda los precios que trae Duffel (lista de vuelos, tarifa principal y cada fecha del calendario
 -- "mismo viaje, otra fecha") para reusarlos entre visitas durante 48 h, en vez de volver a pedirlos y gastar
 -- busquedas. En Vercel el server no tiene disco ni memoria que sobreviva entre pedidos: sin esta tabla, la cache
 -- se pierde en cada arranque. La lee y la escribe lib/providers/cache-persistente.js.
@@ -47,5 +47,5 @@ begin
 end;
 $$;
 
-comment on table public.vuelos_cache is 'Cache de precios de vuelos de Ignav (48 h). La escribe y lee solo el server. Ver lib/providers/cache-persistente.js.';
+comment on table public.vuelos_cache is 'Cache de precios de vuelos de Duffel (48 h). La escribe y lee solo el server. Ver lib/providers/cache-persistente.js.';
 comment on function public.vuelos_cache_purgar() is 'Borra las entradas vencidas. Devuelve cuantas borro.';

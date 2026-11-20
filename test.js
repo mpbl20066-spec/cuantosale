@@ -619,10 +619,10 @@ function haversineKm(a, b) {
   process.env.RATE_LIMIT_PER_MIN = '1000';
   /* El server lee el .env de la maquina, pero solo las variables que no estan
      definidas. Vaciarlas aca antes del require deja la suite aislada: sin esto
-     las pruebas salian contra Ignav y el cache de Supabase reales, y el
+     las pruebas salian contra Duffel y el cache de Supabase reales, y el
      resultado dependia de lo que hubiera en esa tabla ese dia. */
-  process.env.IGNAV_API_KEY = '';
-  process.env.IGNAV_CACHE_DB = '0';
+  process.env.DUFFEL_TOKEN = '';
+  process.env.DUFFEL_CACHE_DB = '0';
   process.env.SERPAPI_CACHE_DB = '0';
   process.env.SUPABASE_URL = '';
   process.env.SUPABASE_SERVICE_ROLE_KEY = '';
@@ -634,34 +634,54 @@ function haversineKm(a, b) {
   const app = require('./server');
   const serpapi = require('./lib/providers/serpapi');
   const flights = require('./lib/providers');
-  const ignav = require('./lib/providers/ignav');
+  const duffel = require('./lib/providers/duffel');
 
-  /* Los vuelos salen solo de Ignav (lib/providers/vuelos.js). El helper prende
-     la key, usa market US para que los precios lleguen en USD (sin pedir
-     cotizacion) y deja todo como estaba al terminar. `responder` recibe la URL
-     y el body del pedido y devuelve el JSON de Ignav. */
-  async function conIgnav(responder, fn, extraEnv) {
-    const env = Object.assign({ IGNAV_API_KEY: 'test-key', IGNAV_MARKET: 'US' }, extraEnv || {});
+  /* Los vuelos salen solo de Duffel (lib/providers/vuelos.js). El helper prende el token y deja todo como estaba al
+     terminar. `responder` recibe la URL y un body con la forma simple de la busqueda ({origin, destination,
+     departure_date, return_date, adults}) y devuelve { itineraries: [...] } (ver duffelItinerario); el helper lo
+     traduce a una respuesta de offer_requests de Duffel, que es lo que el proveedor lee de verdad. */
+  async function conDuffel(responder, fn, extraEnv) {
+    const env = Object.assign({ DUFFEL_TOKEN: 'duffel_test_x' }, extraEnv || {});
     const antes = {};
     Object.keys(env).forEach(function (k) { antes[k] = process.env[k]; process.env[k] = env[k]; });
     flights.clearCache();
-    ignav.setFetch(async function (url, init) {
-      const body = init && init.body ? JSON.parse(init.body) : null;
-      return { ok: true, status: 200, json: async function () { return responder(url, body); } };
+    duffel.setFetch(async function (url, init) {
+      const d = init && init.body ? JSON.parse(init.body).data : null;
+      const body = d && d.slices ? {
+        origin: d.slices[0].origin, destination: d.slices[0].destination, departure_date: d.slices[0].departure_date,
+        return_date: d.slices[1] ? d.slices[1].departure_date : undefined, adults: d.passengers.length, cabin_class: d.cabin_class
+      } : d;
+      const res = await responder(url, body);
+      const nodo = function (code) { return { iata_code: code, name: code }; };
+      const slice = function (leg) {
+        return { duration: 'PT' + Math.floor(leg.duration_minutes / 60) + 'H' + (leg.duration_minutes % 60 ? (leg.duration_minutes % 60) + 'M' : ''),
+          segments: leg.segments.map(function (x) {
+            return { origin: nodo(x.departure_airport), destination: nodo(x.arrival_airport), departing_at: x.departure_time_local, arriving_at: x.arrival_time_local,
+              marketing_carrier: { iata_code: x.marketing_carrier_code, name: x.operating_carrier_name }, operating_carrier: { iata_code: x.marketing_carrier_code, name: x.operating_carrier_name },
+              marketing_carrier_flight_number: x.flight_number, duration: 'PT1H' };
+          }) };
+      };
+      const offers = (res.itineraries || []).map(function (it, i) {
+        return { id: 'off_' + i, total_amount: String(it.price.amount), total_currency: it.price.currency, expires_at: '2099-01-01T00:00:00Z',
+          owner: { name: it.outbound.segments[0].operating_carrier_name, iata_code: it.outbound.segments[0].marketing_carrier_code },
+          passengers: [{ id: 'pas_1' }], slices: [slice(it.outbound)].concat(it.inbound ? [slice(it.inbound)] : []) };
+      });
+      const json = { data: { id: 'orq_test', offers: offers } };
+      return { ok: true, status: 200, text: async function () { return JSON.stringify(json); } };
     });
     try { return await fn(); } finally {
-      ignav.setFetch(null);
+      duffel.setFetch(null);
       flights.clearCache();
       Object.keys(antes).forEach(function (k) { if (antes[k] === undefined) delete process.env[k]; else process.env[k] = antes[k]; });
     }
   }
-  function ignavItinerario(precio, tramos, vuelta) {
+  function duffelItinerario(precio, tramos, vuelta) {
     const leg = function (segs) {
       return { duration_minutes: 165, segments: segs.map(function (x) {
         return { departure_airport: x[0], arrival_airport: x[1], departure_time_local: x[2], arrival_time_local: x[3], marketing_carrier_code: x[4], flight_number: x[5], operating_carrier_name: x[6] };
       }) };
     };
-    return { price: { amount: precio, currency: 'USD' }, outbound: leg(tramos), inbound: vuelta ? leg(vuelta) : null, ignav_id: 'ign-' + precio };
+    return { price: { amount: precio, currency: 'USD' }, outbound: leg(tramos), inbound: vuelta ? leg(vuelta) : null };
   }
 
   // Respuesta de google_flights recortada a lo que el provider realmente lee.
@@ -864,27 +884,27 @@ function haversineKm(a, b) {
 
   await t('el cache evita pagar dos veces la misma fecha', async function () {
     let calls = 0;
-    await conIgnav(function () {
+    await conDuffel(function () {
       calls += 1;
-      return { itineraries: [ignavItinerario(200, [['MVD', 'FLN', '2027-01-10T10:00', '2027-01-10T12:45', 'G3', '100', 'GOL']])] };
+      return { itineraries: [duffelItinerario(200, [['MVD', 'FLN', '2027-01-10T10:00', '2027-01-10T12:45', 'G3', '100', 'GOL']])] };
     }, async function () {
       const points = [{ shift: 0, dep: dep, ret: ret }, { shift: 1, dep: dep, ret: ret }];
       const first = await flights.getCalendar('MVD', 'FLN', points, 'eq', 2);
       const callsAfterFirst = calls;
-      assert.ok(callsAfterFirst > 0, 'la primera pasada tiene que consultar a Ignav');
+      assert.ok(callsAfterFirst > 0, 'la primera pasada tiene que consultar a Duffel');
       const second = await flights.getCalendar('MVD', 'FLN', points, 'eq', 2);
       assert.strictEqual(second.real, first.real, 'la segunda pasada devuelve lo mismo');
       // Los dos puntos comparten la clave (mismo dep y ret en el fixture), asi
       // que el segundo tiene que salir del cache sin gastar otra busqueda.
-      assert.strictEqual(calls, callsAfterFirst, 'la segunda consulta no puede volver a pegarle a Ignav');
-    }, { IGNAV_CALENDAR_LIVE: '1' });
+      assert.strictEqual(calls, callsAfterFirst, 'la segunda consulta no puede volver a pegarle a Duffel');
+    }, { DUFFEL_CALENDAR_LIVE: '1' });
   });
 
   await t('el calendario reparte precio real y estimado por separado', async function () {
-    await conIgnav(function (url, body) {
+    await conDuffel(function (url, body) {
       // Un punto sin itinerarios: tiene que quedar estimado y sin precio.
       if (body.departure_date === '2027-01-09') return { itineraries: [] };
-      return { itineraries: [ignavItinerario(400, [['MVD', 'FLN', body.departure_date + 'T10:00', body.departure_date + 'T12:45', 'G3', '100', 'GOL']])] };
+      return { itineraries: [duffelItinerario(400, [['MVD', 'FLN', body.departure_date + 'T10:00', body.departure_date + 'T12:45', 'G3', '100', 'GOL']])] };
     }, async function () {
       const points = [
         { shift: -1, dep: '2027-01-09', ret: '2027-01-16' },
@@ -899,7 +919,7 @@ function haversineKm(a, b) {
         if (punto.real) assert.strictEqual(punto.pp, 200, 'el total de 2 adultos se divide por persona');
         else assert.strictEqual(punto.pp, null, 'un punto estimado no inventa precio');
       });
-    }, { IGNAV_CALENDAR_LIVE: '1' });
+    }, { DUFFEL_CALENDAR_LIVE: '1' });
   });
   await t('normaliza hoteles reales de Booking.com con tarifa e imagen', async function () {
     const originalFetch = global.fetch;
@@ -1320,36 +1340,36 @@ function haversineKm(a, b) {
   const port = server.address().port;
   await t('expone vuelos por la ruta de búsqueda que consume la PWA', async function () {
     const pedidos = [];
-    await conIgnav(function (url, body) {
+    await conDuffel(function (url, body) {
       pedidos.push({ url: String(url), body: body });
       return { itineraries: [
-        ignavItinerario(180, [['MVD', 'FLN', '2027-01-10T10:00', '2027-01-10T12:45', 'AR', '123', 'Aerolínea Test']], [['FLN', 'MVD', '2027-01-17T14:00', '2027-01-17T16:40', 'AR', '124', 'Aerolínea Test']]),
-        ignavItinerario(240, [['MVD', 'GRU', '2027-01-10T08:00', '2027-01-10T10:30', 'G3', '10', 'GOL'], ['GRU', 'FLN', '2027-01-10T12:00', '2027-01-10T13:00', 'G3', '20', 'GOL']]),
-        // Un self transfer no se ofrece: si un tramo se atrasa el otro se pierde.
-        Object.assign(ignavItinerario(90, [['MVD', 'FLN', '2027-01-10T06:00', '2027-01-10T09:00', 'XX', '1', 'Low Cost']]), { requires_self_transfer: true })
+        duffelItinerario(180, [['MVD', 'FLN', '2027-01-10T10:00', '2027-01-10T12:45', 'AR', '123', 'Aerolínea Test']], [['FLN', 'MVD', '2027-01-17T14:00', '2027-01-17T16:40', 'AR', '124', 'Aerolínea Test']]),
+        duffelItinerario(240, [['MVD', 'GRU', '2027-01-10T08:00', '2027-01-10T10:30', 'G3', '10', 'GOL'], ['GRU', 'FLN', '2027-01-10T12:00', '2027-01-10T13:00', 'G3', '20', 'GOL']]),
+
+        duffelItinerario(300, [['MVD', 'FLN', '2027-01-10T06:00', '2027-01-10T09:00', 'XX', '1', 'Low Cost']])
       ] };
     }, async function () {
       const response = await post(port, '/api/vuelos/buscar', { origen: 'MVD', destino: 'fln', fecha_ida: dep, fecha_vuelta: ret, pasajeros: 1, style: 'ahorro' });
       const payload = JSON.parse(response.body);
       assert.strictEqual(response.status, 200);
-      assert.strictEqual(payload.provider, 'ignav');
-      assert.ok(pedidos.length >= 1 && pedidos[0].url.endsWith('/round-trip'), 'ida y vuelta va a /round-trip');
+      assert.strictEqual(payload.provider, 'duffel');
+      assert.ok(pedidos.length >= 1 && pedidos[0].url.indexOf('/air/offer_requests') >= 0, 'la busqueda va a /air/offer_requests de Duffel');
       assert.strictEqual(pedidos[0].body.origin, 'MVD');
       assert.strictEqual(pedidos[0].body.destination, 'FLN');
-      assert.strictEqual(payload.offers.length, 2, 'el self transfer queda afuera');
+      assert.strictEqual(payload.offers.length, 3, 'trae las tres ofertas de Duffel');
       const barato = payload.offers.reduce(function (a, b) { return a.price_usd <= b.price_usd ? a : b; });
       assert.strictEqual(barato.price_usd, 180);
       assert.strictEqual(barato.departure_airport.code, 'MVD');
       assert.strictEqual(barato.airline, 'Aerolínea Test');
-      assert.ok(barato.inbound, 'Ignav trae el tramo de vuelta');
+      assert.ok(barato.inbound, 'Duffel trae el tramo de vuelta');
       // Ninguna tarjeta puede llevar un link de pago propio: la reserva se
       // completa afuera y la app no cobra vuelos.
       assert.ok(payload.offers.every(function (o) { return !o.booking_url && !o.checkout_url; }));
     });
   });
   await t('el calendario de fechas responde puntos con precio por separado', async function () {
-    await conIgnav(function (url, body) {
-      return { itineraries: [ignavItinerario(600, [['MVD', 'FLN', body.departure_date + 'T10:00', body.departure_date + 'T12:45', 'G3', '100', 'GOL']])] };
+    await conDuffel(function (url, body) {
+      return { itineraries: [duffelItinerario(600, [['MVD', 'FLN', body.departure_date + 'T10:00', body.departure_date + 'T12:45', 'G3', '100', 'GOL']])] };
     }, async function () {
       const r = await get(port, '/api/vuelos/calendario?dest=fln&dep=' + dep + '&ret=' + ret + '&pax=2&style=eq&origin=MVD');
       const j = JSON.parse(r.body);
@@ -1359,7 +1379,7 @@ function haversineKm(a, b) {
       assert.ok(j.puntos.length > 1, 'el calendario tiene que traer varias fechas');
       assert.ok(j.puntos.every(function (p) { return typeof p.dep === 'string' && typeof p.shift === 'number'; }));
       assert.ok(j.puntos.some(function (p) { return p.real; }), 'con el buscador andando algun punto tiene que traer precio real');
-    }, { IGNAV_CALENDAR_LIVE: '1', IGNAV_DAILY_MAX: '100' });
+    }, { DUFFEL_CALENDAR_LIVE: '1', DUFFEL_DAILY_MAX: '100' });
   });
   /* El 15 de dentro de dos meses, 7 noches: una de las fechas que precarga el cron para las guias. */
   const fechaGuia = (function () {
@@ -1369,9 +1389,9 @@ function haversineKm(a, b) {
   })();
   await t('la precarga de las guias guarda el vuelo del mes, no lo vuelve a pagar y el "Desde" lo usa', async function () {
     let pedidos = 0;
-    await conIgnav(function (url, body) {
+    await conDuffel(function (url, body) {
       pedidos++;
-      return { itineraries: [ignavItinerario(300, [['MVD', 'FLN', body.departure_date + 'T10:00', body.departure_date + 'T12:45', 'G3', '100', 'GOL']])] };
+      return { itineraries: [duffelItinerario(300, [['MVD', 'FLN', body.departure_date + 'T10:00', body.departure_date + 'T12:45', 'G3', '100', 'GOL']])] };
     }, async function () {
       const rutas = [{ origin: 'MVD', destination: 'FLN', dep: fechaGuia.dep, ret: fechaGuia.ret }];
       const r1 = await flights.precalentarMeses(rutas, 'ahorro', 5);
@@ -1400,9 +1420,9 @@ function haversineKm(a, b) {
     const barata = salidas[2];
     flights.clearCache();
     try {
-      await conIgnav(function (url, body) {
+      await conDuffel(function (url, body) {
         const precio = body.departure_date === barata.dep ? 150 : body.departure_date === salidas[0].dep ? 'nada' : 340;
-        return { itineraries: precio === 'nada' ? [] : [ignavItinerario(precio, [['MVD', 'GIG', body.departure_date + 'T10:00', body.departure_date + 'T13:00', 'G3', '100', 'GOL']])] };
+        return { itineraries: precio === 'nada' ? [] : [duffelItinerario(precio, [['MVD', 'GIG', body.departure_date + 'T10:00', body.departure_date + 'T13:00', 'G3', '100', 'GOL']])] };
       }, async function () {
         const rutas = salidas.slice(0, 4).map(function (s) { return { origin: 'MVD', destination: 'GIG', dep: s.dep, ret: s.ret }; });
         const r1 = await flights.precalentarMeses(rutas, 'ahorro', 10);
@@ -2572,8 +2592,8 @@ function haversineKm(a, b) {
     assert.ok(!appScript.body.includes('Reservar los tours seleccionados'), 'el pie con la nota y el botón de reserva ya no debe existir');
   });
   await t('con key vacía la búsqueda real de vuelos responde con error controlado', async function () {
-    const oldKey = process.env.IGNAV_API_KEY;
-    process.env.IGNAV_API_KEY = '';
+    const oldKey = process.env.DUFFEL_TOKEN;
+    process.env.DUFFEL_TOKEN = '';
     flights.clearCache();
     try {
       const r = await post(port, '/api/vuelos/buscar', { origen: 'MVD', destino: 'fln', fecha_ida: dep, fecha_vuelta: ret, pasajeros: 2, style: 'eq' });
@@ -2588,7 +2608,7 @@ function haversineKm(a, b) {
       assert.strictEqual(cj.configured, false);
       assert.deepStrictEqual(cj.puntos, []);
     } finally {
-      process.env.IGNAV_API_KEY = oldKey;
+      process.env.DUFFEL_TOKEN = oldKey;
       flights.clearCache();
     }
   });

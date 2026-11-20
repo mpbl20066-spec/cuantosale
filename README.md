@@ -18,8 +18,9 @@ cuantosale/
 │  ├─ admin.js                Login y sesiones del panel (ADMIN_USER / ADMIN_PASS)
 │  ├─ mail-*.js, push.js, wa-*.js   Avisos por mail, push y WhatsApp
 │  └─ providers/
-│     ├─ vuelos.js            Vuelos: solo Ignav (SerpAPI deshabilitado)
-│     ├─ ignav.js             Cliente de Ignav
+│     ├─ vuelos.js            Vuelos: solo Duffel
+│     ├─ duffel.js            Cliente de Duffel (vuelos, hoteles y autos)
+│     ├─ duffel-vuelos.js     Vuelos con Duffel (precios y ofertas)
 │     ├─ index.js             Agregador de vuelos: cache, dedupe y tope diario
 │     ├─ cache-persistente.js Cache de vuelos en Supabase (sql/vuelos_cache.sql)
 │     ├─ serpapi.js           Ya no se carga; queda como referencia
@@ -46,16 +47,16 @@ cuantosale/
 2. En la carpeta del proyecto: `node server.js`
 3. Abrí http://localhost:3000
 
-Sin `IGNAV_API_KEY`, el servidor arranca igual: la web anda y los vuelos se muestran como no disponibles, sin consultar a otro proveedor. No se rompe nada.
+Sin `DUFFEL_TOKEN`, el servidor arranca igual: la web anda y los vuelos se muestran como no disponibles, sin consultar a otro proveedor. No se rompe nada.
 
-## 2. Conectar Ignav (vuelos)
+## 2. Conectar Duffel (vuelos)
 
-El proveedor de vuelos es Ignav (https://ignav.com, ~US$ 2 cada 1.000 pedidos). SerpAPI está deshabilitado en `lib/providers/vuelos.js`: no se usa ni como respaldo.
+El proveedor de vuelos es Duffel (https://duffel.com). Ignav y SerpAPI ya no se usan.
 
-1. Guardá la key en Vercel (o en tu `.env`) como `IGNAV_API_KEY`. Es un secreto de servidor.
-2. `IGNAV_MARKET=UY` (por defecto): Ignav devuelve pesos y la app los pasa a USD con la cotización del día.
-3. `IGNAV_DAILY_MAX` (300 por defecto) topa los pedidos pagos por día y por instancia, sumando búsqueda y calendario. `IGNAV_CALENDAR_LIVE=1` prende el calendario "mismo viaje, otra fecha" con precios reales (11 pedidos por viaje distinto, compartidos por el cache entre viajes cercanos).
-4. Ignav no cotiza vueltas a más de ~360 días: `IGNAV_MAX_DAYS` (355) corta antes de pedirlas.
+1. Guardá el token en Vercel (o en tu `.env`) como `DUFFEL_TOKEN`. Es un secreto de servidor. Con `duffel_test_...` los datos son de prueba; con `duffel_live_...`, reales.
+2. Duffel cobra en USD. Si alguna vez devolviera otra moneda, la app la pasa a USD con la cotización del día.
+3. `DUFFEL_DAILY_MAX` (300 por defecto) topa los pedidos por día y por instancia, sumando búsqueda y calendario. `DUFFEL_CALENDAR_LIVE=1` prende el calendario "mismo viaje, otra fecha" con precios reales (11 pedidos por viaje distinto, compartidos por el cache entre viajes cercanos). Duffel cobra un recargo si hay muchas más búsquedas que reservas.
+4. Las aerolíneas no venden vuelos a más de ~330 días: `DUFFEL_MAX_DAYS` (330) corta antes de pedirlos.
 
 Los nombres viejos `SERPAPI_CALENDAR_LIVE`, `SERPAPI_DAILY_MAX` y `SERPAPI_CALENDAR_TTL_H` siguen valiendo como respaldo. `BOOKING_API_KEY` y `BOOKING_API_HOST` son solo para alojamientos.
 
@@ -251,7 +252,7 @@ El schema y las reglas de contenido están documentados en la cabecera del archi
 
 | Componente | Origen |
 |---|---|
-| Pasajes de avión desde Montevideo | Ignav cuando hay `IGNAV_API_KEY`; el presupuesto suma tarifas en USD |
+| Pasajes de avión desde Montevideo | Duffel cuando hay `DUFFEL_TOKEN`; el presupuesto suma tarifas en USD |
 | Comparador de fechas ("mismo viaje, otra fecha") | Precio real de vuelo por fecha cuando el punto se pudo consultar; estimado en los puntos que fallaron |
 | Alojamiento | Booking.com / RapidAPI, con tarifa y foto reales |
 | Tours | **Estimado** (`LOCAL_TOURS` en `public/app.js`); la card lo rotula "Precio referencial" |
@@ -320,7 +321,7 @@ El server ya sabía ir en cualquier orden: cotiza con `?dest=` y `?second=` y la
 
 ### Costos y límites de las consultas
 
-- El gasto de vuelos lo topa `IGNAV_DAILY_MAX` por instancia; el consumo real hay que mirarlo en el panel de Ignav.
+- El gasto de vuelos lo topa `DUFFEL_DAILY_MAX` por instancia; el consumo real hay que mirarlo en el panel de Duffel.
 - Cada persona puede hacer `RATE_LIMIT_PER_MIN` búsquedas por minuto (30 por defecto), y los endpoints caros tienen cubos separados de los gratuitos.
 - **Límite conocido:** el cache y el rate limit viven en la memoria del proceso. En Vercel cada instancia es efímera, así que dos instancias distintas no comparten cache: el mismo precio puede pagarse dos veces si la petición cae en otra instancia.
 
@@ -329,7 +330,7 @@ El server ya sabía ir en cualquier orden: cotiza con `?dest=` y `?second=` y la
 Sirve cualquier hosting que ejecute Node (Render, Railway, Fly.io, un VPS, etc.):
 
 - Comando de inicio: `node server.js`
-- Variables de entorno: `IGNAV_API_KEY`; para hoteles, `BOOKING_API_KEY` y `BOOKING_API_HOST`; el resto (Supabase, panel, mails, WhatsApp) está documentado en `.env.example`
+- Variables de entorno: `DUFFEL_TOKEN`; para hoteles, `BOOKING_API_KEY` y `BOOKING_API_HOST`; el resto (Supabase, panel, mails, WhatsApp) está documentado en `.env.example`
 - En producción corre en Vercel (`vercel.json`): cada push a `main` despliega
 - El puerto lo define el hosting con `PORT`; el servidor ya lo lee.
 

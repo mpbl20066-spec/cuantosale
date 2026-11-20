@@ -88,7 +88,7 @@
         ? 'Modo local: los pedidos se guardan en un archivo de esta computadora. En producción hace falta configurar Supabase (SUPABASE_URL y SUPABASE_SERVICE_KEY).'
         : 'Falta configurar Supabase en el servidor: sin eso no se pueden guardar pedidos.') + '</p>';
     }
-    /* Los numeros del negocio van solo en Pedidos; los de la precarga (vuelos, hoteles, Ignav, Booking) en Sistema. */
+    /* Los numeros del negocio van solo en Pedidos; los de la precarga (vuelos, hoteles, Duffel, Booking) en Sistema. */
     if (S.vista === 'pedidos') {
       html += '<section class="kpis kpis--4" aria-label="Resumen">' +
         kpi('Por cobrar a clientes', usd(k.por_cobrar_usd), k.a_devolver_usd ? 'a devolver: ' + usd(k.a_devolver_usd) : 'clientes que nos deben', k.por_cobrar_usd || k.a_devolver_usd ? 'kpi--warn' : '') +
@@ -195,7 +195,7 @@
     var h = '<section class="kpis" aria-label="Precios de las guías">' +
       kpiPre('vuelos', 'Vuelos de las guías', pc.vuelos.conPrecio + ' / ' + pc.vuelos.rutas, 'meses con precio real · ' + (pc.vuelos.buscadas || 0) + ' de ' + (pc.vuelos.fechas || 0) + ' fechas buscadas', pc.vuelos.conPrecio < pc.vuelos.rutas ? 'kpi--warn' : 'kpi--ok') +
       kpiPre('hoteles', 'Hoteles calibrados', pc.hoteles.calibrados + ' / ' + pc.hoteles.destinos, pc.hoteles.sinDatos ? pc.hoteles.sinDatos + ' sin hoteles en Booking' : 'con Booking, se renueva cada 30 días', pc.hoteles.calibrados < pc.hoteles.destinos ? 'kpi--warn' : 'kpi--ok') +
-      kpi('Ignav hoy', pc.ignav.gastoHoy + (pc.ignav.topeDiario ? ' / ' + pc.ignav.topeDiario : ''), 'búsquedas del día (tope)', pc.ignav.topeDiario && pc.ignav.gastoHoy >= pc.ignav.topeDiario ? 'kpi--warn' : '') +
+      kpi('Duffel hoy', pc.duffel.gastoHoy + (pc.duffel.topeDiario ? ' / ' + pc.duffel.topeDiario : ''), 'búsquedas del día (tope)', pc.duffel.topeDiario && pc.duffel.gastoHoy >= pc.duffel.topeDiario ? 'kpi--warn' : '') +
       kpiBooking(pc.booking) + '</section>';
     if (S.verPre) h += detallePrecarga(pc, S.verPre);
     return h;
