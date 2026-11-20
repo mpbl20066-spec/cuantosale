@@ -1076,6 +1076,15 @@
   .f-tr__i.is-on{border-color:#F5C518;background:rgba(245,197,24,.08)}
   .f-tr__i:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .f-h3.is-tr{box-shadow:0 2px 0 #F5C518}
+  .rt-m{font-size:8.5px}
+  .rt-m--p{fill:var(--ink);font-weight:800}
+  .f-tr__i{position:relative}
+  .f-tr__i>span:nth-child(2){flex:1;min-width:0}
+  .f-tr__a{flex:none;margin-left:auto;font-style:normal;font-size:12px;font-weight:800;color:var(--ink2);text-decoration:underline;text-underline-offset:3px}
+  .f-tr__i.is-on .f-tr__a{color:#0B1F3A;background:#F5C518;padding:3px 9px;border-radius:99px;text-decoration:none}
+  .f-tr__hint{margin:6px 2px 0;font-size:12.5px;font-weight:600;line-height:1.4;color:var(--ink2)}
+  .f-tr__res{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px;margin:6px 0 4px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink2);font-size:13px;font-weight:600}
+  .f-tr__res b{color:var(--ink);font-weight:800}
   .f-sin--tr{margin:10px 0 2px;padding:12px 14px;border:1px dashed var(--line);border-radius:12px;color:var(--ink);text-decoration:none;font-weight:700;width:100%}
   .f-sin--tr.is-on{border:1px solid #F5C518;background:rgba(245,197,24,.08)}
   .f-tr{display:grid;gap:8px;margin:10px 0 6px;padding:0;list-style:none}
@@ -2097,15 +2106,16 @@
     var a = PAR.l[0], b = PAR.l[1], ferry = PAR.tramo.modo === 'ferry', aer = 'Aeropuerto';
     var sel = S.tramoSel || 1;
     var nombreTr = function (t) { return t ? (t.tipo === 'priv' ? 'Privado' : 'Compartido') : ''; };
-    var estado = function (n) {
-      if (n === 2) return S.entre ? (ferry ? 'Ferry' : 'Compartido') + ' · ' + f(entreTotal()) : 'Sin transfer · ' + f(0);
+    var par2 = function (n) {
+      if (n === 2) return S.entre ? [ferry ? 'Ferry' : 'Compartido', f(entreTotal())] : ['Sin transfer', f(0)];
       var t = n === 1 ? trasl() : trasl3();
-      return t ? nombreTr(t) + ' · ' + f(trTramo(t, n)) : 'Sin transfer · ' + f(0);
+      return t ? [nombreTr(t), f(trTramo(t, n))] : ['Sin transfer', f(0)];
     };
+    var estado = function (n) { return par2(n).join(' · '); };
     var datos = [
-      { n: 1, de: aer, a: a.nom, fecha: a.ida, txt: estado(1), mini: estado(1) },
-      { n: 2, de: a.nom, a: b.nom, fecha: b.ida, txt: PAR.tramo.km + ' km · ' + estado(2), mini: PAR.tramo.km + ' km · ' + horasTxt(PAR.tramo.horas) },
-      { n: 3, de: b.nom, a: aer, fecha: b.vuelta, txt: estado(3), mini: estado(3) }
+      { n: 1, de: aer, a: a.nom, fecha: a.ida, txt: estado(1), mini: par2(1) },
+      { n: 2, de: a.nom, a: b.nom, fecha: b.ida, txt: PAR.tramo.km + ' km · ' + estado(2), mini: par2(2) },
+      { n: 3, de: b.nom, a: aer, fecha: b.vuelta, txt: estado(3), mini: par2(3) }
     ];
     var corto = function (t, m) { t = String(t || ''); return esc(t.length > m ? t.slice(0, m - 1) + '…' : t); };
     var pt = [[30, 62], [120, 36], [212, 62], [296, 36]], mids = [[75, 49], [166, 49], [254, 49]];
@@ -2114,18 +2124,20 @@
       return '<g class="rt-s' + (on ? ' is-on' : '') + '" data-tr="' + d.n + '" role="button" tabindex="0" aria-pressed="' + on + '" aria-label="Tramo ' + d.n + ': ' + esc(d.de) + ' a ' + esc(d.a) + '">' +
         '<path d="M' + A[0] + ' ' + A[1] + ' L' + B[0] + ' ' + B[1] + '" class="rt-hit"/><path d="M' + A[0] + ' ' + A[1] + ' L' + B[0] + ' ' + B[1] + '" class="rt-l"' + dash + '/>' +
         '<circle cx="' + m[0] + '" cy="' + m[1] + '" r="10" class="rt-b"/><text x="' + m[0] + '" y="' + (m[1] + 4) + '" class="rt-n">' + d.n + '</text>' +
-        '<text x="' + m[0] + '" y="' + (m[1] + 26) + '" class="rt-m">' + corto(d.mini, 18) + '</text></g>';
+        '<text x="' + m[0] + '" y="' + (m[1] + 25) + '" class="rt-m">' + esc(d.mini[0]) + '</text><text x="' + m[0] + '" y="' + (m[1] + 36) + '" class="rt-m rt-m--p">' + esc(d.mini[1]) + '</text></g>';
     }).join('');
     var nodos = [aer, a.nom, b.nom, aer].map(function (nm, k) {
       var P = pt[k], arriba = P[1] < 50;
-      return '<circle cx="' + P[0] + '" cy="' + P[1] + '" r="5" class="rt-p' + (k === 0 || k === 3 ? ' rt-p--a' : '') + '"/><text x="' + P[0] + '" y="' + (arriba ? P[1] - 11 : P[1] + 20) + '" class="rt-t">' + corto(nm, 13) + '</text>';
+      return '<circle cx="' + P[0] + '" cy="' + P[1] + '" r="5" class="rt-p' + (k === 0 || k === 3 ? ' rt-p--a' : '') + '"/><text x="' + P[0] + '" y="' + (arriba ? P[1] - 11 : P[1] + 20) + '" class="rt-t">' + esc(nm) + '</text>';
     }).join('');
+    var activos = (trasl() ? 1 : 0) + (S.entre ? 1 : 0) + (trasl3() ? 1 : 0);
     var abierto = S.rutaAbierta == null ? window.innerWidth >= 900 : S.rutaAbierta;
-    return '<details class="f-ruta"' + (abierto ? ' open' : '') + '><summary>Mapa de ruta · 3 tramos</summary>' +
-      '<svg class="rt" viewBox="0 0 326 100" role="group" aria-label="Recorrido del viaje combinado">' + segs + nodos + '</svg>' +
+    return '<p class="f-tr__hint">Tocá cualquier tramo para cambiarlo o marcarlo por tu cuenta.</p><details class="f-ruta"' + (abierto ? ' open' : '') + '><summary>Mapa de ruta · 3 tramos</summary>' +
+      '<svg class="rt" viewBox="0 0 326 112" role="group" aria-label="Recorrido del viaje combinado">' + segs + nodos + '</svg>' +
       '<ol class="f-tr" aria-label="Tramos del viaje combinado">' + datos.map(function (d) {
-        return '<li class="f-tr__i' + (sel === d.n ? ' is-on' : '') + '" data-tr="' + d.n + '" role="button" tabindex="0" aria-pressed="' + (sel === d.n) + '"><span class="f-tr__n">' + d.n + '</span><span><b>' + esc(d.de) + ' → ' + esc(d.a) + '</b><small>' + fdc(d.fecha) + ' · ' + d.txt + '</small></span></li>';
-      }).join('') + '</ol></details>';
+        return '<li class="f-tr__i' + (sel === d.n ? ' is-on' : '') + '" data-tr="' + d.n + '" role="button" tabindex="0" aria-pressed="' + (sel === d.n) + '"><span class="f-tr__n">' + d.n + '</span><span><b>' + esc(d.de) + ' → ' + esc(d.a) + '</b><small>' + fdc(d.fecha) + ' · ' + d.txt + '</small></span><em class="f-tr__a">' + (sel === d.n ? 'Editando' : 'Cambiar') + '</em></li>';
+      }).join('') + '</ol></details>' +
+      '<p class="f-tr__res"><span>Transfers: <b>' + activos + ' de 3 tramos</b></span><span>Subtotal <b>' + f(trTotal() + entreTotal()) + '</b></span></p>';
   }
   /* Tarjeta de un transfer del aeropuerto para el tramo 1 o el 3, con el precio de ESE tramo. */
   function trCard(t, n) {
