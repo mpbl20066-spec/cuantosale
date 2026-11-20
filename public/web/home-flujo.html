@@ -205,20 +205,22 @@
   .x-arrows{display:none;gap:6px}
   .x-arr{width:32px;height:32px;border:1.5px solid var(--line);border-radius:50%;background:transparent;color:var(--ink2);font:400 20px/1 var(--fb);cursor:pointer;display:grid;place-items:center;padding:0 0 2px}
   .x-arr:hover{border-color:var(--ink2);color:var(--ink)}
-  .x-car{display:flex;align-items:stretch;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 2px 8px;margin:0 -2px}
+  .x-car{display:flex;align-items:stretch;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:2px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 2px 8px;margin:0 -2px}
   .x-car::-webkit-scrollbar{display:none}
   .x-car>.xr.xr--tour{flex:0 0 84%;scroll-snap-align:start;margin:0;min-height:0}
   @media (min-width:768px){.x-arrows{display:flex}.x-car>.xr.xr--tour{flex-basis:calc((100% - 28px) / 2.3)}}
   .x-car .xr--tour .xr__b{flex:1}
   .x-car .xr--tour .x-tit{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
   .x-car .xr--tour .x-val{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-  .x-car .xr--tour .x-foot{margin-top:auto;padding-top:6px}
+  .x-car .xr--tour .x-foot{margin-top:auto;padding-top:0}
+  .x-car .xr--tour .xr__b{padding:12px 14px 8px;gap:5px}
+  .x-car .xr--tour .x-link{padding:3px 0 0;margin:0}
   .x-gastos{margin:30px 0 0}.x-gastos .x-h3x{margin:0 0 4px;font-size:18px}.x-gastos .f-sub{margin:0 0 4px}
   .x-gastos+.dd{margin-top:14px}
   .xr.xr--tour{flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;margin-bottom:14px}
   .xr.xr--tour.is-sel{padding:0}
   .xr--tour .opt__tick{display:none}
-  .xr--tour .xr__img{width:100%;height:auto;aspect-ratio:16/9;max-height:150px;border-radius:0;flex:0 0 auto}
+  .xr--tour .xr__img{width:100%;height:auto;aspect-ratio:16/9;max-height:140px;border-radius:0;flex:0 0 auto}
   .xr--tour .xr__b{padding:14px 14px 12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
   .xr--tour .x-tit{font-size:16px;line-height:1.25}
   .xr--tour .x-val{margin:0;font-size:12.5px;line-height:1.4;color:var(--ink2)}
@@ -3639,7 +3641,8 @@
     $('steps').hidden = S.paso >= 5 || !!S.abriendo;
     $('foot').hidden = S.paso >= 5 || !!S.abriendo;
     if (S.paso < 5) { $('cta').textContent = S.paso === 2 && PAR && PA === 0 ? 'Continuar a ' + PAR.l[1].nom + ' →' : (MODO === 'avion' ? (S.paso === 1 ? (S.sub === 't' ? 'Continuar a Extras →' : 'Continuar a Alojamiento →') : (S.paso === 2 ? 'Continuar a Transfer →' : CTAS[S.paso])) : CTAS[S.paso]); $('cta').disabled = (S.paso === 2 && S.cargandoH) || (MODO === 'bus' && S.paso === 1 && !BUS) || (MODO === 'avion' && S.paso === 1 && !S.vuelo); $('cta').style.opacity = $('cta').disabled ? .5 : 1; }
-    Object.keys(carPos).forEach(function (id) { var c = $(id); if (c) { c.style.scrollBehavior = 'auto'; c.scrollLeft = carPos[id]; c.style.scrollBehavior = ''; } });
+    /* Los carruseles arrancan siempre en el primer tour; solo se conserva la posicion al re-dibujar por un cambio dentro del mismo paso (agregar un tour). */
+    Array.prototype.forEach.call($('main').querySelectorAll('.x-car'), function (c) { c.style.scrollBehavior = 'auto'; c.scrollLeft = !scrollTop && carPos[c.id] ? carPos[c.id] : 0; c.style.scrollBehavior = ''; });
     if (scrollTop) $('main').scrollTop = 0;
     marcarHistoria();
     vigilarComparativa();
