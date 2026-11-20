@@ -3994,6 +3994,13 @@ function handleRequest(req, res) {
     }
     /* URLs limpias de la app nueva: /nuevo, /nuevo/destinos, /nuevo/planificar... (tabla en NUEVO_PAGINAS).
        Las URL viejas (/test, /test/, /test/home-xxx.html) responden 301 a la ruta limpia (y /test/x.css a /web/x.css), con los mismos parametros. */
+    /* Pagina de mantenimiento en la portada (public/mantenimiento.html). Solo tapa '/': los links compartidos
+       (/destino/..., /grupo, /app?viaje=...) y el panel siguen andando. Se apaga con MANTENIMIENTO=0 en Vercel.
+       Para ver la home real mientras tanto: /?ver=sitio */
+    if (url.pathname === '/' && String(process.env.MANTENIMIENTO || '1').trim() !== '0' && url.searchParams.get('ver') !== 'sitio') {
+      try { serveStatic(req, res, '/mantenimiento.html'); } catch (e) { res.writeHead(400); res.end(); }
+      return;
+    }
     const nuevoRedir = nuevoRedireccion(url.pathname, url.search);
     if (nuevoRedir) {
       res.writeHead(301, { Location: nuevoRedir, 'Cache-Control': 'public, max-age=3600' });
