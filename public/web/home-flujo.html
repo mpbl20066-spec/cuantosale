@@ -2124,16 +2124,16 @@
       return '<g class="rt-s' + (on ? ' is-on' : '') + '" data-tr="' + d.n + '" role="button" tabindex="0" aria-pressed="' + on + '" aria-label="Tramo ' + d.n + ': ' + esc(d.de) + ' a ' + esc(d.a) + '">' +
         '<path d="M' + A[0] + ' ' + A[1] + ' L' + B[0] + ' ' + B[1] + '" class="rt-hit"/><path d="M' + A[0] + ' ' + A[1] + ' L' + B[0] + ' ' + B[1] + '" class="rt-l"' + dash + '/>' +
         '<circle cx="' + m[0] + '" cy="' + m[1] + '" r="10" class="rt-b"/><text x="' + m[0] + '" y="' + (m[1] + 4) + '" class="rt-n">' + d.n + '</text>' +
-        '<text x="' + m[0] + '" y="' + (m[1] + 25) + '" class="rt-m">' + esc(d.mini[0]) + '</text><text x="' + m[0] + '" y="' + (m[1] + 36) + '" class="rt-m rt-m--p">' + esc(d.mini[1]) + '</text></g>';
+        '<text x="' + m[0] + '" y="' + (m[1] + 22) + '" class="rt-m">' + esc(d.mini[0]) + '</text><text x="' + m[0] + '" y="' + (m[1] + 32) + '" class="rt-m rt-m--p">' + esc(d.mini[1]) + '</text></g>';
     }).join('');
     var nodos = [aer, a.nom, b.nom, aer].map(function (nm, k) {
       var P = pt[k], arriba = P[1] < 50;
-      return '<circle cx="' + P[0] + '" cy="' + P[1] + '" r="5" class="rt-p' + (k === 0 || k === 3 ? ' rt-p--a' : '') + '"/><text x="' + P[0] + '" y="' + (arriba ? P[1] - 11 : P[1] + 20) + '" class="rt-t">' + esc(nm) + '</text>';
+      return '<circle cx="' + P[0] + '" cy="' + P[1] + '" r="5" class="rt-p' + (k === 0 || k === 3 ? ' rt-p--a' : '') + '"/><text x="' + P[0] + '" y="' + (arriba ? P[1] - 11 : P[1] + 31) + '" class="rt-t">' + esc(nm) + '</text>';
     }).join('');
     var activos = (trasl() ? 1 : 0) + (S.entre ? 1 : 0) + (trasl3() ? 1 : 0);
     var abierto = S.rutaAbierta == null ? window.innerWidth >= 900 : S.rutaAbierta;
     return '<p class="f-tr__hint">Tocá cualquier tramo para cambiarlo o marcarlo por tu cuenta.</p><details class="f-ruta"' + (abierto ? ' open' : '') + '><summary>Mapa de ruta · 3 tramos</summary>' +
-      '<svg class="rt" viewBox="0 0 326 112" role="group" aria-label="Recorrido del viaje combinado">' + segs + nodos + '</svg>' +
+      '<svg class="rt" viewBox="0 0 326 118" role="group" aria-label="Recorrido del viaje combinado">' + segs + nodos + '</svg>' +
       '<ol class="f-tr" aria-label="Tramos del viaje combinado">' + datos.map(function (d) {
         return '<li class="f-tr__i' + (sel === d.n ? ' is-on' : '') + '" data-tr="' + d.n + '" role="button" tabindex="0" aria-pressed="' + (sel === d.n) + '"><span class="f-tr__n">' + d.n + '</span><span><b>' + esc(d.de) + ' → ' + esc(d.a) + '</b><small>' + fdc(d.fecha) + ' · ' + d.txt + '</small></span><em class="f-tr__a">' + (sel === d.n ? 'Editando' : 'Cambiar') + '</em></li>';
       }).join('') + '</ol></details>' +
@@ -2152,7 +2152,8 @@
   function transferPar() {
     var n = S.tramoSel || 1, a = PAR.l[0], b = PAR.l[1], aer = 'Aeropuerto', ferry = PAR.tramo.modo === 'ferry';
     var r = [null, [aer, a.nom, a.ida], [a.nom, b.nom, b.ida], [b.nom, aer, b.vuelta]][n];
-    var cab = '<h2 class="f-h3 is-tr" data-trb="' + n + '">' + ic(I.van, 22) + 'Tramo ' + n + ' · ' + esc(r[0]) + ' → ' + esc(r[1]) + '</h2><p class="f-sub">' + fdc(r[2]) + (n === 2 ? ' · ' + PAR.tramo.km + ' km · unas ' + horasTxt(PAR.tramo.horas) + (ferry ? ' con el cruce en barco' : ' por ruta') : ' · precio de este tramo') + '</p>';
+    var tSel = n === 1 ? trasl() : (n === 3 ? trasl3() : null), durTr = tSel && tSel.dur ? tSel.dur : '';
+    var cab = '<h2 class="f-h3 is-tr" data-trb="' + n + '">' + ic(I.van, 22) + 'Tramo ' + n + ' · ' + esc(r[0]) + ' → ' + esc(r[1]) + '</h2><p class="f-sub">' + fdc(r[2]) + (n === 2 ? ' · ' + PAR.tramo.km + ' km · unas ' + horasTxt(PAR.tramo.horas) + (ferry ? ' con el cruce en barco' : '') : (durTr ? ' · ' + esc(durTr) : '')) + ' · precio de este tramo</p>';
     var tiene = n === 1 ? !!S.traslado : (n === 3 ? !!S.t3 : !!S.entre);
     var no = '<button type="button" class="f-sin f-sin--tr' + (!tiene ? ' is-on' : '') + '" data-notr="' + n + '">No necesito transfer en este tramo (voy por mi cuenta)' + (!tiene ? ' ✓' : '') + '</button>';
     if (n === 2) return cab + cardEntre(true) + no + '<button type="button" class="f-sin" data-sin-transfer="1">Continuar sin transfer</button>';
