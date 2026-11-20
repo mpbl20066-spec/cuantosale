@@ -199,10 +199,10 @@
   .x-add.is-on{background:var(--action-bg);border-color:var(--action-bg);color:var(--action-ink)}
   /* Paso Extras: "+ Agregar" / "✓ Agregado" (acento amarillo), "Ver detalles" discreto, "No incluir" y barra de resumen */
     /* Tarjeta de tour: foto arriba y limpia (nada encima), texto debajo, precio + "+ Agregar" y "Ver detalles" aparte */
-  .xr--tour{flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;margin-bottom:14px}
-  .xr--tour.is-sel{padding:0}
+  .xr.xr--tour{flex-direction:column;align-items:stretch;gap:0;padding:0;overflow:hidden;margin-bottom:14px}
+  .xr.xr--tour.is-sel{padding:0}
   .xr--tour .opt__tick{display:none}
-  .xr--tour .xr__img{width:100%;height:auto;aspect-ratio:16/9;border-radius:0;flex:0 0 auto}
+  .xr--tour .xr__img{width:100%;height:auto;aspect-ratio:16/10;max-height:190px;border-radius:0;flex:0 0 auto}
   .xr--tour .xr__b{padding:14px 14px 12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
   .xr--tour .x-tit{font-size:16px;line-height:1.25}
   .xr--tour .x-val{margin:0;font-size:12.5px;line-height:1.4;color:var(--ink2)}
@@ -212,7 +212,7 @@
   .xr--tour .x-link{margin:2px 0 0;padding:6px 0}
   .x-add--main{padding:10px 16px;border:1.5px solid var(--line);background:transparent;color:var(--ink)}
   .x-add--main:hover{border-color:var(--ink2)}
-  .x-add--main.is-on{border-color:#F5C518;background:rgba(245,197,24,.14);color:var(--ink)}
+  .xr .x-add.x-add--main.is-on{border-color:#F5C518!important;background:rgba(245,197,24,.16)!important;color:var(--ink)!important}
   .x-link{display:block;margin:6px 0 0;padding:0;border:0;background:transparent;color:var(--ink2);font:500 12px var(--fb);text-decoration:none;opacity:.8;cursor:pointer}
   .x-link:hover{opacity:1;color:var(--ink)}
   .dd-none{padding:6px 10px;border:1.5px solid var(--line);border-radius:99px;background:transparent;color:var(--ink2);font:700 11.5px var(--fb);cursor:pointer;white-space:nowrap}
