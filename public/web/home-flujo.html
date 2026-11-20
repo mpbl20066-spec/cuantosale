@@ -1940,12 +1940,12 @@
   function cardEntre() {
     if (!PAR || MODO === 'auto') return '';
     var t = PAR.tramo, on = !!S.entre, b = PAR.l[1].nom, ferry = t.modo === 'ferry';
-    return '<h2 class="f-h3">' + ic(I.van, 22) + 'De ' + esc(DEST1) + ' a ' + esc(b) + '</h2><p class="f-sub">' + t.km + ' km · unas ' + horasTxt(t.horas) + (ferry ? ' con el cruce en barco' : ' por ruta') + ' · ' + nochesTxt(PAR.l[0].noches) + ' después de llegar</p>' +
+    return '<h2 class="f-h3">' + ic(I.van, 22) + (MODO === 'avion' ? 'Tramo 2 · Entre destinos' : 'Entre destinos') + '</h2><p class="f-sub">' + fdc(PAR.l[1].ida) + ': ' + esc(DEST1) + ' → ' + esc(b) + ' · ' + t.km + ' km · unas ' + horasTxt(t.horas) + (ferry ? ' con el cruce en barco' : ' por ruta') + '</p>' +
       '<div class="opt trc' + sel(on) + '" role="button" tabindex="0" data-entre="1" aria-pressed="' + on + '">' + tick +
         '<div class="trc__img" role="img" aria-label="' + (ferry ? 'Ferry' : 'Van compartida') + '" style="background-image:url(traslado-van.png)"></div>' +
-        '<div class="trc__b"><b>' + (ferry ? 'Ferry a ' : 'Traslado a ') + esc(b) + '</b><small>' + (ferry ? 'Pasaje por persona' : 'Compartido · precio por persona') + '</small>' +
+        '<div class="trc__b"><b>' + (ferry ? 'Ferry a ' : 'Traslado a ') + esc(b) + '</b><small>' + (MODO === 'avion' ? 'Tramo 2 · ' : '') + (ferry ? 'Pasaje por persona' : 'Compartido · precio por persona') + '</small>' +
         '<ul><li>' + ic('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 16) + 'Unas ' + horasTxt(t.horas) + '</li><li>' + ic('<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.100L12 17l-5.400 2.900 1-6.100L3.200 9.500l6.100-.9z"/>', 16) + 'Precio estimado</li></ul></div>' +
-        '<div class="trc__p"><b>' + f(t.pp * pax) + '</b><small>solo ida · ' + personasTxt() + '</small></div></div>';
+        '<div class="trc__p"><b>' + f(t.pp * pax) + '</b><small>' + (MODO === 'avion' ? 'Tramo 2 · ' : '') + 'solo ida · ' + personasTxt() + '</small></div></div>';
   }
   function cargarBus() {
     if (MODO !== 'bus') return Promise.resolve();
@@ -2061,10 +2061,16 @@
     if (!PAR || MODO !== 'avion') return '';
     var a = PAR.l[0], b = PAR.l[1], ferry = PAR.tramo.modo === 'ferry', aer = 'Aeropuerto';
     var fila = function (n, t, d, extra) { return '<li><span class="f-tr__n">' + n + '</span><span><b>' + t + '</b><small>' + d + '</small></span>' + (extra || '') + '</li>'; };
+    /* Los tramos 1 y 3 se eligen juntos en el bloque "Tramos 1 y 3": cada fila dice si esta incluido y cuanto suma ese tramo. */
+    var tr = trasl(), u = tr ? (tr.pp ? pax : Math.ceil(pax / 4)) : 0;
+    var estado = function (n) {
+      if (!tr || (n === 3 && !S.tIV)) return 'sin traslado';
+      return 'incluido en traslados al aeropuerto · ' + f((n === 1 ? tr.precio : precioVueltaTr(tr)) * u);
+    };
     return '<ol class="f-tr" aria-label="Tramos del viaje combinado">' +
-      fila(1, aer + ' → ' + esc(a.nom), fdc(a.ida) + ' · lo elegís abajo') +
+      fila(1, aer + ' → ' + esc(a.nom), fdc(a.ida) + ' · ' + estado(1)) +
       fila(2, esc(a.nom) + ' → ' + esc(b.nom), fdc(b.ida) + ' · ' + PAR.tramo.km + ' km' + (ferry ? ' con barco' : '') + (S.entre ? ' · ' + f(entreTotal()) : ' · sin sumar')) +
-      fila(3, esc(b.nom) + ' → ' + aer, fdc(b.vuelta) + ' · lo elegís abajo') + '</ol>';
+      fila(3, esc(b.nom) + ' → ' + aer, fdc(b.vuelta) + ' · ' + estado(3)) + '</ol>';
   }
   function bloqueCombinar() {
     if (MODO !== 'avion' || NOCHES < 2 || !combDefecto(PAR ? PAR.l[0].k : destKey)) return '';
@@ -2100,21 +2106,23 @@
       (soloUno ? '<button type="button" class="f-more" data-filtro="vuelo:precio">Ver más opciones de vuelos</button>' : '') +
       (!esRec && vs.length > 3 ? '<button type="button" class="f-more" data-mas="vuelos">' + (S.verMasVuelos ? 'Ver menos' : 'Ver más opciones de vuelos') + '</button>' : '') +
       ahorroFechas() +
-      '<h2 class="f-h3">' + ic(I.van, 22) + 'Transfer</h2><p class="f-sub">' + (PAR ? 'Del aeropuerto a ' + esc(DEST1) + ' y de ' + esc(PAR.l[1].nom) + ' al aeropuerto' : 'Aeropuerto ⇄ alojamiento · ida y vuelta incluida') + ' · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>' +
+      (PAR
+        ? '<h2 class="f-h3">' + ic(I.van, 22) + 'Tramos 1 y 3 · Traslados al aeropuerto</h2><p class="f-sub">' + fdc(PAR.l[0].ida) + ': Aeropuerto → ' + esc(DEST1) + '<br>' + fdc(PAR.l[1].vuelta) + ': ' + esc(PAR.l[1].nom) + ' → Aeropuerto<br>El precio de cada opción suma los 2 traslados · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>'
+        : '<h2 class="f-h3">' + ic(I.van, 22) + 'Transfer</h2><p class="f-sub">Aeropuerto ⇄ alojamiento · ida y vuelta incluida · desde ' + f(Math.min.apply(null, TRASLADOS.map(trPrecio))) + '</p>') +
       chips([['todos', 'Todos'], ['priv', 'Privado'], ['comp', 'Compartido']], S.fTras, 'tras') +
       TRASLADOS.filter(function (t) { return S.fTras === 'todos' || S.fTras === t.tipo; }).map(function (t) {
-        var on = S.traslado === t.id, sub = t.tipo === 'priv' ? 'Directo · ' + personasTxt() : t.sub;
+        var on = S.traslado === t.id, sub = (PAR ? 'Tramos 1 y 3 · ' : '') + (t.tipo === 'priv' ? 'Directo · ' + personasTxt() : t.sub);
         return '<div class="opt trc' + sel(on) + '" role="button" tabindex="0" data-sel="traslado:' + t.id + '" aria-pressed="' + on + '">' + tick + 
           '<div class="trc__img" role="img" aria-label="' + (t.tipo === 'priv' ? 'Auto privado' : 'Van compartida') + '" style="background-image:url(' + (t.tipo === 'priv' ? 'traslado-auto.png' : 'traslado-van.png') + ')"></div>' +
           '<div class="trc__b"><b>' + esc(t.nom) + '</b><small>' + esc(sub) + '</small>' +
           '<ul><li>' + ic('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/>', 16) + esc(t.cap) + '</li><li>' + ic('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 16) + esc(t.dur) + '</li><li>' + ic('<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.100L12 17l-5.400 2.900 1-6.100L3.200 9.500l6.100-.9z"/>', 16) + esc(t.nota) + '</li></ul></div>' +
-          '<div class="trc__p"><b>' + f(trPrecio(t)) + '</b><small>ida y vuelta' + (t.pp ? ' · ' + personasTxt() : ' · ' + Math.ceil(pax / 4) + (pax > 4 ? ' vehículos' : ' vehículo')) + '</small></div></div>';
+          '<div class="trc__p"><b>' + f(trPrecio(t)) + '</b><small>' + (PAR ? '2 traslados' : 'ida y vuelta') + (t.pp ? ' · ' + personasTxt() : ' · ' + Math.ceil(pax / 4) + (pax > 4 ? ' vehículos' : ' vehículo')) + '</small></div></div>';
       }).join('') +
       cardEntre() + '<button type="button" class="f-sin" data-sin-transfer="1">Continuar sin transfer</button>';
     /* Vuelos y traslados van en dos pantallas: primero el vuelo, despues el traslado (mismo paso del flujo). */
     var k = html.indexOf('<h2 class="f-h3">');
     if (S.sub !== 't') return html.slice(0, k);
-    return '<h1 class="f-h">Transfer</h1>' + tramosCombinado() + html.slice(k).replace(/^<h2 class="f-h3">.*?<\/h2>/, '');
+    return '<h1 class="f-h">Transfer</h1>' + tramosCombinado() + (PAR ? html.slice(k) : html.slice(k).replace(/^<h2 class="f-h3">.*?<\/h2>/, ''));
   }
   /* ---- "¿Podés ahorrar viajando otro día?" ----
      Precios REALES de /api/vuelos/calendario (el proveedor de vuelos de la app, hoy Duffel; ver lib/providers/vuelos.js): el mismo viaje,
