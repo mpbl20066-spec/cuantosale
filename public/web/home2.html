@@ -429,6 +429,7 @@
   .q-camino button:focus-visible,.q-camino a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   .q-camino b{display:flex;align-items:center;gap:7px;font-family:var(--fh);font-size:14.5px;font-weight:800;line-height:1.2;color:inherit}
   .q-camino b svg{flex:none;width:18px;height:18px}
+  .q-camino button,.q-camino a{border:1px solid transparent;font-weight:800}
   .q-camino button[aria-current="true"],.q-camino button[aria-current="true"]:hover{background:#F5C518;color:#070B14;cursor:default}
   .q-camino button[aria-current="true"] b,.q-camino button[aria-current="true"] svg{color:#070B14!important}
   .q-camino button[aria-current="true"] svg{stroke:#070B14!important}
@@ -437,13 +438,13 @@
   @media (max-width:380px){.q-camino button,.q-camino a{white-space:normal;padding:0 8px}.q-camino b{font-size:13px;line-height:1.15}}
   @media (min-width:1024px){.q-camino{max-width:460px;margin-bottom:22px}.q-camino button,.q-camino a{min-height:46px}.q-camino b{font-size:15.5px}}
   /* Montos redondos y recientes en una fila de chips: lo importante son los destinos, no el historial. */
-  .q-rec{margin:16px 0 0}
-  .q-rec__h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px}
-  .q-rec__h h2{margin:0;font:800 12.5px var(--fb);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.92)}
-  .q-rec__h button{min-height:32px;padding:0 12px;border:1px solid rgba(255,255,255,.32);border-radius:99px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.92);font:700 12.5px var(--fb);cursor:pointer;transition:background .15s}
-  .q-rec__h button:hover{background:rgba(255,255,255,.18)}
+  .q-rec{margin:20px 0 0}
+  .q-rec__h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:0 2px}
+  .q-rec__h h2{margin:0;font:800 13px var(--fb);letter-spacing:.1em;text-transform:uppercase;color:#fff}
+  .q-rec__h button{min-height:36px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:#F5C518;font:700 13px var(--fb);text-decoration:underline;text-underline-offset:3px;cursor:pointer;transition:background .15s}
+  .q-rec__h button:hover{background:rgba(255,255,255,.1)}
   .q-rec__h button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-  .q-rec ul{display:flex;gap:8px;margin:0;padding:2px 0 4px;list-style:none;overflow-x:auto;scrollbar-width:none}
+  .q-rec ul{display:flex;gap:10px;margin:0;padding:2px 0 6px;list-style:none;overflow-x:auto;scrollbar-width:none}
   .q-rec ul::-webkit-scrollbar{display:none}
   .q-rec li{flex:none}
   .q-rec a{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:4px 14px 4px 5px;border-radius:99px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);color:#fff;font:700 13px var(--fb);text-decoration:none;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -486,7 +487,7 @@
   .q-fila[data-est="casi"],.q-fila[data-est="no"]{opacity:.55}
   .q-fila[data-est="casi"] img,.q-fila[data-est="no"] img{filter:grayscale(1)}
   .q-fila{will-change:transform}
-  .q-mas{display:block;width:100%;margin:6px 0 28px;padding:13px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--hx-navy);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+  .q-mas{display:block;width:100%;margin:14px 0 36px;padding:14px;border-radius:14px;border:1px solid rgba(128,140,165,.35);border-style:solid;background:rgba(255,255,255,.04);color:var(--hx-navy);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
   .q-mas:hover{border-color:#F5C518}
   .q-mas:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
   /* ---- Tus busquedas recientes: en el celular una fila que se desliza; en la PC debajo de la calculadora ---- */

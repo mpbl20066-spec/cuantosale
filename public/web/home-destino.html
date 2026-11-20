@@ -613,7 +613,7 @@
   /* Ir a los resultados pasando destino, fechas, personas y medio de transporte. */
   function aResultados() {
     /* Con las fechas elegidas se va derecho a elegir el vuelo (paso 1 del flujo de reserva). */
-    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: S.ninos, ida: S.ida, vuelta: S.vuelta, fuente: 'destino_vuelos', origen_home: fuente, directo: '1' });
+    var q = new URLSearchParams({ destino: S.dest, pax: S.pax, ninos: S.ninos, ida: S.ida, vuelta: S.vuelta, fuente: 'destino_vuelos', origen_home: fuente });
     var par = parElegido(); if (par && nochesViaje() >= 2) { q.set('segundo', par.k); q.set('noches1', noches1()); } else par = null;
     /* Avion: elegir vuelo. Auto: datos del auto, combustible, peajes y mapa. Bus: resultado del bus. */
     var m = mediosDe(destInfo()).indexOf(S.medio) >= 0 ? S.medio : 'avion';
