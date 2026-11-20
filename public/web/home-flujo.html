@@ -949,6 +949,10 @@
   .vd-l li>span{flex:none;color:var(--ink2)}
   .vd-l b{font-weight:700;text-align:right}
   .vd-l small{display:block;margin-top:3px;font-size:11.5px;font-weight:500;color:var(--ink2)}
+  .vd-ok{width:100%;min-height:50px;margin-top:6px;border:0;border-radius:14px;background:#F5C518;color:#0B1F3A;font:800 15.5px var(--fb);cursor:pointer;box-shadow:0 4px 14px rgba(245,197,24,.28)}
+  .vd-ok:hover{filter:brightness(1.05)}
+  .vd-ok:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  .fc-det:focus:not(:focus-visible){outline:none}
   .vd-na{font-weight:600;color:var(--ink2)}
   .fc-por{margin:-6px 0 0;font-size:12.5px;font-weight:600;line-height:1.4;color:var(--ink2)}
   .fc-ruta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px}
@@ -3616,6 +3620,7 @@
   var VDET = {};
   function abrirDetalleVuelo(id) {
     S.modal = { tipo: 'vuelo_det', id: id }; pintarModal();
+    try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (er) { /* sin foco que soltar */ }
     track('flujo_vuelo_detalle', { vuelo: id });
     if (VDET[id] && VDET[id].estado !== 'error') return;
     VDET[id] = { estado: 'cargando' };
@@ -3630,20 +3635,24 @@
     var consulta = '<span class="vd-na">Consultalo con la aerolínea</span>';
     var cant = function (n, uno, varios) { return n == null ? consulta : (n === 0 ? 'No incluido' : n + ' ' + (n === 1 ? uno : varios)); };
     var cond = function (c) { return !c ? consulta : (!c.permitido ? 'No permitido' : (c.costo_usd > 0 ? 'Permitido, con costo de ' + f(c.costo_usd) + ' por persona' : 'Permitido sin costo adicional')); };
+    var TRAD = { basic: 'Básica', classic: 'Clásica', standard: 'Estándar', light: 'Light', flex: 'Flex', economy: 'Económica', 'economy basic': 'Económica básica', 'economy classic': 'Económica clásica', 'economy flex': 'Económica flex', 'premium economy': 'Premium Economy', business: 'Ejecutiva', first: 'Primera clase' };
+    var tr = function (t) { var k = String(t || '').trim().toLowerCase(); return TRAD[k] || String(t || '').trim().replace(/\bbasic\b/ig, 'Básica').replace(/\beconomy\b/ig, 'Económica'); };
+    var nDesp = d.equipaje && d.equipaje.despachado;
+    var subValija = d.valija_extra ? (nDesp > 0 ? (nDesp === 1 ? '1.ª valija incluida; valijas adicionales' : nDesp + ' valijas incluidas; valijas adicionales') : 'Valijas') + ' desde ' + f(d.valija_extra.usd) + (d.valija_extra.kg ? ' (hasta ' + d.valija_extra.kg + ' kg)' : '') + ' por persona y tramo. Se compra en la aerolínea.' : '';
     var fila = function (k, val) { return '<li><span>' + k + '</span><b>' + val + '</b></li>'; };
     var cuerpo = e.estado === 'cargando' ? '<div class="cal-cargando" role="status" style="justify-content:center;padding:28px 0"><span class="fl-spin" aria-hidden="true"></span>Trayendo el detalle…</div>'
       : (e.estado === 'error' ? '<p class="td-p">' + esc(e.msg || 'No pudimos traer el detalle de esta tarifa.') + '</p>'
       : '<ul class="vd-l">' +
-          fila('Tarifa', d.tarifa ? esc(d.tarifa) : consulta) + fila('Clase', d.cabina ? esc(d.cabina) : 'Económica') +
+          fila('Tarifa', d.tarifa ? esc(tr(d.tarifa)) : consulta) + fila('Clase', d.cabina ? esc(tr(d.cabina)) : 'Económica') +
           fila('Equipaje de mano', cant(d.equipaje && d.equipaje.mano, 'pieza incluida', 'piezas incluidas')) +
-          fila('Valija despachada', cant(d.equipaje && d.equipaje.despachado, 'incluida', 'incluidas') + (d.valija_extra ? '<small>Extra desde ' + f(d.valija_extra.usd) + (d.valija_extra.kg ? ' (hasta ' + d.valija_extra.kg + ' kg)' : '') + ' por persona y tramo. Se compra en la aerolínea.</small>' : '')) +
+          fila('Valija despachada', cant(nDesp, 'incluida', 'incluidas') + (subValija ? '<small>' + subValija + '</small>' : '')) +
           fila('Cambios de fecha', cond(d.cambios)) + fila('Cancelación con reembolso', cond(d.reembolso)) + '</ul>');
     return '<div class="f-modal__bg" data-cerrar="1"></div><div class="f-modal__sheet" role="dialog" aria-modal="true" aria-label="Detalle de la tarifa">' +
       '<div class="f-modal__top"><div><small>DETALLE DE LA TARIFA</small><h2>' + esc(v ? v.air : 'Vuelo') + '</h2></div><button type="button" class="f-modal__x" data-cerrar="1" aria-label="Cerrar">✕</button></div>' +
       (e.estado === 'ok' && d.precio_actual_usd > 0 && v && Math.abs(d.precio_actual_usd - precioVuelo(v)) >= 1 ? '<p class="td-c">Esta tarifa se volvió a consultar: hoy cuesta ' + f(d.precio_actual_usd) + ' (antes ' + f(precioVuelo(v)) + ').</p>' : '') +
       (v ? '<p class="td-p">' + v.sal + ' → ' + v.lle + ' · ' + esc(v.escT) + ' · ' + f(precioVuelo(v)) + ' ida y vuelta, ' + personasTxt() + '</p>' : '') + cuerpo +
       '<p class="td-c">Información de la aerolínea a través de nuestro buscador. Puede cambiar: ella confirma las condiciones y el precio final al reservar.</p>' +
-      (v ? '<button type="button" class="g-btn ' + (S.vuelo === v.id ? '' : 'g-btn--main') + '" data-vdet-elegir="' + esc(v.id) + '">' + (S.vuelo === v.id ? 'Seguir con este vuelo' : 'Elegir este vuelo') + '</button>' : '') + '</div>';
+      (v ? '<button type="button" class="g-btn vd-ok" data-vdet-elegir=""' + esc(v.id) + '">' + (S.vuelo === v.id ? 'Seguir con este vuelo' : 'Elegir este vuelo') + '</button>' : '') + '</div>';
   }
   function cerrarModal() { S.modal = null; pintarModal(); }
   function pintarModal() {

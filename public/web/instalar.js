@@ -59,6 +59,9 @@
      WhatsApp, y nunca fuera de la pantalla. Las paginas sin wa-flotante.js (el flujo) no median esa barra: se mide aca. */
   function ubicarAviso() {
     if (!aviso) return;
+    /* Con una hoja o modal abierto el aviso se esconde: no se encima con el contenido ni con el overlay. */
+    var mod = document.getElementById('modal');
+    aviso.style.display = mod && !mod.hidden ? 'none' : '';
     var alto = window.innerHeight, techo = alto;
     [].forEach.call(document.querySelectorAll('.tabs,.u-foot,.f-foot,#cs-consent'), function (el) {
       var r = el.getBoundingClientRect();
@@ -68,6 +71,7 @@
     aviso.style.setProperty('--cs-inst-sube', Math.min(sube, Math.round(alto * 0.5)) + 'px');
   }
   window.addEventListener('resize', function () { ubicarAviso(); });
+  document.addEventListener('DOMContentLoaded', function () { var m = document.getElementById('modal'); if (m && window.MutationObserver) new MutationObserver(ubicarAviso).observe(m, { attributes: true, attributeFilter: ['hidden'] }); });
   window.addEventListener('scroll', function () { ubicarAviso(); }, { passive: true, capture: true });
   [600, 1800].forEach(function (ms) { setTimeout(ubicarAviso, ms); });
   /* Samsung Internet instala la web como un APK propio armado para una version vieja de Android, y Android 14/15
